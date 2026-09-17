@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{layout/admin-layout :: html(
+        pageTitle='Quản trị Thể Loại Sách',
+        pageSubtitle='Cấu trúc cây thể loại phân cấp (Cha - Con) áp dụng toàn hệ thống',
+        content=~{::section}
+      )}">
+<body>
+<section>
+    <div class="row g-4">
+        <!-- Left: Category Tree & Hierarchy -->
+        <div class="col-lg-8">
+            <div class="content-card">
+                <div class="content-card-header">
+                    <h6 class="fw-bold mb-0 text-primary d-flex align-items-center gap-2">
+                        <i class="fas fa-sitemap"></i> Cây Danh Mục Thể Loại Sách
+                    </h6>
+                    <span class="badge bg-light text-secondary border" th:text="${#lists.size(allCategories)} + ' thể loại'">4 thể loại</span>
+                </div>
+
+                <div class="table-responsive">
+                    <table class="table custom-table mb-0 align-middle">
+                        <thead>
+                        <tr>
+                            <th style="width: 60px;">ID</th>
+                            <th>Tên Thể Loại</th>
+                            <th>Cấp Bậc (Cây Phân Cấp)</th>
+                            <th class="text-center" style="width: 140px;">Số Đầu Sách</th>
+                            <th class="text-end" style="width: 100px;">Thao Tác</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <tr th:if="${#lists.isEmpty(categoryHierarchy)}">
+                            <td colspan="5" class="text-center py-4 text-muted">
+                                Chưa có thể loại nào được tạo.
+                            </td>
+                        </tr>
+                        <th:block th:each="cat : ${categoryHierarchy}">
+                            <!-- Root Category Row -->
+                            <tr class="table-light">
+                                <td class="text-muted fw-bold" th:text="${cat.id}">1</td>
+                                <td>
+                                    <div class="fw-bold text-dark fs-6">
+                                        <i class="fas fa-folder-open text-primary me-2"></i>
+                                        <span th:text="${cat.name}">Văn học & Tiểu thuyết</span>
+                                    </div>
+                                </td>
+                                <td>
+                                    <span class="badge bg-primary px-2 py-1">Danh mục Gốc (Root)</span>
+                                </td>
+                                <td class="text-center">
+                                    <span class="badge bg-primary-subtle text-primary border border-primary-subtle"
+                                          th:text="${cat.bookCount} + ' đầu sách'">25 đầu sách</span>
+                                </td>
+                                <td class="text-end">
+                                    <div class="btn-group btn-group-sm">
+                                        <button type="button" class="btn btn-outline-secondary" title="Sửa"
+                                                data-bs-toggle="modal" th:data-bs-target="'#editCatModal' + ${cat.id}">
+                                            <i class="fas fa-pen-to-square text-warning"></i>
+                                        </button>
+                                        <button type="button" class="btn btn-outline-secondary" title="Xóa"
+                                                data-bs-toggle="modal" th:data-bs-target="'#deleteCatModal' + ${cat.id}">
+                                            <i class="fas fa-trash-can text-danger"></i>
+                                        </button>
+                                    </div>
+                                </td>
+                            </tr>
+
+                            <!-- Sub Categories (if any) -->
+                            <tr th:each="sub : ${cat.subCategories}">
+                                <td class="text-muted small ps-4" th:text="${sub.id}">5</td>
+                                <td class="ps-4">
+                                    <div class="d-flex align-items-center gap-2">
+                                        <i class="fas fa-turn-up fa-rotate-90 text-muted"></i>
+                                        <i class="fas fa-tag text-secondary"></i>
+                                        <span class="fw-semibold text-dark" th:text="${sub.name}">Tiểu thuyết Trinh thám</span>
+                                    </div>
+                                </td>
+                                <td>
+                                    <span class="badge bg-light text-secondary border" th:text="'Thuộc: ' + ${cat.name}">Thuộc: Văn học</span>
+                                </td>
+                                <td class="text-center">
+                                    <span class="badge bg-secondary-subtle text-secondary border border-secondary-subtle"
+                                          th:text="${sub.bookCount} + ' đầu sách'">5 đầu sách</span>
+                                </td>
+                                <td class="text-end">
+                                    <div class="btn-group btn-group-sm">
+                                        <button type="button" class="btn btn-outline-secondary" title="Sửa"
+                                                data-bs-toggle="modal" th:data-bs-target="'#editCatModal' + ${sub.id}">
+                                            <i class="fas fa-pen-to-square text-warning"></i>
+                                        </button>
+                                        <button type="button" class="btn btn-outline-secondary" title="Xóa"
+                                                data-bs-toggle="modal" th:data-bs-target="'#deleteCatModal' + ${sub.id}">
+                                            <i class="fas fa-trash-can text-danger"></i>
+                                        </button>
+                                    </div>
+                                </td>
+                            </tr>
+                        </th:block>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- Right: Add New Category Card -->
+        <div class="col-lg-4">
+            <div class="content-card">
+                <div class="content-card-header">
+                    <h6 class="fw-bold mb-0 text-primary">
+                        <i class="fas fa-plus-circle me-2"></i> Thêm Thể Loại Mới
+                    </h6>
+                </div>
+                <div class="content-card-body">
+                    <form th:action="@{/admin/categories/create}" th:object="${newCategory}" method="post">
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">Tên Thể Loại <span class="text-danger">*</span></label>
+                            <input type="text" class="form-control" th:field="*{name}"
+                                   placeholder="Ví dụ: Khoa học Viễn tưởng" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label fw-semibold">Danh Mục Cha (Tùy chọn)</label>
+                            <select class="form-select" th:field="*{parentId}">
+                                <option value="">-- Là Danh Mục Gốc (Không có cha) --</option>
+                                <option th:each="parent : ${allCategories}" th:value="${parent.id}" th:text="${parent.name}"></option>
+                            </select>
+                            <div class="form-text">Để trống nếu đây là thể loại gốc cấp cao nhất.</div>
+                        </div>
+                        <button type="submit" class="btn btn-primary-custom w-100">
+                            <i class="fas fa-plus me-1"></i> Lưu Thể Loại Mới
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modals for all categories (Edit & Delete) -->
+    <th:block th:each="cat : ${allCategories}">
+        <!-- Edit Modal -->
+        <div class="modal fade" th:id="'editCatModal' + ${cat.id}" tabindex="-1" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered text-start">
+                <div class="modal-content">
+                    <form th:action="@{/admin/categories/edit/{id}(id=${cat.id})}" method="post">
+                        <div class="modal-header">
+                            <h5 class="modal-title fw-bold">
+                                <i class="fas fa-pen text-warning me-2"></i> Chỉnh sửa Thể Loại
+                            </h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <div class="modal-body">
+                            <div class="mb-3">
+                                <label class="form-label fw-bold">Tên Thể Loại <span class="text-danger">*</span></label>
+                                <input type="text" name="name" class="form-control" th:value="${cat.name}" required>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label fw-semibold">Danh Mục Cha</label>
+                                <select name="parentId" class="form-select">
+                                    <option value="">-- Là Danh Mục Gốc --</option>
+                                    <option th:each="p : ${allCategories}" th:if="${p.id != cat.id}"
+                                            th:value="${p.id}" th:text="${p.name}"
+                                            th:selected="${p.id == cat.parentId}"></option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-light" data-bs-dismiss="modal">Hủy</button>
+                            <button type="submit" class="btn btn-primary-custom">Cập nhật</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- Delete Modal -->
+        <div class="modal fade" th:id="'deleteCatModal' + ${cat.id}" tabindex="-1" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered text-start">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title fw-bold text-danger">
+                            <i class="fas fa-triangle-exclamation me-2"></i> Xác nhận xóa thể loại
+                        </h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <p>Bạn có chắc muốn xóa thể loại <strong th:text="${cat.name}"></strong>?</p>
+                        <p class="text-muted small">
+                            Hệ thống sẽ từ chối xóa nếu thể loại này đang có danh mục con hoặc đầu sách liên kết.
+                        </p>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-light" data-bs-dismiss="modal">Hủy</button>
+                        <form th:action="@{/admin/categories/delete/{id}(id=${cat.id})}" method="post" class="d-inline">
+                            <button type="submit" class="btn btn-danger">Xóa thể loại</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </th:block>
+</section>
+</body>
+</html>

@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<body>
+<header class="app-header" th:fragment="navbar">
+    <div class="page-title">
+        <h4 th:text="${pageTitle} ?: 'Quản trị Dữ liệu gốc (Master Data)'">Quản trị Dữ liệu gốc</h4>
+        <p th:text="${pageSubtitle} ?: 'Chuẩn hóa danh mục đầu sách, tác giả và thể loại toàn chuỗi cửa hàng'">Chuẩn hóa dữ liệu toàn chuỗi</p>
+    </div>
+
+    <div class="header-user">
+        <div class="user-avatar">
+            <i class="fas fa-user-shield"></i>
+        </div>
+        <div>
+            <div class="fw-bold" style="font-size: 0.9rem;">Nguyễn Văn An</div>
+            <div class="badge bg-primary" style="font-size: 0.7rem;">ROLE_ADMIN (Tổng Giám Đốc)</div>
+        </div>
+    </div>
+</header>
+</body>
+</html>

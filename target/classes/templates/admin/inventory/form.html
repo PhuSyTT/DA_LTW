@@ -1,0 +1,598 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{layout/admin-layout :: html(
+        pageTitle=${isEdit} ? 'Chỉnh Sửa Mặt Hàng Sách Cũ' : 'Nhập Kho Sách Cũ Chi Nhánh (Nhóm 2)',
+        pageSubtitle='Chấm điểm tình trạng sách, định giá bán theo chi nhánh và tải ảnh thực tế Cloudinary',
+        content=~{::section}
+      )}">
+<body>
+<section>
+    <!-- Top Return Bar -->
+    <div class="d-flex align-items-center justify-content-between mb-4">
+        <a th:href="@{/admin/inventory}" class="btn btn-secondary-custom btn-sm">
+            <i class="fas fa-arrow-left me-1"></i> Quay lại Danh sách Tồn Kho
+        </a>
+
+        <span class="badge bg-primary-subtle text-primary border border-primary-subtle px-3 py-2 fw-semibold">
+            <i class="fas fa-barcode me-1"></i> Quy trình Nghiệp vụ Nhóm 2
+        </span>
+    </div>
+
+    <form th:action="${isEdit} ? @{/admin/inventory/edit/{id}(id=${item.id})} : @{/admin/inventory/create}"
+          th:object="${bookItemDto}"
+          method="post"
+          enctype="multipart/form-data"
+          id="inventoryForm">
+
+        <input type="hidden" th:field="*{id}" th:if="${isEdit}">
+
+        <div class="row g-4">
+            <!-- Left Column: Master Data Selection & Book Information -->
+            <div class="col-lg-5">
+                <!-- Master Book Selection Card -->
+                <div class="content-card mb-4">
+                    <div class="content-card-header">
+                        <h6 class="fw-bold mb-0 text-primary">
+                            <i class="fas fa-book me-2"></i> 1. Chọn Đầu Sách Gốc (Master Data)
+                        </h6>
+                    </div>
+                    <div class="content-card-body">
+                        <!-- Book Select Dropdown -->
+                        <div class="mb-3" th:if="${!isEdit}">
+                            <label for="bookSelect" class="form-label fw-semibold">
+                                Đầu sách Master: <span class="text-danger">*</span>
+                            </label>
+                            <select id="bookSelect" th:field="*{bookId}" class="form-select select2"
+                                    th:classappend="${#fields.hasErrors('bookId')} ? 'is-invalid' : ''"
+                                    onchange="onBookSelected(this)">
+                                <option value="">-- Chọn đầu sách từ Master Data --</option>
+                                <option th:each="b : ${books}"
+                                        th:value="${b.id}"
+                                        th:text="${b.title} + ' (ISBN: ' + ${b.isbn} + ')'"
+                                        th:data-title="${b.title}"
+                                        th:data-author="${b.authorName}"
+                                        th:data-isbn="${b.isbn}"
+                                        th:data-cover="${b.coverImageUrl}"
+                                        th:data-price="${b.originalPrice}"
+                                        th:selected="${b.id == bookItemDto.bookId}">
+                                    Tôi Thấy Hoa Vàng Trên Cỏ Xanh
+                                </option>
+                            </select>
+                            <div class="invalid-feedback" th:if="${#fields.hasErrors('bookId')}" th:errors="*{bookId}">
+                                Vui lòng chọn đầu sách
+                            </div>
+                        </div>
+
+                        <!-- Display selected Master Book preview -->
+                        <div id="masterBookPreview" class="p-3 bg-light rounded-3 border text-center"
+                             th:style="${selectedBook != null or isEdit} ? '' : 'display: none;'">
+                            <img id="previewCover"
+                                 th:src="${selectedBook != null} ? ${selectedBook.coverImageUrl} : (${item != null} ? ${item.bookCoverImageUrl} : 'https://images.unsplash.com/photo-1544716278-ca5e3f4abd8c?w=200&q=80')"
+                                 class="rounded shadow-sm mb-3"
+                                 style="max-width: 140px; height: 190px; object-fit: cover;"
+                                 alt="Bìa sách">
+                            <h6 id="previewTitle" class="fw-bold text-dark mb-1"
+                                th:text="${selectedBook != null} ? ${selectedBook.title} : (${item != null} ? ${item.bookTitle} : '')">
+                                Tiêu đề sách
+                            </h6>
+                            <p id="previewAuthor" class="text-muted small mb-2"
+                               th:text="${selectedBook != null} ? ${selectedBook.authorName} : (${item != null} ? ${item.authorName} : '')">
+                                Tác giả
+                            </p>
+                            <div class="d-flex justify-content-center gap-2 mb-2">
+                                <span class="badge bg-secondary font-monospace" id="previewIsbn"
+                                      th:text="${selectedBook != null} ? 'ISBN: ' + ${selectedBook.isbn} : (${item != null} ? 'ISBN: ' + ${item.bookIsbn} : '')">
+                                    ISBN: 978604...
+                                </span>
+                            </div>
+                            <div class="border-top pt-2 mt-2">
+                                <span class="text-muted small">Giá bìa niêm yết:</span>
+                                <span class="fw-bold text-primary fs-6 ms-1" id="previewOriginalPrice"
+                                      th:text="${selectedBook != null} ? ${#numbers.formatDecimal(selectedBook.originalPrice, 0, 'COMMA', 0, 'POINT')} + ' ₫' : (${item != null and item.bookOriginalPrice != null} ? ${#numbers.formatDecimal(item.bookOriginalPrice, 0, 'COMMA', 0, 'POINT')} + ' ₫' : '0 ₫')">
+                                    125.000 ₫
+                                </span>
+                                <input type="hidden" id="rawOriginalPrice"
+                                       th:value="${selectedBook != null} ? ${selectedBook.originalPrice} : (${item != null} ? ${item.bookOriginalPrice} : '0')">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Branch & SKU Barcode Card (FR-INV-01) -->
+                <div class="content-card">
+                    <div class="content-card-header">
+                        <h6 class="fw-bold mb-0 text-success">
+                            <i class="fas fa-store me-2"></i> 2. Chi Nhánh & Mã Vạch SKU
+                        </h6>
+                    </div>
+                    <div class="content-card-body">
+                        <!-- Branch Selection -->
+                        <div class="mb-3">
+                            <label for="branchSelect" class="form-label fw-semibold">
+                                Chi nhánh lưu kho: <span class="text-danger">*</span>
+                            </label>
+                            <select id="branchSelect" th:field="*{branchId}" class="form-select"
+                                    th:disabled="${isEdit}"
+                                    th:classappend="${#fields.hasErrors('branchId')} ? 'is-invalid' : ''"
+                                    onchange="generateSuggestedSku()">
+                                <option th:each="br : ${branches}"
+                                        th:value="${br.id}"
+                                        th:text="${br.branchName} + ' (' + ${br.city} + ')'"
+                                        th:selected="${br.id == bookItemDto.branchId}">
+                                    Chi nhánh Quận 1 (TP. Hồ Chí Minh)
+                                </option>
+                            </select>
+                            <input type="hidden" th:field="*{branchId}" th:if="${isEdit}">
+                            <div class="invalid-feedback" th:if="${#fields.hasErrors('branchId')}" th:errors="*{branchId}">
+                                Vui lòng chọn chi nhánh
+                            </div>
+                        </div>
+
+                        <!-- SKU Barcode (FR-INV-01) -->
+                        <div class="mb-3">
+                            <div class="d-flex justify-content-between align-items-center mb-1">
+                                <label for="skuBarcode" class="form-label fw-semibold mb-0">
+                                    Mã SKU / Barcode: <span class="text-danger">*</span>
+                                </label>
+                                <button type="button" class="btn btn-link btn-sm p-0 text-decoration-none" onclick="generateSuggestedSku()">
+                                    <i class="fas fa-magic me-1"></i> Tự động tạo mã
+                                </button>
+                            </div>
+                            <div class="input-group">
+                                <span class="input-group-text bg-white"><i class="fas fa-barcode"></i></span>
+                                <input type="text" id="skuBarcode" th:field="*{skuBarcode}"
+                                       class="form-control font-monospace fw-bold"
+                                       th:classappend="${#fields.hasErrors('skuBarcode')} ? 'is-invalid' : ''"
+                                       placeholder="VD: Q1-DNT-90-001" required>
+                                <button class="btn btn-outline-secondary btn-sm" type="button" onclick="checkSkuAvailable()">
+                                    Kiểm tra
+                                </button>
+                            </div>
+                            <div class="invalid-feedback d-block" th:if="${#fields.hasErrors('skuBarcode')}" th:errors="*{skuBarcode}">
+                                Mã SKU không hợp lệ
+                            </div>
+                            <div id="skuFeedback" class="form-text small">Mã định danh duy nhất cho cuốn sách vật lý này trên toàn chuỗi.</div>
+                        </div>
+
+                        <!-- Shelf Location (FR-INV-04) -->
+                        <div class="mb-3">
+                            <label for="shelfLocation" class="form-label fw-semibold">
+                                Vị trí kệ sách (Shelf Location):
+                            </label>
+                            <div class="input-group">
+                                <span class="input-group-text bg-white"><i class="fas fa-layer-group text-muted"></i></span>
+                                <input type="text" id="shelfLocation" th:field="*{shelfLocation}"
+                                       class="form-control"
+                                       placeholder="VD: Kệ Văn Học - Dãy A3 - Tầng 2">
+                            </div>
+                            <div class="form-text small">Giúp nhân viên kho dễ dàng tìm sách khi đóng hàng hoặc khách hỏi.</div>
+                        </div>
+
+                        <!-- Stock Quantity & Status -->
+                        <div class="row g-2">
+                            <div class="col-6">
+                                <label for="stockQuantity" class="form-label fw-semibold">Số lượng tồn:</label>
+                                <input type="number" id="stockQuantity" th:field="*{stockQuantity}"
+                                       class="form-control" min="1" value="1" required>
+                            </div>
+                            <div class="col-6">
+                                <label for="status" class="form-label fw-semibold">Trạng thái:</label>
+                                <select id="status" th:field="*{status}" class="form-select">
+                                    <option value="AVAILABLE">Sẵn sàng bán</option>
+                                    <option value="RESERVED">Đang giữ chỗ</option>
+                                    <option value="SOLD">Đã bán</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right Column: Grading Scale, Pricing & Cloudinary Image Upload -->
+            <div class="col-lg-7">
+                <!-- Grading Scale & Pricing Card (FR-INV-02) -->
+                <div class="content-card mb-4">
+                    <div class="content-card-header">
+                        <h6 class="fw-bold mb-0 text-warning">
+                            <i class="fas fa-star-half-stroke me-2"></i> 3. Chấm Điểm Tình Trạng & Định Giá Bán
+                        </h6>
+                    </div>
+                    <div class="content-card-body">
+                        <!-- Grading Selection Radios -->
+                        <label class="form-label fw-semibold mb-2">
+                            Mức độ cũ của sách (Condition Grade): <span class="text-danger">*</span>
+                        </label>
+
+                        <div class="row g-2 mb-3">
+                            <!-- LIKE NEW -->
+                            <div class="col-md-6 col-lg-4">
+                                <div class="form-check grade-card p-2 border rounded-3 text-center h-100">
+                                    <input class="form-check-input d-none" type="radio" name="conditionGrade"
+                                           id="gradeLikeNew" value="LIKE_NEW"
+                                           th:checked="*{conditionGrade == 'LIKE_NEW'}"
+                                           onchange="onGradeChanged('LIKE_NEW')">
+                                    <label class="form-check-label w-100 cursor-pointer" for="gradeLikeNew">
+                                        <span class="badge badge-condition badge-like-new d-block mb-1">LIKE NEW (99%)</span>
+                                        <small class="text-muted d-block" style="font-size: 0.72rem;">Gần như mới tinh, bìa phẳng</small>
+                                        <small class="text-primary fw-bold d-block mt-1" style="font-size: 0.75rem;">70% - 85% giá bìa</small>
+                                    </label>
+                                </div>
+                            </div>
+
+                            <!-- VERY GOOD -->
+                            <div class="col-md-6 col-lg-4">
+                                <div class="form-check grade-card p-2 border rounded-3 text-center h-100">
+                                    <input class="form-check-input d-none" type="radio" name="conditionGrade"
+                                           id="gradeVeryGood" value="VERY_GOOD"
+                                           th:checked="*{conditionGrade == 'VERY_GOOD'}"
+                                           onchange="onGradeChanged('VERY_GOOD')">
+                                    <label class="form-check-label w-100 cursor-pointer" for="gradeVeryGood">
+                                        <span class="badge badge-condition badge-very-good d-block mb-1">VERY GOOD (90%)</span>
+                                        <small class="text-muted d-block" style="font-size: 0.72rem;">Bìa đẹp, gáy chắc, giấy ngả nhẹ</small>
+                                        <small class="text-primary fw-bold d-block mt-1" style="font-size: 0.75rem;">55% - 70% giá bìa</small>
+                                    </label>
+                                </div>
+                            </div>
+
+                            <!-- GOOD -->
+                            <div class="col-md-6 col-lg-4">
+                                <div class="form-check grade-card p-2 border rounded-3 text-center h-100">
+                                    <input class="form-check-input d-none" type="radio" name="conditionGrade"
+                                           id="gradeGood" value="GOOD"
+                                           th:checked="*{conditionGrade == 'GOOD' or conditionGrade == null}"
+                                           onchange="onGradeChanged('GOOD')">
+                                    <label class="form-check-label w-100 cursor-pointer" for="gradeGood">
+                                        <span class="badge badge-condition badge-good d-block mb-1">GOOD (80%)</span>
+                                        <small class="text-muted d-block" style="font-size: 0.72rem;">Có vết ố nhẹ, nếp gấp nhỏ</small>
+                                        <small class="text-primary fw-bold d-block mt-1" style="font-size: 0.75rem;">40% - 55% giá bìa</small>
+                                    </label>
+                                </div>
+                            </div>
+
+                            <!-- ACCEPTABLE -->
+                            <div class="col-md-6 col-lg-6">
+                                <div class="form-check grade-card p-2 border rounded-3 text-center h-100">
+                                    <input class="form-check-input d-none" type="radio" name="conditionGrade"
+                                           id="gradeAcceptable" value="ACCEPTABLE"
+                                           th:checked="*{conditionGrade == 'ACCEPTABLE'}"
+                                           onchange="onGradeChanged('ACCEPTABLE')">
+                                    <label class="form-check-label w-100 cursor-pointer" for="gradeAcceptable">
+                                        <span class="badge badge-condition badge-acceptable d-block mb-1">ACCEPTABLE (60%)</span>
+                                        <small class="text-muted d-block" style="font-size: 0.72rem;">Sách cũ nhiều năm, gáy mòn, 100% đủ trang</small>
+                                        <small class="text-primary fw-bold d-block mt-1" style="font-size: 0.75rem;">25% - 40% giá bìa</small>
+                                    </label>
+                                </div>
+                            </div>
+
+                            <!-- COLLECTIBLE -->
+                            <div class="col-md-6 col-lg-6">
+                                <div class="form-check grade-card p-2 border rounded-3 text-center h-100">
+                                    <input class="form-check-input d-none" type="radio" name="conditionGrade"
+                                           id="gradeCollectible" value="COLLECTIBLE"
+                                           th:checked="*{conditionGrade == 'COLLECTIBLE'}"
+                                           onchange="onGradeChanged('COLLECTIBLE')">
+                                    <label class="form-check-label w-100 cursor-pointer" for="gradeCollectible">
+                                        <span class="badge bg-dark text-warning border border-warning d-block mb-1">COLLECTIBLE (Hiếm)</span>
+                                        <small class="text-muted d-block" style="font-size: 0.72rem;">Bản in đầu, có chữ ký, ngừng phát hành</small>
+                                        <small class="text-primary fw-bold d-block mt-1" style="font-size: 0.75rem;">Định giá sưu tầm</small>
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Dynamic Price Suggestion Box -->
+                        <div class="alert alert-info py-2 px-3 mb-3 d-flex align-items-center justify-content-between flex-wrap gap-2" id="priceSuggestionAlert">
+                            <div>
+                                <i class="fas fa-calculator me-1"></i>
+                                <span class="fw-semibold">Dải giá khuyên nghị:</span>
+                                <span id="suggestedRangeText" class="fw-bold text-dark ms-1">40% - 55% giá bìa</span>
+                            </div>
+                            <div>
+                                <span class="badge bg-primary fs-6" id="suggestedPriceTag">0 ₫</span>
+                            </div>
+                        </div>
+
+                        <!-- Selling Price Input -->
+                        <div class="mb-3">
+                            <label for="sellingPrice" class="form-label fw-semibold">
+                                Giá bán thực tế tại chi nhánh (VNĐ): <span class="text-danger">*</span>
+                            </label>
+                            <div class="input-group">
+                                <input type="number" id="sellingPrice" th:field="*{sellingPrice}"
+                                       class="form-control form-control-lg fw-bold text-danger"
+                                       th:classappend="${#fields.hasErrors('sellingPrice')} ? 'is-invalid' : ''"
+                                       min="0" step="1000" placeholder="VD: 55000" required>
+                                <span class="input-group-text bg-light fw-bold">₫</span>
+                            </div>
+                            <div class="invalid-feedback d-block" th:if="${#fields.hasErrors('sellingPrice')}" th:errors="*{sellingPrice}">
+                                Vui lòng nhập giá bán hợp lệ
+                            </div>
+                        </div>
+
+                        <!-- Condition Note -->
+                        <div class="mb-2">
+                            <label for="conditionNote" class="form-label fw-semibold">
+                                Ghi chú chi tiết vết ố & khuyết điểm thực tế:
+                            </label>
+                            <textarea id="conditionNote" th:field="*{conditionNote}" class="form-control" rows="3"
+                                      placeholder="VD: Bìa trước phẳng, gáy sách hơi ngả màu nhẹ ở mép dưới, trang 15 có nếp gấp nhỏ, 100% không mất trang."></textarea>
+                            <div class="form-text small">Thông tin này sẽ hiển thị trực tiếp cho khách hàng xem khi mua sách.</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Cloudinary Physical Photo Upload Card (FR-INV-03) -->
+                <div class="content-card mb-4">
+                    <div class="content-card-header d-flex justify-content-between align-items-center">
+                        <h6 class="fw-bold mb-0 text-info">
+                            <i class="fas fa-cloud-arrow-up me-2"></i> 4. Ảnh Chụp Thực Tế Sách Cũ (Cloudinary)
+                        </h6>
+                        <span class="badge bg-info-subtle text-info border border-info-subtle small">
+                            Tối thiểu 3 ảnh góc cạnh
+                        </span>
+                    </div>
+                    <div class="content-card-body">
+                        <p class="text-muted small mb-3">
+                            Nhân viên chụp tối thiểu 3 ảnh thực tế (<strong>Bìa trước</strong>, <strong>Gáy sách</strong>, <strong>Trang ruột / Vết ố</strong>) để tải trực tiếp lên Cloudinary. Khách hàng sẽ soi ảnh này để quyết định mua.
+                        </p>
+
+                        <!-- Existing Images (if edit mode) -->
+                        <div class="mb-3" th:if="${item != null and !#lists.isEmpty(item.images)}">
+                            <label class="form-label fw-semibold small">Ảnh thực tế hiện tại:</label>
+                            <div class="d-flex gap-2 flex-wrap">
+                                <div th:each="img : ${item.images}" class="position-relative">
+                                    <img th:src="${img.imageUrl}" class="rounded border shadow-sm"
+                                         style="width: 80px; height: 110px; object-fit: cover;">
+                                    <span th:if="${img.isPrimary}" class="position-absolute top-0 start-0 badge bg-primary"
+                                          style="font-size: 0.65rem;">Chính</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- File Input -->
+                        <div class="mb-3">
+                            <label for="imageFiles" class="form-label fw-semibold">
+                                Chọn ảnh chụp thực tế từ thiết bị:
+                            </label>
+                            <input class="form-control" type="file" id="imageFiles" name="imageFiles"
+                                   multiple accept="image/*" onchange="previewUploadFiles(this)">
+                            <div class="form-text small">Định dạng hỗ trợ: JPG, PNG, WEBP. Tối đa 10MB/ảnh.</div>
+                        </div>
+
+                        <!-- Preview Selected Images Grid -->
+                        <div id="imagePreviewGrid" class="d-flex gap-3 flex-wrap mt-2"></div>
+                    </div>
+                </div>
+
+                <!-- Submit Buttons -->
+                <div class="d-flex gap-2 justify-content-end mb-5">
+                    <a th:href="@{/admin/inventory}" class="btn btn-secondary-custom">
+                        <i class="fas fa-times me-1"></i> Hủy Bỏ
+                    </a>
+                    <button type="submit" class="btn btn-primary-custom btn-lg px-4">
+                        <i class="fas fa-save me-2"></i>
+                        <span th:text="${isEdit} ? 'Lưu Cập Nhật Mặt Hàng' : 'Xác Nhận Nhập Kho Sách Cũ'">Xác Nhận</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </form>
+</section>
+
+<!-- Custom Form Interaction Script -->
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+    highlightSelectedGrade();
+    calculatePriceRecommendation();
+});
+
+function onBookSelected(select) {
+    const selectedOption = select.options[select.selectedIndex];
+    const previewBox = document.getElementById('masterBookPreview');
+
+    if (!selectedOption || !selectedOption.value) {
+        previewBox.style.display = 'none';
+        return;
+    }
+
+    const title = selectedOption.getAttribute('data-title') || '';
+    const author = selectedOption.getAttribute('data-author') || '';
+    const isbn = selectedOption.getAttribute('data-isbn') || '';
+    const cover = selectedOption.getAttribute('data-cover') || 'https://images.unsplash.com/photo-1544716278-ca5e3f4abd8c?w=200&q=80';
+    const price = selectedOption.getAttribute('data-price') || '0';
+
+    document.getElementById('previewTitle').innerText = title;
+    document.getElementById('previewAuthor').innerText = author;
+    document.getElementById('previewIsbn').innerText = 'ISBN: ' + isbn;
+    document.getElementById('previewCover').src = cover;
+    document.getElementById('previewOriginalPrice').innerText = Number(price).toLocaleString('vi-VN') + ' ₫';
+    document.getElementById('rawOriginalPrice').value = price;
+
+    previewBox.style.display = 'block';
+
+    generateSuggestedSku();
+    calculatePriceRecommendation();
+}
+
+function getSelectedGrade() {
+    const radios = document.getElementsByName('conditionGrade');
+    for (let r of radios) {
+        if (r.checked) return r.value;
+    }
+    return 'GOOD';
+}
+
+function onGradeChanged(grade) {
+    highlightSelectedGrade();
+    calculatePriceRecommendation();
+    generateSuggestedSku();
+}
+
+function highlightSelectedGrade() {
+    const radios = document.getElementsByName('conditionGrade');
+    for (let r of radios) {
+        const card = r.closest('.grade-card');
+        if (card) {
+            if (r.checked) {
+                card.classList.add('border-primary', 'bg-primary-subtle');
+            } else {
+                card.classList.remove('border-primary', 'bg-primary-subtle');
+            }
+        }
+    }
+}
+
+async function calculatePriceRecommendation() {
+    const bookSelect = document.getElementById('bookSelect');
+    let bookId = bookSelect ? bookSelect.value : null;
+    if (!bookId) {
+        const urlParams = new URLSearchParams(window.location.search);
+        bookId = urlParams.get('bookId');
+    }
+
+    const rawPrice = parseFloat(document.getElementById('rawOriginalPrice').value || 0);
+    const grade = getSelectedGrade();
+
+    if (!bookId && rawPrice <= 0) {
+        return;
+    }
+
+    if (bookId) {
+        try {
+            const resp = await fetch(`/api/inventory/suggest-price?bookId=${bookId}&conditionGrade=${grade}`);
+            const data = await resp.json();
+            if (data.success && data.data) {
+                const range = data.data;
+                document.getElementById('suggestedRangeText').innerText = 
+                    `${range.rateMinPercent}% - ${range.rateMaxPercent}% giá bìa (${Number(range.minPrice).toLocaleString('vi-VN')} ₫ - ${Number(range.maxPrice).toLocaleString('vi-VN')} ₫)`;
+                document.getElementById('suggestedPriceTag').innerText = 'Đề xuất: ' + Number(range.suggestedPrice).toLocaleString('vi-VN') + ' ₫';
+
+                const priceInput = document.getElementById('sellingPrice');
+                if (!priceInput.value || priceInput.dataset.manual !== 'true') {
+                    priceInput.value = range.suggestedPrice;
+                }
+                return;
+            }
+        } catch (e) {
+            console.warn('API suggest-price failed, calculating locally:', e);
+        }
+    }
+
+    // Local fallback calculation
+    let minRate = 40, maxRate = 55, sugRate = 45;
+    if (grade === 'LIKE_NEW') { minRate = 70; maxRate = 85; sugRate = 75; }
+    else if (grade === 'VERY_GOOD') { minRate = 55; maxRate = 70; sugRate = 60; }
+    else if (grade === 'GOOD') { minRate = 40; maxRate = 55; sugRate = 45; }
+    else if (grade === 'ACCEPTABLE') { minRate = 25; maxRate = 40; sugRate = 30; }
+    else if (grade === 'COLLECTIBLE') { minRate = 100; maxRate = 200; sugRate = 120; }
+
+    const minP = Math.round((rawPrice * minRate) / 100000) * 1000;
+    const maxP = Math.round((rawPrice * maxRate) / 100000) * 1000;
+    const sugP = Math.round((rawPrice * sugRate) / 100000) * 1000;
+
+    document.getElementById('suggestedRangeText').innerText = 
+        `${minRate}% - ${maxRate}% giá bìa (${minP.toLocaleString('vi-VN')} ₫ - ${maxP.toLocaleString('vi-VN')} ₫)`;
+    document.getElementById('suggestedPriceTag').innerText = 'Đề xuất: ' + sugP.toLocaleString('vi-VN') + ' ₫';
+
+    const priceInput = document.getElementById('sellingPrice');
+    if (!priceInput.value || priceInput.dataset.manual !== 'true') {
+        priceInput.value = sugP;
+    }
+}
+
+document.getElementById('sellingPrice').addEventListener('input', function() {
+    this.dataset.manual = 'true';
+});
+
+async function generateSuggestedSku() {
+    const bookSelect = document.getElementById('bookSelect');
+    const branchSelect = document.getElementById('branchSelect');
+    const bookId = bookSelect ? bookSelect.value : null;
+    const branchId = branchSelect ? branchSelect.value : null;
+    const grade = getSelectedGrade();
+
+    if (!bookId || !branchId) return;
+
+    try {
+        const resp = await fetch(`/api/inventory/suggest-sku?branchId=${branchId}&bookId=${bookId}&conditionGrade=${grade}`);
+        const data = await resp.json();
+        if (data.success && data.data && data.data.skuBarcode) {
+            document.getElementById('skuBarcode').value = data.data.skuBarcode;
+            document.getElementById('skuFeedback').className = 'form-text text-success small';
+            document.getElementById('skuFeedback').innerText = 'Đã sinh mã SKU tự động độc nhất hợp lệ.';
+        }
+    } catch (e) {
+        console.warn('API suggest-sku failed:', e);
+    }
+}
+
+async function checkSkuAvailable() {
+    const sku = document.getElementById('skuBarcode').value.trim();
+    if (!sku) {
+        alert('Vui lòng nhập mã SKU cần kiểm tra');
+        return;
+    }
+
+    try {
+        const resp = await fetch(`/api/inventory/check-sku?skuBarcode=${encodeURIComponent(sku)}`);
+        const data = await resp.json();
+        const feedback = document.getElementById('skuFeedback');
+        if (data.success && data.data) {
+            if (data.data.available) {
+                feedback.className = 'form-text text-success small fw-semibold';
+                feedback.innerText = '✔ ' + data.data.message;
+            } else {
+                feedback.className = 'form-text text-danger small fw-semibold';
+                feedback.innerText = '✖ ' + data.data.message;
+            }
+        }
+    } catch (e) {
+        alert('Không thể kiểm tra SKU: ' + e.message);
+    }
+}
+
+function previewUploadFiles(input) {
+    const grid = document.getElementById('imagePreviewGrid');
+    grid.innerHTML = '';
+
+    if (!input.files || input.files.length === 0) return;
+
+    Array.from(input.files).forEach((file, index) => {
+        const reader = new FileReader();
+        reader.onload = function (e) {
+            const container = document.createElement('div');
+            container.className = 'position-relative text-center';
+
+            const img = document.createElement('img');
+            img.src = e.target.result;
+            img.className = 'rounded border shadow-sm';
+            img.style = 'width: 100px; height: 130px; object-fit: cover;';
+
+            const badge = document.createElement('span');
+            badge.className = 'position-absolute top-0 start-0 badge ' + (index === 0 ? 'bg-primary' : 'bg-secondary');
+            badge.style.fontSize = '0.65rem';
+            badge.innerText = index === 0 ? 'Bìa chính' : 'Ảnh ' + (index + 1);
+
+            container.appendChild(img);
+            container.appendChild(badge);
+            grid.appendChild(container);
+        };
+        reader.readAsDataURL(file);
+    });
+}
+</script>
+
+<style>
+.cursor-pointer {
+    cursor: pointer;
+}
+.grade-card {
+    transition: all 0.2s ease;
+}
+.grade-card:hover {
+    border-color: var(--primary-color) !important;
+    background-color: #f8fafc;
+}
+</style>
+</body>
+</html>

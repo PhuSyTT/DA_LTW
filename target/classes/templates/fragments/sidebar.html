@@ -27,10 +27,11 @@
             <span>Thể Loại Sách</span>
         </a>
 
-        <div class="nav-section-title mt-3">Vận Hành & Chi Nhánh</div>
-        <a href="javascript:void(0)" class="sidebar-link text-muted" title="Sắp phát triển ở Nhóm 2">
+        <div class="nav-section-title mt-3">Nhóm 2: Kho & Định Giá</div>
+        <a th:href="@{/admin/inventory}" class="sidebar-link" th:classappend="${activeMenu == 'inventory'} ? 'active' : ''">
             <i class="fas fa-boxes-stacked"></i>
-            <span>Tồn Kho Chi Nhánh <span class="badge bg-secondary ms-auto">N2</span></span>
+            <span>Tồn Kho Chi Nhánh</span>
+            <span class="badge bg-primary ms-auto">N2</span>
         </a>
         <a href="javascript:void(0)" class="sidebar-link text-muted" title="Sắp phát triển ở Nhóm 3,4">
             <i class="fas fa-truck-ramp-box"></i>

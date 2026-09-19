@@ -45,6 +45,9 @@ public class BookItem {
     @Column(nullable = false, length = 20)
     private String status = "AVAILABLE"; // AVAILABLE, RESERVED, SOLD
 
+    @OneToMany(mappedBy = "bookItem", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+    private java.util.List<BookItemImage> images = new java.util.ArrayList<>();
+
     public BookItem() {
     }
 
@@ -150,6 +153,34 @@ public class BookItem {
 
     public void setStatus(String status) {
         this.status = status;
+    }
+
+    public java.util.List<BookItemImage> getImages() {
+        return images;
+    }
+
+    public void setImages(java.util.List<BookItemImage> images) {
+        this.images = images;
+    }
+
+    public void addImage(BookItemImage image) {
+        if (images == null) {
+            images = new java.util.ArrayList<>();
+        }
+        images.add(image);
+        image.setBookItem(this);
+    }
+
+    public String getPrimaryImageUrl() {
+        if (images == null || images.isEmpty()) {
+            return null;
+        }
+        for (BookItemImage img : images) {
+            if (Boolean.TRUE.equals(img.getIsPrimary())) {
+                return img.getImageUrl();
+            }
+        }
+        return images.get(0).getImageUrl();
     }
 
     public static Builder builder() {

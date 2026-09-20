@@ -14,9 +14,6 @@
         </a>
 
         <div class="d-flex gap-2">
-            <a th:href="@{/admin/inventory/create(bookId=${book.id})}" class="btn btn-success btn-sm fw-bold">
-                <i class="fas fa-boxes-stacked me-1"></i> Nhập Kho Sách Cũ Chi Nhánh
-            </a>
             <a th:href="@{/admin/books/edit/{id}(id=${book.id})}" class="btn btn-warning btn-sm text-dark fw-bold">
                 <i class="fas fa-pen-to-square me-1"></i> Chỉnh sửa Dữ liệu Gốc
             </a>
@@ -114,19 +111,13 @@
                             <th class="text-center">Số Lượng</th>
                             <th>Vị Trí Kệ</th>
                             <th>Trạng Thái</th>
-                            <th class="text-end">Thao Tác</th>
                         </tr>
                         </thead>
                         <tbody>
                         <tr th:if="${#lists.isEmpty(book.branchStocks)}">
-                            <td colspan="8" class="text-center py-4 text-muted">
+                            <td colspan="7" class="text-center py-4 text-muted">
                                 <i class="fas fa-box-open d-block mb-2 fs-3 text-secondary"></i>
                                 Hiện tại chưa có chi nhánh nào nhập kho mặt hàng sách cũ cho đầu sách này.
-                                <div class="mt-2">
-                                    <a th:href="@{/admin/inventory/create(bookId=${book.id})}" class="btn btn-sm btn-outline-success">
-                                        <i class="fas fa-plus me-1"></i> Nhập kho chi nhánh đầu tiên
-                                    </a>
-                                </div>
                             </td>
                         </tr>
                         <tr th:each="item : ${book.branchStocks}">
@@ -134,11 +125,7 @@
                                 <span class="fw-bold text-dark" th:text="${item.branchName}">Chi nhánh Quận 1</span>
                             </td>
                             <td>
-                                <a th:if="${item.id != null}" th:href="@{/admin/inventory/detail/{id}(id=${item.id})}"
-                                   class="badge bg-light text-dark border font-monospace text-decoration-none hover-primary fw-bold"
-                                   th:text="${item.skuBarcode}">SKU-Q1-0001</a>
-                                <span th:if="${item.id == null}" class="badge bg-light text-dark border font-monospace"
-                                      th:text="${item.skuBarcode}">SKU-Q1-0001</span>
+                                <span class="badge bg-light text-dark border font-monospace" th:text="${item.skuBarcode}">SKU-Q1-0001</span>
                             </td>
                             <td>
                                 <span th:if="${item.conditionGrade == 'LIKE_NEW'}" class="badge badge-condition badge-like-new">LIKE NEW (99%)</span>
@@ -158,12 +145,6 @@
                                 <span th:if="${item.status == 'AVAILABLE'}" class="badge bg-success-subtle text-success border border-success-subtle">Sẵn sàng bán</span>
                                 <span th:if="${item.status == 'RESERVED'}" class="badge bg-warning-subtle text-warning border border-warning-subtle">Đang giữ chỗ</span>
                                 <span th:if="${item.status == 'SOLD'}" class="badge bg-secondary-subtle text-secondary border border-secondary-subtle">Đã bán</span>
-                            </td>
-                            <td class="text-end">
-                                <a th:if="${item.id != null}" th:href="@{/admin/inventory/detail/{id}(id=${item.id})}"
-                                   class="btn btn-outline-primary btn-xs px-2 py-1" title="Xem chi tiết & ảnh thực tế">
-                                    <i class="fas fa-eye me-1"></i> Chi tiết
-                                </a>
                             </td>
                         </tr>
                         </tbody>

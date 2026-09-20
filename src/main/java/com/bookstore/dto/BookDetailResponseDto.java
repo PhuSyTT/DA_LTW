@@ -166,7 +166,6 @@ public class BookDetailResponseDto {
     }
 
     public static class BranchStockDto {
-        private Long id;
         private Long branchId;
         private String branchName;
         private String skuBarcode;
@@ -179,9 +178,8 @@ public class BookDetailResponseDto {
         public BranchStockDto() {
         }
 
-        public BranchStockDto(Long id, Long branchId, String branchName, String skuBarcode, String conditionGrade,
+        public BranchStockDto(Long branchId, String branchName, String skuBarcode, String conditionGrade,
                               BigDecimal sellingPrice, Integer stockQuantity, String shelfLocation, String status) {
-            this.id = id;
             this.branchId = branchId;
             this.branchName = branchName;
             this.skuBarcode = skuBarcode;
@@ -190,14 +188,6 @@ public class BookDetailResponseDto {
             this.stockQuantity = stockQuantity;
             this.shelfLocation = shelfLocation;
             this.status = status;
-        }
-
-        public Long getId() {
-            return id;
-        }
-
-        public void setId(Long id) {
-            this.id = id;
         }
 
         public Long getBranchId() {
@@ -269,7 +259,6 @@ public class BookDetailResponseDto {
         }
 
         public static class Builder {
-            private Long id;
             private Long branchId;
             private String branchName;
             private String skuBarcode;
@@ -278,11 +267,6 @@ public class BookDetailResponseDto {
             private Integer stockQuantity;
             private String shelfLocation;
             private String status;
-
-            public Builder id(Long id) {
-                this.id = id;
-                return this;
-            }
 
             public Builder branchId(Long branchId) {
                 this.branchId = branchId;
@@ -325,7 +309,7 @@ public class BookDetailResponseDto {
             }
 
             public BranchStockDto build() {
-                return new BranchStockDto(id, branchId, branchName, skuBarcode, conditionGrade, sellingPrice, stockQuantity, shelfLocation, status);
+                return new BranchStockDto(branchId, branchName, skuBarcode, conditionGrade, sellingPrice, stockQuantity, shelfLocation, status);
             }
         }
     }

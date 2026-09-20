@@ -164,23 +164,18 @@ public class BookItem {
     }
 
     public void addImage(BookItemImage image) {
-        if (images == null) {
-            images = new java.util.ArrayList<>();
+        if (this.images == null) {
+            this.images = new java.util.ArrayList<>();
         }
-        images.add(image);
+        this.images.add(image);
         image.setBookItem(this);
     }
 
-    public String getPrimaryImageUrl() {
-        if (images == null || images.isEmpty()) {
-            return null;
+    public void removeImage(BookItemImage image) {
+        if (this.images != null) {
+            this.images.remove(image);
+            image.setBookItem(null);
         }
-        for (BookItemImage img : images) {
-            if (Boolean.TRUE.equals(img.getIsPrimary())) {
-                return img.getImageUrl();
-            }
-        }
-        return images.get(0).getImageUrl();
     }
 
     public static Builder builder() {

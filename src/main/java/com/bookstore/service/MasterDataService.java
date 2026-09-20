@@ -6,8 +6,6 @@ import com.bookstore.entity.Book;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
-import java.util.List;
-
 public interface MasterDataService {
     Page<BookDto> searchBooks(String keyword, Long categoryId, Long authorId, Pageable pageable);
     BookDto getBookDtoById(Long id);
@@ -17,7 +15,8 @@ public interface MasterDataService {
     BookDto updateBook(Long id, BookDto bookDto);
     void deleteBook(Long id);
     boolean isIsbnAvailable(String isbn, Long excludeBookId);
-    List<BookDto> getAllBooks();
+    java.util.List<BookDto> getAllBooks();
     long getTotalBooksCount();
     long getTotalInventoryCount();
 }
+

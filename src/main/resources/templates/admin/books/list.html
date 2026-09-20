@@ -1,8 +1,8 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org"
       th:replace="~{layout/admin-layout :: html(
-        pageTitle='Quản trị Đầu Sách Master',
-        pageSubtitle='Danh mục 110 đầu sách chuẩn hóa toàn hệ thống chuỗi cửa hàng',
+        pageTitle='Quản trị Đầu Sách',
+        pageSubtitle='Danh mục 110 đầu sách toàn hệ thống chuỗi cửa hàng',
         content=~{::section}
       )}">
 <body>
@@ -16,7 +16,7 @@
                 </div>
                 <div class="stat-info">
                     <h3 th:text="${totalBooks}">110</h3>
-                    <p>Tổng Đầu Sách Master Chuẩn</p>
+                    <p>Tổng Đầu Sách</p>
                 </div>
             </div>
         </div>
@@ -93,7 +93,7 @@
                 <tr>
                     <th style="width: 70px;">Bìa</th>
                     <th>Tên Đầu Sách & ISBN</th>
-                    <th>Tác Giả Chuẩn</th>
+                    <th>Tác Giả</th>
                     <th>Thể Loại</th>
                     <th class="text-end">Giá Bìa Gốc</th>
                     <th class="text-center">Tồn Kho Toàn Chuỗi</th>
@@ -161,12 +161,12 @@
                                 <div class="modal-content text-start">
                                     <div class="modal-header">
                                         <h5 class="modal-title fw-bold text-danger">
-                                            <i class="fas fa-triangle-exclamation me-2"></i> Xác nhận xóa đầu sách gốc
+                                            <i class="fas fa-triangle-exclamation me-2"></i> Xác nhận xóa đầu sách
                                         </h5>
                                         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                                     </div>
                                     <div class="modal-body">
-                                        <p>Bạn có chắc chắn muốn xóa đầu sách Master:</p>
+                                        <p>Bạn có chắc chắn muốn xóa đầu sách:</p>
                                         <p class="fw-bold fs-6 text-dark" th:text="${book.title} + ' (ISBN: ' + ${book.isbn} + ')'"></p>
                                         <p class="text-muted small">
                                             <i class="fas fa-shield-alt text-primary me-1"></i>

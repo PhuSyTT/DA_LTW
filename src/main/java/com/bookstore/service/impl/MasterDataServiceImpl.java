@@ -68,7 +68,6 @@ public class MasterDataServiceImpl implements MasterDataService {
 
         List<BookDetailResponseDto.BranchStockDto> branchStocks = items.stream()
                 .map(item -> BookDetailResponseDto.BranchStockDto.builder()
-                        .id(item.getId())
                         .branchId(item.getBranch().getId())
                         .branchName(item.getBranch().getBranchName())
                         .skuBarcode(item.getSkuBarcode())
@@ -179,11 +178,11 @@ public class MasterDataServiceImpl implements MasterDataService {
     }
 
     @Override
-    public List<BookDto> getAllBooks() {
+    public java.util.List<BookDto> getAllBooks() {
         return bookRepository.findAll(org.springframework.data.domain.Sort.by("title").ascending())
                 .stream()
                 .map(this::mapToDto)
-                .collect(Collectors.toList());
+                .collect(java.util.stream.Collectors.toList());
     }
 
     @Override

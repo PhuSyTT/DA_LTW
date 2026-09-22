@@ -1,0 +1,380 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title th:text="${pageTitle} ?: 'Đăng Nhập - OldBooks'">Đăng Nhập - OldBooks</title>
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;0,800;1,400;1,600&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+
+    <!-- FontAwesome 6 -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" rel="stylesheet">
+
+    <!-- Custom Landing Page CSS for unified theme -->
+    <link th:href="@{/css/landing-page.css}" href="/css/landing-page.css" rel="stylesheet">
+
+    <style>
+        .auth-wrapper {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 40px 20px;
+            position: relative;
+            background: radial-gradient(circle at 10% 20%, rgba(205, 133, 63, 0.15) 0%, rgba(238, 238, 238, 0.4) 40%, #FDFBF7 90%);
+        }
+
+        .auth-card {
+            background: #FFFFFF;
+            border: 1px solid var(--border-gold);
+            border-radius: var(--radius-xl);
+            box-shadow: 0 20px 50px -10px rgba(33, 29, 25, 0.15), 0 0 0 1px rgba(184, 134, 11, 0.15);
+            width: 100%;
+            max-width: 960px;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            overflow: hidden;
+            position: relative;
+            z-index: 10;
+        }
+
+        .auth-form-side {
+            padding: 48px 40px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        .auth-banner-side {
+            background: linear-gradient(145deg, #1E1A16 0%, #2A241F 100%);
+            padding: 48px 40px;
+            color: #FFFFFF;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            position: relative;
+            border-left: 1px solid rgba(184, 134, 11, 0.3);
+        }
+
+        .auth-banner-side::before {
+            content: '';
+            position: absolute;
+            top: 0; right: 0; bottom: 0; left: 0;
+            background: radial-gradient(circle at 80% 20%, rgba(184, 134, 11, 0.25) 0%, transparent 60%);
+            pointer-events: none;
+        }
+
+        .brand-auth-logo {
+            display: inline-flex;
+            align-items: center;
+            gap: 12px;
+            text-decoration: none;
+            margin-bottom: 24px;
+        }
+
+        .form-group-custom {
+            margin-bottom: 20px;
+        }
+
+        .form-label-custom {
+            display: block;
+            font-size: 0.88rem;
+            font-weight: 600;
+            color: var(--text-heading);
+            margin-bottom: 8px;
+        }
+
+        .input-icon-wrap {
+            position: relative;
+            display: flex;
+            align-items: center;
+        }
+
+        .input-icon-wrap i.input-icon {
+            position: absolute;
+            left: 16px;
+            color: var(--color-peru);
+            font-size: 1rem;
+            pointer-events: none;
+        }
+
+        .input-custom {
+            width: 100%;
+            padding: 13px 16px 13px 44px;
+            background: #FAF7F2;
+            border: 1px solid var(--border-light);
+            border-radius: var(--radius-md);
+            font-family: var(--font-sans);
+            font-size: 0.95rem;
+            color: var(--text-main);
+            transition: all var(--trans-fast);
+            outline: none;
+        }
+
+        .input-custom:focus {
+            background: #FFFFFF;
+            border-color: var(--color-goldenrod);
+            box-shadow: 0 0 0 3px rgba(184, 134, 11, 0.18);
+        }
+
+        .toggle-pwd-btn {
+            position: absolute;
+            right: 14px;
+            background: transparent;
+            border: none;
+            color: var(--text-muted);
+            cursor: pointer;
+            padding: 4px;
+        }
+
+        .toggle-pwd-btn:hover {
+            color: var(--color-goldenrod);
+        }
+
+        /* Role Quick Switch Buttons */
+        .role-switcher-box {
+            margin-top: 24px;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(205, 133, 63, 0.25);
+            border-radius: var(--radius-md);
+            padding: 18px;
+        }
+
+        .role-btn-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 8px;
+            margin-top: 12px;
+        }
+
+        .quick-role-btn {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 10px 14px;
+            background: rgba(255, 255, 255, 0.08);
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            border-radius: var(--radius-sm);
+            color: #FFFFFF;
+            font-size: 0.82rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all var(--trans-fast);
+            text-align: left;
+        }
+
+        .quick-role-btn:hover {
+            background: var(--grad-primary);
+            border-color: var(--color-goldenrod);
+            transform: translateX(4px);
+            box-shadow: 0 4px 12px rgba(184, 134, 11, 0.3);
+        }
+
+        .quick-role-btn .role-tag {
+            font-size: 0.7rem;
+            padding: 2px 8px;
+            border-radius: 999px;
+            background: rgba(0, 0, 0, 0.3);
+            color: #DE9E5F;
+        }
+
+        @media (max-width: 860px) {
+            .auth-card {
+                grid-template-columns: 1fr;
+                max-width: 480px;
+            }
+            .auth-banner-side {
+                display: none;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="vintage-grain-overlay"></div>
+
+    <div class="auth-wrapper">
+        <div class="auth-card">
+            
+            <!-- LEFT COLUMN: Form Login -->
+            <div class="auth-form-side">
+                <a th:href="@{/}" href="/" class="brand-auth-logo">
+                    <div class="logo-icon-wrap" style="width: 40px; height: 40px; font-size: 1.1rem;">
+                        <i class="fa-solid fa-book-bookmark"></i>
+                    </div>
+                    <div class="logo-text-wrap">
+                        <span class="brand-name" style="font-size: 1.35rem;">OldBooks</span>
+                        <span class="brand-tagline" style="font-size: 0.65rem;">Cổng Đăng Nhập Hệ Thống</span>
+                    </div>
+                </a>
+
+                <h1 style="font-size: 1.8rem; margin: 0 0 6px; color: var(--text-heading);">Chào mừng trở lại</h1>
+                <p style="font-size: 0.9rem; color: var(--text-muted); margin-bottom: 24px;">
+                    Đăng nhập để truy cập kho sách, quản trị chi nhánh và dữ liệu vận hành.
+                </p>
+
+                <!-- Error Alert -->
+                <div th:if="${errorMessage}" class="alert-box-vintage error" style="display: flex; align-items: center; gap: 12px; background: #FEF2F2; border: 1px solid #FCA5A5; color: #991B1B; padding: 12px 16px; border-radius: var(--radius-md); font-size: 0.88rem; margin-bottom: 20px;">
+                    <i class="fa-solid fa-circle-exclamation" style="font-size: 1.1rem;"></i>
+                    <span th:text="${errorMessage}">Email hoặc mật khẩu không chính xác!</span>
+                </div>
+
+                <!-- Logout Success Alert -->
+                <div th:if="${logoutMessage}" class="alert-box-vintage success" style="display: flex; align-items: center; gap: 12px; background: #ECFDF5; border: 1px solid #6EE7B7; color: #065F46; padding: 12px 16px; border-radius: var(--radius-md); font-size: 0.88rem; margin-bottom: 20px;">
+                    <i class="fa-solid fa-circle-check" style="font-size: 1.1rem;"></i>
+                    <span th:text="${logoutMessage}">Bạn đã đăng xuất thành công!</span>
+                </div>
+
+                <!-- Main Login Form -->
+                <form th:action="@{/login}" method="post" id="loginForm">
+                    <!-- Email -->
+                    <div class="form-group-custom">
+                        <label for="email" class="form-label-custom">Địa chỉ Email</label>
+                        <div class="input-icon-wrap">
+                            <i class="fa-regular fa-envelope input-icon"></i>
+                            <input type="email" id="email" name="email" class="input-custom" placeholder="nhap_email@oldbooks.vn" required autofocus>
+                        </div>
+                    </div>
+
+                    <!-- Password -->
+                    <div class="form-group-custom">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                            <label for="password" class="form-label-custom" style="margin-bottom: 0;">Mật khẩu</label>
+                            <a href="javascript:void(0)" onclick="alert('Mật khẩu mặc định cho tất cả tài khoản mẫu là: 123456')" style="font-size: 0.8rem; color: var(--color-peru); text-decoration: none; font-weight: 600;">Quên mật khẩu?</a>
+                        </div>
+                        <div class="input-icon-wrap">
+                            <i class="fa-solid fa-lock input-icon"></i>
+                            <input type="password" id="password" name="password" class="input-custom" placeholder="••••••••" required>
+                            <button type="button" class="toggle-pwd-btn" id="togglePwdBtn" onclick="togglePasswordVisibility()" aria-label="Hiện mật khẩu">
+                                <i class="fa-regular fa-eye" id="togglePwdIcon"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Submit Button -->
+                    <button type="submit" class="btn-primary-gold" style="width: 100%; padding: 14px; font-size: 1rem; justify-content: center; margin-top: 8px; border-radius: var(--radius-md);">
+                        <i class="fa-solid fa-right-to-bracket"></i>
+                        <span>Đăng Nhập</span>
+                    </button>
+                </form>
+
+                <div style="text-align: center; margin-top: 24px; font-size: 0.85rem; color: var(--text-muted);">
+                    <a th:href="@{/}" href="/" style="color: var(--color-goldenrod); font-weight: 600; text-decoration: none;">
+                        <i class="fa-solid fa-arrow-left me-1"></i> Quay lại trang chủ OldBooks
+                    </a>
+                </div>
+            </div>
+
+            <!-- RIGHT COLUMN: Role Quick Selector & Presentation -->
+            <div class="auth-banner-side">
+                <div style="position: relative; z-index: 2;">
+                    <div class="hero-badge" style="display: inline-flex; margin-bottom: 12px;">
+                        <i class="fa-solid fa-shield-halved"></i>
+                        <span>PHÂN QUYỀN 5 ROLE SRS</span>
+                    </div>
+                    <h2 style="font-size: 1.5rem; color: #FFFFFF; margin: 0 0 8px;">Trải Nghiệm Nhanh Theo Từng Vai Trò</h2>
+                    <p style="font-size: 0.85rem; color: rgba(255, 255, 255, 0.7); margin-bottom: 16px; line-height: 1.5;">
+                        Nhấp vào từng nút bên dưới để tự động điền tài khoản & mật khẩu kiểm thử cho từng vai trò trong hệ thống:
+                    </p>
+
+                    <!-- Quick Switcher Box -->
+                    <div class="role-switcher-box">
+                        <div class="role-btn-grid">
+                            <!-- 1. Admin -->
+                            <button type="button" class="quick-role-btn" onclick="fillCredentials('admin@oldbooks.vn', '123456', 'ADMIN')">
+                                <div>
+                                    <i class="fa-solid fa-crown" style="color: #F59E0B; margin-right: 8px;"></i>
+                                    <span>1. Quản trị viên (ADMIN)</span>
+                                </div>
+                                <span class="role-tag">Toàn quyền HQ</span>
+                            </button>
+
+                            <!-- 2. Branch Manager -->
+                            <button type="button" class="quick-role-btn" onclick="fillCredentials('manager.hn@oldbooks.vn', '123456', 'BRANCH_MANAGER')">
+                                <div>
+                                    <i class="fa-solid fa-store" style="color: #38BDF8; margin-right: 8px;"></i>
+                                    <span>2. Quản lý chi nhánh</span>
+                                </div>
+                                <span class="role-tag">Quản lý CN HN</span>
+                            </button>
+
+                            <!-- 3. Warehouse Staff -->
+                            <button type="button" class="quick-role-btn" onclick="fillCredentials('warehouse@oldbooks.vn', '123456', 'WAREHOUSE_STAFF')">
+                                <div>
+                                    <i class="fa-solid fa-boxes-stacked" style="color: #A3E635; margin-right: 8px;"></i>
+                                    <span>3. Thủ kho & Thu mua</span>
+                                </div>
+                                <span class="role-tag">Kho & Thu mua</span>
+                            </button>
+
+                            <!-- 4. Cashier -->
+                            <button type="button" class="quick-role-btn" onclick="fillCredentials('cashier@oldbooks.vn', '123456', 'CASHIER')">
+                                <div>
+                                    <i class="fa-solid fa-cash-register" style="color: #F472B6; margin-right: 8px;"></i>
+                                    <span>4. Thu ngân bán hàng</span>
+                                </div>
+                                <span class="role-tag">Bán hàng POS</span>
+                            </button>
+
+                            <!-- 5. Customer -->
+                            <button type="button" class="quick-role-btn" onclick="fillCredentials('customer@gmail.com', '123456', 'CUSTOMER')">
+                                <div>
+                                    <i class="fa-solid fa-user-tag" style="color: #E2E8F0; margin-right: 8px;"></i>
+                                    <span>5. Khách hàng độc giả</span>
+                                </div>
+                                <span class="role-tag">Mua & Săn sách</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <div style="position: relative; z-index: 2; font-size: 0.78rem; color: rgba(255, 255, 255, 0.5); padding-top: 16px; border-top: 1px solid rgba(255, 255, 255, 0.1);">
+                    <i class="fa-solid fa-lock me-1"></i> Mật khẩu mặc định hệ thống: <code>123456</code> (Bảo mật bằng BCrypt)
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- Quick Fill & Toggle Password Script -->
+    <script>
+        function fillCredentials(email, password, roleName) {
+            const emailInput = document.getElementById('email');
+            const pwdInput = document.getElementById('password');
+
+            emailInput.value = email;
+            pwdInput.value = password;
+
+            // Highlight effect
+            emailInput.style.borderColor = '#B8860B';
+            pwdInput.style.borderColor = '#B8860B';
+            emailInput.style.backgroundColor = '#FFFBEB';
+            pwdInput.style.backgroundColor = '#FFFBEB';
+
+            setTimeout(() => {
+                emailInput.style.borderColor = '';
+                pwdInput.style.borderColor = '';
+                emailInput.style.backgroundColor = '';
+                pwdInput.style.backgroundColor = '';
+            }, 1000);
+        }
+
+        function togglePasswordVisibility() {
+            const pwdInput = document.getElementById('password');
+            const toggleIcon = document.getElementById('togglePwdIcon');
+            if (pwdInput.type === 'password') {
+                pwdInput.type = 'text';
+                toggleIcon.classList.remove('fa-eye');
+                toggleIcon.classList.add('fa-eye-slash');
+            } else {
+                pwdInput.type = 'password';
+                toggleIcon.classList.remove('fa-eye-slash');
+                toggleIcon.classList.add('fa-eye');
+            }
+        }
+    </script>
+</body>
+</html>

@@ -1,19 +1,48 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
 <body>
 <header class="app-header" th:fragment="navbar">
     <div class="page-title">
-        <h4 th:text="${pageTitle} ?: 'Quản Lý Kho'">Quản Lý Kho</h4>
-        <p th:text="${pageSubtitle} ?: 'Quản lý danh mục đầu sách, tác giả và thể loại toàn chuỗi cửa hàng'">Quản lý dữ liệu kho toàn chuỗi</p>
+        <h4 th:text="${pageTitle} ?: 'Quản Trị Hệ Thống'">Quản Trị Hệ Thống</h4>
+        <p th:text="${pageSubtitle} ?: 'Hệ thống Quản lý Chuỗi Cửa hàng Sách cũ Đa Chi nhánh'">Hệ thống Quản lý Chuỗi Sách Cũ</p>
     </div>
 
-    <div class="header-user">
-        <div class="user-avatar">
-            <i class="fas fa-user-shield"></i>
-        </div>
-        <div>
-            <div class="fw-bold" style="font-size: 0.9rem;">Nguyễn Văn An</div>
-            <div class="badge bg-primary" style="font-size: 0.7rem;">ROLE_ADMIN (Tổng Giám Đốc)</div>
+    <div class="d-flex align-items-center gap-3">
+        <!-- View Public Store Button -->
+        <a th:href="@{/}" href="/" target="_blank" class="view-store-btn" title="Mở trang chủ bán sách cho độc giả">
+            <i class="fas fa-store"></i>
+            <span>Xem Cửa Hàng</span>
+            <i class="fas fa-arrow-up-right-from-square" style="font-size: 0.75rem;"></i>
+        </a>
+
+        <!-- User Profile Badge & Logout -->
+        <div class="header-user d-flex align-items-center gap-2">
+            <div class="user-avatar">
+                <i class="fas fa-user-shield"></i>
+            </div>
+            <div>
+                <div class="fw-bold" style="font-size: 0.88rem;" sec:authorize="isAuthenticated()">
+                    <span sec:authentication="principal.fullName" th:text="${#authentication.name}">Nguyễn Văn Admin</span>
+                </div>
+                <div class="fw-bold" style="font-size: 0.88rem;" sec:authorize="isAnonymous()">
+                    <span>Khách Quản Trị</span>
+                </div>
+
+                <div sec:authorize="isAuthenticated()">
+                    <span class="badge bg-warning text-dark border border-warning" style="font-size: 0.68rem;"
+                          sec:authentication="principal.roleName">ROLE_ADMIN</span>
+                </div>
+                <div sec:authorize="isAnonymous()">
+                    <span class="badge bg-secondary" style="font-size: 0.68rem;">Chưa đăng nhập</span>
+                </div>
+            </div>
+
+            <!-- Logout Link -->
+            <a th:href="@{/logout}" href="/logout" class="btn btn-sm btn-outline-danger rounded-pill px-3 py-1 ms-2" title="Đăng xuất khỏi hệ thống" style="font-size: 0.78rem; font-weight: 600; display: inline-flex; align-items: center; gap: 4px;">
+                <i class="fas fa-right-from-bracket"></i>
+                <span>Đăng xuất</span>
+            </a>
         </div>
     </div>
 </header>

@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{layout/admin-layout :: html(
+        pageTitle='Quản Lý Tài Khoản & Phân Quyền',
+        pageSubtitle='Quản lý 5 vai trò nhân sự & độc giả theo chuẩn tài liệu SRS',
+        content=~{::section}
+      )}">
+<body>
+<section>
+    <!-- Role Definition & Statistics Cards according to SRS -->
+    <div class="row g-3 mb-4">
+        <div class="col-md-12">
+            <div class="content-card p-3" style="background: linear-gradient(135deg, #F8F9FA 0%, #E9ECEF 100%); border-left: 4px solid #4361EE !important;">
+                <div class="d-flex align-items-center justify-content-between flex-wrap gap-2">
+                    <div>
+                        <h6 class="fw-bold mb-1 text-primary"><i class="fas fa-shield-halved me-2"></i>Hệ Thống Phân Quyền 5 Roles Chuẩn Theo Tài Liệu SRS</h6>
+                        <p class="text-muted small mb-0">Phân định rõ quyền hạn giữa <strong>Staff Kiểm duyệt (Thẩm định Trade-in)</strong> và <strong>Staff thường (Bán hàng & Kho)</strong>.</p>
+                    </div>
+                    <button class="btn btn-primary btn-sm rounded-pill px-3 shadow-sm" data-bs-toggle="modal" data-bs-target="#modalCreateUser">
+                        <i class="fas fa-user-plus me-1"></i> Thêm Tài Khoản Mới
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Content Row -->
+    <div class="row g-4">
+        <!-- User List Table -->
+        <div class="col-lg-12">
+            <div class="content-card">
+                <div class="content-card-header d-flex align-items-center justify-content-between">
+                    <h6 class="fw-bold mb-0 text-primary d-flex align-items-center gap-2">
+                        <i class="fas fa-users-gear"></i> Danh Sách Tài Khoản & Vai Trò Hệ Thống
+                    </h6>
+                    <span class="badge bg-light text-secondary border" th:text="${#lists.size(users)} + ' tài khoản'">0 tài khoản</span>
+                </div>
+                <div class="table-responsive">
+                    <table class="table custom-table mb-0 align-middle">
+                        <thead>
+                            <tr>
+                                <th class="ps-4" style="width: 60px;">ID</th>
+                                <th>Người Dùng / Email</th>
+                                <th>Số Điện Thoại</th>
+                                <th>Vai Trò (Role SRS)</th>
+                                <th>Chi Nhánh Trực Thuộc</th>
+                                <th class="text-center">Trạng Thái</th>
+                                <th class="text-end pe-4">Thao Tác</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr th:if="${#lists.isEmpty(users)}">
+                                <td colspan="7" class="text-center py-4 text-muted">
+                                    Chưa có tài khoản nào được tạo.
+                                </td>
+                            </tr>
+                            <tr th:each="user : ${users}">
+                                <td class="ps-4 fw-bold text-muted" th:text="${user.id}">1</td>
+                                <td>
+                                    <div class="d-flex align-items-center gap-3">
+                                        <div class="rounded-circle d-flex align-items-center justify-content-center text-white fw-bold shadow-sm"
+                                             style="width: 36px; height: 36px; background: linear-gradient(135deg, #4361EE, #3F37C9);"
+                                             th:text="${#strings.substring(user.fullName, 0, 1)}">
+                                            A
+                                        </div>
+                                        <div>
+                                            <div class="fw-bold text-dark" th:text="${user.fullName}">Nguyễn Văn A</div>
+                                            <div class="small text-muted" th:text="${user.email}">user@bookstore.vn</div>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td th:text="${user.phone} ?: '—'">0901.111.222</td>
+                                <td>
+                                    <!-- Badges matching SRS Roles -->
+                                    <span th:if="${user.roleName == 'ROLE_ADMIN' or user.roleName == 'ADMIN'}" class="badge bg-danger text-white px-2 py-1 rounded-pill">
+                                        <i class="fas fa-crown me-1"></i> ADMIN (Quản Trị Chuỗi)
+                                    </span>
+                                    <span th:if="${user.roleName == 'ROLE_BRANCH_MANAGER' or user.roleName == 'BRANCH_MANAGER'}" class="badge bg-primary text-white px-2 py-1 rounded-pill">
+                                        <i class="fas fa-building-user me-1"></i> QUẢN LÝ CHI NHÁNH
+                                    </span>
+                                    <span th:if="${user.roleName == 'ROLE_WAREHOUSE_STAFF' or user.roleName == 'WAREHOUSE_STAFF' or user.roleName == 'ROLE_STAFF_APPRAISER'}" class="badge bg-warning text-dark px-2 py-1 rounded-pill fw-bold">
+                                        <i class="fas fa-boxes-stacked me-1"></i> THỦ KHO & THU MUA
+                                    </span>
+                                    <span th:if="${user.roleName == 'ROLE_CASHIER' or user.roleName == 'CASHIER' or user.roleName == 'ROLE_STAFF_GENERAL'}" class="badge bg-info text-dark px-2 py-1 rounded-pill">
+                                        <i class="fas fa-cash-register me-1"></i> THU NGÂN BÁN HÀNG
+                                    </span>
+                                    <span th:if="${user.roleName == 'ROLE_CUSTOMER' or user.roleName == 'CUSTOMER'}" class="badge bg-secondary text-white px-2 py-1 rounded-pill">
+                                        <i class="fas fa-user me-1"></i> KHÁCH HÀNG (Độc Giả)
+                                    </span>
+                                </td>
+                                <td>
+                                    <span th:if="${user.branchName != null}" class="badge bg-light text-dark border">
+                                        <i class="fas fa-store text-primary me-1"></i> <span th:text="${user.branchName}">Quận 1</span>
+                                    </span>
+                                    <span th:if="${user.branchName == null}" class="text-muted small">Toàn chuỗi / Không gán</span>
+                                </td>
+                                <td class="text-center">
+                                    <span th:if="${user.isActive}" class="badge bg-success-subtle text-success border border-success-subtle rounded-pill">Hoạt động</span>
+                                    <span th:unless="${user.isActive}" class="badge bg-danger-subtle text-danger border border-danger-subtle rounded-pill">Bị khóa</span>
+                                </td>
+                                <td class="text-end pe-4">
+                                    <div class="btn-group btn-group-sm">
+                                        <!-- Toggle Status Form -->
+                                        <form th:attr="action=@{/admin/users/{id}/toggle(id=${user.id})}" method="post" style="display:inline;">
+                                            <button type="submit" class="btn btn-outline-secondary" th:title="${user.isActive} ? 'Khóa tài khoản' : 'Mở khóa'">
+                                                <i th:class="${user.isActive} ? 'fas fa-lock' : 'fas fa-lock-open'"></i>
+                                            </button>
+                                        </form>
+                                    </div>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Create User -->
+    <div class="modal fade" id="modalCreateUser" tabindex="-1" aria-labelledby="modalCreateUserLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content border-0 shadow">
+                <form th:attr="action=@{/admin/users/create}" method="post">
+                    <div class="modal-header bg-light">
+                        <h6 class="modal-title fw-bold" id="modalCreateUserLabel">
+                            <i class="fas fa-user-plus text-primary me-2"></i>Thêm Tài Khoản Nhân Sự / Người Dùng
+                        </h6>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body p-4">
+                        <div class="mb-3">
+                            <label class="form-label small fw-bold">Họ và Tên <span class="text-danger">*</span></label>
+                            <input type="text" name="fullName" class="form-control" placeholder="Ví dụ: Lê Minh Kiểm Duyệt" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label small fw-bold">Email Đăng Nhập <span class="text-danger">*</span></label>
+                            <input type="email" name="email" class="form-control" placeholder="appraiser@bookstore.vn" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label small fw-bold">Mật Khẩu Ban Đầu</label>
+                            <input type="password" name="password" class="form-control" placeholder="Mặc định: 123456 nếu để trống">
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label small fw-bold">Số Điện Thoại</label>
+                            <input type="text" name="phone" class="form-control" placeholder="090x.xxx.xxx">
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label small fw-bold">Vai Trò (Role SRS) <span class="text-danger">*</span></label>
+                            <select name="roleId" class="form-select" required>
+                                <option value="">-- Chọn vai trò --</option>
+                                <option th:each="r : ${roles}" th:value="${r.id}" th:text="${r.roleName} + ' - ' + ${r.description}">ROLE_STAFF_APPRAISER</option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label small fw-bold">Chi Nhánh Công Tác (Nếu là nhân sự chi nhánh)</label>
+                            <select name="branchId" class="form-select">
+                                <option value="">-- Không gán chi nhánh (Dành cho Admin / Customer) --</option>
+                                <option th:each="b : ${branches}" th:value="${b.id}" th:text="${b.branchName}">Chi nhánh Quận 1</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="modal-footer bg-light">
+                        <button type="button" class="btn btn-outline-secondary btn-sm" data-bs-dismiss="modal">Hủy</button>
+                        <button type="submit" class="btn btn-primary btn-sm px-4">Lưu Tài Khoản</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</section>
+</body>
+</html>

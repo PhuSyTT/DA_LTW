@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security" lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title th:text="${pageTitle} ?: 'Chi Tiết Đầu Sách - OldBooks'">Chi Tiết Sách - OldBooks</title>
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;0,800;1,400;1,600&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+
+    <!-- FontAwesome 6 -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" rel="stylesheet">
+
+    <!-- Custom Landing & Catalog CSS -->
+    <link th:href="@{/css/landing-page.css}" href="/css/landing-page.css" rel="stylesheet">
+    <style>
+        .book-detail-container {
+            padding: 50px 24px 80px;
+        }
+        .detail-card {
+            background: #FFFFFF;
+            border: 1px solid var(--border-light);
+            border-radius: var(--radius-xl);
+            padding: 40px;
+            box-shadow: var(--shadow-lg);
+            display: grid;
+            grid-template-columns: 340px 1fr;
+            gap: 48px;
+        }
+        .branch-stock-card {
+            background: #FAF7F2;
+            border: 1px solid var(--border-light);
+            border-radius: var(--radius-md);
+            padding: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 12px;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="vintage-grain-overlay"></div>
+
+    <!-- 1. HEADER -->
+    <header class="site-header">
+        <div class="container header-container">
+            <!-- Brand Logo -->
+            <a th:href="@{/}" href="/" class="brand-logo">
+                <div class="logo-icon-wrap">
+                    <i class="fa-solid fa-book-bookmark"></i>
+                </div>
+                <div class="logo-text-wrap">
+                    <span class="brand-name">OldBooks</span>
+                    <span class="brand-tagline">Timeless Stories</span>
+                </div>
+            </a>
+
+            <!-- Navigation Links -->
+            <nav>
+                <ul class="nav-menu">
+                    <li><a th:href="@{/}" href="/" class="nav-link">Home</a></li>
+                    <li><a th:href="@{/books}" href="/books" class="nav-link active">Sách</a></li>
+                    <li><a th:href="@{/#categories}" href="/#categories" class="nav-link">Thể loại</a></li>
+                    <li><a th:href="@{/#value-prop}" href="/#value-prop" class="nav-link">Về chúng tôi</a></li>
+                </ul>
+            </nav>
+
+            <!-- Actions -->
+            <div class="header-actions">
+                <a th:href="@{/books}" class="btn-outline-vintage" style="padding: 8px 18px; font-size: 0.88rem;">
+                    <i class="fa-solid fa-arrow-left"></i> Quay lại kho sách
+                </a>
+
+                <div sec:authorize="isAnonymous()" style="display: inline-block;">
+                    <a th:href="@{/login}" href="/login" class="user-login-btn">
+                        <i class="fa-regular fa-user"></i>
+                        <span>Đăng nhập</span>
+                    </a>
+                </div>
+
+                <div sec:authorize="isAuthenticated()" style="display: inline-flex; align-items: center; gap: 8px;">
+                    <a th:href="@{/admin/books}" sec:authorize="hasAnyAuthority('ROLE_ADMIN', 'ADMIN', 'ROLE_BRANCH_MANAGER', 'BRANCH_MANAGER', 'ROLE_WAREHOUSE_STAFF', 'WAREHOUSE_STAFF', 'ROLE_CASHIER', 'CASHIER')" class="user-login-btn" style="background: var(--grad-primary); color: #FFF; border: none;" title="Vào trang quản trị">
+                        <i class="fa-solid fa-crown"></i>
+                        <span sec:authentication="principal.roleName">Admin HQ</span>
+                    </a>
+                    <span sec:authorize="hasAnyAuthority('ROLE_CUSTOMER', 'CUSTOMER')" class="user-login-btn" style="cursor: default;" title="Tài khoản độc giả">
+                        <i class="fa-solid fa-circle-user" style="color: var(--color-peru);"></i>
+                        <span sec:authentication="principal.fullName">Độc Giả</span>
+                    </span>
+                    <a th:href="@{/logout}" href="/logout" class="action-btn" title="Đăng xuất" style="color: #DC2626;">
+                        <i class="fa-solid fa-right-from-bracket"></i>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- 2. MAIN DETAIL -->
+    <main class="container book-detail-container">
+        <div class="detail-card">
+            <!-- Left: Book Cover Visual -->
+            <div>
+                <div class="book-cover-wrap" style="border-radius: var(--radius-lg); padding: 30px;">
+                    <img th:if="${book.coverImageUrl != null and !book.coverImageUrl.isEmpty()}" th:src="${book.coverImageUrl}" th:alt="${book.title}" style="width: 240px; height: 340px; object-fit: cover; border-radius: 4px 10px 10px 4px; box-shadow: var(--shadow-book);">
+                    <img th:unless="${book.coverImageUrl != null and !book.coverImageUrl.isEmpty()}" th:src="@{/images/hero-vintage-books.jpg}" th:alt="${book.title}" style="width: 240px; height: 340px; object-fit: cover; border-radius: 4px 10px 10px 4px; box-shadow: var(--shadow-book);">
+                </div>
+                
+                <div style="margin-top: 24px; text-align: center;">
+                    <span class="badge bg-warning text-dark border border-warning px-3 py-2 rounded-pill fw-bold">
+                        <i class="fa-solid fa-shield-halved me-1"></i> Đã Kiểm Định Chất Lượng
+                    </span>
+                </div>
+            </div>
+
+            <!-- Right: Book Metadata & Stock -->
+            <div>
+                <span class="section-eyebrow" th:text="${book.categoryName}">VĂN HỌC</span>
+                <h1 style="font-size: 2.4rem; margin: 8px 0 12px; color: var(--text-heading);" th:text="${book.title}">Tên Sách</h1>
+                
+                <p style="font-size: 1.1rem; color: var(--color-peru); font-weight: 600; margin-bottom: 20px;">
+                    Tác giả: <span th:text="${book.authorName}">Tác Giả Chuẩn</span>
+                </p>
+
+                <!-- Metadata Grid -->
+                <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 14px; background: #FAF7F2; padding: 20px; border-radius: var(--radius-md); border: 1px solid var(--border-light); margin-bottom: 28px;">
+                    <div><strong class="text-muted">Mã ISBN:</strong> <span th:text="${book.isbn}">978-xxx</span></div>
+                    <div><strong class="text-muted">Nhà xuất bản:</strong> <span th:text="${book.publisher} ?: 'Đang cập nhật'">NXB Trẻ</span></div>
+                    <div><strong class="text-muted">Năm phát hành:</strong> <span th:text="${book.publishYear} ?: '2020'">2020</span></div>
+                    <div><strong class="text-muted">Giá bìa gốc niêm yết:</strong> <span th:text="${book.originalPrice != null ? #numbers.formatDecimal(book.originalPrice, 0, 'COMMA', 0, 'POINT') + ' ₫' : 'Đang cập nhật'}" style="text-decoration: line-through; color: var(--text-muted);">110.000 ₫</span></div>
+                </div>
+
+                <!-- Branch Inventory Availability -->
+                <h3 style="font-size: 1.25rem; margin-bottom: 14px; color: var(--text-heading);">
+                    <i class="fa-solid fa-store" style="color: var(--color-goldenrod); margin-right: 8px;"></i>
+                    Tình Trạng Sách & Tồn Kho Theo Chi Nhánh
+                </h3>
+
+                <div th:if="${#lists.isEmpty(book.branchStocks)}">
+                    <p class="text-muted italic">Đầu sách này hiện đang tạm hết hàng tại tất cả các chi nhánh.</p>
+                </div>
+
+                <div th:each="bs : ${book.branchStocks}" class="branch-stock-card">
+                    <div>
+                        <div style="font-weight: 700; color: var(--text-heading); font-size: 1rem;" th:text="${bs.branchName}">Chi nhánh Quận 1</div>
+                        <div style="font-size: 0.82rem; color: var(--text-muted);">
+                            <span th:text="${bs.conditionGrade} ?: 'Good'">Good</span> • Vị trí kệ: <span th:text="${bs.shelfLocation} ?: 'Kệ chính'">Kệ chính</span>
+                        </div>
+                    </div>
+                    <div style="text-align: right;">
+                        <span class="badge bg-success-subtle text-success border border-success px-3 py-1 rounded-pill" th:text="${bs.stockQuantity != null ? 'Còn ' + bs.stockQuantity + ' cuốn' : 'Còn hàng'}">Còn 2 cuốn</span>
+                        <div style="font-weight: 800; color: var(--color-goldenrod); font-size: 1.1rem; margin-top: 4px;" th:text="${bs.sellingPrice != null ? #numbers.formatDecimal(bs.sellingPrice, 0, 'COMMA', 0, 'POINT') + ' ₫' : 'Liên hệ'}">55.000 ₫</div>
+                    </div>
+                </div>
+
+                <!-- CTA Actions -->
+                <div style="display: flex; gap: 16px; margin-top: 30px;">
+                    <button class="btn-primary-gold" onclick="alert('Đã thêm sách vào giỏ hàng thành công!')">
+                        <i class="fa-solid fa-cart-shopping"></i>
+                        <span>Đặt Mua Ngay</span>
+                    </button>
+                    <a th:href="@{/books}" class="btn-outline-vintage">
+                        <span>Tiếp tục tìm sách</span>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- 3. FOOTER -->
+    <footer class="site-footer">
+        <div class="container">
+            <div class="footer-bottom" style="border: none; padding: 0;">
+                <p>&copy; 2026 OldBooks Store Chain. All rights reserved. Thiết kế đồng bộ phong cách Modern Vintage.</p>
+                <div class="footer-legal-links">
+                    <a th:href="@{/}">Trang chủ</a>
+                    <a th:href="@{/books}">Kho sách</a>
+                    <a th:href="@{/admin/books}">Quản trị Admin</a>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <script th:src="@{/js/landing-page.js}"></script>
+</body>
+</html>

@@ -178,6 +178,14 @@ public class MasterDataServiceImpl implements MasterDataService {
     }
 
     @Override
+    public java.util.List<BookDto> getAllBooks() {
+        return bookRepository.findAll(org.springframework.data.domain.Sort.by("title").ascending())
+                .stream()
+                .map(this::mapToDto)
+                .collect(java.util.stream.Collectors.toList());
+    }
+
+    @Override
     public long getTotalBooksCount() {
         return bookRepository.count();
     }

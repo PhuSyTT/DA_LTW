@@ -15,6 +15,8 @@ public interface MasterDataService {
     BookDto updateBook(Long id, BookDto bookDto);
     void deleteBook(Long id);
     boolean isIsbnAvailable(String isbn, Long excludeBookId);
+    java.util.List<BookDto> getAllBooks();
     long getTotalBooksCount();
     long getTotalInventoryCount();
 }
+

@@ -1,599 +1,1294 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security" lang="vi">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="OldBooks - Nền tảng mua bán sách cũ chất lượng cao, mang theo giá trị và câu chuyện vượt thời gian.">
-    <title>OldBooks - Tìm Những Cuốn Sách Đã Có Một Câu Chuyện</title>
+    <meta charset="utf-8"/>
+    <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+    <meta content="Book4Life - Hiệu Sách Cũ Trực Tuyến & Bền Vững Hàng Đầu. Trao đời mới cho những trang sách cũ." name="description"/>
+    <title th:text="${pageTitle} ?: 'Book4Life - Hiệu Sách Cũ Trực Tuyến &amp; Bền Vững Hàng Đầu'">Book4Life - Hiệu Sách Cũ Trực Tuyến &amp; Bền Vững Hàng Đầu</title>
 
-    <!-- Google Fonts -->
+    <!-- Google Fonts: Plus Jakarta Sans (Không chân - Sans-Serif) & Inter -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;0,800;1,400;1,600&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,400;0,500;0,600;0,700;0,800;1,400;1,600;1,700&amp;family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet"/>
 
     <!-- FontAwesome 6 -->
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" rel="stylesheet">
 
-    <!-- Custom Landing Page CSS -->
-    <link th:href="@{/css/landing-page.css}" href="/css/landing-page.css" rel="stylesheet">
+    <!-- Tailwind CSS with Book4Life Literary Warmth Tokens (Pure Sans-Serif) -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#835500",
+                        "primary-container": "#f5a623",
+                        "on-primary": "#ffffff",
+                        "on-primary-container": "#644000",
+                        "primary-fixed": "#ffddb4",
+                        "primary-fixed-dim": "#ffb955",
+                        "on-primary-fixed": "#291800",
+                        "on-primary-fixed-variant": "#633f00",
+                        "inverse-primary": "#ffb955",
+                        "secondary": "#6c5b51",
+                        "secondary-container": "#f6ded1",
+                        "on-secondary": "#ffffff",
+                        "on-secondary-container": "#726157",
+                        "secondary-fixed": "#f6ded1",
+                        "secondary-fixed-dim": "#d9c2b6",
+                        "on-secondary-fixed": "#251911",
+                        "on-secondary-fixed-variant": "#53443a",
+                        "tertiary": "#6d5a50",
+                        "tertiary-container": "#c9b1a5",
+                        "on-tertiary": "#ffffff",
+                        "on-tertiary-container": "#55433a",
+                        "tertiary-fixed": "#f7ddd0",
+                        "tertiary-fixed-dim": "#dac2b5",
+                        "on-tertiary-fixed": "#261911",
+                        "on-tertiary-fixed-variant": "#54433a",
+                        "surface": "#faf9f6",
+                        "surface-dim": "#dbdad7",
+                        "surface-bright": "#faf9f6",
+                        "surface-variant": "#e3e2e0",
+                        "surface-container-lowest": "#ffffff",
+                        "surface-container-low": "#f4f3f1",
+                        "surface-container": "#efeeeb",
+                        "surface-container-high": "#e9e8e5",
+                        "surface-container-highest": "#e3e2e0",
+                        "on-surface": "#1a1c1a",
+                        "on-surface-variant": "#524534",
+                        "inverse-surface": "#2f312f",
+                        "inverse-on-surface": "#f2f1ee",
+                        "outline": "#857462",
+                        "outline-variant": "#d7c3ae",
+                        "surface-tint": "#835500",
+                        "background": "#faf9f6",
+                        "on-background": "#1a1c1a",
+                        "error": "#ba1a1a",
+                        "error-container": "#ffdad6",
+                        "on-error": "#ffffff",
+                        "on-error-container": "#93000a"
+                    },
+                    borderRadius: {
+                        "DEFAULT": "0.25rem",
+                        "sm": "0.25rem",
+                        "md": "0.5rem",
+                        "lg": "0.75rem",
+                        "xl": "1rem",
+                        "2xl": "1.5rem",
+                        "3xl": "2rem",
+                        "full": "9999px"
+                    },
+                    fontFamily: {
+                        "sans": ["'Plus Jakarta Sans'", "Inter", "-apple-system", "BlinkMacSystemFont", "'Segoe UI'", "sans-serif"],
+                        "serif": ["'Plus Jakarta Sans'", "Inter", "sans-serif"],
+                        "heading": ["'Plus Jakarta Sans'", "sans-serif"],
+                        "display-lg": ["'Plus Jakarta Sans'"],
+                        "headline-lg": ["'Plus Jakarta Sans'"],
+                        "headline-md": ["'Plus Jakarta Sans'"],
+                        "headline-sm": ["'Plus Jakarta Sans'"],
+                        "title-lg": ["'Plus Jakarta Sans'"],
+                        "title-md": ["'Plus Jakarta Sans'"],
+                        "body-lg": ["'Plus Jakarta Sans'"],
+                        "body-md": ["'Plus Jakarta Sans'"],
+                        "body-sm": ["'Plus Jakarta Sans'"],
+                        "label-lg": ["'Plus Jakarta Sans'"],
+                        "label-md": ["'Plus Jakarta Sans'"],
+                        "label-sm": ["'Plus Jakarta Sans'"]
+                    }
+                }
+            }
+        };
+    </script>
+    <style>
+        * {
+            font-family: 'Plus Jakarta Sans', 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif !important;
+        }
+        .material-symbols-outlined, .fa-solid, .fa-regular, .fas, .far {
+            font-family: inherit;
+        }
+        .material-symbols-outlined {
+            font-family: 'Material Symbols Outlined' !important;
+        }
+        .fa-solid, .fas {
+            font-family: 'Font Awesome 6 Free' !important;
+            font-weight: 900 !important;
+        }
+        .fa-regular, .far {
+            font-family: 'Font Awesome 6 Free' !important;
+            font-weight: 400 !important;
+        }
+        html { scroll-behavior: smooth; }
+        .toast-notification {
+            position: fixed;
+            bottom: 24px;
+            right: 24px;
+            background: #2C1E16;
+            color: #FAF9F6;
+            padding: 14px 22px;
+            border-radius: 12px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.25);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            z-index: 9999;
+            transform: translateY(120%);
+            transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+        .toast-notification.show {
+            transform: translateY(0);
+        }
+    </style>
 </head>
-<body>
+<body class="bg-background font-sans text-on-surface antialiased min-h-screen">
 
-    <!-- Paper Grain Overlay -->
-    <div class="vintage-grain-overlay"></div>
+    <!-- Toast Notification Popup -->
+    <div id="toastNotification" class="toast-notification">
+        <span class="material-symbols-outlined text-primary-container">check_circle</span>
+        <span id="toastMessage" class="text-sm font-medium">Đã thêm vào giỏ hàng thành công!</span>
+    </div>
 
-    <!-- 1. HEADER SECTION -->
-    <header class="site-header">
-        <div class="container header-container">
-            <!-- Brand Logo -->
-            <a th:href="@{/}" href="/" class="brand-logo" id="header-logo">
-                <div class="logo-icon-wrap">
-                    <i class="fa-solid fa-book-bookmark"></i>
-                </div>
-                <div class="logo-text-wrap">
-                    <span class="brand-name">OldBooks</span>
-                    <span class="brand-tagline">Timeless Stories</span>
-                </div>
-            </a>
-
-            <!-- Navigation Links -->
-            <nav>
-                <ul class="nav-menu" id="nav-menu">
-                    <li><a th:href="@{/}" href="/" class="nav-link active">Home</a></li>
-                    <li><a th:href="@{/books}" href="/books" class="nav-link">Sách</a></li>
-                    <li><a href="#categories" class="nav-link">Thể loại</a></li>
-                    <li><a href="#value-prop" class="nav-link">Về chúng tôi</a></li>
-                    <li><a href="#community" class="nav-link">Blog</a></li>
-                    <li><a href="#contact" class="nav-link">Liên hệ</a></li>
-                </ul>
-            </nav>
-
-            <!-- Search Bar -->
-            <form th:action="@{/books}" method="get" class="header-search">
-                <i class="fa-solid fa-magnifying-glass search-icon"></i>
-                <input type="text" name="keyword" class="search-input" id="main-search-input" placeholder="Tìm tên sách, tác giả...">
-            </form>
-
-            <!-- Header Action Icons -->
-            <div class="header-actions">
-                <!-- Wishlist Icon -->
-                <a href="#wishlist" class="action-btn" title="Danh sách yêu thích" id="wishlist-btn">
-                    <i class="fa-regular fa-heart"></i>
-                    <span class="badge-count">2</span>
-                </a>
-
-                <!-- Cart Icon -->
-                <a href="#cart" class="action-btn" title="Giỏ hàng" id="cart-btn">
-                    <i class="fa-solid fa-bag-shopping"></i>
-                    <span class="badge-count">0</span>
-                </a>
-
-                <!-- User / Login -->
-                <div sec:authorize="isAnonymous()" style="display: inline-block;">
-                    <a th:href="@{/login}" href="/login" class="user-login-btn" id="login-btn">
-                        <i class="fa-regular fa-user"></i>
-                        <span>Đăng nhập</span>
+    <!-- ========================================== -->
+    <!-- HEADER: Book4Life Top Navigation & Sub-Bar -->
+    <!-- ========================================== -->
+    <header class="fixed top-0 left-0 right-0 z-50 bg-surface/95 backdrop-blur-xl border-b border-outline-variant/30 shadow-[0_1px_8px_rgba(44,30,22,0.04)]">
+        <div class="w-full">
+            <!-- Main Header Row -->
+            <div class="h-20 w-full max-w-7xl mx-auto px-4 sm:px-6 flex items-center justify-between gap-4 md:gap-6">
+                
+                <!-- Logo & Brand Name -->
+                <div class="flex items-center gap-3 shrink-0">
+                    <a th:href="@{/}" href="/" class="flex items-center gap-3 group">
+                        <img th:src="@{/images/book4life-logo.png}"
+                             src="/images/book4life-logo.png"
+                             onerror="this.onerror=null; this.src='https://lh3.googleusercontent.com/aida/AEtjO1VFRXY_NxriMnSUoyOlnJkpi_znEOfbT5nqVF_bWOeMuQrL28jtA3tETNkUlNIEvXJm19CEHOkGmCwnVISoEMhl5cfEIGWneqFqQTEH2YVxCJT61G2j2-6D0aqTouvk9S4LMHzp7_D4BtPEKRDgZ-a42hUwlA9vSusc7zVTRfWF9HyMuFlJPcKDbdvyCu6om3wwYvn8--WJGC61Nv6WZJ_H2WA8IPtCQmf7qoGvV5cvAnQdgl-cs0nr3g';"
+                             alt="Book4Life Logo" 
+                             class="h-9 w-auto object-contain transition-transform group-hover:scale-105"/>
+                        <div class="flex flex-col">
+                            <span class="font-bold text-2xl text-on-surface tracking-tight leading-none group-hover:text-primary transition-colors">Book4Life</span>
+                            <span class="text-[10px] text-tertiary font-semibold tracking-wider uppercase mt-0.5">Hiệu Sách Cũ Bền Vững</span>
+                        </div>
                     </a>
                 </div>
 
-                <div sec:authorize="isAuthenticated()" style="display: inline-flex; align-items: center; gap: 8px;">
-                    <a th:href="@{/admin/books}" sec:authorize="hasAnyAuthority('ROLE_ADMIN', 'ADMIN', 'ROLE_BRANCH_MANAGER', 'BRANCH_MANAGER', 'ROLE_WAREHOUSE_STAFF', 'WAREHOUSE_STAFF', 'ROLE_CASHIER', 'CASHIER')" class="user-login-btn" style="background: var(--grad-primary); color: #FFF; border: none;" title="Vào trang quản trị">
-                        <i class="fa-solid fa-crown"></i>
-                        <span sec:authentication="principal.roleName">Admin HQ</span>
-                    </a>
-                    <span sec:authorize="hasAnyAuthority('ROLE_CUSTOMER', 'CUSTOMER')" class="user-login-btn" style="cursor: default;" title="Tài khoản độc giả">
-                        <i class="fa-solid fa-circle-user" style="color: var(--color-peru);"></i>
-                        <span sec:authentication="principal.fullName">Độc Giả</span>
-                    </span>
-                    <a th:href="@{/logout}" href="/logout" class="action-btn" title="Đăng xuất" style="color: #DC2626;">
-                        <i class="fa-solid fa-right-from-bracket"></i>
-                    </a>
+                <!-- Category Selector & Omni Search Bar -->
+                <div class="flex-1 max-w-xl mx-2 hidden md:flex items-center">
+                    <form th:action="@{/books}" method="get" class="w-full flex items-center bg-surface-container-low border border-outline-variant/40 rounded-xl px-3 py-1.5 shadow-[0_1px_4px_rgba(44,30,22,0.04)] focus-within:bg-surface-container-lowest focus-within:border-primary focus-within:shadow-[0_2px_12px_rgba(131,85,0,0.12)] transition-all">
+                        <div class="relative">
+                            <select name="categoryId" class="appearance-none bg-transparent flex items-center gap-1 text-on-surface-variant text-xs font-semibold pr-6 mr-2 border-r border-outline-variant/40 shrink-0 hover:text-on-surface cursor-pointer focus:outline-none">
+                                <option value="">Tất cả thể loại</option>
+                                <option th:each="cat : ${categories}" th:value="${cat.id}" th:text="${cat.name}">Tiểu thuyết</option>
+                            </select>
+                            <span class="material-symbols-outlined pointer-events-none absolute right-2 top-1/2 -translate-y-1/2 text-[14px] text-on-surface-variant">expand_more</span>
+                        </div>
+                        <span class="material-symbols-outlined text-on-surface-variant text-[20px] mr-2 shrink-0">search</span>
+                        <input name="keyword" class="w-full bg-transparent text-sm text-on-surface placeholder:text-outline focus:outline-none" placeholder="Tìm tựa sách, tác giả, thể loại hoặc ISBN..." type="text"/>
+                        <button type="submit" class="hidden">Tìm</button>
+                    </form>
                 </div>
 
-                <!-- Mobile Hamburger Toggle -->
-                <button class="mobile-toggle" id="mobile-menu-toggle" aria-label="Toggle navigation">
-                    <i class="fa-solid fa-bars"></i>
-                </button>
+                <!-- Navigation Links & User Actions -->
+                <div class="flex items-center gap-4 shrink-0">
+                    <nav class="hidden xl:flex items-center gap-5 text-sm font-semibold text-on-surface-variant">
+                        <a th:href="@{/books}" class="hover:text-primary transition-colors">Kho sách</a>
+                        <a th:href="@{/authors}" class="hover:text-primary transition-colors">Tác giả</a>
+                        <a th:href="@{/blog}" class="hover:text-primary transition-colors">Blog</a>
+                        <a th:href="@{/about}" class="hover:text-primary transition-colors">Về chúng tôi</a>
+                    </nav>
+
+                    <!-- Wishlist & Cart Badges -->
+                    <div class="flex items-center gap-1">
+                        <button onclick="showToast('Danh sách yêu thích đã được lưu!')" aria-label="Yêu thích" class="relative p-2 rounded-full hover:bg-surface-container-high text-on-surface-variant hover:text-primary transition-all">
+                            <span class="material-symbols-outlined text-[22px]">favorite</span>
+                            <span class="absolute top-1 right-1 flex items-center justify-center min-w-[16px] h-4 px-1 rounded-full bg-secondary text-on-secondary text-[10px] font-bold">5</span>
+                        </button>
+                        <button onclick="showToast('Giỏ hàng có 3 cuốn sách sẵn sàng thanh toán!')" aria-label="Giỏ hàng" class="relative p-2 rounded-full hover:bg-surface-container-high text-on-surface-variant hover:text-primary transition-all">
+                            <span class="material-symbols-outlined text-[22px]">shopping_bag</span>
+                            <span class="absolute top-1 right-1 flex items-center justify-center min-w-[16px] h-4 px-1 rounded-full bg-primary-container text-on-primary-container text-[10px] font-bold">3</span>
+                        </button>
+                    </div>
+
+                    <!-- Multi-Role Auth Controls -->
+                    <div class="flex items-center border-l border-outline-variant/40 pl-3">
+                        <!-- Anonymous State -->
+                        <div sec:authorize="isAnonymous()">
+                            <a th:href="@{/login}" href="/login" class="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-surface-container-high hover:bg-primary-container text-on-surface hover:text-on-primary-container text-xs font-bold shadow-sm transition-all">
+                                <div class="w-6 h-6 rounded-full bg-primary flex items-center justify-center text-white text-xs">
+                                    <span class="material-symbols-outlined text-[14px]">person</span>
+                                </div>
+                                <span>Đăng nhập</span>
+                            </a>
+                        </div>
+
+                        <!-- Authenticated State -->
+                        <div sec:authorize="isAuthenticated()" class="flex items-center gap-2">
+                            <!-- Admin / Staff Shortcut -->
+                            <a th:href="@{/admin/books}" 
+                               sec:authorize="hasAnyAuthority('ROLE_ADMIN', 'ADMIN', 'ROLE_BRANCH_MANAGER', 'BRANCH_MANAGER', 'ROLE_WAREHOUSE_STAFF', 'WAREHOUSE_STAFF', 'ROLE_CASHIER', 'CASHIER')" 
+                               class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-primary text-white text-xs font-bold shadow hover:bg-primary/90 transition-all">
+                                <span class="material-symbols-outlined text-[16px]">admin_panel_settings</span>
+                                <span sec:authentication="principal.roleName">Admin HQ</span>
+                            </a>
+
+                            <!-- Customer Profile Badge -->
+                            <span sec:authorize="hasAnyAuthority('ROLE_CUSTOMER', 'CUSTOMER')" 
+                                  class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-secondary-container text-on-secondary-container text-xs font-bold">
+                                <span class="material-symbols-outlined text-[16px]">account_circle</span>
+                                <span sec:authentication="principal.fullName">Độc Giả</span>
+                            </span>
+
+                            <!-- Logout Button -->
+                            <a th:href="@{/logout}" href="/logout" title="Đăng xuất" class="p-2 rounded-xl hover:bg-error-container text-outline hover:text-error transition-colors">
+                                <span class="material-symbols-outlined text-[20px]">logout</span>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Sub-Header Category Pills Bar -->
+            <div class="h-11 w-full bg-surface-container-low/90 border-t border-outline-variant/20">
+                <div class="h-full max-w-7xl mx-auto px-4 sm:px-6 flex items-center justify-between overflow-x-auto scrollbar-none">
+                    <nav class="flex items-center gap-2 sm:gap-3 text-nowrap text-xs font-semibold">
+                        <a th:href="@{/books}" class="px-3 py-1 rounded-full bg-primary-container text-on-primary-container font-bold shadow-sm hover:brightness-95 transition-all">Tất cả kho sách</a>
+                        <a th:href="@{/books(keyword='kinh dien')}" class="px-3 py-1 rounded-full text-on-surface-variant hover:text-on-surface hover:bg-surface-container-high transition-colors">Kinh Điển</a>
+                        <a th:href="@{/books(keyword='van hoc viet nam')}" class="px-3 py-1 rounded-full text-on-surface-variant hover:text-on-surface hover:bg-surface-container-high transition-colors">Văn Học Việt Nam</a>
+                        <a th:href="@{/books(keyword='triet hoc')}" class="px-3 py-1 rounded-full text-on-surface-variant hover:text-on-surface hover:bg-surface-container-high transition-colors">Triết Học &amp; Lịch Sử</a>
+                        <a th:href="@{/books(keyword='ngoai van')}" class="px-3 py-1 rounded-full text-on-surface-variant hover:text-on-surface hover:bg-surface-container-high transition-colors">Sách Ngoại Văn</a>
+                        <a th:href="@{/books(keyword='giam sau')}" class="px-3 py-1 rounded-full text-on-surface-variant hover:text-on-surface hover:bg-surface-container-high transition-colors">Sách Giảm Sâu</a>
+                        <a th:href="@{/books(keyword='combo')}" class="px-3 py-1 rounded-full text-on-surface-variant hover:text-on-surface hover:bg-surface-container-high transition-colors">Combo Tiết Kiệm</a>
+                    </nav>
+                    <div class="hidden md:flex items-center gap-1.5 shrink-0 ml-4 text-[11px] text-tertiary font-semibold">
+                        <span class="material-symbols-outlined text-[15px] text-primary">verified_user</span>
+                        <span>Thẩm định 100% bản thảo &amp; sách cũ</span>
+                    </div>
+                </div>
             </div>
         </div>
     </header>
 
+    <!-- ========================================== -->
     <!-- MAIN CONTENT -->
-    <main>
-        <!-- 2. HERO SECTION -->
-        <section class="hero-section" id="hero">
-            <div class="hero-shape-1"></div>
-            <div class="hero-shape-2"></div>
+    <!-- ========================================== -->
+    <main class="w-full pt-32 bg-surface">
+        <div class="flex flex-col w-full">
 
-            <div class="container hero-grid">
-                <!-- Left Column Content -->
-                <div class="hero-content">
-                    <div class="hero-badge">
-                        <i class="fa-solid fa-feather-pointed"></i>
-                        <span>BOOKS WITH A STORY</span>
-                    </div>
-
-                    <h1 class="hero-heading">
-                        Tìm Những Cuốn Sách<br>
-                        <span class="gradient-text">Đã Có Một Câu Chuyện</span>
-                    </h1>
-
-                    <p class="hero-subheading">
-                        Khám phá những cuốn sách cũ chất lượng, mang theo giá trị và câu chuyện riêng của chúng. Từng trang sách cũ lưu giữ những dấu ấn tri thức vượt thời gian.
-                    </p>
-
-                    <!-- CTA Buttons -->
-                    <div class="hero-cta-group">
-                        <a th:href="@{/books}" href="/books" class="btn-primary-gold" id="cta-explore">
-                            <i class="fa-solid fa-book-open-reader"></i>
-                            <span>Khám phá kho sách</span>
-                            <i class="fa-solid fa-arrow-right"></i>
-                        </a>
-
-                        <a href="#featured-books" class="btn-outline-vintage" id="cta-learn-more">
-                            <i class="fa-solid fa-star"></i>
-                            <span>Sách tuyển chọn</span>
-                        </a>
-                    </div>
-
-                    <!-- Social Proof Stats -->
-                    <div class="hero-stats">
-                        <div class="stat-item">
-                            <span class="stat-number">15,000+</span>
-                            <span class="stat-label">Đầu sách tuyển chọn</span>
-                        </div>
-                        <div class="stat-divider"></div>
-                        <div class="stat-item">
-                            <span class="stat-number">4.9/5</span>
-                            <span class="stat-label">Đánh giá chất lượng</span>
-                        </div>
-                        <div class="stat-divider"></div>
-                        <div class="stat-item">
-                            <span class="stat-number">30,000+</span>
-                            <span class="stat-label">Độc giả tin yêu</span>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Right Column Visual Art -->
-                <div class="hero-visual-wrap">
-                    <div class="hero-art-backdrop"></div>
+            <!-- SECTION 1: HERO SECTION -->
+            <section class="relative w-full overflow-hidden bg-surface py-12 md:py-16 lg:py-20 border-b border-outline-variant/30">
+                <div class="max-w-7xl mx-auto px-6 grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
                     
-                    <div class="hero-main-card">
-                        <img th:src="@{/images/hero-vintage-books.jpg}" src="/images/hero-vintage-books.jpg" alt="Vintage Books and Reading Lamp" class="hero-img">
+                    <!-- Left Column (60%) -->
+                    <div class="lg:col-span-7 flex flex-col items-start gap-6 z-10">
+                        <!-- Eyebrow Pill -->
+                        <div class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-secondary-container text-on-secondary-container shadow-sm">
+                            <span class="material-symbols-outlined text-[18px] text-primary">eco</span>
+                            <span class="text-xs font-bold tracking-wide">Hiệu Sách Cũ Trực Tuyến &amp; Bền Vững Hàng Đầu</span>
+                        </div>
+
+                        <!-- Headline -->
+                        <h1 class="text-4xl sm:text-5xl lg:text-6xl text-on-surface font-extrabold tracking-tight leading-[1.15]">
+                            Trao Đời Mới Cho Những <span class="text-primary">Trang Sách Cũ</span>
+                        </h1>
+
+                        <!-- Subtitle -->
+                        <p class="text-base sm:text-lg text-on-surface-variant max-w-2xl leading-relaxed font-normal">
+                            Hơn 50.000+ tựa sách chọn lọc, bản in hiếm và sách kinh điển đã được kiểm định chất lượng nghiêm ngặt. Tiết kiệm đến 70% chi phí và chung tay giảm phát thải carbon cho một cộng đồng yêu chữ bền vững.
+                        </p>
+
+                        <!-- CTA Row -->
+                        <div class="flex flex-wrap items-center gap-4 pt-2">
+                            <a th:href="@{/books}" href="/books" class="px-8 py-4 rounded-xl bg-primary-container text-on-primary-container text-base font-bold shadow-md hover:brightness-95 hover:shadow-xl transition-all duration-300 flex items-center gap-2">
+                                <span>Khám Phá Bộ Sưu Tập</span>
+                                <span class="material-symbols-outlined text-[20px]">auto_stories</span>
+                            </a>
+                            <a th:href="@{/about}" href="/about" class="px-7 py-4 rounded-xl bg-surface-container-low border border-outline-variant/40 text-on-surface text-base font-bold shadow-sm hover:bg-surface-container-high transition-all duration-300 flex items-center gap-2">
+                                <span>Bán Lại Sách Cũ</span>
+                                <span class="material-symbols-outlined text-[20px]">recycling</span>
+                            </a>
+                        </div>
+
+                        <!-- Trust Stats Strip -->
+                        <div class="w-full pt-6 mt-4 flex flex-wrap items-center gap-6 text-on-surface-variant text-sm font-semibold border-t border-outline-variant/30">
+                            <div class="flex items-center gap-2">
+                                <span class="w-2.5 h-2.5 rounded-full bg-primary animate-pulse"></span>
+                                <span class="font-extrabold text-on-surface">50.000+</span>
+                                <span>Cuốn sách đã cứu sống</span>
+                            </div>
+                            <div class="hidden sm:inline-block w-1.5 h-1.5 rounded-full bg-outline-variant"></div>
+                            <div class="flex items-center gap-2">
+                                <span class="material-symbols-outlined text-[18px] text-primary-container" style="font-variation-settings: 'FILL' 1;">star</span>
+                                <span class="font-extrabold text-on-surface">4.9/5</span>
+                                <span>Đánh giá từ 18.000+ bạn đọc</span>
+                            </div>
+                            <div class="hidden sm:inline-block w-1.5 h-1.5 rounded-full bg-outline-variant"></div>
+                            <div class="flex items-center gap-2">
+                                <span class="material-symbols-outlined text-[18px] text-primary">local_shipping</span>
+                                <span>Freeship đơn từ <strong class="text-on-surface font-bold">250.000₫</strong></span>
+                            </div>
+                        </div>
                     </div>
 
-                    <!-- Decorative Floating Badges -->
-                    <div class="floating-badge badge-top-left">
-                        <div class="floating-icon-box">
-                            <i class="fa-solid fa-ribbon"></i>
+                    <!-- Right Column (40%) Inspiration Photo -->
+                    <div class="lg:col-span-5 relative flex justify-center">
+                        <div class="relative w-full max-w-md lg:max-w-none">
+                            <!-- Ambient Glow Backdrop -->
+                            <div class="absolute -inset-4 bg-secondary-container/40 rounded-3xl blur-2xl -z-10 transform rotate-1"></div>
+                            
+                            <!-- Image Card -->
+                            <div class="relative rounded-2xl overflow-hidden shadow-2xl bg-surface-container-low border border-outline-variant/30">
+                                <img th:src="@{/images/vintage-hero-books.png}"
+                                     src="/images/vintage-hero-books.png"
+                                     onerror="this.onerror=null; this.src='https://lh3.googleusercontent.com/aida-public/AB6AXuC30lbAsp3g-afYNO2m1BoTwMV8a2CNBe76fBGxICcKLZ1uAcFdaHRmJ3c293tH80SmgsI9fx5UwMc4q0Li1aBrY1M1T6_uWxcSTBaTEleHmr441PYeLlZ1GdQYY--sJWmoVpQuOiCy7L_Lk4WuTfVo8o_39igX2LHwCMjzGaQf9MNijoxCNM8llMvnPkBXDSk4kKIN33AuIsUcKNm8qQZsKb-zQ7oOqUGc0JHa-RXTcf4u03DGzwrc';"
+                                     alt="Bộ sưu tập sách kinh điển tại Book4Life" 
+                                     class="w-full h-[460px] object-cover hover:scale-105 transition-transform duration-700 ease-out"/>
+                                <div class="absolute inset-0 bg-gradient-to-t from-inverse-surface/70 via-transparent to-transparent"></div>
+                                
+                                <!-- Floating Badge: Giảm tới 70% -->
+                                <div class="absolute top-4 right-4 px-4 py-2 rounded-xl bg-surface/95 backdrop-blur-md text-on-surface shadow-lg flex items-center gap-2 border border-outline-variant/30">
+                                    <span class="material-symbols-outlined text-primary text-[20px]" style="font-variation-settings: 'FILL' 1;">sell</span>
+                                    <div class="flex flex-col">
+                                        <span class="text-[10px] text-on-surface-variant font-semibold leading-none">Ưu đãi hôm nay</span>
+                                        <span class="text-xs font-bold text-primary">Giảm tới 70% giá bìa</span>
+                                    </div>
+                                </div>
+
+                                <!-- Floating Provenance Card on Bottom -->
+                                <div class="absolute bottom-4 left-4 right-4 p-4 rounded-xl bg-surface-container-lowest/95 backdrop-blur-md shadow-xl flex items-center justify-between border border-outline-variant/20">
+                                    <div class="flex items-center gap-3">
+                                        <div class="w-10 h-10 rounded-full bg-primary-container/20 flex items-center justify-center text-primary">
+                                            <span class="material-symbols-outlined text-[22px]">verified</span>
+                                        </div>
+                                        <div>
+                                            <h4 class="text-sm font-bold text-on-surface leading-tight">Ấn Bản Sưu Tầm Tuyển Chọn</h4>
+                                            <p class="text-xs text-on-surface-variant">Giấy ngả vàng tự nhiên, gáy chỉ nguyên vẹn</p>
+                                        </div>
+                                    </div>
+                                    <span class="material-symbols-outlined text-primary text-[24px]">bookmark</span>
+                                </div>
+                            </div>
                         </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- SECTION 2: VALUE PROPOSITIONS BAR -->
+            <section id="ve-chung-toi" class="w-full py-14 bg-surface-container-low border-b border-outline-variant/20">
+                <div class="max-w-7xl mx-auto px-6">
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                        <!-- Card 1 -->
+                        <div class="p-8 rounded-2xl bg-surface border border-outline-variant/30 shadow-sm hover:shadow-md transition-shadow flex flex-col gap-4">
+                            <div class="w-12 h-12 rounded-xl bg-secondary-container flex items-center justify-center text-on-secondary-container">
+                                <span class="material-symbols-outlined text-[28px] text-primary">forest</span>
+                            </div>
+                            <div>
+                                <h3 class="text-lg font-bold text-on-surface mb-2 flex items-center gap-2">
+                                    Đọc Sách Xanh (Eco-Friendly)
+                                </h3>
+                                <p class="text-sm text-on-surface-variant leading-relaxed">
+                                    Mỗi cuốn sách cũ được tái sử dụng giúp bảo vệ cây xanh và giảm thiểu lượng rác thải giấy ra môi trường, kiến tạo chu kỳ sống bền vững cho văn hóa đọc.
+                                </p>
+                            </div>
+                        </div>
+                        <!-- Card 2 -->
+                        <div class="p-8 rounded-2xl bg-surface border border-outline-variant/30 shadow-sm hover:shadow-md transition-shadow flex flex-col gap-4">
+                            <div class="w-12 h-12 rounded-xl bg-primary-fixed flex items-center justify-center text-on-primary-fixed-variant">
+                                <span class="material-symbols-outlined text-[28px] text-primary" style="font-variation-settings: 'FILL' 1;">savings</span>
+                            </div>
+                            <div>
+                                <h3 class="text-lg font-bold text-on-surface mb-2 flex items-center gap-2">
+                                    Tiết Kiệm Đến 70%
+                                </h3>
+                                <p class="text-sm text-on-surface-variant leading-relaxed">
+                                    Sở hữu những tác phẩm kinh điển và kho tàng tri thức tinh tuyển với mức giá chỉ từ 45.000₫, cực kỳ thân thiện với túi tiền của học sinh, sinh viên và mọt sách.
+                                </p>
+                            </div>
+                        </div>
+                        <!-- Card 3 -->
+                        <div class="p-8 rounded-2xl bg-surface border border-outline-variant/30 shadow-sm hover:shadow-md transition-shadow flex flex-col gap-4">
+                            <div class="w-12 h-12 rounded-xl bg-tertiary-fixed flex items-center justify-center text-on-tertiary-fixed">
+                                <span class="material-symbols-outlined text-[28px] text-tertiary">fact_check</span>
+                            </div>
+                            <div>
+                                <h3 class="text-lg font-bold text-on-surface mb-2 flex items-center gap-2">
+                                    Tiêu Chuẩn Thẩm Định 5 Bước
+                                </h3>
+                                <p class="text-sm text-on-surface-variant leading-relaxed">
+                                    Mỗi cuốn sách được chuyên viên khử trùng tia UV, làm sạch bìa và phân loại tình trạng minh bạch (Mới 99%, Rất tốt 85%, Đạt chuẩn) trước khi lên kệ.
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- SECTION 3: FILTER & CURATED TABS BAR -->
+            <section id="featured-books" class="w-full pt-16 pb-8 bg-surface">
+                <div class="max-w-7xl mx-auto px-6 flex flex-col gap-8">
+                    <!-- Section Header -->
+                    <div class="flex flex-col md:flex-row md:items-end justify-between gap-4">
                         <div>
-                            <div class="floating-text-title">Bản in Sưu tầm</div>
-                            <div class="floating-text-desc">Nguyên vẹn & Độc bản</div>
+                            <div class="flex items-center gap-2 text-primary text-xs font-bold uppercase tracking-wider mb-2">
+                                <span class="material-symbols-outlined text-[16px]">menu_book</span>
+                                <span>Kho Tuyển Chọn Hôm Nay</span>
+                            </div>
+                            <h2 class="text-3xl sm:text-4xl text-on-surface font-extrabold tracking-tight">
+                                Tuyển Chọn Nổi Bật Dành Cho Bạn
+                            </h2>
+                            <p class="text-sm text-on-surface-variant mt-1">
+                                Sách cũ chất lượng cao, kiểm duyệt tình trạng thực tế • Cập nhật mỗi ngày lúc 09:00 sáng
+                            </p>
+                        </div>
+                        <!-- Sort Selection -->
+                        <div class="flex items-center gap-3 shrink-0">
+                            <span class="text-xs text-on-surface-variant font-medium">Sắp xếp theo:</span>
+                            <div class="relative">
+                                <select onchange="window.location.href='/books'" class="appearance-none bg-surface-container-low border border-outline-variant/40 text-on-surface text-xs font-bold px-4 py-2.5 pr-9 rounded-xl shadow-sm focus:outline-none focus:bg-surface-container-lowest cursor-pointer">
+                                    <option>Phổ biến nhất</option>
+                                    <option>Giá từ thấp đến cao</option>
+                                    <option>Giá từ cao đến thấp</option>
+                                    <option>Mới cập nhật sáng nay</option>
+                                    <option>Bản in hiếm nhất</option>
+                                </select>
+                                <span class="material-symbols-outlined pointer-events-none absolute right-2.5 top-1/2 -translate-y-1/2 text-on-surface-variant text-[18px]">expand_more</span>
+                            </div>
                         </div>
                     </div>
 
-                    <div class="floating-badge badge-bottom-right">
-                        <div class="floating-icon-box">
-                            <i class="fa-solid fa-shield-halved"></i>
+                    <!-- Category Tab Buttons -->
+                    <div class="flex items-center gap-3 overflow-x-auto pb-2 scrollbar-none">
+                        <a th:href="@{/books}" class="px-5 py-2.5 rounded-full bg-primary-container text-on-primary-container text-xs font-bold shadow-sm shrink-0 hover:brightness-95 transition-all">
+                            Tất Cả
+                        </a>
+                        <a th:href="@{/books(keyword='hiem')}" class="px-5 py-2.5 rounded-full bg-surface-container-low text-on-surface-variant text-xs font-bold hover:bg-surface-container-high hover:text-on-surface shrink-0 transition-colors">
+                            Bản In Hiếm &amp; Sưu Tầm
+                        </a>
+                        <a th:href="@{/books(keyword='tieu thuyet')}" class="px-5 py-2.5 rounded-full bg-surface-container-low text-on-surface-variant text-xs font-bold hover:bg-surface-container-high hover:text-on-surface shrink-0 transition-colors">
+                            Văn Học &amp; Tiểu Thuyết
+                        </a>
+                        <a th:href="@{/books(keyword='kinh te')}" class="px-5 py-2.5 rounded-full bg-surface-container-low text-on-surface-variant text-xs font-bold hover:bg-surface-container-high hover:text-on-surface shrink-0 transition-colors">
+                            Kinh Tế &amp; Phát Triển Bản Thân
+                        </a>
+                        <a th:href="@{/books(keyword='triet hoc')}" class="px-5 py-2.5 rounded-full bg-surface-container-low text-on-surface-variant text-xs font-bold hover:bg-surface-container-high hover:text-on-surface shrink-0 transition-colors">
+                            Triết Học - Lịch Sử
+                        </a>
+                        <a th:href="@{/books(keyword='combo')}" class="px-5 py-2.5 rounded-full bg-surface-container-low text-on-surface-variant text-xs font-bold hover:bg-surface-container-high hover:text-on-surface shrink-0 transition-colors">
+                            Combo Siêu Tiết Kiệm
+                        </a>
+                    </div>
+                </div>
+            </section>
+
+            <!-- SECTION 4: FEATURED BOOK GRID (4 Columns x 2 Rows = 8 Book Cards) -->
+            <section class="w-full pb-16 bg-surface">
+                <div class="max-w-7xl mx-auto px-6">
+                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-7">
+
+                        <!-- Book 1: Trăm Năm Cô Đơn -->
+                        <div class="group relative flex flex-col rounded-2xl bg-surface-container-lowest border border-outline-variant/30 p-4 shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300">
+                            <div class="relative w-full aspect-[3/4] rounded-xl overflow-hidden bg-surface-container-low mb-4">
+                                <a th:href="@{/books/1}" href="/books/1">
+                                    <img th:src="@{/images/book-les-miserables.jpg}"
+                                         src="/images/book-les-miserables.jpg"
+                                         onerror="this.onerror=null; this.src='https://lh3.googleusercontent.com/aida-public/AB6AXuD2a-YRwN7bSV9_HclRw6fNlbvYqIwyDZa4zWchG_tg_BZWACIVMkRLvMhtDnX6b5XtGrlmOcF0dFDJ2D3f09PIQbapmHzp0dEULVnFd4NdjOSUhPQWCQmguQh5qNr7k4sorCt2PQefTr7LXpXQhn_mVcTeSyHvAcVl7rEjjRzSUqHytjwpfwc_kbLr63o-LgrhbZeh6xSDr8uflMx81KufWKah7LRVi-SytErkoWKJ_-QM2XraVTwi';"
+                                         alt="Trăm Năm Cô Đơn" 
+                                         class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"/>
+                                </a>
+                                <span class="absolute top-3 left-3 px-2.5 py-1 rounded-md bg-secondary text-on-secondary text-[11px] font-bold shadow-md">
+                                    Bản Hiếm
+                                </span>
+                                <button onclick="showToast('Đã thêm Trăm Năm Cô Đơn vào danh sách yêu thích!')" aria-label="Lưu vào yêu thích" class="absolute top-3 right-3 w-8 h-8 rounded-full bg-surface/90 backdrop-blur-sm text-on-surface flex items-center justify-center hover:text-error hover:bg-surface shadow-sm transition-colors" type="button">
+                                    <span class="material-symbols-outlined text-[18px]">favorite</span>
+                                </button>
+                            </div>
+                            <div class="flex-1 flex flex-col justify-between">
+                                <div>
+                                    <p class="text-xs text-tertiary font-bold">Gabriel García Márquez</p>
+                                    <a th:href="@{/books/1}" href="/books/1">
+                                        <h3 class="text-base font-bold text-on-surface leading-snug line-clamp-2 mt-1 group-hover:text-primary transition-colors">
+                                            Trăm Năm Cô Đơn (Bìa Cứng 1986)
+                                        </h3>
+                                    </a>
+                                    <div class="flex items-center gap-1.5 mt-2">
+                                        <span class="material-symbols-outlined text-[16px] text-primary-container" style="font-variation-settings: 'FILL' 1;">star</span>
+                                        <span class="text-xs font-extrabold text-on-surface">4.9</span>
+                                        <span class="text-xs text-outline">(128 đánh giá)</span>
+                                    </div>
+                                </div>
+                                <div class="mt-4 pt-3 border-t border-outline-variant/20 flex items-center justify-between gap-2">
+                                    <div class="flex flex-col items-start min-w-0">
+                                        <div class="flex items-center gap-1.5 whitespace-nowrap">
+                                            <span class="text-xs line-through text-outline whitespace-nowrap">350.000₫</span>
+                                            <span class="inline-flex items-center px-1.5 py-0.5 rounded bg-error-container text-on-error-container text-[10px] font-bold">-47%</span>
+                                        </div>
+                                        <span class="text-base sm:text-lg font-extrabold text-on-surface whitespace-nowrap mt-0.5">185.000₫</span>
+                                    </div>
+                                    <div class="flex items-center gap-1.5 shrink-0">
+                                        <a th:href="@{/books/1}" href="/books/1" class="px-2.5 py-1.5 rounded-xl bg-surface-container-high hover:bg-surface-container-highest text-on-surface text-xs font-bold transition-colors whitespace-nowrap">
+                                            Chi tiết
+                                        </a>
+                                        <button onclick="showToast('Đã thêm Trăm Năm Cô Đơn vào giỏ hàng!')" aria-label="Thêm vào giỏ" class="w-8 h-8 sm:w-9 sm:h-9 rounded-xl bg-primary-container text-on-primary-container flex items-center justify-center hover:brightness-95 shadow-sm hover:scale-105 active:scale-95 transition-all shrink-0" type="button">
+                                            <span class="material-symbols-outlined text-[18px]">add_shopping_cart</span>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
-                        <div>
-                            <div class="floating-text-title">Kiểm định 100%</div>
-                            <div class="floating-text-desc">Từng trang sách kỹ lưỡng</div>
+
+                        <!-- Book 2: Nhà Giả Kim -->
+                        <div class="group relative flex flex-col rounded-2xl bg-surface-container-lowest border border-outline-variant/30 p-4 shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300">
+                            <div class="relative w-full aspect-[3/4] rounded-xl overflow-hidden bg-surface-container-low mb-4">
+                                <a th:href="@{/books/2}" href="/books/2">
+                                    <img th:src="@{/images/book-alchemist.jpg}"
+                                         src="/images/book-alchemist.jpg"
+                                         onerror="this.onerror=null; this.src='https://lh3.googleusercontent.com/aida-public/AB6AXuBZpHLtdRX6GRNiR1MEzYMlxFSlrZf5DqjRxQOaV3kJMIPT0PsKo58RNfPRg6-KL-dyaAHaMSo7gciN3vT2bc2y07Zee38XoaSP9IKPY1OZYWwFtfIjTeKFwOEdJaxB8NwUk6gfjvCLtVm6R9ESRjgdJX19tRIFde08XvI2dhJg5ea-Q5aKTbFnPwO-hjSc2eUGM1dEUT9tX7qzNpug5khNdMr5cpAlyKaJeMuYTUsizQ01WQlgNtGp';"
+                                         alt="Nhà Giả Kim" 
+                                         class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"/>
+                                </a>
+                                <span class="absolute top-3 left-3 px-2.5 py-1 rounded-md bg-surface-container-highest text-on-surface text-[11px] font-bold shadow-md">
+                                    Như Mới 95%
+                                </span>
+                                <button onclick="showToast('Đã thêm Nhà Giả Kim vào danh sách yêu thích!')" aria-label="Lưu vào yêu thích" class="absolute top-3 right-3 w-8 h-8 rounded-full bg-surface/90 backdrop-blur-sm text-on-surface flex items-center justify-center hover:text-error hover:bg-surface shadow-sm transition-colors" type="button">
+                                    <span class="material-symbols-outlined text-[18px]">favorite</span>
+                                </button>
+                            </div>
+                            <div class="flex-1 flex flex-col justify-between">
+                                <div>
+                                    <p class="text-xs text-tertiary font-bold">Paulo Coelho</p>
+                                    <a th:href="@{/books/2}" href="/books/2">
+                                        <h3 class="text-base font-bold text-on-surface leading-snug line-clamp-2 mt-1 group-hover:text-primary transition-colors">
+                                            Nhà Giả Kim (Ấn bản kỷ niệm)
+                                        </h3>
+                                    </a>
+                                    <div class="flex items-center gap-1.5 mt-2">
+                                        <span class="material-symbols-outlined text-[16px] text-primary-container" style="font-variation-settings: 'FILL' 1;">star</span>
+                                        <span class="text-xs font-extrabold text-on-surface">5.0</span>
+                                        <span class="text-xs text-outline">(342 đánh giá)</span>
+                                    </div>
+                                </div>
+                                <div class="mt-4 pt-3 border-t border-outline-variant/20 flex items-center justify-between gap-2">
+                                    <div class="flex flex-col items-start min-w-0">
+                                        <div class="flex items-center gap-1.5 whitespace-nowrap">
+                                            <span class="text-xs line-through text-outline whitespace-nowrap">120.000₫</span>
+                                            <span class="inline-flex items-center px-1.5 py-0.5 rounded bg-error-container text-on-error-container text-[10px] font-bold">-43%</span>
+                                        </div>
+                                        <span class="text-base sm:text-lg font-extrabold text-on-surface whitespace-nowrap mt-0.5">68.000₫</span>
+                                    </div>
+                                    <div class="flex items-center gap-1.5 shrink-0">
+                                        <a th:href="@{/books/2}" href="/books/2" class="px-2.5 py-1.5 rounded-xl bg-surface-container-high hover:bg-surface-container-highest text-on-surface text-xs font-bold transition-colors whitespace-nowrap">
+                                            Chi tiết
+                                        </a>
+                                        <button onclick="showToast('Đã thêm Nhà Giả Kim vào giỏ hàng!')" aria-label="Thêm vào giỏ" class="w-8 h-8 sm:w-9 sm:h-9 rounded-xl bg-primary-container text-on-primary-container flex items-center justify-center hover:brightness-95 shadow-sm hover:scale-105 active:scale-95 transition-all shrink-0" type="button">
+                                            <span class="material-symbols-outlined text-[18px]">add_shopping_cart</span>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
+
+                        <!-- Book 3: Bắt Trẻ Đồng Xanh -->
+                        <div class="group relative flex flex-col rounded-2xl bg-surface-container-lowest border border-outline-variant/30 p-4 shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300">
+                            <div class="relative w-full aspect-[3/4] rounded-xl overflow-hidden bg-surface-container-low mb-4">
+                                <a th:href="@{/books/3}" href="/books/3">
+                                    <img th:src="@{/images/book-catcher-rye.jpg}"
+                                         src="/images/book-catcher-rye.jpg"
+                                         onerror="this.onerror=null; this.src='https://lh3.googleusercontent.com/aida-public/AB6AXuCF9PAijh4Z68xzGPMqhnFME1viF-gW5tKVyMtiq69lWNxZFHOaYZVFjOj7TSfROcx0WmhSVJ15IYgAmXzbe6uKBFamVmrxinRXP0eRIMKyI590oTao-5Nwh1H4mn7yh9c7KD73HErgWUYYvs7vkGuXxxUsO03olkKZLdu3VToP2XvvLyH9JvTEFVl62auu8FUITdQiP9D1sYJQW0X1E0UV6t5IkM2dmy_BdQhPAsXFopZMMMBX1Jw2';"
+                                         alt="Bắt Trẻ Đồng Xanh" 
+                                         class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"/>
+                                </a>
+                                <span class="absolute top-3 left-3 px-2.5 py-1 rounded-md bg-secondary-container text-on-secondary-container text-[11px] font-bold shadow-md">
+                                    Rất Tốt 85%
+                                </span>
+                                <button onclick="showToast('Đã thêm Bắt Trẻ Đồng Xanh vào danh sách yêu thích!')" aria-label="Lưu vào yêu thích" class="absolute top-3 right-3 w-8 h-8 rounded-full bg-surface/90 backdrop-blur-sm text-on-surface flex items-center justify-center hover:text-error hover:bg-surface shadow-sm transition-colors" type="button">
+                                    <span class="material-symbols-outlined text-[18px]">favorite</span>
+                                </button>
+                            </div>
+                            <div class="flex-1 flex flex-col justify-between">
+                                <div>
+                                    <p class="text-xs text-tertiary font-bold">J.D. Salinger</p>
+                                    <a th:href="@{/books/3}" href="/books/3">
+                                        <h3 class="text-base font-bold text-on-surface leading-snug line-clamp-2 mt-1 group-hover:text-primary transition-colors">
+                                            Bắt Trẻ Đồng Xanh (Bản in cổ điển)
+                                        </h3>
+                                    </a>
+                                    <div class="flex items-center gap-1.5 mt-2">
+                                        <span class="material-symbols-outlined text-[16px] text-primary-container" style="font-variation-settings: 'FILL' 1;">star</span>
+                                        <span class="text-xs font-extrabold text-on-surface">4.8</span>
+                                        <span class="text-xs text-outline">(96 đánh giá)</span>
+                                    </div>
+                                </div>
+                                <div class="mt-4 pt-3 border-t border-outline-variant/20 flex items-center justify-between gap-2">
+                                    <div class="flex flex-col items-start min-w-0">
+                                        <div class="flex items-center gap-1.5 whitespace-nowrap">
+                                            <span class="text-xs line-through text-outline whitespace-nowrap">150.000₫</span>
+                                            <span class="inline-flex items-center px-1.5 py-0.5 rounded bg-error-container text-on-error-container text-[10px] font-bold">-47%</span>
+                                        </div>
+                                        <span class="text-base sm:text-lg font-extrabold text-on-surface whitespace-nowrap mt-0.5">79.000₫</span>
+                                    </div>
+                                    <div class="flex items-center gap-1.5 shrink-0">
+                                        <a th:href="@{/books/3}" href="/books/3" class="px-2.5 py-1.5 rounded-xl bg-surface-container-high hover:bg-surface-container-highest text-on-surface text-xs font-bold transition-colors whitespace-nowrap">
+                                            Chi tiết
+                                        </a>
+                                        <button onclick="showToast('Đã thêm Bắt Trẻ Đồng Xanh vào giỏ hàng!')" aria-label="Thêm vào giỏ" class="w-8 h-8 sm:w-9 sm:h-9 rounded-xl bg-primary-container text-on-primary-container flex items-center justify-center hover:brightness-95 shadow-sm hover:scale-105 active:scale-95 transition-all shrink-0" type="button">
+                                            <span class="material-symbols-outlined text-[18px]">add_shopping_cart</span>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Book 4: Suối Nguồn -->
+                        <div class="group relative flex flex-col rounded-2xl bg-surface-container-lowest border border-outline-variant/30 p-4 shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300">
+                            <div class="relative w-full aspect-[3/4] rounded-xl overflow-hidden bg-surface-container-low mb-4">
+                                <a th:href="@{/books/4}" href="/books/4">
+                                    <img src="https://lh3.googleusercontent.com/aida-public/AB6AXuC0dIjpisbfRvaWRjHeFDY9Vy3eo6iskfLtDjiZk7laJ6tZ01XXszHqy5NwOy_T50MkA0muMQ17CJwO24q17eYQM7sZywZEdeMothOcVvZ1DI4kzhobfbwRMGYYKWxfcl0AsV61iS51DIdlA0M8hQxY_ll_lus4eH-FUULieNZlTLOekdWtmWeCuTtX-q3o6uOePkChocF78jLS2wYowWC6RKo7OhokOaArW7_e0Grtsn1gz2mEEddH" 
+                                         alt="Suối Nguồn" 
+                                         class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"/>
+                                </a>
+                                <span class="absolute top-3 left-3 px-2.5 py-1 rounded-md bg-secondary-container text-on-secondary-container text-[11px] font-bold shadow-md">
+                                    Rất Tốt 90%
+                                </span>
+                                <button onclick="showToast('Đã thêm Suối Nguồn vào danh sách yêu thích!')" aria-label="Lưu vào yêu thích" class="absolute top-3 right-3 w-8 h-8 rounded-full bg-surface/90 backdrop-blur-sm text-on-surface flex items-center justify-center hover:text-error hover:bg-surface shadow-sm transition-colors" type="button">
+                                    <span class="material-symbols-outlined text-[18px]">favorite</span>
+                                </button>
+                            </div>
+                            <div class="flex-1 flex flex-col justify-between">
+                                <div>
+                                    <p class="text-xs text-tertiary font-bold">Ayn Rand</p>
+                                    <a th:href="@{/books/4}" href="/books/4">
+                                        <h3 class="text-base font-bold text-on-surface leading-snug line-clamp-2 mt-1 group-hover:text-primary transition-colors">
+                                            Suối Nguồn (Tập 1 &amp; 2 Trọn Bộ)
+                                        </h3>
+                                    </a>
+                                    <div class="flex items-center gap-1.5 mt-2">
+                                        <span class="material-symbols-outlined text-[16px] text-primary-container" style="font-variation-settings: 'FILL' 1;">star</span>
+                                        <span class="text-xs font-extrabold text-on-surface">4.9</span>
+                                        <span class="text-xs text-outline">(215 đánh giá)</span>
+                                    </div>
+                                </div>
+                                <div class="mt-4 pt-3 border-t border-outline-variant/20 flex items-center justify-between gap-2">
+                                    <div class="flex flex-col items-start min-w-0">
+                                        <div class="flex items-center gap-1.5 whitespace-nowrap">
+                                            <span class="text-xs line-through text-outline whitespace-nowrap">420.000₫</span>
+                                            <span class="inline-flex items-center px-1.5 py-0.5 rounded bg-error-container text-on-error-container text-[10px] font-bold">-50%</span>
+                                        </div>
+                                        <span class="text-base sm:text-lg font-extrabold text-on-surface whitespace-nowrap mt-0.5">210.000₫</span>
+                                    </div>
+                                    <div class="flex items-center gap-1.5 shrink-0">
+                                        <a th:href="@{/books/4}" href="/books/4" class="px-2.5 py-1.5 rounded-xl bg-surface-container-high hover:bg-surface-container-highest text-on-surface text-xs font-bold transition-colors whitespace-nowrap">
+                                            Chi tiết
+                                        </a>
+                                        <button onclick="showToast('Đã thêm Suối Nguồn vào giỏ hàng!')" aria-label="Thêm vào giỏ" class="w-8 h-8 sm:w-9 sm:h-9 rounded-xl bg-primary-container text-on-primary-container flex items-center justify-center hover:brightness-95 shadow-sm hover:scale-105 active:scale-95 transition-all shrink-0" type="button">
+                                            <span class="material-symbols-outlined text-[18px]">add_shopping_cart</span>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Book 5: Hoàng Tử Bé -->
+                        <div class="group relative flex flex-col rounded-2xl bg-surface-container-lowest border border-outline-variant/30 p-4 shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300">
+                            <div class="relative w-full aspect-[3/4] rounded-xl overflow-hidden bg-surface-container-low mb-4">
+                                <a th:href="@{/books/5}" href="/books/5">
+                                    <img th:src="@{/images/book-little-prince.jpg}"
+                                         src="/images/book-little-prince.jpg"
+                                         onerror="this.onerror=null; this.src='https://lh3.googleusercontent.com/aida-public/AB6AXuDZ-omZ6FBgTQtqsU2vpNF_I6PHUC4k5uxZU6Du3fkroFquxaPf1GolaPrvUcZPlqqPiwyjUYwiOlVZar1khupF-B8a_7RbJvnj5AR561TwJqyJLyURYbIv5-uygFQW_b3hpgmm-GrPGdYdrA847RuoptuI5EEFz03PfXKt-mKLQNmstdG7mPS0wZCOawa_Ugjx-zLhdGMvR7JvjpOgsau-1n-fw0H9D0bpdYmKOJBQCVT2rYXBN7A5';"
+                                         alt="Hoàng Tử Bé" 
+                                         class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"/>
+                                </a>
+                                <span class="absolute top-3 left-3 px-2.5 py-1 rounded-md bg-surface-container-highest text-on-surface text-[11px] font-bold shadow-md">
+                                    Như Mới 98%
+                                </span>
+                                <button onclick="showToast('Đã thêm Hoàng Tử Bé vào danh sách yêu thích!')" aria-label="Lưu vào yêu thích" class="absolute top-3 right-3 w-8 h-8 rounded-full bg-surface/90 backdrop-blur-sm text-on-surface flex items-center justify-center hover:text-error hover:bg-surface shadow-sm transition-colors" type="button">
+                                    <span class="material-symbols-outlined text-[18px]">favorite</span>
+                                </button>
+                            </div>
+                            <div class="flex-1 flex flex-col justify-between">
+                                <div>
+                                    <p class="text-xs text-tertiary font-bold">Antoine de Saint-Exupéry</p>
+                                    <a th:href="@{/books/5}" href="/books/5">
+                                        <h3 class="text-base font-bold text-on-surface leading-snug line-clamp-2 mt-1 group-hover:text-primary transition-colors">
+                                            Hoàng Tử Bé (Bản dịch kinh điển)
+                                        </h3>
+                                    </a>
+                                    <div class="flex items-center gap-1.5 mt-2">
+                                        <span class="material-symbols-outlined text-[16px] text-primary-container" style="font-variation-settings: 'FILL' 1;">star</span>
+                                        <span class="text-xs font-extrabold text-on-surface">5.0</span>
+                                        <span class="text-xs text-outline">(512 đánh giá)</span>
+                                    </div>
+                                </div>
+                                <div class="mt-4 pt-3 border-t border-outline-variant/20 flex items-center justify-between gap-2">
+                                    <div class="flex flex-col items-start min-w-0">
+                                        <div class="flex items-center gap-1.5 whitespace-nowrap">
+                                            <span class="text-xs line-through text-outline whitespace-nowrap">110.000₫</span>
+                                            <span class="inline-flex items-center px-1.5 py-0.5 rounded bg-error-container text-on-error-container text-[10px] font-bold">-50%</span>
+                                        </div>
+                                        <span class="text-base sm:text-lg font-extrabold text-on-surface whitespace-nowrap mt-0.5">55.000₫</span>
+                                    </div>
+                                    <div class="flex items-center gap-1.5 shrink-0">
+                                        <a th:href="@{/books/5}" href="/books/5" class="px-2.5 py-1.5 rounded-xl bg-surface-container-high hover:bg-surface-container-highest text-on-surface text-xs font-bold transition-colors whitespace-nowrap">
+                                            Chi tiết
+                                        </a>
+                                        <button onclick="showToast('Đã thêm Hoàng Tử Bé vào giỏ hàng!')" aria-label="Thêm vào giỏ" class="w-8 h-8 sm:w-9 sm:h-9 rounded-xl bg-primary-container text-on-primary-container flex items-center justify-center hover:brightness-95 shadow-sm hover:scale-105 active:scale-95 transition-all shrink-0" type="button">
+                                            <span class="material-symbols-outlined text-[18px]">add_shopping_cart</span>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Book 6: Lược Sử Loài Người -->
+                        <div class="group relative flex flex-col rounded-2xl bg-surface-container-lowest border border-outline-variant/30 p-4 shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300">
+                            <div class="relative w-full aspect-[3/4] rounded-xl overflow-hidden bg-surface-container-low mb-4">
+                                <a th:href="@{/books/6}" href="/books/6">
+                                    <img src="https://lh3.googleusercontent.com/aida-public/AB6AXuAd_nc3Tc2LNVXtFb8PRE4vVLErg3NoqFITt6H8DWdNSQmnmkbSf9RwEdPVufqIVlRFXQ5CrkpgEgN_qs-VUzOzp6GvmAb_0hWkLXJlOcTJraKbpF_cXtI9lXJWKZvkjx2L-3k0VdhAcqAdcil0qq-BuGTP8Zev9PZ2iD2Z8OutkMMZYIlO6I1Pl0VSW7IqX9kd-SeEzHu6BaG3Wdl_D4zHdub9Jvrm9qfLX3G3EMklSPU4byMhEHhG" 
+                                         alt="Lược Sử Loài Người" 
+                                         class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"/>
+                                </a>
+                                <span class="absolute top-3 left-3 px-2.5 py-1 rounded-md bg-secondary-container text-on-secondary-container text-[11px] font-bold shadow-md">
+                                    Rất Tốt 85%
+                                </span>
+                                <button onclick="showToast('Đã thêm Lược Sử Loài Người vào danh sách yêu thích!')" aria-label="Lưu vào yêu thích" class="absolute top-3 right-3 w-8 h-8 rounded-full bg-surface/90 backdrop-blur-sm text-on-surface flex items-center justify-center hover:text-error hover:bg-surface shadow-sm transition-colors" type="button">
+                                    <span class="material-symbols-outlined text-[18px]">favorite</span>
+                                </button>
+                            </div>
+                            <div class="flex-1 flex flex-col justify-between">
+                                <div>
+                                    <p class="text-xs text-tertiary font-bold">Yuval Noah Harari</p>
+                                    <a th:href="@{/books/6}" href="/books/6">
+                                        <h3 class="text-base font-bold text-on-surface leading-snug line-clamp-2 mt-1 group-hover:text-primary transition-colors">
+                                            Lược Sử Loài Người (Sapiens)
+                                        </h3>
+                                    </a>
+                                    <div class="flex items-center gap-1.5 mt-2">
+                                        <span class="material-symbols-outlined text-[16px] text-primary-container" style="font-variation-settings: 'FILL' 1;">star</span>
+                                        <span class="text-xs font-extrabold text-on-surface">4.9</span>
+                                        <span class="text-xs text-outline">(189 đánh giá)</span>
+                                    </div>
+                                </div>
+                                <div class="mt-4 pt-3 border-t border-outline-variant/20 flex items-center justify-between gap-2">
+                                    <div class="flex flex-col items-start min-w-0">
+                                        <div class="flex items-center gap-1.5 whitespace-nowrap">
+                                            <span class="text-xs line-through text-outline whitespace-nowrap">260.000₫</span>
+                                            <span class="inline-flex items-center px-1.5 py-0.5 rounded bg-error-container text-on-error-container text-[10px] font-bold">-44%</span>
+                                        </div>
+                                        <span class="text-base sm:text-lg font-extrabold text-on-surface whitespace-nowrap mt-0.5">145.000₫</span>
+                                    </div>
+                                    <div class="flex items-center gap-1.5 shrink-0">
+                                        <a th:href="@{/books/6}" href="/books/6" class="px-2.5 py-1.5 rounded-xl bg-surface-container-high hover:bg-surface-container-highest text-on-surface text-xs font-bold transition-colors whitespace-nowrap">
+                                            Chi tiết
+                                        </a>
+                                        <button onclick="showToast('Đã thêm Lược Sử Loài Người vào giỏ hàng!')" aria-label="Thêm vào giỏ" class="w-8 h-8 sm:w-9 sm:h-9 rounded-xl bg-primary-container text-on-primary-container flex items-center justify-center hover:brightness-95 shadow-sm hover:scale-105 active:scale-95 transition-all shrink-0" type="button">
+                                            <span class="material-symbols-outlined text-[18px]">add_shopping_cart</span>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Book 7: Tội Ác Và Trừng Phạt -->
+                        <div class="group relative flex flex-col rounded-2xl bg-surface-container-lowest border border-outline-variant/30 p-4 shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300">
+                            <div class="relative w-full aspect-[3/4] rounded-xl overflow-hidden bg-surface-container-low mb-4">
+                                <a th:href="@{/books/7}" href="/books/7">
+                                    <img src="https://lh3.googleusercontent.com/aida-public/AB6AXuClr4w4CZFc7APii_5XXB8fqifqAlF1HEFgubDd6i_MdpYobBBDrfkOTlNW8Q1UihF4H_ftAZmG35vG4PthO-AZMWdKkSWqE2VSBWnJZPjVvJiwVhmPM6lwe3DoSIFQx-LDWOY4D376Y4O-xddcGbovygkzA5C1kZuRph-QdKWbrB7qXv5pSS1behpXbIUsluPunle-8TqEH6aLJZw-TKzIyWqmCs5T36SmtVD3iUwYajoQmBvlbrOj" 
+                                         alt="Tội Ác Và Trừng Phạt" 
+                                         class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"/>
+                                </a>
+                                <span class="absolute top-3 left-3 px-2.5 py-1 rounded-md bg-secondary text-on-secondary text-[11px] font-bold shadow-md">
+                                    Bản Cũ 1992
+                                </span>
+                                <button onclick="showToast('Đã thêm Tội Ác Và Trừng Phạt vào danh sách yêu thích!')" aria-label="Lưu vào yêu thích" class="absolute top-3 right-3 w-8 h-8 rounded-full bg-surface/90 backdrop-blur-sm text-on-surface flex items-center justify-center hover:text-error hover:bg-surface shadow-sm transition-colors" type="button">
+                                    <span class="material-symbols-outlined text-[18px]">favorite</span>
+                                </button>
+                            </div>
+                            <div class="flex-1 flex flex-col justify-between">
+                                <div>
+                                    <p class="text-xs text-tertiary font-bold">Fyodor Dostoevsky</p>
+                                    <a th:href="@{/books/7}" href="/books/7">
+                                        <h3 class="text-base font-bold text-on-surface leading-snug line-clamp-2 mt-1 group-hover:text-primary transition-colors">
+                                            Tội Ác Và Trừng Phạt (Trọn bộ)
+                                        </h3>
+                                    </a>
+                                    <div class="flex items-center gap-1.5 mt-2">
+                                        <span class="material-symbols-outlined text-[16px] text-primary-container" style="font-variation-settings: 'FILL' 1;">star</span>
+                                        <span class="text-xs font-extrabold text-on-surface">4.8</span>
+                                        <span class="text-xs text-outline">(74 đánh giá)</span>
+                                    </div>
+                                </div>
+                                <div class="mt-4 pt-3 border-t border-outline-variant/20 flex items-center justify-between gap-2">
+                                    <div class="flex flex-col items-start min-w-0">
+                                        <div class="flex items-center gap-1.5 whitespace-nowrap">
+                                            <span class="text-xs line-through text-outline whitespace-nowrap">290.000₫</span>
+                                            <span class="inline-flex items-center px-1.5 py-0.5 rounded bg-error-container text-on-error-container text-[10px] font-bold">-53%</span>
+                                        </div>
+                                        <span class="text-base sm:text-lg font-extrabold text-on-surface whitespace-nowrap mt-0.5">135.000₫</span>
+                                    </div>
+                                    <div class="flex items-center gap-1.5 shrink-0">
+                                        <a th:href="@{/books/7}" href="/books/7" class="px-2.5 py-1.5 rounded-xl bg-surface-container-high hover:bg-surface-container-highest text-on-surface text-xs font-bold transition-colors whitespace-nowrap">
+                                            Chi tiết
+                                        </a>
+                                        <button onclick="showToast('Đã thêm Tội Ác Và Trừng Phạt vào giỏ hàng!')" aria-label="Thêm vào giỏ" class="w-8 h-8 sm:w-9 sm:h-9 rounded-xl bg-primary-container text-on-primary-container flex items-center justify-center hover:brightness-95 shadow-sm hover:scale-105 active:scale-95 transition-all shrink-0" type="button">
+                                            <span class="material-symbols-outlined text-[18px]">add_shopping_cart</span>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Book 8: Đắc Nhân Tâm -->
+                        <div class="group relative flex flex-col rounded-2xl bg-surface-container-lowest border border-outline-variant/30 p-4 shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300">
+                            <div class="relative w-full aspect-[3/4] rounded-xl overflow-hidden bg-surface-container-low mb-4">
+                                <a th:href="@{/books/8}" href="/books/8">
+                                    <img src="https://lh3.googleusercontent.com/aida-public/AB6AXuA0_PWmT6SjaUmSTh-E49e7xvMTnMA4CsOF4Rr8R4Jy1vEpwVyC3J5Q0Fnj6iQEM8Js4IccUiiBpdEOck_zy_8OydjBA_LTbo-qtOJuAOHTSBZQXoMOtj9nGxqDuSN7XafBEo6Q8kuBU0Myiui3pewuznzu1AqIE_IEYjxkPioiYKtf160ufCh3Wyc_isLdV7rBRc5rID7JPn9OUbP28YBK1tWCgQVIl-T2mspvMipEUK00Oy7DY3Q8" 
+                                         alt="Đắc Nhân Tâm" 
+                                         class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"/>
+                                </a>
+                                <span class="absolute top-3 left-3 px-2.5 py-1 rounded-md bg-secondary-container text-on-secondary-container text-[11px] font-bold shadow-md">
+                                    Rất Tốt 80%
+                                </span>
+                                <button onclick="showToast('Đã thêm Đắc Nhân Tâm vào danh sách yêu thích!')" aria-label="Lưu vào yêu thích" class="absolute top-3 right-3 w-8 h-8 rounded-full bg-surface/90 backdrop-blur-sm text-on-surface flex items-center justify-center hover:text-error hover:bg-surface shadow-sm transition-colors" type="button">
+                                    <span class="material-symbols-outlined text-[18px]">favorite</span>
+                                </button>
+                            </div>
+                            <div class="flex-1 flex flex-col justify-between">
+                                <div>
+                                    <p class="text-xs text-tertiary font-bold">Dale Carnegie</p>
+                                    <a th:href="@{/books/8}" href="/books/8">
+                                        <h3 class="text-base font-bold text-on-surface leading-snug line-clamp-2 mt-1 group-hover:text-primary transition-colors">
+                                            Đắc Nhân Tâm (Bản dịch đầu tiên)
+                                        </h3>
+                                    </a>
+                                    <div class="flex items-center gap-1.5 mt-2">
+                                        <span class="material-symbols-outlined text-[16px] text-primary-container" style="font-variation-settings: 'FILL' 1;">star</span>
+                                        <span class="text-xs font-extrabold text-on-surface">4.7</span>
+                                        <span class="text-xs text-outline">(420 đánh giá)</span>
+                                    </div>
+                                </div>
+                                <div class="mt-4 pt-3 border-t border-outline-variant/20 flex items-center justify-between gap-2">
+                                    <div class="flex flex-col items-start min-w-0">
+                                        <div class="flex items-center gap-1.5 whitespace-nowrap">
+                                            <span class="text-xs line-through text-outline whitespace-nowrap">105.000₫</span>
+                                            <span class="inline-flex items-center px-1.5 py-0.5 rounded bg-error-container text-on-error-container text-[10px] font-bold">-50%</span>
+                                        </div>
+                                        <span class="text-base sm:text-lg font-extrabold text-on-surface whitespace-nowrap mt-0.5">52.000₫</span>
+                                    </div>
+                                    <div class="flex items-center gap-1.5 shrink-0">
+                                        <a th:href="@{/books/8}" href="/books/8" class="px-2.5 py-1.5 rounded-xl bg-surface-container-high hover:bg-surface-container-highest text-on-surface text-xs font-bold transition-colors whitespace-nowrap">
+                                            Chi tiết
+                                        </a>
+                                        <button onclick="showToast('Đã thêm Đắc Nhân Tâm vào giỏ hàng!')" aria-label="Thêm vào giỏ" class="w-8 h-8 sm:w-9 sm:h-9 rounded-xl bg-primary-container text-on-primary-container flex items-center justify-center hover:brightness-95 shadow-sm hover:scale-105 active:scale-95 transition-all shrink-0" type="button">
+                                            <span class="material-symbols-outlined text-[18px]">add_shopping_cart</span>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
                     </div>
 
-                    <div class="deco-dots"></div>
+                    <!-- View All Books Button -->
+                    <div class="mt-12 text-center">
+                        <a th:href="@{/books}" href="/books" class="inline-flex items-center gap-2 px-8 py-3.5 rounded-full bg-surface-container-high border border-outline-variant/40 text-on-surface text-sm font-bold hover:bg-primary-container hover:text-on-primary-container shadow-sm transition-all duration-300">
+                            <span>Xem Toàn Bộ 50.000+ Tựa Sách Cũ</span>
+                            <span class="material-symbols-outlined text-[18px]">arrow_forward</span>
+                        </a>
+                    </div>
                 </div>
-            </div>
-        </section>
+            </section>
 
-        <!-- 3. FEATURED CATEGORIES SECTION -->
-        <section class="categories-section" id="categories">
-            <div class="container">
-                <div class="section-header">
-                    <span class="section-eyebrow">Danh mục tuyển chọn</span>
-                    <h2 class="section-title">Khám phá theo thể loại</h2>
-                    <p class="section-subtitle">
-                        Tìm kiếm những tác phẩm thuộc các thể loại phong phú từ văn học kinh điển đến sách chuyên ngành quý giá.
-                    </p>
-                </div>
-
-                <div class="categories-grid">
-                    <!-- Category 1: Văn học -->
-                    <a th:href="@{/books(categoryId=1)}" href="/books?categoryId=1" class="category-card" id="cat-van-hoc" style="text-decoration: none; color: inherit;">
-                        <div class="category-icon-wrap">
-                            <i class="fa-solid fa-book-open"></i>
-                        </div>
-                        <h3 class="category-name">Văn học</h3>
-                        <span class="category-count">3,420+ cuốn</span>
-                        <div class="category-arrow"><i class="fa-solid fa-arrow-right"></i></div>
-                    </a>
-
-                    <!-- Category 2: Kinh tế -->
-                    <a th:href="@{/books(categoryId=2)}" href="/books?categoryId=2" class="category-card" id="cat-kinh-te" style="text-decoration: none; color: inherit;">
-                        <div class="category-icon-wrap">
-                            <i class="fa-solid fa-chart-line"></i>
-                        </div>
-                        <h3 class="category-name">Kinh tế</h3>
-                        <span class="category-count">1,850+ cuốn</span>
-                        <div class="category-arrow"><i class="fa-solid fa-arrow-right"></i></div>
-                    </a>
-
-                    <!-- Category 3: Kỹ năng -->
-                    <a th:href="@{/books(categoryId=3)}" href="/books?categoryId=3" class="category-card" id="cat-ky-nang" style="text-decoration: none; color: inherit;">
-                        <div class="category-icon-wrap">
-                            <i class="fa-solid fa-lightbulb"></i>
-                        </div>
-                        <h3 class="category-name">Kỹ năng</h3>
-                        <span class="category-count">2,100+ cuốn</span>
-                        <div class="category-arrow"><i class="fa-solid fa-arrow-right"></i></div>
-                    </a>
-
-                    <!-- Category 4: Công nghệ -->
-                    <a th:href="@{/books(categoryId=4)}" href="/books?categoryId=4" class="category-card" id="cat-cong-nghe" style="text-decoration: none; color: inherit;">
-                        <div class="category-icon-wrap">
-                            <i class="fa-solid fa-microchip"></i>
-                        </div>
-                        <h3 class="category-name">Công nghệ</h3>
-                        <span class="category-count">940+ cuốn</span>
-                        <div class="category-arrow"><i class="fa-solid fa-arrow-right"></i></div>
-                    </a>
-
-                    <!-- Category 5: Lịch sử -->
-                    <a th:href="@{/books(categoryId=5)}" href="/books?categoryId=5" class="category-card" id="cat-lich-su" style="text-decoration: none; color: inherit;">
-                        <div class="category-icon-wrap">
-                            <i class="fa-solid fa-landmark"></i>
-                        </div>
-                        <h3 class="category-name">Lịch sử</h3>
-                        <span class="category-count">1,630+ cuốn</span>
-                        <div class="category-arrow"><i class="fa-solid fa-arrow-right"></i></div>
-                    </a>
-
-                    <!-- Category 6: Tiểu thuyết -->
-                    <a th:href="@{/books(categoryId=6)}" href="/books?categoryId=6" class="category-card" id="cat-tieu-thuyet" style="text-decoration: none; color: inherit;">
-                        <div class="category-icon-wrap">
-                            <i class="fa-solid fa-scroll"></i>
-                        </div>
-                        <h3 class="category-name">Tiểu thuyết</h3>
-                        <span class="category-count">4,280+ cuốn</span>
-                        <div class="category-arrow"><i class="fa-solid fa-arrow-right"></i></div>
-                    </a>
-                </div>
-            </div>
-        </section>
-
-        <!-- 4. FEATURED BOOKS SECTION -->
-        <section class="featured-books-section" id="featured-books">
-            <div class="container">
-                <div class="section-header">
-                    <span class="section-eyebrow">Tác phẩm kinh điển</span>
-                    <h2 class="section-title">Sách được yêu thích</h2>
-                    <p class="section-subtitle">
-                        Những cuốn sách được độc giả săn đón nhiều nhất với tình trạng bảo quản tốt và mức giá tiết kiệm.
-                    </p>
-                </div>
-
-                <div class="books-grid">
-                    <!-- Book 1: Hoàng Tử Bé -->
-                    <article class="book-card" id="book-card-1">
-                        <div class="book-cover-wrap">
-                            <span class="condition-badge like-new">Like New</span>
-                            <button class="book-wishlist-btn" title="Thêm vào yêu thích" aria-label="Thêm vào yêu thích">
-                                <i class="fa-regular fa-heart"></i>
-                            </button>
-                            <img th:src="@{/images/book-little-prince.jpg}" src="/images/book-little-prince.jpg" alt="Hoàng Tử Bé - Antoine de Saint-Exupéry" class="book-cover-img">
-                        </div>
-                        <div class="book-body">
-                            <span class="book-category-tag">Văn học cổ điển</span>
-                            <h3 class="book-title" title="Hoàng Tử Bé (Bản minh họa màu bìa cứng cổ điển)">Hoàng Tử Bé</h3>
-                            <p class="book-author">Antoine de Saint-Exupéry</p>
-                            <div class="book-rating">
-                                <i class="fa-solid fa-star"></i>
-                                <i class="fa-solid fa-star"></i>
-                                <i class="fa-solid fa-star"></i>
-                                <i class="fa-solid fa-star"></i>
-                                <i class="fa-solid fa-star"></i>
-                                <span>(4.9)</span>
+            <!-- SECTION 5: THU MUA & TRAO ĐỔI SÁCH CŨ PROCESS BANNER -->
+            <section id="thu-mua-sach" class="w-full py-16 bg-surface-container-low border-t border-b border-outline-variant/30">
+                <div class="max-w-7xl mx-auto px-6">
+                    <div class="rounded-3xl bg-surface border border-outline-variant/30 p-8 md:p-12 lg:p-16 shadow-lg relative overflow-hidden">
+                        <!-- Subtle Pattern / Accent circle -->
+                        <div class="absolute -top-24 -right-24 w-80 h-80 bg-primary-container/15 rounded-full blur-3xl pointer-events-none"></div>
+                        
+                        <div class="max-w-3xl mb-12">
+                            <div class="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-secondary-container text-on-secondary-container text-xs font-bold mb-3">
+                                <span class="material-symbols-outlined text-[16px]">cycle</span>
+                                <span>Quy Trình Thu Gom Đơn Giản • Minh Bạch</span>
                             </div>
-                            <div class="book-footer">
-                                <div class="book-price-box">
-                                    <span class="current-price">68.000 ₫</span>
-                                    <span class="original-price">110.000 ₫</span>
+                            <h2 class="text-3xl sm:text-4xl text-on-surface font-extrabold tracking-tight">
+                                Dọn Kệ Sách Cũ — Đón Nhận Tri Thức Mới
+                            </h2>
+                            <p class="text-sm sm:text-base text-on-surface-variant mt-2 leading-relaxed">
+                                Bạn có những cuốn sách đã đọc xong và đang nằm yên trên kệ? Hãy gửi lại cho Book4Life để cuốn sách tiếp tục sứ mệnh với người đọc mới, đồng thời tích lũy quỹ mua sách mới.
+                            </p>
+                        </div>
+
+                        <!-- 4 Process Steps -->
+                        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 relative">
+                            <!-- Step 1 -->
+                            <div class="p-6 rounded-2xl bg-surface-container-low border border-outline-variant/20 flex flex-col justify-between shadow-sm relative group hover:bg-surface-container transition-colors">
+                                <div class="flex items-center justify-between mb-4">
+                                    <span class="w-10 h-10 rounded-full bg-primary-container text-on-primary-container text-lg font-bold flex items-center justify-center shadow-sm">
+                                        1
+                                    </span>
+                                    <span class="material-symbols-outlined text-[28px] text-tertiary">photo_camera</span>
                                 </div>
-                                <a th:href="@{/books/1}" href="/books/1" class="btn-book-detail">
-                                    <span>Xem chi tiết</span>
-                                    <i class="fa-solid fa-chevron-right"></i>
-                                </a>
-                            </div>
-                        </div>
-                    </article>
-
-                    <!-- Book 2: Nhà Giả Kim -->
-                    <article class="book-card" id="book-card-2">
-                        <div class="book-cover-wrap">
-                            <span class="condition-badge good">Good</span>
-                            <button class="book-wishlist-btn" title="Thêm vào yêu thích" aria-label="Thêm vào yêu thích">
-                                <i class="fa-regular fa-heart"></i>
-                            </button>
-                            <img th:src="@{/images/book-alchemist.jpg}" src="/images/book-alchemist.jpg" alt="Nhà Giả Kim - Paulo Coelho" class="book-cover-img">
-                        </div>
-                        <div class="book-body">
-                            <span class="book-category-tag">Triết lý sống</span>
-                            <h3 class="book-title" title="Nhà Giả Kim (The Alchemist - Bản dịch kinh điển)">Nhà Giả Kim</h3>
-                            <p class="book-author">Paulo Coelho</p>
-                            <div class="book-rating">
-                                <i class="fa-solid fa-star"></i>
-                                <i class="fa-solid fa-star"></i>
-                                <i class="fa-solid fa-star"></i>
-                                <i class="fa-solid fa-star"></i>
-                                <i class="fa-solid fa-star-half-stroke"></i>
-                                <span>(4.8)</span>
-                            </div>
-                            <div class="book-footer">
-                                <div class="book-price-box">
-                                    <span class="current-price">52.000 ₫</span>
-                                    <span class="original-price">89.000 ₫</span>
+                                <div>
+                                    <h4 class="text-base font-bold text-on-surface mb-1.5">Chụp Ảnh Bìa &amp; Gáy Sách</h4>
+                                    <p class="text-xs text-on-surface-variant leading-relaxed">Chụp ảnh tổng thể gáy sách trên kệ hoặc từng cuốn để hệ thống nhận diện tựa và tình trạng.</p>
                                 </div>
-                                <a th:href="@{/books/2}" href="/books/2" class="btn-book-detail">
-                                    <span>Xem chi tiết</span>
-                                    <i class="fa-solid fa-chevron-right"></i>
-                                </a>
                             </div>
-                        </div>
-                    </article>
 
-                    <!-- Book 3: Bắt Trẻ Đồng Xanh -->
-                    <article class="book-card" id="book-card-3">
-                        <div class="book-cover-wrap">
-                            <span class="condition-badge used">Used</span>
-                            <button class="book-wishlist-btn" title="Thêm vào yêu thích" aria-label="Thêm vào yêu thích">
-                                <i class="fa-regular fa-heart"></i>
-                            </button>
-                            <img th:src="@{/images/book-catcher-rye.jpg}" src="/images/book-catcher-rye.jpg" alt="Bắt Trẻ Đồng Xanh - J.D. Salinger" class="book-cover-img">
-                        </div>
-                        <div class="book-body">
-                            <span class="book-category-tag">Tiểu thuyết hiện đại</span>
-                            <h3 class="book-title" title="Bắt Trẻ Đồng Xanh (The Catcher in the Rye)">Bắt Trẻ Đồng Xanh</h3>
-                            <p class="book-author">J.D. Salinger</p>
-                            <div class="book-rating">
-                                <i class="fa-solid fa-star"></i>
-                                <i class="fa-solid fa-star"></i>
-                                <i class="fa-solid fa-star"></i>
-                                <i class="fa-solid fa-star"></i>
-                                <i class="fa-regular fa-star"></i>
-                                <span>(4.7)</span>
-                            </div>
-                            <div class="book-footer">
-                                <div class="book-price-box">
-                                    <span class="current-price">45.000 ₫</span>
-                                    <span class="original-price">95.000 ₫</span>
+                            <!-- Step 2 -->
+                            <div class="p-6 rounded-2xl bg-surface-container-low border border-outline-variant/20 flex flex-col justify-between shadow-sm relative group hover:bg-surface-container transition-colors">
+                                <div class="flex items-center justify-between mb-4">
+                                    <span class="w-10 h-10 rounded-full bg-primary-container text-on-primary-container text-lg font-bold flex items-center justify-center shadow-sm">
+                                        2
+                                    </span>
+                                    <span class="material-symbols-outlined text-[28px] text-tertiary">request_quote</span>
                                 </div>
-                                <a th:href="@{/books/3}" href="/books/3" class="btn-book-detail">
-                                    <span>Xem chi tiết</span>
-                                    <i class="fa-solid fa-chevron-right"></i>
-                                </a>
+                                <div>
+                                    <h4 class="text-base font-bold text-on-surface mb-1.5">Báo Giá Tự Động 15 Phút</h4>
+                                    <p class="text-xs text-on-surface-variant leading-relaxed">Thuật toán đối chiếu giá thị trường và báo lại mức thu mua cam kết cao nhất trong 15 phút.</p>
+                                </div>
                             </div>
-                        </div>
-                    </article>
 
-                    <!-- Book 4: Những Người Khốn Khổ -->
-                    <article class="book-card" id="book-card-4">
-                        <div class="book-cover-wrap">
-                            <span class="condition-badge like-new">Like New</span>
-                            <button class="book-wishlist-btn" title="Thêm vào yêu thích" aria-label="Thêm vào yêu thích">
-                                <i class="fa-regular fa-heart"></i>
-                            </button>
-                            <img th:src="@{/images/book-les-miserables.jpg}" src="/images/book-les-miserables.jpg" alt="Những Người Khốn Khổ - Victor Hugo" class="book-cover-img">
-                        </div>
-                        <div class="book-body">
-                            <span class="book-category-tag">Sử thi văn học</span>
-                            <h3 class="book-title" title="Những Người Khốn Khổ (Les Misérables - Bìa da dập nhũ vàng)">Những Người Khốn Khổ</h3>
-                            <p class="book-author">Victor Hugo</p>
-                            <div class="book-rating">
-                                <i class="fa-solid fa-star"></i>
-                                <i class="fa-solid fa-star"></i>
-                                <i class="fa-solid fa-star"></i>
-                                <i class="fa-solid fa-star"></i>
-                                <i class="fa-solid fa-star"></i>
-                                <span>(5.0)</span>
-                            </div>
-                            <div class="book-footer">
-                                <div class="book-price-box">
-                                    <span class="current-price">125.000 ₫</span>
-                                    <span class="original-price">220.000 ₫</span>
+                            <!-- Step 3 -->
+                            <div class="p-6 rounded-2xl bg-surface-container-low border border-outline-variant/20 flex flex-col justify-between shadow-sm relative group hover:bg-surface-container transition-colors">
+                                <div class="flex items-center justify-between mb-4">
+                                    <span class="w-10 h-10 rounded-full bg-primary-container text-on-primary-container text-lg font-bold flex items-center justify-center shadow-sm">
+                                        3
+                                    </span>
+                                    <span class="material-symbols-outlined text-[28px] text-tertiary">local_shipping</span>
                                 </div>
-                                <a th:href="@{/books/4}" href="/books/4" class="btn-book-detail">
-                                    <span>Xem chi tiết</span>
-                                    <i class="fa-solid fa-chevron-right"></i>
-                                </a>
+                                <div>
+                                    <h4 class="text-base font-bold text-on-surface mb-1.5">Shipper Lấy Tận Nhà Miễn Phí</h4>
+                                    <p class="text-xs text-on-surface-variant leading-relaxed">Shipper liên kết tới nhận sách tận cửa nhà theo khung giờ bạn chọn, không tốn phí vận chuyển.</p>
+                                </div>
+                            </div>
+
+                            <!-- Step 4 -->
+                            <div class="p-6 rounded-2xl bg-surface-container-low border border-outline-variant/20 flex flex-col justify-between shadow-sm relative group hover:bg-surface-container transition-colors">
+                                <div class="flex items-center justify-between mb-4">
+                                    <span class="w-10 h-10 rounded-full bg-primary-container text-on-primary-container text-lg font-bold flex items-center justify-center shadow-sm">
+                                        4
+                                    </span>
+                                    <span class="material-symbols-outlined text-[28px] text-tertiary">payments</span>
+                                </div>
+                                <div>
+                                    <h4 class="text-base font-bold text-on-surface mb-1.5">Nhận Tiền Hoặc Voucher +15%</h4>
+                                    <p class="text-xs text-on-surface-variant leading-relaxed">Tiền chuyển khoản ngay trong ngày hoặc đổi lấy Voucher mua sách được cộng thêm 15% giá trị.</p>
+                                </div>
                             </div>
                         </div>
-                    </article>
+
+                        <!-- CTA Action -->
+                        <div class="mt-10 flex flex-wrap items-center justify-between gap-6 pt-6 border-t border-outline-variant/20">
+                            <div class="flex items-center gap-3">
+                                <span class="material-symbols-outlined text-primary text-[24px]">support_agent</span>
+                                <span class="text-xs sm:text-sm text-on-surface-variant">Hỗ trợ thu gom số lượng lớn từ các tủ sách gia đình và viện nghiên cứu: <strong class="text-on-surface font-bold">1900 6868</strong></span>
+                            </div>
+                            <button onclick="showToast('Hệ thống tiếp nhận yêu cầu thu mua đang kết nối tổng đài viên!')" class="px-8 py-4 rounded-xl bg-primary-container text-on-primary-container text-sm font-bold shadow-md hover:brightness-95 transition-all flex items-center gap-2">
+                                <span>Gửi Yêu Cầu Thu Mua Ngay</span>
+                                <span class="material-symbols-outlined text-[20px]">arrow_forward</span>
+                            </button>
+                        </div>
+                    </div>
                 </div>
+            </section>
 
-                <!-- CTA to All Books -->
-                <div style="text-align: center; margin-top: 48px;">
-                    <a th:href="@{/books}" href="/books" class="btn-primary-gold" style="padding: 16px 36px; font-size: 1.05rem; display: inline-flex; align-items: center; gap: 10px;">
-                        <i class="fa-solid fa-book-open-reader"></i>
-                        <span>Xem Toàn Bộ Kho Sách Tuyển Chọn</span>
-                        <i class="fa-solid fa-arrow-right"></i>
-                    </a>
+            <!-- SECTION 6: BỘ SƯU TẬP BẢN IN HIẾM & ARCHIVAL VAULT (Curated Spotlight) -->
+            <section id="sach-hiem" class="w-full py-20 bg-surface">
+                <div class="max-w-7xl mx-auto px-6">
+                    <div class="rounded-3xl bg-[#2C1E16] text-[#FAF9F6] p-8 md:p-14 shadow-2xl relative overflow-hidden border border-[#4A3B32]">
+                        <!-- Decorative Ambient Light -->
+                        <div class="absolute top-0 right-0 w-96 h-96 bg-primary-container/15 rounded-full blur-3xl pointer-events-none"></div>
+
+                        <div class="grid grid-cols-1 lg:grid-cols-12 gap-10 items-center">
+                            <!-- Left Text & Info -->
+                            <div class="lg:col-span-6 flex flex-col gap-6">
+                                <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/10 text-primary-container text-xs font-bold tracking-wider">
+                                    <span class="material-symbols-outlined text-[16px]">workspace_premium</span>
+                                    <span>LƯU TRỮ ĐẶC BIỆT • ARCHIVAL VAULT</span>
+                                </div>
+                                <h2 class="text-3xl sm:text-4xl font-extrabold tracking-tight text-[#FAF9F6] leading-tight">
+                                    Bộ Sưu Tập Bản In Đầu &amp; Sách Quý Thế Kỷ 20
+                                </h2>
+                                <p class="text-sm sm:text-base text-outline-variant leading-relaxed">
+                                    Mỗi cuốn sách trong chuyên mục này đều kèm chứng nhận giám định xuất xứ (Provenance Certificate), có chữ ký tác giả hoặc dấu mộc thư viện xưa. Được bảo quản trong phòng kiểm soát độ ẩm 50% tiêu chuẩn bảo tàng.
+                                </p>
+
+                                <!-- Metadata Pills -->
+                                <div class="grid grid-cols-2 sm:grid-cols-3 gap-4 pt-2">
+                                    <div class="p-3 rounded-xl bg-white/5 border border-white/10">
+                                        <span class="block text-[11px] text-outline-variant">Giấy chứng nhận</span>
+                                        <span class="text-base font-bold text-primary-container">100% Bản Thật</span>
+                                    </div>
+                                    <div class="p-3 rounded-xl bg-white/5 border border-white/10">
+                                        <span class="block text-[11px] text-outline-variant">Độ ẩm bảo quản</span>
+                                        <span class="text-base font-bold text-[#FAF9F6]">50% ± 5%</span>
+                                    </div>
+                                    <div class="p-3 rounded-xl bg-white/5 border border-white/10">
+                                        <span class="block text-[11px] text-outline-variant">Vận chuyển</span>
+                                        <span class="text-base font-bold text-[#FAF9F6]">Hộp Gỗ Niêm Phong</span>
+                                    </div>
+                                </div>
+
+                                <!-- Spotlight CTA -->
+                                <div class="pt-4 flex items-center gap-4">
+                                    <a th:href="@{/books(keyword='hiem')}" class="px-7 py-3.5 rounded-xl bg-primary-container text-on-primary-container text-sm font-bold hover:brightness-95 transition-all shadow-md">
+                                        Xem 128 Ấn Bản Quý Hiếm
+                                    </a>
+                                    <a href="#ve-chung-toi" class="text-outline-variant hover:text-primary-container text-xs font-bold transition-colors flex items-center gap-1">
+                                        <span>Quy chuẩn giám định</span>
+                                        <span class="material-symbols-outlined text-[16px]">chevron_right</span>
+                                    </a>
+                                </div>
+                            </div>
+
+                            <!-- Right Showcase Image Card -->
+                            <div class="lg:col-span-6 relative">
+                                <div class="relative rounded-2xl overflow-hidden shadow-2xl bg-white/5 border border-white/10">
+                                    <img src="https://lh3.googleusercontent.com/aida-public/AB6AXuB_eARZdHK6yANkk2MS5LEwS88a2726tN3ew2rgaU78JOatmn2L7QYKonk6bEvb65x4dpQbKn3BrX94YrFlQuSwIdyk_z2SqY-4JTYLyoqUEql1ES36opAo-a8XRlORz0ZuRWpJWe0Drc7P_GFkvJesFjcX8PuhBvzG5m-yUKwxKnE8z37rDjLvF1BU3R9EDYp5akeNZGG1ows0II6XOOiY8l085BzspdEu3AiwvFPgj_tZjuVJ9-M-" 
+                                         alt="Bộ sưu tập bản in hiếm" 
+                                         class="w-full h-[380px] object-cover"/>
+                                    <div class="absolute inset-0 bg-gradient-to-t from-[#2C1E16] via-transparent to-transparent"></div>
+                                    
+                                    <!-- Spotlight Book Details on overlay -->
+                                    <div class="absolute bottom-4 left-4 right-4 p-4 rounded-xl bg-[#2C1E16]/95 backdrop-blur-md flex items-center justify-between border border-white/10">
+                                        <div>
+                                            <span class="text-[11px] text-primary-container uppercase tracking-wider font-bold">Tâm điểm đấu giá tuần</span>
+                                            <h4 class="text-base font-bold text-[#FAF9F6]">Vang Bóng Một Thời (Ấn bản Tân Dân 1940)</h4>
+                                            <p class="text-xs text-outline-variant">Nguyễn Tuân • Kèm bút tích đề tặng</p>
+                                        </div>
+                                        <div class="text-right shrink-0">
+                                            <span class="text-[11px] text-outline-variant block">Giá sưu tầm</span>
+                                            <span class="text-lg font-extrabold text-primary-container">4.250.000₫</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
-            </div>
-        </section>
+            </section>
 
-        <!-- 5. VALUE PROPOSITION SECTION -->
-        <section class="value-section" id="value-prop">
-            <div class="container">
-                <div class="value-banner">
-                    <div class="value-header">
-                        <span class="section-eyebrow">Cam kết chất lượng</span>
-                        <h2 class="section-title">Tại sao chọn OldBooks?</h2>
-                        <p class="section-subtitle">
-                            Chúng tôi tin rằng mỗi cuốn sách cũ đều chứa đựng những giá trị vĩnh cửu. Đội ngũ OldBooks luôn nỗ lực đem đến trải nghiệm đọc trọn vẹn nhất.
+            <!-- SECTION 7: CUSTOMER TESTIMONIALS & LITERARY COMMUNITY -->
+            <section class="w-full py-16 bg-surface-container-low border-t border-b border-outline-variant/30">
+                <div class="max-w-7xl mx-auto px-6">
+                    <div class="text-center max-w-2xl mx-auto mb-14">
+                        <div class="inline-flex items-center gap-1 text-primary text-xs font-bold uppercase tracking-wider mb-2">
+                            <span class="material-symbols-outlined text-[16px]">forum</span>
+                            <span>Cộng Đồng Độc Giả Book4Life</span>
+                        </div>
+                        <h2 class="text-3xl sm:text-4xl text-on-surface font-extrabold tracking-tight">
+                            Những Câu Chuyện Bên Trang Sách Sang Tay
+                        </h2>
+                        <p class="text-sm text-on-surface-variant mt-2 font-normal">
+                            Hơn 18.000 bạn đọc tại Hà Nội, TP.HCM và khắp Việt Nam đã chọn tái sinh những cuốn sách cũ.
                         </p>
                     </div>
 
-                    <div class="value-grid">
-                        <!-- Pillar 1 -->
-                        <div class="value-card">
-                            <div class="value-icon-box">
-                                <i class="fa-solid fa-clipboard-check"></i>
+                    <!-- Testimonial 3 Cards Grid -->
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                        <!-- Review 1 -->
+                        <div class="p-8 rounded-2xl bg-surface border border-outline-variant/30 shadow-sm hover:shadow-md transition-shadow flex flex-col justify-between">
+                            <div>
+                                <div class="flex items-center gap-1 text-primary-container mb-4">
+                                    <span class="material-symbols-outlined text-[20px]" style="font-variation-settings: 'FILL' 1;">star</span>
+                                    <span class="material-symbols-outlined text-[20px]" style="font-variation-settings: 'FILL' 1;">star</span>
+                                    <span class="material-symbols-outlined text-[20px]" style="font-variation-settings: 'FILL' 1;">star</span>
+                                    <span class="material-symbols-outlined text-[20px]" style="font-variation-settings: 'FILL' 1;">star</span>
+                                    <span class="material-symbols-outlined text-[20px]" style="font-variation-settings: 'FILL' 1;">star</span>
+                                </div>
+                                <p class="text-sm text-on-surface leading-relaxed mb-6 font-normal">
+                                    "Mình tìm cuốn 'Trăm Năm Cô Đơn' bản dịch cũ suốt 3 năm trời khắp phố sách cũ Đinh Lễ không thấy. Thật bất ngờ khi săn được trên Book4Life với tình trạng còn rất thơm mùi giấy cũ, gáy chỉ nguyên vẹn. Đóng gói giấy kraft thân thiện môi trường cực kỳ cẩn thận!"
+                                </p>
                             </div>
-                            <h3 class="value-card-title">Kiểm tra chất lượng</h3>
-                            <p class="value-card-desc">
-                                Từng trang sách, gáy sách và bìa đều được kiểm định cẩn thận, đánh giá đúng chuẩn tình trạng thực tế.
-                            </p>
+                            <div class="flex items-center gap-3 pt-4 border-t border-outline-variant/20">
+                                <div class="w-11 h-11 rounded-full bg-secondary-container text-on-secondary-container flex items-center justify-center font-bold text-sm">
+                                    TH
+                                </div>
+                                <div>
+                                    <h4 class="text-sm font-bold text-on-surface">Trần Minh Hoàng</h4>
+                                    <p class="text-xs text-outline">Giảng viên Văn học • Hà Nội</p>
+                                </div>
+                            </div>
                         </div>
 
-                        <!-- Pillar 2 -->
-                        <div class="value-card">
-                            <div class="value-icon-box">
-                                <i class="fa-solid fa-tags"></i>
+                        <!-- Review 2 -->
+                        <div class="p-8 rounded-2xl bg-surface border border-outline-variant/30 shadow-sm hover:shadow-md transition-shadow flex flex-col justify-between">
+                            <div>
+                                <div class="flex items-center gap-1 text-primary-container mb-4">
+                                    <span class="material-symbols-outlined text-[20px]" style="font-variation-settings: 'FILL' 1;">star</span>
+                                    <span class="material-symbols-outlined text-[20px]" style="font-variation-settings: 'FILL' 1;">star</span>
+                                    <span class="material-symbols-outlined text-[20px]" style="font-variation-settings: 'FILL' 1;">star</span>
+                                    <span class="material-symbols-outlined text-[20px]" style="font-variation-settings: 'FILL' 1;">star</span>
+                                    <span class="material-symbols-outlined text-[20px]" style="font-variation-settings: 'FILL' 1;">star</span>
+                                </div>
+                                <p class="text-sm text-on-surface leading-relaxed mb-6 font-normal">
+                                    "Dịch vụ thu mua sách cũ ở đây nhanh chóng đến ngỡ ngàng. Mình dọn tủ hơn 40 cuốn giáo trình và tiểu thuyết, chụp ảnh gửi lên web thì 15 phút sau đã có định giá rõ ràng. Shipper qua lấy tận cửa và tiền về tài khoản ngay trong chiều."
+                                </p>
                             </div>
-                            <h3 class="value-card-title">Giá cả hợp lý</h3>
-                            <p class="value-card-desc">
-                                Tiết kiệm từ 40% đến 70% so với giá bìa mới, giúp bạn dễ dàng tiếp cận kho tàng tri thức vô tận.
-                            </p>
+                            <div class="flex items-center gap-3 pt-4 border-t border-outline-variant/20">
+                                <div class="w-11 h-11 rounded-full bg-primary-fixed text-on-primary-fixed-variant flex items-center justify-center font-bold text-sm">
+                                    LN
+                                </div>
+                                <div>
+                                    <h4 class="text-sm font-bold text-on-surface">Lê Phương Nga</h4>
+                                    <p class="text-xs text-outline">Content Writer • TP. Hồ Chí Minh</p>
+                                </div>
+                            </div>
                         </div>
 
-                        <!-- Pillar 3 -->
-                        <div class="value-card">
-                            <div class="value-icon-box">
-                                <i class="fa-solid fa-truck-fast"></i>
+                        <!-- Review 3 -->
+                        <div class="p-8 rounded-2xl bg-surface border border-outline-variant/30 shadow-sm hover:shadow-md transition-shadow flex flex-col justify-between">
+                            <div>
+                                <div class="flex items-center gap-1 text-primary-container mb-4">
+                                    <span class="material-symbols-outlined text-[20px]" style="font-variation-settings: 'FILL' 1;">star</span>
+                                    <span class="material-symbols-outlined text-[20px]" style="font-variation-settings: 'FILL' 1;">star</span>
+                                    <span class="material-symbols-outlined text-[20px]" style="font-variation-settings: 'FILL' 1;">star</span>
+                                    <span class="material-symbols-outlined text-[20px]" style="font-variation-settings: 'FILL' 1;">star</span>
+                                    <span class="material-symbols-outlined text-[20px]" style="font-variation-settings: 'FILL' 1;">star_half</span>
+                                </div>
+                                <p class="text-sm text-on-surface leading-relaxed mb-6 font-normal">
+                                    "Tiết kiệm được 60-70% tiền mua sách mỗi tháng mà vẫn đọc được sách chất lượng. Phân loại 'Như Mới' hay 'Rất Tốt' của Book4Life chuẩn xác 100%, không bị tình trạng nói quá như mua trên các sàn thương mại điện tử khác."
+                                </p>
                             </div>
-                            <h3 class="value-card-title">Giao hàng toàn quốc</h3>
-                            <p class="value-card-desc">
-                                Đóng gói chống sốc và chống ẩm chuyên nghiệp, giao tận tay người đọc an toàn trên khắp 63 tỉnh thành.
-                            </p>
-                        </div>
-
-                        <!-- Pillar 4 -->
-                        <div class="value-card">
-                            <div class="value-icon-box">
-                                <i class="fa-solid fa-recycle"></i>
+                            <div class="flex items-center gap-3 pt-4 border-t border-outline-variant/20">
+                                <div class="w-11 h-11 rounded-full bg-tertiary-fixed text-on-tertiary-fixed flex items-center justify-center font-bold text-sm">
+                                    ĐK
+                                </div>
+                                <div>
+                                    <h4 class="text-sm font-bold text-on-surface">Đỗ Tuấn Khôi</h4>
+                                    <p class="text-xs text-outline">Sinh viên ĐHQG • Đà Nẵng</p>
+                                </div>
                             </div>
-                            <h3 class="value-card-title">Tái sử dụng sách</h3>
-                            <p class="value-card-desc">
-                                Chung tay bảo vệ môi trường và kéo dài vòng đời của tri thức bằng phong cách sống đọc bền vững.
-                            </p>
                         </div>
                     </div>
                 </div>
-            </div>
-        </section>
+            </section>
 
-        <!-- BONUS: COMMUNITY & NEWSLETTER SECTION -->
-        <section class="community-section" id="community">
-            <div class="container">
-                <div class="community-box">
-                    <div class="community-text">
-                        <h2 class="community-title">Tham gia cộng đồng yêu sách cũ</h2>
-                        <p class="community-desc">
-                            Đăng ký nhận thông báo sớm nhất khi có các bản in hiếm, sách sưu tầm và ưu đãi độc quyền hàng tuần.
-                        </p>
+            <!-- SECTION 8: FINAL SUSTAINABILITY COMMITMENT STRIP -->
+            <section class="w-full py-12 bg-surface">
+                <div class="max-w-7xl mx-auto px-6">
+                    <div class="p-8 rounded-2xl bg-surface-container border border-outline-variant/30 flex flex-col md:flex-row items-center justify-between gap-6 shadow-sm">
+                        <div class="flex items-center gap-4">
+                            <div class="w-14 h-14 rounded-2xl bg-primary-container text-on-primary-container flex items-center justify-center shrink-0 shadow-sm">
+                                <span class="material-symbols-outlined text-[32px]">park</span>
+                            </div>
+                            <div>
+                                <h3 class="text-xl text-on-surface font-extrabold">Dự Án 'Mỗi Cuốn Sách — Một Mầm Cây'</h3>
+                                <p class="text-xs sm:text-sm text-on-surface-variant mt-0.5 font-normal">Với mỗi 10 cuốn sách được mua hoặc thu hồi, Book4Life trích 10.000₫ đóng góp quỹ trồng rừng phòng hộ tại Tây Bắc.</p>
+                            </div>
+                        </div>
+                        <div class="shrink-0 flex items-center gap-3">
+                            <span class="text-xs font-bold text-primary">Đã trồng 3.420 cây xanh năm 2025</span>
+                            <a href="#ve-chung-toi" class="px-5 py-2.5 rounded-xl bg-surface border border-outline-variant/30 text-on-surface text-xs font-bold hover:bg-surface-container-highest shadow-sm transition-colors">
+                                Chi Tiết →
+                            </a>
+                        </div>
                     </div>
-                    <form class="community-form" id="newsletter-form">
-                        <input type="email" class="community-input" placeholder="Nhập địa chỉ email của bạn..." required>
-                        <button type="submit" class="btn-primary-gold" style="white-space: nowrap;">
-                            <span>Đăng ký</span>
-                            <i class="fa-solid fa-paper-plane"></i>
-                        </button>
-                    </form>
                 </div>
-            </div>
-        </section>
+            </section>
+
+        </div>
     </main>
 
-    <!-- 6. FOOTER SECTION -->
-    <footer class="site-footer" id="contact">
-        <div class="container">
-            <div class="footer-grid">
-                <!-- Col 1: Brand & Bio -->
-                <div class="footer-brand">
-                    <a th:href="@{/}" href="/" class="brand-logo">
-                        <div class="logo-icon-wrap">
-                            <i class="fa-solid fa-book-bookmark"></i>
-                        </div>
-                        <div class="logo-text-wrap">
-                            <span class="brand-name">OldBooks</span>
-                            <span class="brand-tagline">Timeless Stories</span>
-                        </div>
-                    </a>
-                    <p class="footer-about">
-                        OldBooks là ngôi nhà của những người yêu sách cũ, nơi mỗi cuốn sách là một hành trình kỳ diệu nối liền quá khứ và hiện tại.
+    <!-- ========================================== -->
+    <!-- FOOTER: Book4Life Literary Warmth Palette -->
+    <!-- ========================================== -->
+    <footer class="w-full bg-[#2C1E16] text-[#FAF9F6] border-t border-[#4A3B32]">
+        <div class="max-w-7xl mx-auto px-6 py-16">
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-10">
+                
+                <!-- Brand Column -->
+                <div class="space-y-4">
+                    <div class="flex items-center gap-2">
+                        <span class="text-2xl font-extrabold text-primary-container tracking-tight">Book4Life</span>
+                    </div>
+                    <p class="text-xs text-outline-variant leading-relaxed font-normal">
+                        Tiệm sách cũ trực tuyến gìn giữ di sản tri thức. Mỗi cuốn sách sang tay là một hành trình tái sinh, giảm lượng khí thải carbon và vun đắp lối sống đọc bền vững.
                     </p>
-                    <div class="footer-socials">
-                        <a href="#facebook" class="social-link" title="Facebook" aria-label="Facebook"><i class="fa-brands fa-facebook-f"></i></a>
-                        <a href="#instagram" class="social-link" title="Instagram" aria-label="Instagram"><i class="fa-brands fa-instagram"></i></a>
-                        <a href="#goodreads" class="social-link" title="Goodreads" aria-label="Goodreads"><i class="fa-brands fa-goodreads-g"></i></a>
-                        <a href="#tiktok" class="social-link" title="TikTok" aria-label="TikTok"><i class="fa-brands fa-tiktok"></i></a>
+                    <div class="flex items-center gap-3 pt-2 text-[#FAF9F6]">
+                        <span class="material-symbols-outlined text-primary-container text-[20px]">nature_people</span>
+                        <span class="text-xs text-outline-variant font-medium">Trung hòa carbon &amp; Bảo vệ cây xanh</span>
                     </div>
                 </div>
 
-                <!-- Col 2: Quick Links -->
-                <div class="footer-col">
-                    <h4 class="footer-column-title">Quick Links</h4>
-                    <ul class="footer-links">
-                        <li><a th:href="@{/}" href="/"><i class="fa-solid fa-chevron-right"></i> Trang chủ</a></li>
-                        <li><a href="#featured-books"><i class="fa-solid fa-chevron-right"></i> Sách mới về</a></li>
-                        <li><a href="#categories"><i class="fa-solid fa-chevron-right"></i> Bộ sưu tập hiếm</a></li>
-                        <li><a href="#value-prop"><i class="fa-solid fa-chevron-right"></i> Đổi sách cũ</a></li>
-                        <li><a href="#community"><i class="fa-solid fa-chevron-right"></i> Blog yêu sách</a></li>
+                <!-- Explore & Categories Column -->
+                <div class="space-y-3">
+                    <h4 class="text-sm font-bold text-[#FAF9F6]">Khám Phá &amp; Danh Mục</h4>
+                    <ul class="space-y-2 text-xs text-outline-variant font-medium">
+                        <li><a th:href="@{/books(keyword='hiem')}" class="hover:text-primary-container transition-colors">Bản in đầu &amp; Sách hiếm tuyển chọn</a></li>
+                        <li><a th:href="@{/books(keyword='tieu thuyet')}" class="hover:text-primary-container transition-colors">Tiểu thuyết kinh điển thế giới</a></li>
+                        <li><a th:href="@{/books(keyword='van hoc')}" class="hover:text-primary-container transition-colors">Văn học hiện đại Việt Nam</a></li>
+                        <li><a th:href="@{/books(keyword='triet hoc')}" class="hover:text-primary-container transition-colors">Triết học, Khảo cứu &amp; Sử liệu</a></li>
+                        <li><a th:href="@{/books(keyword='combo')}" class="hover:text-primary-container transition-colors">Gói Combo độc giả thông thái</a></li>
                     </ul>
                 </div>
 
-                <!-- Col 3: Categories -->
-                <div class="footer-col">
-                    <h4 class="footer-column-title">Danh mục sách</h4>
-                    <ul class="footer-links">
-                        <li><a href="#cat-van-hoc"><i class="fa-solid fa-chevron-right"></i> Văn học cổ điển</a></li>
-                        <li><a href="#cat-kinh-te"><i class="fa-solid fa-chevron-right"></i> Kinh tế & Quản trị</a></li>
-                        <li><a href="#cat-ky-nang"><i class="fa-solid fa-chevron-right"></i> Kỹ năng & Phát triển</a></li>
-                        <li><a href="#cat-lich-su"><i class="fa-solid fa-chevron-right"></i> Lịch sử & Triết học</a></li>
-                        <li><a href="#cat-tieu-thuyet"><i class="fa-solid fa-chevron-right"></i> Tiểu thuyết & Ký sự</a></li>
-                    </ul>
+                <!-- Grading & Appraisal Column -->
+                <div class="space-y-3">
+                    <h4 class="text-sm font-bold text-[#FAF9F6]">Hỗ Trợ &amp; Thẩm Định</h4>
+                    <p class="text-xs text-outline-variant font-normal">Hệ thống 3 bậc phân loại chuẩn xác:</p>
+                    <div class="space-y-2 pt-1">
+                        <div class="flex items-start gap-2">
+                            <span class="px-2 py-0.5 rounded bg-white/10 text-primary-container text-[11px] font-bold shrink-0">Rare</span>
+                            <span class="text-[12px] text-outline-variant">Sách cổ, có chữ ký, ấn bản giới hạn</span>
+                        </div>
+                        <div class="flex items-start gap-2">
+                            <span class="px-2 py-0.5 rounded bg-white/10 text-[#FAF9F6] text-[11px] font-bold shrink-0">Like New</span>
+                            <span class="text-[12px] text-outline-variant">Gần như mới 95-99%, gáy nguyên vẹn</span>
+                        </div>
+                        <div class="flex items-start gap-2">
+                            <span class="px-2 py-0.5 rounded bg-white/10 text-outline-variant text-[11px] font-bold shrink-0">Good</span>
+                            <span class="text-[12px] text-outline-variant">Dấu vết thời gian nhẹ 80-90%, giấy đẹp</span>
+                        </div>
+                    </div>
+                    <div class="pt-2">
+                        <a href="#thu-mua-sach" class="text-xs font-bold text-primary-container hover:underline">Chính sách gửi bán &amp; Thu mua →</a>
+                    </div>
                 </div>
 
-                <!-- Col 4: Contact & Stores -->
-                <div class="footer-col">
-                    <h4 class="footer-column-title">Liên hệ & Chi nhánh</h4>
-                    <ul class="footer-contact-info">
-                        <li class="footer-contact-item">
-                            <i class="fa-solid fa-location-dot"></i>
-                            <span>Chi nhánh 1: 125 Phố Sách 19/12, Hoàn Kiếm, Hà Nội</span>
-                        </li>
-                        <li class="footer-contact-item">
-                            <i class="fa-solid fa-location-dot"></i>
-                            <span>Chi nhánh 2: 45 Đường Sách Nguyễn Văn Bình, Q.1, TP.HCM</span>
-                        </li>
-                        <li class="footer-contact-item">
-                            <i class="fa-solid fa-phone"></i>
-                            <span>Hotline: 1900 6868 (8:00 - 21:00)</span>
-                        </li>
-                        <li class="footer-contact-item">
-                            <i class="fa-solid fa-envelope"></i>
-                            <span>Email: contact@oldbooks.vn</span>
-                        </li>
-                    </ul>
+                <!-- Newsletter Column -->
+                <div class="space-y-4">
+                    <h4 class="text-sm font-bold text-[#FAF9F6]">Bản Tin Mọt Sách</h4>
+                    <p class="text-xs text-outline-variant font-normal">Nhận danh mục sách hiếm về mỗi tuần và voucher giảm 50.000₫ cho đơn đầu tiên.</p>
+                    <div class="flex items-center gap-2">
+                        <input class="w-full px-3 py-2 rounded-lg bg-white/10 text-xs text-[#FAF9F6] placeholder:text-outline-variant/60 focus:outline-none focus:ring-1 focus:ring-primary-container border border-white/10 font-medium" placeholder="Nhập email của bạn..." type="email"/>
+                        <button onclick="showToast('Cảm ơn bạn đã đăng ký nhận bản tin Book4Life!')" class="px-4 py-2 bg-primary-container text-on-primary-container text-xs font-bold rounded-lg shrink-0 hover:brightness-95 transition-colors" type="button">Nhận</button>
+                    </div>
+                    <span class="inline-block text-[11px] text-outline-variant/80 font-normal">*Cam kết không gửi thư rác, hủy nhận bất cứ lúc nào.</span>
                 </div>
             </div>
 
-            <!-- Footer Bottom Bar -->
-            <div class="footer-bottom">
-                <p>&copy; 2026 OldBooks Store Chain. All rights reserved. Thiết kế với trọn vẹn tình yêu dành cho sách.</p>
-                <div class="footer-legal-links">
-                    <a href="#terms">Điều khoản sử dụng</a>
-                    <a href="#privacy">Chính sách bảo mật</a>
-                    <a href="#shipping">Chính sách vận chuyển</a>
+            <!-- Bottom Copyright & Badges -->
+            <div class="mt-12 pt-8 border-t border-outline-variant/20 flex flex-col md:flex-row items-center justify-between gap-4 text-xs text-outline-variant font-normal">
+                <div class="flex items-center gap-4">
+                    <span>© 2025 Book4Life Inc. Bảo lưu mọi quyền.</span>
+                    <span class="inline-block w-1 h-1 rounded-full bg-outline-variant/40"></span>
+                    <span class="flex items-center gap-1"><span class="material-symbols-outlined text-[16px]">language</span>Tiếng Việt (VN)</span>
+                </div>
+                <div class="flex items-center gap-6">
+                    <div class="flex items-center gap-3 text-[12px]">
+                        <span>Thanh toán an toàn:</span>
+                        <span class="material-symbols-outlined text-[20px] text-outline-variant">credit_card</span>
+                        <span class="material-symbols-outlined text-[20px] text-outline-variant">account_balance_wallet</span>
+                        <span class="material-symbols-outlined text-[20px] text-outline-variant">qr_code_2</span>
+                    </div>
                 </div>
             </div>
         </div>
     </footer>
 
-    <!-- Interactive JS -->
-    <script th:src="@{/js/landing-page.js}" src="/js/landing-page.js"></script>
+    <!-- JavaScript for Interactive Notifications -->
+    <script>
+        function showToast(message) {
+            const toast = document.getElementById('toastNotification');
+            const toastMsg = document.getElementById('toastMessage');
+            if (toast && toastMsg) {
+                toastMsg.innerText = message;
+                toast.classList.add('show');
+                setTimeout(() => {
+                    toast.classList.remove('show');
+                }, 3000);
+            }
+        }
+    </script>
 </body>
 </html>

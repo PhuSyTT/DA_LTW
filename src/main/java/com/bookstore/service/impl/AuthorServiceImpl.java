@@ -57,6 +57,7 @@ public class AuthorServiceImpl implements AuthorService {
         Author author = Author.builder()
                 .name(authorDto.getName().trim())
                 .biography(authorDto.getBiography())
+                .avatarUrl(authorDto.getAvatarUrl())
                 .build();
         Author saved = authorRepository.save(author);
         return mapToDto(saved);
@@ -68,6 +69,7 @@ public class AuthorServiceImpl implements AuthorService {
         Author author = getAuthorEntityById(id);
         author.setName(authorDto.getName().trim());
         author.setBiography(authorDto.getBiography());
+        author.setAvatarUrl(authorDto.getAvatarUrl());
         Author saved = authorRepository.save(author);
         return mapToDto(saved);
     }
@@ -100,6 +102,7 @@ public class AuthorServiceImpl implements AuthorService {
                 .id(author.getId())
                 .name(author.getName())
                 .biography(author.getBiography())
+                .avatarUrl(author.getAvatarUrl())
                 .bookCount(bookCount)
                 .build();
     }

@@ -60,7 +60,9 @@ public class SecurityConfig {
                     "/css/**", "/js/**", "/images/**", "/webjars/**", "/favicon.ico"
                 ).permitAll()
                 .requestMatchers(
-                    "/", "/home", "/books", "/books/**", "/login", "/register", "/error", "/api/**"
+                    "/", "/home", "/books", "/books/**", "/authors", "/authors/**", 
+                    "/blog", "/blog/**", "/about", "/contact", "/categories", "/categories/**",
+                    "/recycle", "/thu-mua-sach", "/login", "/register", "/error", "/api/**"
                 ).permitAll()
                 .requestMatchers("/admin/users/**").hasAnyAuthority("ROLE_ADMIN", "ADMIN")
                 .requestMatchers("/admin/**").hasAnyAuthority(

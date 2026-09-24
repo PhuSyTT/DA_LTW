@@ -13,15 +13,18 @@ public class AuthorDto {
 
     private String biography;
 
+    private String avatarUrl;
+
     private Long bookCount;
 
     public AuthorDto() {
     }
 
-    public AuthorDto(Long id, String name, String biography, Long bookCount) {
+    public AuthorDto(Long id, String name, String biography, String avatarUrl, Long bookCount) {
         this.id = id;
         this.name = name;
         this.biography = biography;
+        this.avatarUrl = avatarUrl;
         this.bookCount = bookCount;
     }
 
@@ -49,6 +52,14 @@ public class AuthorDto {
         this.biography = biography;
     }
 
+    public String getAvatarUrl() {
+        return avatarUrl;
+    }
+
+    public void setAvatarUrl(String avatarUrl) {
+        this.avatarUrl = avatarUrl;
+    }
+
     public Long getBookCount() {
         return bookCount;
     }
@@ -65,6 +76,7 @@ public class AuthorDto {
         private Long id;
         private String name;
         private String biography;
+        private String avatarUrl;
         private Long bookCount;
 
         public Builder id(Long id) {
@@ -82,13 +94,18 @@ public class AuthorDto {
             return this;
         }
 
+        public Builder avatarUrl(String avatarUrl) {
+            this.avatarUrl = avatarUrl;
+            return this;
+        }
+
         public Builder bookCount(Long bookCount) {
             this.bookCount = bookCount;
             return this;
         }
 
         public AuthorDto build() {
-            return new AuthorDto(id, name, biography, bookCount);
+            return new AuthorDto(id, name, biography, avatarUrl, bookCount);
         }
     }
 }

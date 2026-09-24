@@ -34,7 +34,7 @@ public class AuthController {
             model.addAttribute("logoutMessage", "Bạn đã đăng xuất khỏi hệ thống thành công!");
         }
 
-        model.addAttribute("pageTitle", "Đăng Nhập Hệ Thống - OldBooks");
+        model.addAttribute("pageTitle", "Đăng Nhập Hệ Thống - Book4Life");
         return "auth/login";
     }
 }

@@ -97,6 +97,137 @@ document.addEventListener('DOMContentLoaded', () => {
       }
     });
   }
+
+  // 7. Dynamic Nav Active State & Silky Smooth ScrollSpy
+  const navMenu = document.querySelector('.nav-menu');
+  const navLinks = document.querySelectorAll('.nav-menu .nav-link');
+
+  // Click handler: Silky smooth scroll and switch active tab immediately
+  navLinks.forEach((link) => {
+    link.addEventListener('click', function(e) {
+      const href = this.getAttribute('href');
+      if (href && (href.startsWith('#') || href.startsWith('/#') || href === '/')) {
+        const targetId = href.replace('/#', '').replace('#', '');
+        
+        if (targetId && targetId !== '/') {
+          const targetEl = document.getElementById(targetId);
+          if (targetEl) {
+            e.preventDefault();
+            const headerOffset = 80;
+            const elementPosition = targetEl.getBoundingClientRect().top;
+            const offsetPosition = elementPosition + window.pageYOffset - headerOffset;
+
+            window.scrollTo({
+              top: offsetPosition,
+              behavior: 'smooth'
+            });
+
+            if (history.pushState) {
+              history.pushState(null, null, '#' + targetId);
+            }
+          }
+        } else if (href === '/' || targetId === 'hero') {
+          if (window.location.pathname === '/' || window.location.pathname === '') {
+            e.preventDefault();
+            window.scrollTo({
+              top: 0,
+              behavior: 'smooth'
+            });
+            if (history.pushState) {
+              history.pushState(null, null, window.location.pathname);
+            }
+          }
+        }
+
+        navLinks.forEach(l => l.classList.remove('active'));
+        this.classList.add('active');
+      }
+    });
+  });
+
+  // ScrollSpy Section Mapping
+  const sections = [
+    { id: 'hero', links: ['/', '#hero', 'index.html'] },
+    { id: 'categories', links: ['#categories', '/#categories'] },
+    { id: 'featured-books', links: ['#featured-books', '/books', '/#featured-books'] },
+    { id: 'value-prop', links: ['#value-prop', '/#value-prop'] },
+    { id: 'community', links: ['#community', '/#community'] },
+    { id: 'contact', links: ['#contact', '/#contact'] }
+  ];
+
+  let scrollTicking = false;
+
+  function onScrollHandler() {
+    if (!scrollTicking) {
+      window.requestAnimationFrame(() => {
+        updateScrollSpy();
+        scrollTicking = false;
+      });
+      scrollTicking = true;
+    }
+  }
+
+  function updateScrollSpy() {
+    const currentPath = window.location.pathname;
+    if (currentPath !== '/' && currentPath !== '/home' && !currentPath.endsWith('index.html')) {
+      return;
+    }
+
+    const scrollY = window.scrollY;
+    const windowHeight = window.innerHeight;
+    const documentHeight = document.documentElement.scrollHeight;
+
+    // Check bottom of page -> highlight "Liên hệ"
+    if (scrollY + windowHeight >= documentHeight - 60) {
+      setActiveNavLink(['#contact', '/#contact']);
+      return;
+    }
+
+    // Check top of page -> highlight "Home"
+    if (scrollY < 180) {
+      setActiveNavLink(['/', '#hero', 'index.html']);
+      return;
+    }
+
+    // Check sections in reverse order
+    for (let i = sections.length - 1; i >= 0; i--) {
+      const sec = sections[i];
+      const el = document.getElementById(sec.id);
+      if (el) {
+        const top = el.offsetTop - 120;
+        if (scrollY >= top) {
+          setActiveNavLink(sec.links);
+          break;
+        }
+      }
+    }
+  }
+
+  function setActiveNavLink(targetHrefs) {
+    navLinks.forEach((link) => {
+      const href = link.getAttribute('href');
+      if (targetHrefs.includes(href)) {
+        link.classList.add('active');
+      } else {
+        link.classList.remove('active');
+      }
+    });
+  }
+
+  window.addEventListener('scroll', onScrollHandler, { passive: true });
+
+  // Handle hash changes
+  window.addEventListener('hashchange', () => {
+    const hash = window.location.hash;
+    if (hash) {
+      navLinks.forEach(l => {
+        if (l.getAttribute('href') === hash || l.getAttribute('href')?.endsWith(hash)) {
+          navLinks.forEach(item => item.classList.remove('active'));
+          l.classList.add('active');
+        }
+      });
+    }
+  });
 });
 
 /**

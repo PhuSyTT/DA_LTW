@@ -19,16 +19,20 @@ public class Author {
     @Column(columnDefinition = "NVARCHAR(MAX)")
     private String biography;
 
+    @Column(name = "avatar_url", length = 500)
+    private String avatarUrl;
+
     @OneToMany(mappedBy = "author", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<Book> books = new ArrayList<>();
 
     public Author() {
     }
 
-    public Author(Long id, String name, String biography) {
+    public Author(Long id, String name, String biography, String avatarUrl) {
         this.id = id;
         this.name = name;
         this.biography = biography;
+        this.avatarUrl = avatarUrl;
     }
 
     public Long getId() {
@@ -55,6 +59,14 @@ public class Author {
         this.biography = biography;
     }
 
+    public String getAvatarUrl() {
+        return avatarUrl;
+    }
+
+    public void setAvatarUrl(String avatarUrl) {
+        this.avatarUrl = avatarUrl;
+    }
+
     public List<Book> getBooks() {
         return books;
     }
@@ -71,6 +83,7 @@ public class Author {
         private Long id;
         private String name;
         private String biography;
+        private String avatarUrl;
         private List<Book> books = new ArrayList<>();
 
         public Builder id(Long id) {
@@ -88,13 +101,18 @@ public class Author {
             return this;
         }
 
+        public Builder avatarUrl(String avatarUrl) {
+            this.avatarUrl = avatarUrl;
+            return this;
+        }
+
         public Builder books(List<Book> books) {
             this.books = books;
             return this;
         }
 
         public Author build() {
-            Author author = new Author(id, name, biography);
+            Author author = new Author(id, name, biography, avatarUrl);
             author.setBooks(books);
             return author;
         }

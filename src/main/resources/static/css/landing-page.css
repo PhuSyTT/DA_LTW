@@ -3,7 +3,7 @@
    Color Palette: #EEEEEE (Light Gray) | #CD853F (Peru) | #B8860B (Dark Goldenrod)
    ========================================================================== */
 
-@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;0,800;1,400;1,600&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,400;0,500;0,600;0,700;0,800;1,400;1,600;1,700&family=Inter:wght@400;500;600;700&display=swap');
 
 :root {
   /* Primary Brand Palette */
@@ -59,9 +59,9 @@
   --shadow-gold: 0 10px 28px rgba(184, 134, 11, 0.24);
   --shadow-book: 8px 12px 28px rgba(33, 29, 25, 0.18), -2px 0 8px rgba(0,0,0,0.06);
 
-  /* Fonts */
-  --font-serif: 'Playfair Display', Georgia, serif;
-  --font-sans: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  /* Fonts (Pure Modern Sans-Serif - Không chân) */
+  --font-serif: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --font-sans: 'Plus Jakarta Sans', 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
 
   /* Transitions */
   --trans-fast: 0.2s cubic-bezier(0.4, 0, 0.2, 1);
@@ -81,6 +81,10 @@
 html {
   scroll-behavior: smooth;
   font-size: 16px;
+}
+
+section[id], footer[id] {
+  scroll-margin-top: 85px;
 }
 
 body {
@@ -173,30 +177,34 @@ button {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  height: 80px;
-  gap: 24px;
+  height: 72px;
+  gap: 14px;
+  max-width: 1400px;
+  flex-wrap: nowrap;
 }
 
 /* Brand Logo */
 .brand-logo {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 10px;
   text-decoration: none;
+  flex-shrink: 0;
 }
 
 .logo-icon-wrap {
-  width: 44px;
-  height: 44px;
+  width: 38px;
+  height: 38px;
   border-radius: var(--radius-md);
   background: var(--grad-primary);
   display: flex;
   align-items: center;
   justify-content: center;
   color: #FFFFFF;
-  font-size: 1.25rem;
+  font-size: 1.1rem;
   box-shadow: var(--shadow-gold);
   transition: transform var(--trans-bounce);
+  flex-shrink: 0;
 }
 
 .brand-logo:hover .logo-icon-wrap {
@@ -210,77 +218,88 @@ button {
 
 .brand-name {
   font-family: var(--font-serif);
-  font-size: 1.55rem;
+  font-size: 1.4rem;
   font-weight: 800;
-  letter-spacing: -0.5px;
+  letter-spacing: -0.3px;
   color: var(--text-heading);
   line-height: 1;
+  white-space: nowrap;
 }
 
 .brand-tagline {
-  font-size: 0.72rem;
+  font-size: 0.65rem;
   font-weight: 600;
   color: var(--color-peru);
-  letter-spacing: 1.5px;
+  letter-spacing: 1.2px;
   text-transform: uppercase;
-  margin-top: 3px;
+  margin-top: 2px;
+  white-space: nowrap;
 }
 
-/* Navigation Links */
+/* Navigation Links - Framed Pill Capsule with Magic Gliding Indicator */
 .nav-menu {
+  position: relative;
   display: flex;
   align-items: center;
-  gap: 28px;
+  gap: 4px;
   list-style: none;
+  background: #FFFFFF;
+  border: 1.5px solid var(--border-gold);
+  border-radius: var(--radius-full);
+  padding: 4px 8px;
+  box-shadow: 0 2px 14px rgba(33, 29, 25, 0.06);
+  white-space: nowrap;
+  flex-shrink: 0;
 }
 
 .nav-link {
-  font-size: 0.95rem;
-  font-weight: 600;
-  color: var(--text-main);
   position: relative;
-  padding: 6px 0;
-  transition: color var(--trans-fast);
-}
-
-.nav-link::after {
-  content: '';
-  position: absolute;
-  bottom: 0;
-  left: 0;
-  width: 0;
-  height: 2.5px;
-  background: var(--grad-primary);
+  font-size: 0.88rem;
+  font-weight: 600;
+  color: #3B2E22;
+  padding: 6px 14px;
   border-radius: var(--radius-full);
-  transition: width var(--trans-normal);
+  transition: all 0.22s ease;
+  white-space: nowrap;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: transparent;
+  text-decoration: none;
+  user-select: none;
+  cursor: pointer;
 }
 
-.nav-link:hover,
-.nav-link.active {
+.nav-link:hover {
   color: var(--color-goldenrod);
+  background: rgba(205, 133, 63, 0.08);
 }
 
-.nav-link:hover::after,
-.nav-link.active::after {
-  width: 100%;
+.nav-link.active {
+  color: var(--color-goldenrod) !important;
+  font-weight: 700;
+  background: rgba(184, 134, 11, 0.12);
 }
 
 /* Search Bar */
 .header-search {
   position: relative;
-  width: 240px;
+  width: 190px;
+  min-width: 140px;
+  flex-shrink: 1;
 }
 
 .search-input {
   width: 100%;
-  padding: 10px 16px 10px 38px;
-  background: var(--bg-secondary);
-  border: 1px solid rgba(205, 133, 63, 0.2);
+  padding: 7px 14px 7px 32px;
+  background: #FAF7F2;
+  border: 1px solid rgba(205, 133, 63, 0.22);
   border-radius: var(--radius-full);
-  font-size: 0.88rem;
+  font-size: 0.82rem;
   font-family: var(--font-sans);
   color: var(--text-main);
   transition: all var(--trans-fast);
+  white-space: nowrap;
 }
 
 .search-input:focus {
@@ -288,16 +307,16 @@ button {
   background: #FFFFFF;
   border-color: var(--color-goldenrod);
   box-shadow: 0 0 0 3px var(--color-gold-glow);
-  width: 280px;
+  width: 210px;
 }
 
 .search-icon {
   position: absolute;
-  left: 14px;
+  left: 11px;
   top: 50%;
   transform: translateY(-50%);
   color: var(--color-peru);
-  font-size: 0.9rem;
+  font-size: 0.82rem;
   pointer-events: none;
 }
 
@@ -305,13 +324,15 @@ button {
 .header-actions {
   display: flex;
   align-items: center;
-  gap: 14px;
+  gap: 8px;
+  flex-shrink: 0;
+  white-space: nowrap;
 }
 
 .action-btn {
   position: relative;
-  width: 42px;
-  height: 42px;
+  width: 36px;
+  height: 36px;
   border-radius: 50%;
   background: #FFFFFF;
   border: 1px solid var(--border-light);
@@ -319,8 +340,9 @@ button {
   align-items: center;
   justify-content: center;
   color: var(--text-main);
-  font-size: 1rem;
+  font-size: 0.9rem;
   transition: all var(--trans-bounce);
+  flex-shrink: 0;
 }
 
 .action-btn:hover {
@@ -333,14 +355,14 @@ button {
 
 .badge-count {
   position: absolute;
-  top: -3px;
-  right: -3px;
+  top: -4px;
+  right: -4px;
   background: var(--color-goldenrod);
   color: #FFFFFF;
-  font-size: 0.68rem;
+  font-size: 0.62rem;
   font-weight: 700;
-  width: 18px;
-  height: 18px;
+  width: 17px;
+  height: 17px;
   border-radius: 50%;
   display: flex;
   align-items: center;
@@ -349,17 +371,24 @@ button {
 }
 
 .user-login-btn {
-  display: flex;
+  display: inline-flex;
   align-items: center;
-  gap: 8px;
-  padding: 8px 16px;
+  gap: 6px;
+  padding: 6px 14px;
   background: var(--grad-gold-soft);
   border: 1px solid var(--border-gold);
   border-radius: var(--radius-full);
   color: var(--text-heading);
-  font-size: 0.9rem;
+  font-size: 0.84rem;
   font-weight: 600;
   transition: all var(--trans-fast);
+  white-space: nowrap;
+  flex-shrink: 0;
+  line-height: 1.2;
+}
+
+.user-login-btn span {
+  white-space: nowrap;
 }
 
 .user-login-btn:hover {
@@ -371,8 +400,9 @@ button {
 
 .mobile-toggle {
   display: none;
-  font-size: 1.4rem;
+  font-size: 1.3rem;
   color: var(--text-main);
+  flex-shrink: 0;
 }
 
 /* ==========================================================================
@@ -849,42 +879,106 @@ button {
 }
 
 /* ==========================================================================
-   Section 4: Featured Books
+/* Section Header Compact & Split with View All CTA */
+.section-header-compact {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  margin-bottom: 20px;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.header-text-group {
+  max-width: 680px;
+}
+
+.section-title-compact {
+  font-family: var(--font-serif);
+  font-size: 1.85rem;
+  font-weight: 800;
+  color: var(--text-heading);
+  line-height: 1.2;
+  margin-bottom: 4px;
+}
+
+.section-subtitle-compact {
+  font-size: 0.92rem;
+  color: var(--text-muted);
+  line-height: 1.45;
+}
+
+.btn-view-all {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 20px;
+  background: #FFFFFF;
+  border: 1.5px solid var(--color-peru);
+  color: var(--color-peru-dark);
+  border-radius: var(--radius-full);
+  font-size: 0.86rem;
+  font-weight: 700;
+  text-decoration: none;
+  transition: all var(--trans-bounce);
+  box-shadow: var(--shadow-sm);
+  white-space: nowrap;
+}
+
+.btn-view-all:hover {
+  background: var(--grad-primary);
+  border-color: transparent;
+  color: #FFFFFF;
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-gold);
+}
+
+.btn-view-all i {
+  transition: transform 0.2s ease;
+  font-size: 0.8rem;
+}
+
+.btn-view-all:hover i {
+  transform: translateX(4px);
+}
+
+/* ==========================================================================
+   Section 4: Featured Books (Compact Fit to Screen)
    ========================================================================== */
 .featured-books-section {
-  padding: 95px 0;
+  padding: 42px 0 38px;
   background: var(--bg-primary);
 }
 
 .books-grid {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
-  gap: 28px;
+  gap: 18px;
 }
 
 .book-card {
   background: var(--bg-surface);
   border: 1px solid var(--border-light);
-  border-radius: var(--radius-lg);
+  border-radius: var(--radius-md);
   overflow: hidden;
   display: flex;
   flex-direction: column;
-  box-shadow: var(--shadow-sm);
+  box-shadow: 0 2px 10px rgba(33, 29, 25, 0.05);
   transition: all var(--trans-bounce);
   position: relative;
 }
 
 .book-card:hover {
-  transform: translateY(-10px);
-  box-shadow: var(--shadow-lg);
+  transform: translateY(-6px);
+  box-shadow: var(--shadow-md);
   border-color: var(--color-goldenrod);
 }
 
 /* Book Cover Visual */
 .book-cover-wrap {
   position: relative;
-  background: linear-gradient(180deg, #EEEEEE 0%, #E8E2D8 100%);
-  padding: 24px 24px 16px;
+  background: linear-gradient(180deg, #F2EFE9 0%, #E6E0D6 100%);
+  padding: 14px 14px 10px;
   display: flex;
   justify-content: center;
   align-items: center;
@@ -892,11 +986,11 @@ button {
 }
 
 .book-cover-img {
-  width: 175px;
-  height: 245px;
+  width: 125px;
+  height: 165px;
   object-fit: cover;
-  border-radius: 4px 10px 10px 4px;
-  box-shadow: var(--shadow-book);
+  border-radius: 3px 8px 8px 3px;
+  box-shadow: 4px 6px 16px rgba(33, 29, 25, 0.16), -1px 0 4px rgba(0,0,0,0.06);
   transition: transform var(--trans-bounce);
   position: relative;
 }
@@ -905,12 +999,12 @@ button {
 .book-cover-wrap::after {
   content: '';
   position: absolute;
-  top: 24px;
-  left: calc(50% - 87.5px);
-  width: 6px;
-  height: 245px;
-  background: linear-gradient(90deg, rgba(0,0,0,0.25) 0%, rgba(255,255,255,0.2) 50%, rgba(0,0,0,0.15) 100%);
-  border-radius: 4px 0 0 4px;
+  top: 14px;
+  left: calc(50% - 62.5px);
+  width: 5px;
+  height: 165px;
+  background: linear-gradient(90deg, rgba(0,0,0,0.22) 0%, rgba(255,255,255,0.2) 50%, rgba(0,0,0,0.12) 100%);
+  border-radius: 3px 0 0 3px;
   pointer-events: none;
 }
 
@@ -921,16 +1015,16 @@ button {
 /* Condition Badges */
 .condition-badge {
   position: absolute;
-  top: 14px;
-  left: 14px;
-  padding: 4px 12px;
+  top: 10px;
+  left: 10px;
+  padding: 3px 9px;
   border-radius: var(--radius-full);
-  font-size: 0.72rem;
+  font-size: 0.65rem;
   font-weight: 700;
   letter-spacing: 0.5px;
   text-transform: uppercase;
   z-index: 2;
-  box-shadow: var(--shadow-sm);
+  box-shadow: 0 2px 6px rgba(0,0,0,0.08);
 }
 
 .condition-badge.like-new {
@@ -954,20 +1048,22 @@ button {
 /* Wishlist Button */
 .book-wishlist-btn {
   position: absolute;
-  top: 14px;
-  right: 14px;
-  width: 34px;
-  height: 34px;
+  top: 10px;
+  right: 10px;
+  width: 28px;
+  height: 28px;
   border-radius: 50%;
-  background: rgba(255, 255, 255, 0.9);
+  background: rgba(255, 255, 255, 0.92);
   backdrop-filter: blur(4px);
   display: flex;
   align-items: center;
   justify-content: center;
   color: var(--text-muted);
-  font-size: 0.9rem;
+  font-size: 0.8rem;
   transition: all var(--trans-bounce);
   z-index: 2;
+  border: none;
+  cursor: pointer;
 }
 
 .book-wishlist-btn:hover,
@@ -979,54 +1075,57 @@ button {
 
 /* Book Details Body */
 .book-body {
-  padding: 20px;
+  padding: 12px 14px;
   display: flex;
   flex-direction: column;
   flex-grow: 1;
 }
 
 .book-category-tag {
-  font-size: 0.75rem;
-  font-weight: 600;
+  font-size: 0.68rem;
+  font-weight: 700;
   color: var(--color-peru);
   text-transform: uppercase;
-  letter-spacing: 0.8px;
-  margin-bottom: 6px;
+  letter-spacing: 0.6px;
+  margin-bottom: 2px;
 }
 
 .book-title {
   font-family: var(--font-serif);
-  font-size: 1.2rem;
+  font-size: 1.02rem;
   font-weight: 700;
   color: var(--text-heading);
-  margin-bottom: 4px;
-  line-height: 1.35;
+  margin-bottom: 2px;
+  line-height: 1.3;
   display: -webkit-box;
   -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
   overflow: hidden;
-  height: 3.2rem;
+  height: 2.6rem;
 }
 
 .book-author {
-  font-size: 0.86rem;
+  font-size: 0.78rem;
   color: var(--text-muted);
-  margin-bottom: 12px;
+  margin-bottom: 4px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .book-rating {
   display: flex;
   align-items: center;
-  gap: 4px;
-  font-size: 0.8rem;
+  gap: 3px;
+  font-size: 0.72rem;
   color: var(--color-goldenrod);
-  margin-bottom: 16px;
+  margin-bottom: 8px;
 }
 
 .book-rating span {
   color: var(--text-muted);
-  font-size: 0.78rem;
-  margin-left: 4px;
+  font-size: 0.72rem;
+  margin-left: 3px;
 }
 
 /* Pricing & CTA */
@@ -1035,7 +1134,7 @@ button {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding-top: 14px;
+  padding-top: 8px;
   border-top: 1px solid var(--border-light);
 }
 
@@ -1045,30 +1144,31 @@ button {
 }
 
 .current-price {
-  font-size: 1.25rem;
+  font-size: 1.05rem;
   font-weight: 800;
   color: var(--color-goldenrod);
   line-height: 1;
 }
 
 .original-price {
-  font-size: 0.8rem;
+  font-size: 0.72rem;
   color: var(--text-light);
   text-decoration: line-through;
-  margin-top: 3px;
+  margin-top: 2px;
 }
 
 .btn-book-detail {
-  padding: 9px 16px;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 5px 12px;
   border-radius: var(--radius-full);
   background: var(--grad-gold-soft);
   border: 1px solid var(--border-gold);
   color: var(--text-heading);
-  font-size: 0.84rem;
+  font-size: 0.76rem;
   font-weight: 700;
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
+  text-decoration: none;
   transition: all var(--trans-fast);
 }
 

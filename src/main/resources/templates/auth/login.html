@@ -1,378 +1,261 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org" lang="vi">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title th:text="${pageTitle} ?: 'Đăng Nhập - OldBooks'">Đăng Nhập - OldBooks</title>
+    <meta charset="utf-8"/>
+    <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+    <title th:text="${pageTitle} ?: 'Đăng Nhập - Book4Life'">Đăng Nhập - Book4Life</title>
 
-    <!-- Google Fonts -->
+    <!-- Google Fonts: Plus Jakarta Sans (Không chân - Sans-Serif) & Inter -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;0,800;1,400;1,600&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,400;0,500;0,600;0,700;0,800;1,400;1,600;1,700&amp;family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet"/>
 
-    <!-- FontAwesome 6 -->
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" rel="stylesheet">
-
-    <!-- Custom Landing Page CSS for unified theme -->
-    <link th:href="@{/css/landing-page.css}" href="/css/landing-page.css" rel="stylesheet">
-
+    <!-- Tailwind CSS with Book4Life Literary Warmth Tokens -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#835500",
+                        "primary-container": "#f5a623",
+                        "on-primary": "#ffffff",
+                        "on-primary-container": "#644000",
+                        "secondary": "#6c5b51",
+                        "secondary-container": "#f6ded1",
+                        "on-secondary-container": "#726157",
+                        "tertiary": "#6d5a50",
+                        "surface": "#faf9f6",
+                        "surface-container-lowest": "#ffffff",
+                        "surface-container-low": "#f4f3f1",
+                        "surface-container": "#efeeeb",
+                        "surface-container-high": "#e9e8e5",
+                        "surface-container-highest": "#e3e2e0",
+                        "on-surface": "#1a1c1a",
+                        "on-surface-variant": "#524534",
+                        "outline": "#857462",
+                        "outline-variant": "#d7c3ae",
+                        "background": "#faf9f6",
+                        "error": "#ba1a1a",
+                        "error-container": "#ffdad6",
+                        "on-error-container": "#93000a"
+                    },
+                    borderRadius: {
+                        "DEFAULT": "0.25rem",
+                        "md": "0.5rem",
+                        "lg": "0.75rem",
+                        "xl": "1rem",
+                        "2xl": "1.5rem",
+                        "3xl": "2rem",
+                        "full": "9999px"
+                    },
+                    fontFamily: {
+                        "sans": ["'Plus Jakarta Sans'", "Inter", "-apple-system", "BlinkMacSystemFont", "sans-serif"]
+                    }
+                }
+            }
+        };
+    </script>
     <style>
-        .auth-wrapper {
-            min-height: 100vh;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            padding: 40px 20px;
-            position: relative;
-            background: radial-gradient(circle at 10% 20%, rgba(205, 133, 63, 0.15) 0%, rgba(238, 238, 238, 0.4) 40%, #FDFBF7 90%);
+        * {
+            font-family: 'Plus Jakarta Sans', 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif !important;
         }
-
-        .auth-card {
-            background: #FFFFFF;
-            border: 1px solid var(--border-gold);
-            border-radius: var(--radius-xl);
-            box-shadow: 0 20px 50px -10px rgba(33, 29, 25, 0.15), 0 0 0 1px rgba(184, 134, 11, 0.15);
-            width: 100%;
-            max-width: 960px;
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            overflow: hidden;
-            position: relative;
-            z-index: 10;
-        }
-
-        .auth-form-side {
-            padding: 48px 40px;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-        }
-
-        .auth-banner-side {
-            background: linear-gradient(145deg, #1E1A16 0%, #2A241F 100%);
-            padding: 48px 40px;
-            color: #FFFFFF;
-            display: flex;
-            flex-direction: column;
-            justify-content: space-between;
-            position: relative;
-            border-left: 1px solid rgba(184, 134, 11, 0.3);
-        }
-
-        .auth-banner-side::before {
-            content: '';
-            position: absolute;
-            top: 0; right: 0; bottom: 0; left: 0;
-            background: radial-gradient(circle at 80% 20%, rgba(184, 134, 11, 0.25) 0%, transparent 60%);
-            pointer-events: none;
-        }
-
-        .brand-auth-logo {
-            display: inline-flex;
-            align-items: center;
-            gap: 12px;
-            text-decoration: none;
-            margin-bottom: 24px;
-        }
-
-        .form-group-custom {
-            margin-bottom: 20px;
-        }
-
-        .form-label-custom {
-            display: block;
-            font-size: 0.88rem;
-            font-weight: 600;
-            color: var(--text-heading);
-            margin-bottom: 8px;
-        }
-
-        .input-icon-wrap {
-            position: relative;
-            display: flex;
-            align-items: center;
-        }
-
-        .input-icon-wrap i.input-icon {
-            position: absolute;
-            left: 16px;
-            color: var(--color-peru);
-            font-size: 1rem;
-            pointer-events: none;
-        }
-
-        .input-custom {
-            width: 100%;
-            padding: 13px 16px 13px 44px;
-            background: #FAF7F2;
-            border: 1px solid var(--border-light);
-            border-radius: var(--radius-md);
-            font-family: var(--font-sans);
-            font-size: 0.95rem;
-            color: var(--text-main);
-            transition: all var(--trans-fast);
-            outline: none;
-        }
-
-        .input-custom:focus {
-            background: #FFFFFF;
-            border-color: var(--color-goldenrod);
-            box-shadow: 0 0 0 3px rgba(184, 134, 11, 0.18);
-        }
-
-        .toggle-pwd-btn {
-            position: absolute;
-            right: 14px;
-            background: transparent;
-            border: none;
-            color: var(--text-muted);
-            cursor: pointer;
-            padding: 4px;
-        }
-
-        .toggle-pwd-btn:hover {
-            color: var(--color-goldenrod);
-        }
-
-        /* Role Quick Switch Buttons */
-        .role-switcher-box {
-            margin-top: 24px;
-            background: rgba(255, 255, 255, 0.05);
-            border: 1px solid rgba(205, 133, 63, 0.25);
-            border-radius: var(--radius-md);
-            padding: 18px;
-        }
-
-        .role-btn-grid {
-            display: grid;
-            grid-template-columns: 1fr;
-            gap: 8px;
-            margin-top: 12px;
-        }
-
-        .quick-role-btn {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            padding: 10px 14px;
-            background: rgba(255, 255, 255, 0.08);
-            border: 1px solid rgba(255, 255, 255, 0.12);
-            border-radius: var(--radius-sm);
-            color: #FFFFFF;
-            font-size: 0.82rem;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all var(--trans-fast);
-            text-align: left;
-        }
-
-        .quick-role-btn:hover {
-            background: var(--grad-primary);
-            border-color: var(--color-goldenrod);
-            transform: translateX(4px);
-            box-shadow: 0 4px 12px rgba(184, 134, 11, 0.3);
-        }
-
-        .quick-role-btn .role-tag {
-            font-size: 0.7rem;
-            padding: 2px 8px;
-            border-radius: 999px;
-            background: rgba(0, 0, 0, 0.3);
-            color: #DE9E5F;
-        }
-
-        @media (max-width: 860px) {
-            .auth-card {
-                grid-template-columns: 1fr;
-                max-width: 480px;
-            }
-            .auth-banner-side {
-                display: none;
-            }
+        .material-symbols-outlined {
+            font-family: 'Material Symbols Outlined' !important;
         }
     </style>
 </head>
-<body>
+<body class="bg-[#FAF9F6] font-sans text-on-surface antialiased min-h-screen flex items-center justify-center p-4">
 
-    <div class="vintage-grain-overlay"></div>
-
-    <div class="auth-wrapper">
-        <div class="auth-card">
+    <!-- Auth Card -->
+    <div class="w-full max-w-4xl rounded-3xl bg-surface border border-outline-variant/40 shadow-2xl overflow-hidden grid grid-cols-1 md:grid-cols-12">
+        
+        <!-- LEFT COLUMN: Form Login (7 cols) -->
+        <div class="md:col-span-7 p-8 sm:p-12 flex flex-col justify-center">
             
-            <!-- LEFT COLUMN: Form Login -->
-            <div class="auth-form-side">
-                <a th:href="@{/}" href="/" class="brand-auth-logo">
-                    <div class="logo-icon-wrap" style="width: 40px; height: 40px; font-size: 1.1rem;">
-                        <i class="fa-solid fa-book-bookmark"></i>
-                    </div>
-                    <div class="logo-text-wrap">
-                        <span class="brand-name" style="font-size: 1.35rem;">OldBooks</span>
-                        <span class="brand-tagline" style="font-size: 0.65rem;">Cổng Đăng Nhập Hệ Thống</span>
-                    </div>
-                </a>
+            <!-- Logo -->
+            <a th:href="@{/}" href="/" class="flex items-center gap-3 mb-6 group">
+                <img th:src="@{/images/book4life-logo.png}"
+                     src="/images/book4life-logo.png"
+                     onerror="this.onerror=null; this.src='https://lh3.googleusercontent.com/aida/AEtjO1VFRXY_NxriMnSUoyOlnJkpi_znEOfbT5nqVF_bWOeMuQrL28jtA3tETNkUlNIEvXJm19CEHOkGmCwnVISoEMhl5cfEIGWneqFqQTEH2YVxCJT61G2j2-6D0aqTouvk9S4LMHzp7_D4BtPEKRDgZ-a42hUwlA9vSusc7zVTRfWF9HyMuFlJPcKDbdvyCu6om3wwYvn8--WJGC61Nv6WZJ_H2WA8IPtCQmf7qoGvV5cvAnQdgl-cs0nr3g';"
+                     alt="Book4Life Logo" 
+                     class="h-8 w-auto object-contain transition-transform group-hover:scale-105"/>
+                <span class="font-extrabold text-2xl text-on-surface tracking-tight group-hover:text-primary transition-colors">Book4Life</span>
+            </a>
 
-                <h1 style="font-size: 1.8rem; margin: 0 0 6px; color: var(--text-heading);">Chào mừng trở lại</h1>
-                <p style="font-size: 0.9rem; color: var(--text-muted); margin-bottom: 24px;">
-                    Đăng nhập để truy cập kho sách, quản trị chi nhánh và dữ liệu vận hành.
+            <h1 class="text-2xl sm:text-3xl font-extrabold text-on-surface">Chào Mừng Trở Lại</h1>
+            <p class="text-xs sm:text-sm text-on-surface-variant mt-1 mb-6 font-normal">
+                Đăng nhập để quản lý tài khoản độc giả, đặt sách hoặc truy cập hệ thống quản trị chuỗi.
+            </p>
+
+            <!-- Alerts -->
+            <div th:if="${errorMessage}" class="mb-4 p-3.5 rounded-xl bg-error-container text-on-error-container text-xs font-bold flex items-center gap-2">
+                <span class="material-symbols-outlined text-[18px]">error</span>
+                <span th:text="${errorMessage}">Email hoặc mật khẩu không chính xác!</span>
+            </div>
+
+            <div th:if="${logoutMessage}" class="mb-4 p-3.5 rounded-xl bg-green-100 text-green-800 text-xs font-bold flex items-center gap-2">
+                <span class="material-symbols-outlined text-[18px]">check_circle</span>
+                <span th:text="${logoutMessage}">Bạn đã đăng xuất an toàn khỏi hệ thống!</span>
+            </div>
+
+            <!-- Login Form -->
+            <form th:action="@{/login}" method="post" id="loginForm" class="space-y-4">
+                <!-- Email / Username -->
+                <div>
+                    <label for="email" class="block text-xs font-bold text-on-surface uppercase tracking-wider mb-1.5">Địa chỉ Email hoặc Tên đăng nhập</label>
+                    <div class="relative flex items-center">
+                        <span class="material-symbols-outlined absolute left-3.5 text-outline text-[18px]">account_circle</span>
+                        <input type="text" id="email" name="email" required autofocus
+                               class="w-full pl-10 pr-4 py-3 bg-surface-container-low border border-outline-variant/50 rounded-xl text-sm text-on-surface focus:outline-none focus:border-primary focus:bg-surface-container-lowest transition-all font-medium"
+                               placeholder="admin@oldbooks.vn (hoặc gõ admin, user1)"/>
+                    </div>
+                </div>
+
+                <!-- Password -->
+                <div>
+                    <div class="flex justify-between items-center mb-1.5">
+                        <label for="password" class="block text-xs font-bold text-on-surface uppercase tracking-wider">Mật khẩu</label>
+                        <a href="javascript:void(0)" onclick="alert('Mật khẩu mẫu mặc định cho tất cả tài khoản là: 123456')" class="text-xs font-bold text-primary hover:underline">Mật khẩu: 123456</a>
+                    </div>
+                    <div class="relative flex items-center">
+                        <span class="material-symbols-outlined absolute left-3.5 text-outline text-[18px]">lock</span>
+                        <input type="password" id="password" name="password" required
+                               class="w-full pl-10 pr-10 py-3 bg-surface-container-low border border-outline-variant/50 rounded-xl text-sm text-on-surface focus:outline-none focus:border-primary focus:bg-surface-container-lowest transition-all font-medium"
+                               placeholder="••••••••"/>
+                        <button type="button" onclick="togglePasswordVisibility()" class="absolute right-3.5 text-outline hover:text-on-surface">
+                            <span class="material-symbols-outlined text-[18px]" id="eyeIcon">visibility</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Remember Me & Submit -->
+                <div class="flex items-center justify-between pt-1">
+                    <label class="flex items-center gap-2 text-xs text-on-surface-variant cursor-pointer font-medium">
+                        <input type="checkbox" name="remember-me" class="rounded border-outline-variant text-primary focus:ring-primary"/>
+                        <span>Ghi nhớ đăng nhập</span>
+                    </label>
+                </div>
+
+                <button type="submit" class="w-full py-3.5 rounded-xl bg-primary-container text-on-primary-container text-sm font-bold shadow-md hover:brightness-95 transition-all flex items-center justify-center gap-2">
+                    <span>Đăng Nhập Vào Hệ Thống</span>
+                    <span class="material-symbols-outlined text-[18px]">arrow_forward</span>
+                </button>
+            </form>
+
+            <div class="mt-6 pt-6 border-t border-outline-variant/30 text-center text-xs text-on-surface-variant font-medium">
+                Chưa có tài khoản? 
+                <a href="javascript:void(0)" onclick="fillRole('customer@gmail.com', '123456')" class="text-primary font-bold hover:underline">Đăng nhập thử tài khoản Độc Giả</a>
+            </div>
+        </div>
+
+        <!-- RIGHT COLUMN: Role Demo Quick Switcher (5 cols) -->
+        <div class="md:col-span-5 bg-[#2C1E16] text-[#FAF9F6] p-8 sm:p-10 flex flex-col justify-between border-t md:border-t-0 md:border-l border-[#4A3B32] relative overflow-hidden">
+            <!-- Decorative Glow -->
+            <div class="absolute -top-10 -right-10 w-48 h-48 bg-primary-container/20 rounded-full blur-3xl pointer-events-none"></div>
+
+            <div>
+                <div class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/10 text-primary-container text-[11px] font-bold tracking-wider mb-4">
+                    <span class="material-symbols-outlined text-[14px]">bolt</span>
+                    <span>TÀI KHOẢN TRẢI NGHIỆM NHANH</span>
+                </div>
+                <h3 class="text-xl font-bold text-[#FAF9F6] mb-1">Kiểm Thử 5 Vai Trò</h3>
+                <p class="text-xs text-outline-variant leading-relaxed mb-6 font-normal">
+                    Nhấp chọn vai trò bên dưới để tự động điền tài khoản mẫu (Mật khẩu: <strong class="text-primary-container">123456</strong>):
                 </p>
 
-                <!-- Error Alert -->
-                <div th:if="${errorMessage}" class="alert-box-vintage error" style="display: flex; align-items: center; gap: 12px; background: #FEF2F2; border: 1px solid #FCA5A5; color: #991B1B; padding: 12px 16px; border-radius: var(--radius-md); font-size: 0.88rem; margin-bottom: 20px;">
-                    <i class="fa-solid fa-circle-exclamation" style="font-size: 1.1rem;"></i>
-                    <span th:text="${errorMessage}">Email hoặc mật khẩu không chính xác!</span>
-                </div>
-
-                <!-- Logout Success Alert -->
-                <div th:if="${logoutMessage}" class="alert-box-vintage success" style="display: flex; align-items: center; gap: 12px; background: #ECFDF5; border: 1px solid #6EE7B7; color: #065F46; padding: 12px 16px; border-radius: var(--radius-md); font-size: 0.88rem; margin-bottom: 20px;">
-                    <i class="fa-solid fa-circle-check" style="font-size: 1.1rem;"></i>
-                    <span th:text="${logoutMessage}">Bạn đã đăng xuất thành công!</span>
-                </div>
-
-                <!-- Main Login Form -->
-                <form th:action="@{/login}" method="post" id="loginForm">
-                    <!-- Email -->
-                    <div class="form-group-custom">
-                        <label for="email" class="form-label-custom">Địa chỉ Email</label>
-                        <div class="input-icon-wrap">
-                            <i class="fa-regular fa-envelope input-icon"></i>
-                            <input type="email" id="email" name="email" class="input-custom" placeholder="nhap_email@oldbooks.vn" required autofocus>
+                <!-- 5 Role Quick Select Buttons -->
+                <div class="space-y-2.5">
+                    <button type="button" onclick="fillRole('admin@oldbooks.vn', '123456')" class="w-full p-2.5 rounded-xl bg-white/5 hover:bg-primary-container hover:text-on-primary-container border border-white/10 text-left transition-all flex items-center justify-between group">
+                        <div class="flex items-center gap-2.5">
+                            <span class="w-7 h-7 rounded-lg bg-white/10 flex items-center justify-center text-primary-container group-hover:text-on-primary-container group-hover:bg-white/20">
+                                <span class="material-symbols-outlined text-[16px]">admin_panel_settings</span>
+                            </span>
+                            <div>
+                                <div class="text-xs font-bold text-[#FAF9F6] group-hover:text-on-primary-container">Admin HQ (Tổng Quản Trị)</div>
+                                <div class="text-[10px] text-outline-variant group-hover:text-on-primary-container/80">admin@oldbooks.vn (hoặc gõ admin)</div>
+                            </div>
                         </div>
-                    </div>
-
-                    <!-- Password -->
-                    <div class="form-group-custom">
-                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
-                            <label for="password" class="form-label-custom" style="margin-bottom: 0;">Mật khẩu</label>
-                            <a href="javascript:void(0)" onclick="alert('Mật khẩu mặc định cho tất cả tài khoản mẫu là: 123456')" style="font-size: 0.8rem; color: var(--color-peru); text-decoration: none; font-weight: 600;">Quên mật khẩu?</a>
-                        </div>
-                        <div class="input-icon-wrap">
-                            <i class="fa-solid fa-lock input-icon"></i>
-                            <input type="password" id="password" name="password" class="input-custom" placeholder="••••••••" required>
-                            <button type="button" class="toggle-pwd-btn" id="togglePwdBtn" onclick="togglePasswordVisibility()" aria-label="Hiện mật khẩu">
-                                <i class="fa-regular fa-eye" id="togglePwdIcon"></i>
-                            </button>
-                        </div>
-                    </div>
-
-                    <!-- Submit Button -->
-                    <button type="submit" class="btn-primary-gold" style="width: 100%; padding: 14px; font-size: 1rem; justify-content: center; margin-top: 8px; border-radius: var(--radius-md);">
-                        <i class="fa-solid fa-right-to-bracket"></i>
-                        <span>Đăng Nhập</span>
+                        <span class="text-[10px] px-2 py-0.5 rounded bg-white/10 group-hover:bg-black/20 font-bold">ADMIN</span>
                     </button>
-                </form>
 
-                <div style="text-align: center; margin-top: 24px; font-size: 0.85rem; color: var(--text-muted);">
-                    <a th:href="@{/}" href="/" style="color: var(--color-goldenrod); font-weight: 600; text-decoration: none;">
-                        <i class="fa-solid fa-arrow-left me-1"></i> Quay lại trang chủ OldBooks
-                    </a>
-                </div>
-            </div>
-
-            <!-- RIGHT COLUMN: Role Quick Selector & Presentation -->
-            <div class="auth-banner-side">
-                <div style="position: relative; z-index: 2;">
-                    <div class="hero-badge" style="display: inline-flex; margin-bottom: 12px;">
-                        <i class="fa-solid fa-shield-halved"></i>
-                        <span>PHÂN QUYỀN 5 ROLE SRS</span>
-                    </div>
-                    <h2 style="font-size: 1.5rem; color: #FFFFFF; margin: 0 0 8px;">Trải Nghiệm Nhanh Theo Từng Vai Trò</h2>
-                    <p style="font-size: 0.85rem; color: rgba(255, 255, 255, 0.7); margin-bottom: 16px; line-height: 1.5;">
-                        Nhấp vào từng nút bên dưới để tự động điền tài khoản & mật khẩu kiểm thử cho từng vai trò trong hệ thống:
-                    </p>
-
-                    <!-- Quick Switcher Box -->
-                    <div class="role-switcher-box">
-                        <div class="role-btn-grid">
-                            <!-- 1. Admin -->
-                            <button type="button" class="quick-role-btn" onclick="fillCredentials('admin@oldbooks.vn', '123456', 'ADMIN')">
-                                <div>
-                                    <i class="fa-solid fa-crown" style="color: #F59E0B; margin-right: 8px;"></i>
-                                    <span>1. Quản trị viên (ADMIN)</span>
-                                </div>
-                                <span class="role-tag">Toàn quyền HQ</span>
-                            </button>
-
-                            <!-- 2. Branch Manager -->
-                            <button type="button" class="quick-role-btn" onclick="fillCredentials('manager.hn@oldbooks.vn', '123456', 'BRANCH_MANAGER')">
-                                <div>
-                                    <i class="fa-solid fa-store" style="color: #38BDF8; margin-right: 8px;"></i>
-                                    <span>2. Quản lý chi nhánh</span>
-                                </div>
-                                <span class="role-tag">Quản lý CN HN</span>
-                            </button>
-
-                            <!-- 3. Warehouse Staff -->
-                            <button type="button" class="quick-role-btn" onclick="fillCredentials('warehouse@oldbooks.vn', '123456', 'WAREHOUSE_STAFF')">
-                                <div>
-                                    <i class="fa-solid fa-boxes-stacked" style="color: #A3E635; margin-right: 8px;"></i>
-                                    <span>3. Thủ kho & Thu mua</span>
-                                </div>
-                                <span class="role-tag">Kho & Thu mua</span>
-                            </button>
-
-                            <!-- 4. Cashier -->
-                            <button type="button" class="quick-role-btn" onclick="fillCredentials('cashier@oldbooks.vn', '123456', 'CASHIER')">
-                                <div>
-                                    <i class="fa-solid fa-cash-register" style="color: #F472B6; margin-right: 8px;"></i>
-                                    <span>4. Thu ngân bán hàng</span>
-                                </div>
-                                <span class="role-tag">Bán hàng POS</span>
-                            </button>
-
-                            <!-- 5. Customer -->
-                            <button type="button" class="quick-role-btn" onclick="fillCredentials('customer@gmail.com', '123456', 'CUSTOMER')">
-                                <div>
-                                    <i class="fa-solid fa-user-tag" style="color: #E2E8F0; margin-right: 8px;"></i>
-                                    <span>5. Khách hàng độc giả</span>
-                                </div>
-                                <span class="role-tag">Mua & Săn sách</span>
-                            </button>
+                    <button type="button" onclick="fillRole('manager.hn@oldbooks.vn', '123456')" class="w-full p-2.5 rounded-xl bg-white/5 hover:bg-primary-container hover:text-on-primary-container border border-white/10 text-left transition-all flex items-center justify-between group">
+                        <div class="flex items-center gap-2.5">
+                            <span class="w-7 h-7 rounded-lg bg-white/10 flex items-center justify-center text-primary-container group-hover:text-on-primary-container group-hover:bg-white/20">
+                                <span class="material-symbols-outlined text-[16px]">store</span>
+                            </span>
+                            <div>
+                                <div class="text-xs font-bold text-[#FAF9F6] group-hover:text-on-primary-container">Quản Lý Chi Nhánh</div>
+                                <div class="text-[10px] text-outline-variant group-hover:text-on-primary-container/80">manager.hn@oldbooks.vn (hoặc gõ manager)</div>
+                            </div>
                         </div>
-                    </div>
-                </div>
+                        <span class="text-[10px] px-2 py-0.5 rounded bg-white/10 group-hover:bg-black/20 font-bold">MANAGER</span>
+                    </button>
 
-                <div style="position: relative; z-index: 2; font-size: 0.78rem; color: rgba(255, 255, 255, 0.5); padding-top: 16px; border-top: 1px solid rgba(255, 255, 255, 0.1);">
-                    <i class="fa-solid fa-lock me-1"></i> Mật khẩu mặc định hệ thống: <code>123456</code> (Bảo mật bằng BCrypt)
+                    <button type="button" onclick="fillRole('warehouse@oldbooks.vn', '123456')" class="w-full p-2.5 rounded-xl bg-white/5 hover:bg-primary-container hover:text-on-primary-container border border-white/10 text-left transition-all flex items-center justify-between group">
+                        <div class="flex items-center gap-2.5">
+                            <span class="w-7 h-7 rounded-lg bg-white/10 flex items-center justify-center text-primary-container group-hover:text-on-primary-container group-hover:bg-white/20">
+                                <span class="material-symbols-outlined text-[16px]">inventory_2</span>
+                            </span>
+                            <div>
+                                <div class="text-xs font-bold text-[#FAF9F6] group-hover:text-on-primary-container">Nhân Viên Kho &amp; Thẩm Định</div>
+                                <div class="text-[10px] text-outline-variant group-hover:text-on-primary-container/80">warehouse@oldbooks.vn (hoặc gõ warehouse)</div>
+                            </div>
+                        </div>
+                        <span class="text-[10px] px-2 py-0.5 rounded bg-white/10 group-hover:bg-black/20 font-bold">WAREHOUSE</span>
+                    </button>
+
+                    <button type="button" onclick="fillRole('cashier@oldbooks.vn', '123456')" class="w-full p-2.5 rounded-xl bg-white/5 hover:bg-primary-container hover:text-on-primary-container border border-white/10 text-left transition-all flex items-center justify-between group">
+                        <div class="flex items-center gap-2.5">
+                            <span class="w-7 h-7 rounded-lg bg-white/10 flex items-center justify-center text-primary-container group-hover:text-on-primary-container group-hover:bg-white/20">
+                                <span class="material-symbols-outlined text-[16px]">point_of_sale</span>
+                            </span>
+                            <div>
+                                <div class="text-xs font-bold text-[#FAF9F6] group-hover:text-on-primary-container">Thu Ngân &amp; Bán Hàng POS</div>
+                                <div class="text-[10px] text-outline-variant group-hover:text-on-primary-container/80">cashier@oldbooks.vn (hoặc gõ cashier)</div>
+                            </div>
+                        </div>
+                        <span class="text-[10px] px-2 py-0.5 rounded bg-white/10 group-hover:bg-black/20 font-bold">CASHIER</span>
+                    </button>
+
+                    <button type="button" onclick="fillRole('customer@gmail.com', '123456')" class="w-full p-2.5 rounded-xl bg-white/5 hover:bg-primary-container hover:text-on-primary-container border border-white/10 text-left transition-all flex items-center justify-between group">
+                        <div class="flex items-center gap-2.5">
+                            <span class="w-7 h-7 rounded-lg bg-white/10 flex items-center justify-center text-primary-container group-hover:text-on-primary-container group-hover:bg-white/20">
+                                <span class="material-symbols-outlined text-[16px]">person</span>
+                            </span>
+                            <div>
+                                <div class="text-xs font-bold text-[#FAF9F6] group-hover:text-on-primary-container">Khách Hàng / Độc Giả</div>
+                                <div class="text-[10px] text-outline-variant group-hover:text-on-primary-container/80">customer@gmail.com (hoặc gõ user1)</div>
+                            </div>
+                        </div>
+                        <span class="text-[10px] px-2 py-0.5 rounded bg-white/10 group-hover:bg-black/20 font-bold">CUSTOMER</span>
+                    </button>
                 </div>
             </div>
 
+            <div class="pt-6 border-t border-white/10 text-[11px] text-outline-variant">
+                Hệ thống chuỗi hiệu sách cũ Book4Life v1.0.0
+            </div>
         </div>
     </div>
 
-    <!-- Quick Fill & Toggle Password Script -->
     <script>
-        function fillCredentials(email, password, roleName) {
-            const emailInput = document.getElementById('email');
-            const pwdInput = document.getElementById('password');
-
-            emailInput.value = email;
-            pwdInput.value = password;
-
-            // Highlight effect
-            emailInput.style.borderColor = '#B8860B';
-            pwdInput.style.borderColor = '#B8860B';
-            emailInput.style.backgroundColor = '#FFFBEB';
-            pwdInput.style.backgroundColor = '#FFFBEB';
-
-            setTimeout(() => {
-                emailInput.style.borderColor = '';
-                pwdInput.style.borderColor = '';
-                emailInput.style.backgroundColor = '';
-                pwdInput.style.backgroundColor = '';
-            }, 1000);
+        function fillRole(email, password) {
+            document.getElementById('email').value = email;
+            document.getElementById('password').value = password;
         }
 
         function togglePasswordVisibility() {
-            const pwdInput = document.getElementById('password');
-            const toggleIcon = document.getElementById('togglePwdIcon');
-            if (pwdInput.type === 'password') {
-                pwdInput.type = 'text';
-                toggleIcon.classList.remove('fa-eye');
-                toggleIcon.classList.add('fa-eye-slash');
+            const pwd = document.getElementById('password');
+            const eye = document.getElementById('eyeIcon');
+            if (pwd.type === 'password') {
+                pwd.type = 'text';
+                eye.innerText = 'visibility_off';
             } else {
-                pwdInput.type = 'password';
-                toggleIcon.classList.remove('fa-eye-slash');
-                toggleIcon.classList.add('fa-eye');
+                pwd.type = 'password';
+                eye.innerText = 'visibility';
             }
         }
     </script>

@@ -1,0 +1,623 @@
+<!DOCTYPE html>
+
+<html lang="vi"><head><meta charset="utf-8"/><meta content="width=device-width, initial-scale=1.0" name="viewport"/><meta content="web_standard" name="shell-type"/><link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,600;0,700;1,400&amp;family=Inter:wght@400;500;600&amp;display=swap" rel="stylesheet"/><link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/><style>@layer base{html,body{margin:0;padding:0;}body{overscroll-behavior:none;}main>:first-child{margin-top:0!important;}main>:last-child{margin-bottom:0!important;}}::-webkit-scrollbar{display:none;}</style><script src="https://cdn.tailwindcss.com"></script><script id="tailwind-config">tailwind.config={darkMode:"class",theme:{extend:{colors:{"on-secondary-container":"#726157","secondary-fixed-dim":"#d9c2b6","surface":"#faf9f6","outline":"#857462","primary":"#835500","primary-fixed":"#ffddb4","surface-dim":"#dbdad7","on-primary-fixed":"#291800","on-error-container":"#93000a","on-primary-container":"#644000","error-container":"#ffdad6","on-tertiary-fixed":"#261911","secondary":"#6c5b51","background":"#faf9f6","inverse-on-surface":"#f2f1ee","surface-variant":"#e3e2e0","inverse-surface":"#2f312f","secondary-fixed":"#f6ded1","on-secondary-fixed":"#251911","inverse-primary":"#ffb955","surface-tint":"#835500","on-tertiary":"#ffffff","on-primary-fixed-variant":"#633f00","surface-bright":"#faf9f6","tertiary-fixed":"#f7ddd0","on-tertiary-fixed-variant":"#54433a","secondary-container":"#f6ded1","primary-container":"#f5a623","error":"#ba1a1a","on-secondary-fixed-variant":"#53443a","on-background":"#1a1c1a","surface-container-lowest":"#ffffff","primary-fixed-dim":"#ffb955","surface-container-low":"#f4f3f1","tertiary-container":"#c9b1a5","surface-container-highest":"#e3e2e0","surface-container":"#efeeeb","outline-variant":"#d7c3ae","on-surface-variant":"#524534","on-tertiary-container":"#55433a","on-error":"#ffffff","surface-container-high":"#e9e8e5","on-surface":"#1a1c1a","on-secondary":"#ffffff","tertiary":"#6d5a50","on-primary":"#ffffff","tertiary-fixed-dim":"#dac2b5"},borderRadius:{"DEFAULT":"0.25rem","lg":"0.5rem","xl":"0.75rem","full":"9999px"},spacing:{"margin":"3rem","gutter":"1.5rem","space-xl":"2.5rem","space-sm":"0.5rem","space-xs":"0.25rem","gutter-mobile":"1rem","space-lg":"1.5rem","margin-mobile":"1.25rem","space-md":"1rem"},fontFamily:{"display-lg-mobile":["Playfair Display"],"headline-lg":["Playfair Display"],"label-md":["Inter"],"body-sm":["Inter"],"body-lg":["Inter"],"label-sm":["Inter"],"label-lg":["Inter"],"display-md-mobile":["Playfair Display"],"display-lg":["Playfair Display"],"headline-sm":["Playfair Display"],"title-md":["Inter"],"headline-lg-mobile":["Playfair Display"],"body-md":["Inter"],"title-lg":["Inter"],"display-md":["Playfair Display"],"headline-md":["Playfair Display"]},fontSize:{"display-lg-mobile":["38px",{"lineHeight":"44px","letterSpacing":"-0.01em","fontWeight":"700"}],"headline-lg":["32px",{"lineHeight":"40px","fontWeight":"600"}],"label-md":["12px",{"lineHeight":"16px","letterSpacing":"0.04em","fontWeight":"600"}],"body-sm":["13px",{"lineHeight":"18px","fontWeight":"400"}],"body-lg":["18px",{"lineHeight":"28px","fontWeight":"400"}],"label-sm":["11px",{"lineHeight":"14px","letterSpacing":"0.02em","fontWeight":"500"}],"label-lg":["14px",{"lineHeight":"20px","fontWeight":"500"}],"display-md-mobile":["32px",{"lineHeight":"38px","letterSpacing":"-0.01em","fontWeight":"600"}],"display-lg":["56px",{"lineHeight":"64px","letterSpacing":"-0.02em","fontWeight":"700"}],"headline-sm":["20px",{"lineHeight":"26px","fontWeight":"600"}],"title-md":["16px",{"lineHeight":"22px","fontWeight":"600"}],"headline-lg-mobile":["26px",{"lineHeight":"32px","fontWeight":"600"}],"body-md":["15px",{"lineHeight":"24px","fontWeight":"400"}],"title-lg":["18px",{"lineHeight":"24px","fontWeight":"600"}],"display-md":["44px",{"lineHeight":"52px","letterSpacing":"-0.02em","fontWeight":"600"}],"headline-md":["24px",{"lineHeight":"30px","fontWeight":"600"}]}}}}</script></head><body class="bg-background font-body-md text-on-surface antialiased min-h-screen"><header class="fixed top-0 left-0 right-0 z-50 bg-surface/90 backdrop-blur-xl shadow-[0_1px_8px_rgba(44,30,22,0.05)]"><div class="h-28 w-full"><div class="h-16 w-full max-w-7xl mx-auto px-6 flex items-center justify-between gap-6"><div class="flex items-center gap-3 shrink-0"><div class="w-10 h-10 rounded-full bg-primary-container/20 flex items-center justify-center text-primary"><span class="material-symbols-outlined text-[24px]">eco</span></div><a class="font-headline-md text-headline-md text-on-surface tracking-tight font-bold flex items-center gap-1.5" data-path="trang-chu" href="#"><span>Book4Life</span></a></div><div class="flex-1 max-w-xl mx-2 hidden lg:flex items-center"><div class="w-full flex items-center bg-surface-container-low rounded-xl px-4 py-2 shadow-[0_1px_4px_rgba(44,30,22,0.04)] focus-within:bg-surface-container-lowest focus-within:shadow-[0_2px_12px_rgba(44,30,22,0.08)] transition-all"><span class="material-symbols-outlined text-outline text-[20px] mr-2.5">search</span><input class="w-full bg-transparent font-body-sm text-body-sm text-on-surface placeholder:text-outline focus:outline-none" placeholder="Tìm tựa sách cũ, tác giả, bản in hiếm hoặc ISBN..." type="text"/><span class="material-symbols-outlined text-outline-variant text-[18px] ml-2 shrink-0">auto_stories</span></div></div><div class="flex items-center gap-4 shrink-0"><div class="flex items-center gap-1.5"><a aria-label="Danh sách yêu thích" class="relative p-2 rounded-full hover:bg-surface-container-high text-on-surface-variant hover:text-on-surface transition-all" data-path="danh-sach-yeu-thich" href="#"><span class="material-symbols-outlined text-[22px]">favorite</span><span class="absolute top-1 right-1 flex items-center justify-center min-w-[16px] h-4 px-1 rounded-full bg-secondary text-on-secondary font-label-sm text-[10px] font-bold">5</span></a><a aria-label="Giỏ hàng" class="relative p-2 rounded-full hover:bg-surface-container-high text-on-surface-variant hover:text-on-surface transition-all" data-path="gio-hang" href="#"><span class="material-symbols-outlined text-[22px]">shopping_bag</span><span class="absolute top-1 right-1 flex items-center justify-center min-w-[16px] h-4 px-1 rounded-full bg-primary-container text-on-primary-container font-label-sm text-[10px] font-bold">3</span></a></div><a class="flex items-center gap-2 pl-2" data-path="tai-khoan" href="#"><div class="w-8 h-8 rounded-full bg-primary flex items-center justify-center shrink-0"><span class="material-symbols-outlined text-on-primary text-[18px]">person</span></div><span class="hidden md:inline-block font-label-sm text-label-sm text-on-surface font-semibold hover:text-primary transition-colors">Tài khoản</span></a></div></div><div class="h-12 w-full bg-surface-container-low/70 border-t border-outline-variant/15"><div class="h-full max-w-7xl mx-auto px-6 flex items-center justify-between overflow-x-auto"><nav class="flex items-center gap-2 text-nowrap font-label-md text-label-md" data-active-classes="bg-primary-container text-on-primary-container font-semibold"><a class="text-on-surface-variant hover:text-on-surface px-3 py-1.5 rounded-lg hover:bg-surface-container transition-colors" data-path="trang-chu" href="#">Trang Chủ</a><a class="text-on-surface-variant hover:text-on-surface px-3 py-1.5 rounded-lg hover:bg-surface-container transition-colors" data-path="the-loai" href="#">Thể Loại</a><a class="text-on-surface-variant hover:text-on-surface px-3 py-1.5 rounded-lg hover:bg-surface-container transition-colors" data-path="tac-gia" href="#">Tác Giả</a><a class="text-on-surface-variant hover:text-on-surface px-3 py-1.5 rounded-lg hover:bg-surface-container transition-colors" data-path="goc-doc-sach-blog" href="#">Góc Đọc Sách / Blog</a><a class="text-on-surface-variant hover:text-on-surface px-3 py-1.5 rounded-lg hover:bg-surface-container transition-colors" data-path="lien-he-va-diem-thu-mua" href="#">Liên Hệ &amp; Điểm Thu Mua</a></nav><div class="hidden md:flex items-center gap-2 shrink-0 ml-4"><span class="flex items-center gap-1.5 text-[11px] font-label-sm text-tertiary"><span class="material-symbols-outlined text-[15px] text-primary">verified_user</span>Thẩm định nguyên bản &amp; Bảo vệ môi trường</span></div></div></div></div></header><main class="w-full pt-28 bg-surface"><div class="flex flex-col w-full">
+<!-- Subtle Grain & Warm Ambient Background Accent -->
+<div class="relative w-full overflow-hidden">
+<div class="absolute -top-40 -right-40 w-96 h-96 rounded-full bg-primary-fixed/30 blur-3xl pointer-events-none"></div>
+<div class="absolute top-1/2 -left-32 w-80 h-80 rounded-full bg-secondary-fixed/40 blur-3xl pointer-events-none"></div>
+<!-- Breadcrumb & Top Utility Row -->
+<div class="max-w-7xl mx-auto px-6 pt-6 pb-2">
+<div class="flex items-center justify-between text-on-surface-variant font-label-md text-label-md">
+<div class="flex items-center gap-2">
+<a class="hover:text-primary transition-colors flex items-center gap-1" href="#">
+<span class="material-symbols-outlined text-[16px]">home</span>
+            Trang Chủ
+          </a>
+<span class="text-outline-variant">/</span>
+<a class="hover:text-primary transition-colors" href="#">Tác Giả</a>
+<span class="text-outline-variant">/</span>
+<span class="text-on-surface font-semibold">Haruki Murakami</span>
+</div>
+<div class="hidden md:flex items-center gap-4 text-outline">
+<span class="flex items-center gap-1 text-label-sm font-label-sm">
+<span class="material-symbols-outlined text-[16px] text-primary">verified</span>
+            Ấn bản đã qua thẩm định bìa &amp; gáy
+          </span>
+<span class="h-3 w-px bg-outline-variant"></span>
+<span class="text-label-sm font-label-sm text-secondary">Mã định danh tác giả: #AUTH-HM-84</span>
+</div>
+</div>
+</div>
+<!-- Featured Author Showcase: Haruki Murakami -->
+<section class="max-w-7xl mx-auto px-6 py-8">
+<div class="bg-surface-container-low rounded-3xl p-8 lg:p-12 shadow-sm relative overflow-hidden">
+<!-- Watermark Monogram Background -->
+<span class="absolute -right-8 -bottom-10 font-display-lg text-[180px] leading-none text-surface-container-highest/40 select-none pointer-events-none italic font-bold">HM</span>
+<div class="grid grid-cols-1 lg:grid-cols-12 gap-10 items-center relative z-10">
+<!-- Portrait & Vintage Frame Column -->
+<div class="lg:col-span-4 flex flex-col items-center">
+<div class="relative w-64 h-80 sm:w-72 sm:h-96 rounded-2xl p-3 bg-surface shadow-md">
+<div class="w-full h-full rounded-xl overflow-hidden relative shadow-inner">
+<img class="w-full h-full object-cover transition-transform duration-700 hover:scale-105" data-alt="Intimate portrait of writer Haruki Murakami in a soft vintage natural light setting with a sepia warm atmosphere, thoughtful gaze, wearing a minimalist wool sweater, surrounded by blurred shelves of vintage hardbound books, earthy coffee tone, textured analog film quality" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBHtWil-NjyT8tKLdgX5QyrcSk3BrkmEy2ArzFZyotjZOhyZSDfi0zcxaoVTcXcp7B5-aylv3_zM4JFJDXfszrmWWeukzxKDMdsv2j5bwV1i3ti0R2d0KsoUNAFrIjplcqlEAsvYe3Zy1-ALbVDXwQMGkG4B9OYFBf-1tfNBQW-lUHM3ng5ldaiN8cjfpqd3WffJ81Smw_4eZ6PaiL0kwaEyPMEQp8qc52pdfzh7KWix7w-7HPd-zx0"/>
+<!-- Subtle Gradient Scrim -->
+<div class="absolute inset-0 bg-gradient-to-t from-[#2C1E16]/40 via-transparent to-transparent"></div>
+</div>
+<!-- Vintage Stamp Provenance Tag -->
+<div class="absolute -bottom-4 -right-3 bg-primary-container text-on-primary-container px-3.5 py-1.5 rounded-full font-label-sm text-label-sm shadow-md flex items-center gap-1.5 font-bold tracking-wider uppercase">
+<span class="material-symbols-outlined text-[15px]">auto_stories</span>
+                Đại Văn Hào Hiện Đại
+              </div>
+</div>
+<!-- Follow / Save Author CTA -->
+<div class="mt-8 flex items-center gap-3">
+<button class="px-5 py-2.5 bg-primary text-on-primary font-label-lg text-label-lg rounded-full shadow-sm hover:bg-primary/90 transition-all flex items-center gap-2 group">
+<span class="material-symbols-outlined text-[18px] group-hover:scale-110 transition-transform">favorite</span>
+                Theo dõi tác giả
+              </button>
+<button aria-label="Chia sẻ hồ sơ" class="p-2.5 rounded-full bg-surface-container-high text-on-surface hover:text-primary transition-colors">
+<span class="material-symbols-outlined text-[20px]">share</span>
+</button>
+</div>
+</div>
+<!-- Bio, Quote & Editorial Notes Column -->
+<div class="lg:col-span-8 flex flex-col justify-between">
+<div class="space-y-4">
+<div class="flex flex-wrap items-center gap-2">
+<span class="px-3 py-1 rounded-full bg-secondary-fixed text-on-secondary-fixed font-label-sm text-label-sm font-semibold">Hiện thực huyền ảo</span>
+<span class="px-3 py-1 rounded-full bg-surface-container-high text-on-surface-variant font-label-sm text-label-sm">Văn học Nhật Bản</span>
+<span class="px-3 py-1 rounded-full bg-surface-container-high text-on-surface-variant font-label-sm text-label-sm">Hậu hiện đại</span>
+<span class="text-label-sm font-label-sm text-outline ml-auto">Sinh năm 1949 • Kyoto, Nhật Bản</span>
+</div>
+<div class="space-y-1">
+<h1 class="font-headline-lg text-headline-lg font-bold text-on-surface tracking-tight">Haruki Murakami</h1>
+<p class="font-body-sm text-body-sm text-outline italic">Thôn Thượng Xuân Thụ (村上 春樹)</p>
+</div>
+<!-- Iconic Literary Quote Block -->
+<div class="relative pl-6 py-2 my-4 bg-surface-container-lowest/80 rounded-2xl p-5 shadow-sm">
+<span class="material-symbols-outlined absolute top-3 left-3 text-primary-container text-[28px] opacity-40">format_quote</span>
+<blockquote class="font-display-md text-headline-sm italic text-on-surface leading-snug pl-4">
+                  "Nếu bạn chỉ đọc những gì người khác đang đọc, bạn chỉ có thể nghĩ những gì người khác đang nghĩ."
+                </blockquote>
+<p class="text-right font-label-sm text-label-sm text-secondary pt-2 pr-2">— Trích <span class="font-semibold italic">Rừng Na Uy</span> (Norwegian Wood)</p>
+</div>
+<!-- Biography Excerpt -->
+<p class="font-body-md text-body-md text-on-surface-variant leading-relaxed">
+                Là một trong những gương mặt có tầm ảnh hưởng sâu rộng nhất của văn đàn đương đại toàn cầu. Tác phẩm của ông dung hòa giữa nỗi cô đơn đô thị, hiện thực huyền ảo, nhạc jazz cổ điển và những tầng tiềm thức bí ẩn. Tại Book4Life, các ấn bản Haruki Murakami luôn được tuyển lựa kỹ lưỡng từ các bản in bìa mềm đầu tiên của Nhã Nam cho đến các tuyển tập bìa cứng sưu tầm có tuổi đời hơn một thập kỷ.
+              </p>
+<!-- Literary Awards Chips -->
+<div class="pt-2 flex flex-wrap items-center gap-3">
+<span class="font-label-sm text-label-sm font-bold text-on-surface uppercase tracking-wider">Giải thưởng tiêu biểu:</span>
+<span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-lg bg-surface-container text-on-surface-variant font-body-sm text-body-sm">
+<span class="material-symbols-outlined text-[16px] text-primary">military_tech</span> Franz Kafka Prize (2006)
+                </span>
+<span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-lg bg-surface-container text-on-surface-variant font-body-sm text-body-sm">
+<span class="material-symbols-outlined text-[16px] text-primary">workspace_premium</span> Jerusalem Prize (2009)
+                </span>
+<span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-lg bg-surface-container text-on-surface-variant font-body-sm text-body-sm">
+<span class="material-symbols-outlined text-[16px] text-primary">award_star</span> Yomiuri Prize
+                </span>
+</div>
+</div>
+<!-- Quick Metrics Grid -->
+<div class="mt-8 pt-6 bg-surface-container rounded-2xl p-4 grid grid-cols-2 sm:grid-cols-4 gap-4">
+<div class="flex flex-col">
+<span class="font-headline-md text-headline-md font-bold text-primary">18</span>
+<span class="font-label-sm text-label-sm text-outline-variant font-medium text-secondary">Tác phẩm sẵn có trên kệ</span>
+</div>
+<div class="flex flex-col">
+<span class="font-headline-md text-headline-md font-bold text-on-surface">4.200+</span>
+<span class="font-label-sm text-label-sm text-outline-variant font-medium text-secondary">Bản sách đã trao tay</span>
+</div>
+<div class="flex flex-col">
+<div class="flex items-center gap-1">
+<span class="font-headline-md text-headline-md font-bold text-primary-container">4.9</span>
+<span class="material-symbols-outlined text-primary-container text-[20px]" style="font-variation-settings: 'FILL' 1;">star</span>
+</div>
+<span class="font-label-sm text-label-sm text-outline-variant font-medium text-secondary">Điểm yêu thích (890+ lượt)</span>
+</div>
+<div class="flex flex-col">
+<span class="font-headline-md text-headline-md font-bold text-on-surface">100%</span>
+<span class="font-label-sm text-label-sm text-outline-variant font-medium text-secondary">Thẩm định trang &amp; gáy</span>
+</div>
+</div>
+</div>
+</div>
+</div>
+</section>
+<!-- Works Archive Section -->
+<section class="max-w-7xl mx-auto px-6 py-10">
+<!-- Section Header & Filter Tabs -->
+<div class="flex flex-col md:flex-row md:items-end justify-between gap-6 pb-6">
+<div>
+<div class="flex items-center gap-2 text-primary font-label-md text-label-md font-semibold tracking-wider uppercase mb-1">
+<span class="material-symbols-outlined text-[18px]">shelves</span>
+            Kho sách lưu giữ &amp; sưu tầm
+          </div>
+<h2 class="font-headline-md text-headline-md font-bold text-on-surface">Tác Phẩm Tiêu Biểu Hiện Có</h2>
+<p class="font-body-sm text-body-sm text-outline mt-1">Các bản sách cũ chọn lọc đã được vệ sinh gáy, kiểm tra trang khuyết và đánh giá tình trạng minh bạch.</p>
+</div>
+<!-- Filter Controls -->
+<div class="flex items-center gap-2 bg-surface-container-low p-1.5 rounded-xl self-start md:self-auto overflow-x-auto max-w-full">
+<button class="px-4 py-2 rounded-lg bg-surface font-label-sm text-label-sm font-semibold text-on-surface shadow-sm">Tất cả (18)</button>
+<button class="px-4 py-2 rounded-lg text-outline font-label-sm text-label-sm hover:text-on-surface transition-colors">Tiểu thuyết dài</button>
+<button class="px-4 py-2 rounded-lg text-outline font-label-sm text-label-sm hover:text-on-surface transition-colors">Truyện ngắn &amp; Tản văn</button>
+<button class="px-4 py-2 rounded-lg text-outline font-label-sm text-label-sm hover:text-on-surface transition-colors">Bản in hiếm / Bìa cứng</button>
+</div>
+</div>
+<!-- Book Grid (Bespoke Antiquarian Book Cards) -->
+<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-6">
+<!-- Card 1: Rừng Na Uy -->
+<div class="bg-surface-container-lowest rounded-2xl p-4 shadow-sm hover:shadow-md transition-all duration-300 flex flex-col justify-between group">
+<div class="space-y-3">
+<div class="relative aspect-[3/4] w-full rounded-xl overflow-hidden bg-surface-container shadow-inner">
+<img class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" data-alt="Vintage book cover of Norwegian Wood by Haruki Murakami, minimalist typographic layout, warm cream parchment tone with subtle vermillion red accent, aged paper edges, soft spine shadow effect, antiquarian bookstore display aesthetic" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCDQ9n4k8T9Fvq1a_uwAu1AXNRwUiBq5IcKCZujXD3Z2_2tmKwDWEObva-zDyNZTVMvsUk3vsaZGTtyu3YQDf5IoH6D9aYTjzcI86XwW4gfo5yIW84HjhjZIaZRoWS4509OCskYi1DNTDIjmD3iyztXOzjAvu6uz0VidCV7Nb8kRf7lf3aenJqTJWA9naYkQEGXiILsbkmfNTy4JQKazAI_d8T2tq5UbrVixDznXAkR5DxQ_gxCqNyp"/>
+<span class="absolute top-2.5 left-2.5 px-2.5 py-1 rounded-md bg-[#2C1E16]/85 text-[#FAF9F6] font-label-sm text-[11px] font-bold tracking-wider backdrop-blur-sm">
+                Very Good 92%
+              </span>
+<span class="absolute bottom-2.5 right-2.5 px-2 py-0.5 rounded bg-surface/90 text-secondary font-label-sm text-[10px]">
+                Tái bản 2018
+              </span>
+</div>
+<div class="space-y-1">
+<span class="text-label-sm font-label-sm text-primary font-medium">Tiểu thuyết kinh điển</span>
+<h3 class="font-title-md text-title-md font-bold text-on-surface group-hover:text-primary transition-colors line-clamp-1">Rừng Na Uy</h3>
+<p class="font-body-sm text-body-sm text-outline">Bản dịch Trịnh Lữ • NXB Hội Nhà Văn</p>
+</div>
+<!-- Provenance & Physical Condition snippet -->
+<div class="bg-surface-container-low rounded-lg p-2.5 space-y-1 font-body-sm text-[12px] text-on-surface-variant">
+<div class="flex items-center justify-between text-secondary">
+<span>Ruột sách: Sạch sẽ, không gạch chân</span>
+</div>
+<div class="flex items-center gap-1 text-outline">
+<span class="material-symbols-outlined text-[14px] text-primary">bookmark</span>
+                Gáy phẳng, mép giấy ố nhẹ tự nhiên
+              </div>
+</div>
+</div>
+<div class="pt-4 mt-3 flex items-center justify-between">
+<div class="flex flex-col">
+<span class="font-label-sm text-[11px] text-outline line-through">115.000₫</span>
+<span class="font-title-lg text-title-lg font-bold text-primary">85.000₫</span>
+</div>
+<button aria-label="Thêm Rừng Na Uy vào giỏ hàng" class="p-2.5 rounded-xl bg-primary-container text-on-primary-container hover:bg-primary-container/80 transition-colors shadow-sm">
+<span class="material-symbols-outlined text-[20px]">add_shopping_cart</span>
+</button>
+</div>
+</div>
+<!-- Card 2: Biên Niên Ký Chim Vặn Dây Cót -->
+<div class="bg-surface-container-lowest rounded-2xl p-4 shadow-sm hover:shadow-md transition-all duration-300 flex flex-col justify-between group">
+<div class="space-y-3">
+<div class="relative aspect-[3/4] w-full rounded-xl overflow-hidden bg-surface-container shadow-inner">
+<img class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" data-alt="Antique paper cover book of The Wind-Up Bird Chronicle by Haruki Murakami, artistic illustration of an eccentric metallic mechanical bird in deep indigo and warm ochre tones, classic spine binding, pristine collectible bookstore display" src="https://lh3.googleusercontent.com/aida-public/AB6AXuD31JBMzPAbDh31OylRC9_HzoZ9dP0hG93iHjX_xlqiH7PDlyo9Q9d_sJE_p5G4YAbAI1xJU3_7Iy4zsKSMUI_Js9unGLOozkTi--tMBd4zMCi9VJIT4GPUaGHmMhLwyRV3HJyb5nMpfCYdvIqhmfaDX2OIeHIFu58uLxykY0lZu_bmohY7279oyHvIm27B8ldT1D4OMlw61iIEoK_npT3COKKZS_UKsjsSnRG-KVLhTwFBjHBZ_30B"/>
+<span class="absolute top-2.5 left-2.5 px-2.5 py-1 rounded-md bg-[#2C1E16]/85 text-[#FAF9F6] font-label-sm text-[11px] font-bold tracking-wider backdrop-blur-sm">
+                Like New 96%
+              </span>
+<span class="absolute bottom-2.5 right-2.5 px-2 py-0.5 rounded bg-surface/90 text-secondary font-label-sm text-[10px]">
+                Bản dày 780 trang
+              </span>
+</div>
+<div class="space-y-1">
+<span class="text-label-sm font-label-sm text-primary font-medium">Tuyệt tác hư cấu</span>
+<h3 class="font-title-md text-title-md font-bold text-on-surface group-hover:text-primary transition-colors line-clamp-1">Biên Niên Ký Chim Vặn Dây Cót</h3>
+<p class="font-body-sm text-body-sm text-outline">Bản dịch Trần Tiễn Cao Đăng</p>
+</div>
+<div class="bg-surface-container-low rounded-lg p-2.5 space-y-1 font-body-sm text-[12px] text-on-surface-variant">
+<div class="flex items-center justify-between text-secondary">
+<span>Ruột sách: Đẹp tinh tươm</span>
+</div>
+<div class="flex items-center gap-1 text-outline">
+<span class="material-symbols-outlined text-[14px] text-primary">bookmark</span>
+                Bìa áo nguyên vẹn, góc không quăn
+              </div>
+</div>
+</div>
+<div class="pt-4 mt-3 flex items-center justify-between">
+<div class="flex flex-col">
+<span class="font-label-sm text-[11px] text-outline line-through">190.000₫</span>
+<span class="font-title-lg text-title-lg font-bold text-primary">138.000₫</span>
+</div>
+<button aria-label="Thêm Biên Niên Ký Chim Vặn Dây Cót vào giỏ hàng" class="p-2.5 rounded-xl bg-primary-container text-on-primary-container hover:bg-primary-container/80 transition-colors shadow-sm">
+<span class="material-symbols-outlined text-[20px]">add_shopping_cart</span>
+</button>
+</div>
+</div>
+<!-- Card 3: Kafka Bên Bờ Biển -->
+<div class="bg-surface-container-lowest rounded-2xl p-4 shadow-sm hover:shadow-md transition-all duration-300 flex flex-col justify-between group">
+<div class="space-y-3">
+<div class="relative aspect-[3/4] w-full rounded-xl overflow-hidden bg-surface-container shadow-inner">
+<img class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" data-alt="Kafka on the Shore book cover resting on a wooden tabletop with a rustic teacup nearby, deep ocean blue and warm amber tones, surreal silhouetted cat and boy motifs, fine paper texture, soft natural light" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCCZYms8Ph9p8aesgDlmiNfZCUzT4uakpT89aEy3VfcxGlX8RNZX160hjN3IeNclSdtOTp2-dtx7arDoS-0EaB3qzo2sK1bOQeUUe02VauY4GljsPmtMOCMpkU3tIc-fgmy7YEzD99kdOkuprERFRkgQt-bbEDxpRHHVOUCdg0N9oHgGqNermhg2W5g489vZWjFCSvcBEz93TNH6Syuq6n3BFqnRPWEZsxXbcEx7QhhUdfDI8GwQTSo"/>
+<span class="absolute top-2.5 left-2.5 px-2.5 py-1 rounded-md bg-[#2C1E16]/85 text-[#FAF9F6] font-label-sm text-[11px] font-bold tracking-wider backdrop-blur-sm">
+                Good 88%
+              </span>
+<span class="absolute bottom-2.5 right-2.5 px-2 py-0.5 rounded bg-surface/90 text-secondary font-label-sm text-[10px]">
+                Ấn bản 2016
+              </span>
+</div>
+<div class="space-y-1">
+<span class="text-label-sm font-label-sm text-primary font-medium">Hiện thực huyền ảo</span>
+<h3 class="font-title-md text-title-md font-bold text-on-surface group-hover:text-primary transition-colors line-clamp-1">Kafka Bên Bờ Biển</h3>
+<p class="font-body-sm text-body-sm text-outline">Dương Tường chuyển ngữ</p>
+</div>
+<div class="bg-surface-container-low rounded-lg p-2.5 space-y-1 font-body-sm text-[12px] text-on-surface-variant">
+<div class="flex items-center justify-between text-secondary">
+<span>Ruột sách: Đầy đủ trang, không rách</span>
+</div>
+<div class="flex items-center gap-1 text-outline">
+<span class="material-symbols-outlined text-[14px] text-primary">bookmark</span>
+                Bìa có nếp gấp đọc nhẹ ở gáy
+              </div>
+</div>
+</div>
+<div class="pt-4 mt-3 flex items-center justify-between">
+<div class="flex flex-col">
+<span class="font-label-sm text-[11px] text-outline line-through">145.000₫</span>
+<span class="font-title-lg text-title-lg font-bold text-primary">95.000₫</span>
+</div>
+<button aria-label="Thêm Kafka Bên Bờ Biển vào giỏ hàng" class="p-2.5 rounded-xl bg-primary-container text-on-primary-container hover:bg-primary-container/80 transition-colors shadow-sm">
+<span class="material-symbols-outlined text-[20px]">add_shopping_cart</span>
+</button>
+</div>
+</div>
+<!-- Card 4: 1Q84 (Trọn bộ 3 tập Boxset) -->
+<div class="bg-surface-container-lowest rounded-2xl p-4 shadow-sm hover:shadow-md transition-all duration-300 flex flex-col justify-between group relative">
+<div class="space-y-3">
+<div class="relative aspect-[3/4] w-full rounded-xl overflow-hidden bg-surface-container shadow-inner">
+<img class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" data-alt="Boxed set collection of three volumes of 1Q84 by Haruki Murakami, emerald green and midnight charcoal covers in an elegant slipcase, minimalist moon motifs, antiquarian library atmosphere, moody studio lighting" src="https://lh3.googleusercontent.com/aida-public/AB6AXuB7HO1OEdyClOLIxOcz1bH7f46df3L0Pj9ZG5ISquiTfmg6ApYqGNvieqoj0OO-UD3p1IbaTlMJ6TKb9JUJytmMdzO3i7uaNrYND86oRHSkA2xL-Q6TiLk_YHOKO889PY53vLGsdF8fDnXF9s2m5b7sJfP-U9n3eYMGq_194YEW5sK2z3MYUfL2deXEOFD-BXMYvlKcKXrsyJWuH73PPXiaw_q6bM2HiWE26r6rCk_Q3eqZ9zrDSnwb"/>
+<span class="absolute top-2.5 left-2.5 px-2.5 py-1 rounded-md bg-primary-container text-on-primary-container font-label-sm text-[11px] font-bold tracking-wider shadow-sm">
+                Rare Set • 3 Tập
+              </span>
+<span class="absolute bottom-2.5 right-2.5 px-2 py-0.5 rounded bg-surface/90 text-secondary font-label-sm text-[10px]">
+                Kèm đai obi gốc
+              </span>
+</div>
+<div class="space-y-1">
+<span class="text-label-sm font-label-sm text-primary font-medium">Bộ ba tiểu thuyết sử thi</span>
+<h3 class="font-title-md text-title-md font-bold text-on-surface group-hover:text-primary transition-colors line-clamp-1">1Q84 (Trọn Bộ 3 Tập)</h3>
+<p class="font-body-sm text-body-sm text-outline">Lục Hương &amp; Cổ Phong dịch</p>
+</div>
+<div class="bg-surface-container-low rounded-lg p-2.5 space-y-1 font-body-sm text-[12px] text-on-surface-variant">
+<div class="flex items-center justify-between text-secondary">
+<span>Tình trạng: Very Good (94%)</span>
+</div>
+<div class="flex items-center gap-1 text-outline">
+<span class="material-symbols-outlined text-[14px] text-primary">bookmark</span>
+                Đầy đủ hộp cứng bao bìa bảo vệ
+              </div>
+</div>
+</div>
+<div class="pt-4 mt-3 flex items-center justify-between">
+<div class="flex flex-col">
+<span class="font-label-sm text-[11px] text-outline line-through">280.000₫</span>
+<span class="font-title-lg text-title-lg font-bold text-primary">195.000₫</span>
+</div>
+<button aria-label="Thêm trọn bộ 1Q84 vào giỏ hàng" class="p-2.5 rounded-xl bg-primary-container text-on-primary-container hover:bg-primary-container/80 transition-colors shadow-sm">
+<span class="material-symbols-outlined text-[20px]">add_shopping_cart</span>
+</button>
+</div>
+</div>
+<!-- Card 5: Người Tình Sputnik -->
+<div class="bg-surface-container-lowest rounded-2xl p-4 shadow-sm hover:shadow-md transition-all duration-300 flex flex-col justify-between group">
+<div class="space-y-3">
+<div class="relative aspect-[3/4] w-full rounded-xl overflow-hidden bg-surface-container shadow-inner">
+<img class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" data-alt="Sputnik Sweetheart book by Haruki Murakami, minimalist graphic cover with satellite and starry night illustration, soft warm paper texture with subtle coffee rings, vintage bookstore counter display" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBOE3_ZnhCP3favfC2tjpjNRQbOhtMnDpe7qxlkk6BWTWcNMzIb5d-nOKounnRT-DtcFpx8HH5I5SlrO9St8wbP9G32wrkb4Wmy1APsUBGW5YR5kVgj_7XPvnToxulXMS0n1Y1Gcqr2j-WEhO20VewOyVRUIESC_KvI7uK5N1ULZtoGF3Y1BYyFX2GwG92xpSg7nTgkpqy_W4obNOvGT0FOUVgc7PWjG2Ap8SKKRf8Z2XT8Q7sj8RLY"/>
+<span class="absolute top-2.5 left-2.5 px-2.5 py-1 rounded-md bg-[#2C1E16]/85 text-[#FAF9F6] font-label-sm text-[11px] font-bold tracking-wider backdrop-blur-sm">
+                Like New 95%
+              </span>
+<span class="absolute bottom-2.5 right-2.5 px-2 py-0.5 rounded bg-surface/90 text-secondary font-label-sm text-[10px]">
+                Bản in Nhã Nam
+              </span>
+</div>
+<div class="space-y-1">
+<span class="text-label-sm font-label-sm text-primary font-medium">Lãng mạn hiện sinh</span>
+<h3 class="font-title-md text-title-md font-bold text-on-surface group-hover:text-primary transition-colors line-clamp-1">Người Tình Sputnik</h3>
+<p class="font-body-sm text-body-sm text-outline">Bản dịch Ngân Xuyên</p>
+</div>
+<div class="bg-surface-container-low rounded-lg p-2.5 space-y-1 font-body-sm text-[12px] text-on-surface-variant">
+<div class="flex items-center justify-between text-secondary">
+<span>Ruột sách: Trắng đẹp, phẳng phiu</span>
+</div>
+<div class="flex items-center gap-1 text-outline">
+<span class="material-symbols-outlined text-[14px] text-primary">bookmark</span>
+                Bìa bóng mờ, không gãy góc
+              </div>
+</div>
+</div>
+<div class="pt-4 mt-3 flex items-center justify-between">
+<div class="flex flex-col">
+<span class="font-label-sm text-[11px] text-outline line-through">105.000₫</span>
+<span class="font-title-lg text-title-lg font-bold text-primary">72.000₫</span>
+</div>
+<button aria-label="Thêm Người Tình Sputnik vào giỏ hàng" class="p-2.5 rounded-xl bg-primary-container text-on-primary-container hover:bg-primary-container/80 transition-colors shadow-sm">
+<span class="material-symbols-outlined text-[20px]">add_shopping_cart</span>
+</button>
+</div>
+</div>
+</div>
+<!-- Load More / View All Works -->
+<div class="mt-10 flex flex-col items-center justify-center gap-3">
+<button class="px-8 py-3 rounded-full bg-surface-container-high hover:bg-surface-container-highest text-on-surface font-label-lg text-label-lg font-semibold transition-colors flex items-center gap-2">
+<span>Xem thêm 13 tựa sách khác của Haruki Murakami</span>
+<span class="material-symbols-outlined text-[18px]">expand_more</span>
+</button>
+<span class="font-body-sm text-[12px] text-outline">Bao gồm: "Phía Nam Biên Giới Phía Tây Mặt Trời", "Cuộc Săn Cừu Hoang", "Tôi Nói Gì Khi Nói Về Chạy Bộ"...</span>
+</div>
+</section>
+<!-- Reading Club / Editorial Spotlight: The Murakami Phenomenon -->
+<section class="max-w-7xl mx-auto px-6 py-8">
+<div class="bg-surface-container rounded-3xl p-8 lg:p-10 relative overflow-hidden">
+<div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
+<div class="lg:col-span-8 space-y-3">
+<span class="px-3 py-1 rounded-full bg-primary-fixed text-on-primary-fixed font-label-sm text-label-sm font-semibold inline-flex items-center gap-1">
+<span class="material-symbols-outlined text-[14px]">menu_book</span>
+              Góc Độc Giả Book4Life
+            </span>
+<h3 class="font-headline-md text-headline-md font-bold text-on-surface">Vì sao sách cũ của Murakami luôn được săn đón?</h3>
+<p class="font-body-md text-body-md text-on-surface-variant leading-relaxed">
+              Những bản in thời kỳ đầu của Nhã Nam (giai đoạn 2006 – 2012) có bìa mỹ thuật vẽ tay và lớp giấy xốp ngả màu tự nhiên, mang lại cảm giác hoài niệm đặc biệt khi lật từng trang sách trong tiếng nhạc jazz êm đềm. Tại Book4Life, mỗi cuốn sách được nâng niu như một ký ức nguyên vẹn truyền tay giữa những tâm hồn đồng điệu.
+            </p>
+</div>
+<div class="lg:col-span-4 flex flex-col sm:flex-row lg:flex-col gap-3 justify-center">
+<div class="bg-surface-container-lowest p-4 rounded-xl shadow-sm flex items-center gap-3">
+<div class="w-10 h-10 rounded-full bg-primary-container/20 text-primary flex items-center justify-center shrink-0">
+<span class="material-symbols-outlined text-[20px]">history_edu</span>
+</div>
+<div class="min-w-0">
+<p class="font-title-md text-[14px] font-bold text-on-surface truncate">Kiểm định trang khuyết</p>
+<p class="font-body-sm text-[12px] text-outline">Đảm bảo 100% không mất chữ hay mất trang</p>
+</div>
+</div>
+<div class="bg-surface-container-lowest p-4 rounded-xl shadow-sm flex items-center gap-3">
+<div class="w-10 h-10 rounded-full bg-secondary-fixed/50 text-secondary flex items-center justify-center shrink-0">
+<span class="material-symbols-outlined text-[20px]">nest_eco_leaf</span>
+</div>
+<div class="min-w-0">
+<p class="font-title-md text-[14px] font-bold text-on-surface truncate">Đóng gói thân thiện môi trường</p>
+<p class="font-body-sm text-[12px] text-outline">Giấy xi măng &amp; băng keo giấy tái chế</p>
+</div>
+</div>
+</div>
+</div>
+</div>
+</section>
+<!-- A-Z Author Directory Section -->
+<section class="max-w-7xl mx-auto px-6 py-12">
+<!-- Section Header -->
+<div class="flex flex-col md:flex-row md:items-end justify-between gap-4 pb-8">
+<div>
+<div class="flex items-center gap-2 text-primary font-label-md text-label-md font-semibold tracking-wider uppercase mb-1">
+<span class="material-symbols-outlined text-[18px]">sort_by_alpha</span>
+            Danh bạ tác giả tinh hoa
+          </div>
+<h2 class="font-headline-lg text-headline-lg font-bold text-on-surface">Tra Cứu Tác Giả Từ A Đến Z</h2>
+<p class="font-body-sm text-body-sm text-outline mt-1">Khám phá hơn 250 tác giả văn học kinh điển, triết học, tâm lý và văn hóa toàn cầu.</p>
+</div>
+<!-- Quick Filter Search for Authors -->
+<div class="w-full md:w-72 flex items-center bg-surface-container-low rounded-xl px-3 py-2 shadow-sm focus-within:bg-surface-container-lowest transition-all">
+<span class="material-symbols-outlined text-outline text-[18px] mr-2">search</span>
+<input class="w-full bg-transparent font-body-sm text-body-sm text-on-surface placeholder:text-outline focus:outline-none" placeholder="Lọc tên tác giả..." type="text"/>
+</div>
+</div>
+<!-- Alphabet Filter Bar -->
+<div class="bg-surface-container-low rounded-2xl p-2.5 shadow-sm overflow-x-auto">
+<div class="flex items-center justify-between min-w-[720px] gap-1 font-label-md text-label-md">
+<button class="w-9 h-9 rounded-xl flex items-center justify-center font-bold bg-primary text-on-primary shadow-sm">Tất cả</button>
+<button class="w-8 h-8 rounded-lg flex items-center justify-center text-on-surface hover:bg-surface-container-high transition-colors font-semibold">A</button>
+<button class="w-8 h-8 rounded-lg flex items-center justify-center text-on-surface hover:bg-surface-container-high transition-colors font-semibold">B</button>
+<button class="w-8 h-8 rounded-lg flex items-center justify-center text-on-surface hover:bg-surface-container-high transition-colors font-semibold">C</button>
+<button class="w-8 h-8 rounded-lg flex items-center justify-center text-on-surface hover:bg-surface-container-high transition-colors font-semibold">D</button>
+<button class="w-8 h-8 rounded-lg flex items-center justify-center text-on-surface hover:bg-surface-container-high transition-colors font-semibold">E</button>
+<button class="w-8 h-8 rounded-lg flex items-center justify-center text-on-surface hover:bg-surface-container-high transition-colors font-semibold">F</button>
+<button class="w-8 h-8 rounded-lg flex items-center justify-center text-on-surface hover:bg-surface-container-high transition-colors font-semibold">G</button>
+<button class="w-8 h-8 rounded-lg flex items-center justify-center text-primary-container bg-primary-container/20 font-bold">H</button>
+<button class="w-8 h-8 rounded-lg flex items-center justify-center text-on-surface hover:bg-surface-container-high transition-colors font-semibold">I</button>
+<button class="w-8 h-8 rounded-lg flex items-center justify-center text-on-surface hover:bg-surface-container-high transition-colors font-semibold">J</button>
+<button class="w-8 h-8 rounded-lg flex items-center justify-center text-on-surface hover:bg-surface-container-high transition-colors font-semibold">K</button>
+<button class="w-8 h-8 rounded-lg flex items-center justify-center text-on-surface hover:bg-surface-container-high transition-colors font-semibold">L</button>
+<button class="w-8 h-8 rounded-lg flex items-center justify-center text-on-surface hover:bg-surface-container-high transition-colors font-semibold">M</button>
+<button class="w-8 h-8 rounded-lg flex items-center justify-center text-on-surface hover:bg-surface-container-high transition-colors font-semibold">N</button>
+<button class="w-8 h-8 rounded-lg flex items-center justify-center text-on-surface hover:bg-surface-container-high transition-colors font-semibold">O</button>
+<button class="w-8 h-8 rounded-lg flex items-center justify-center text-on-surface hover:bg-surface-container-high transition-colors font-semibold">P</button>
+<button class="w-8 h-8 rounded-lg flex items-center justify-center text-on-surface hover:bg-surface-container-high transition-colors font-semibold">Q</button>
+<button class="w-8 h-8 rounded-lg flex items-center justify-center text-on-surface hover:bg-surface-container-high transition-colors font-semibold">R</button>
+<button class="w-8 h-8 rounded-lg flex items-center justify-center text-on-surface hover:bg-surface-container-high transition-colors font-semibold">S</button>
+<button class="w-8 h-8 rounded-lg flex items-center justify-center text-on-surface hover:bg-surface-container-high transition-colors font-semibold">T</button>
+<button class="w-8 h-8 rounded-lg flex items-center justify-center text-on-surface hover:bg-surface-container-high transition-colors font-semibold">U</button>
+<button class="w-8 h-8 rounded-lg flex items-center justify-center text-on-surface hover:bg-surface-container-high transition-colors font-semibold">V</button>
+<button class="w-8 h-8 rounded-lg flex items-center justify-center text-on-surface hover:bg-surface-container-high transition-colors font-semibold">W</button>
+<button class="w-8 h-8 rounded-lg flex items-center justify-center text-on-surface hover:bg-surface-container-high transition-colors font-semibold">X</button>
+<button class="w-8 h-8 rounded-lg flex items-center justify-center text-on-surface hover:bg-surface-container-high transition-colors font-semibold">Y</button>
+<button class="w-8 h-8 rounded-lg flex items-center justify-center text-on-surface hover:bg-surface-container-high transition-colors font-semibold">Z</button>
+</div>
+</div>
+<!-- Authors Directory Grid -->
+<div class="mt-8 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+<!-- Author Card 1: Gabriel García Márquez -->
+<a class="bg-surface-container-lowest p-4 rounded-2xl shadow-sm hover:shadow-md hover:-translate-y-1 transition-all flex items-center gap-3.5 group" href="#">
+<div class="w-14 h-14 rounded-full bg-surface-container overflow-hidden shrink-0">
+<img class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300" data-alt="Monochrome sepia portrait of author Gabriel Garcia Marquez with classic vintage glasses and friendly warm expression, sepia warm ambient paper light" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDjzGf-OzEzfP8HZbWmpysqlYlYIt3VBGfUbutFhGYF3qhlaxoVkY1btNkg46SJ0CG9wRtyP62So1VDjBPHbdHew5fE2nl0qqohzPaKhJKhs0KDz-UO_PXHcSFe1GrU3K0EXX3_H0cJ2A5qawky_O6WpfGxdclUB8ed738iOb4KfjssPLtI6x_RyO4d2KaXMuD2GKqVVZsIsPHg5UZsY2V9tZiPNSGAgVwvpUr1kfmf2OKpw_Y5RV47"/>
+</div>
+<div class="min-w-0 flex-1">
+<h4 class="font-title-md text-title-md font-bold text-on-surface group-hover:text-primary transition-colors truncate">G. García Márquez</h4>
+<p class="font-body-sm text-[12px] text-outline truncate">Chủ nghĩa hiện thực huyền ảo</p>
+<span class="inline-block mt-1 px-2 py-0.5 rounded bg-surface-container text-secondary font-label-sm text-[11px] font-semibold">14 tựa sách sẵn có</span>
+</div>
+</a>
+<!-- Author Card 2: Nam Cao -->
+<a class="bg-surface-container-lowest p-4 rounded-2xl shadow-sm hover:shadow-md hover:-translate-y-1 transition-all flex items-center gap-3.5 group" href="#">
+<div class="w-14 h-14 rounded-full bg-surface-container overflow-hidden shrink-0">
+<img class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300" data-alt="Vintage sepia portrait of Vietnamese literary master Nam Cao, authentic historical literature look, warm aged paper tones" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBAT2cFDJgAYyZ8cCzyi1eqffUEMLx9AKfhml_Io4UteUGNoPlgk6SjVM2yMuK6k4RVD5WMBWTF80mfkhgZQMr1FB8IXbRktEADmpox4UhqH6SlhT9r-U5p841Bjgpgggavt3fTazv6lc-4buEisTPHnDq9SjOXPVKLfqWnvjOPhA-vlwqMGvUkkMcQmttH6m8HWVV-GIT1bj1GKULTUjTgyg_RAyRgUGKvusAy6f4pUtiKfPSXeOAb"/>
+</div>
+<div class="min-w-0 flex-1">
+<h4 class="font-title-md text-title-md font-bold text-on-surface group-hover:text-primary transition-colors truncate">Nam Cao</h4>
+<p class="font-body-sm text-[12px] text-outline truncate">Hiện thực phê phán Việt Nam</p>
+<span class="inline-block mt-1 px-2 py-0.5 rounded bg-surface-container text-secondary font-label-sm text-[11px] font-semibold">9 tựa sách sẵn có</span>
+</div>
+</a>
+<!-- Author Card 3: Vũ Trọng Phụng -->
+<a class="bg-surface-container-lowest p-4 rounded-2xl shadow-sm hover:shadow-md hover:-translate-y-1 transition-all flex items-center gap-3.5 group" href="#">
+<div class="w-14 h-14 rounded-full bg-surface-container overflow-hidden shrink-0">
+<img class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300" data-alt="Historical portrait photograph of Vietnamese author Vu Trong Phung in 1930s attire, classic warm parchment texture, literary legacy atmosphere" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAwRBRMI9Jfy5h1nkXEZHaW-S4_ciRtiixY9yrBp6MdUMIDb63NtnXfwp1njrL5wTsxzH7VIx7OE2DvzQRh4YPn3ov2zmuUZNfrjirQoDMsnfL323BVjFOV9O0FuloysHWOLXQz0b2OYELliLi3mILFbnG3hUK9tA4rpVDBCHYDDCn-SCOiaS4RvrNDiCDKUvkw5nUqH4r601PeFQnv-2ZF_-Q24mpWgY8ZN36VOUkN4tAzWawBfJcI"/>
+</div>
+<div class="min-w-0 flex-1">
+<h4 class="font-title-md text-title-md font-bold text-on-surface group-hover:text-primary transition-colors truncate">Vũ Trọng Phụng</h4>
+<p class="font-body-sm text-[12px] text-outline truncate">Ông vua phóng sự đất Bắc</p>
+<span class="inline-block mt-1 px-2 py-0.5 rounded bg-surface-container text-secondary font-label-sm text-[11px] font-semibold">11 tựa sách sẵn có</span>
+</div>
+</a>
+<!-- Author Card 4: Nguyễn Tuân -->
+<a class="bg-surface-container-lowest p-4 rounded-2xl shadow-sm hover:shadow-md hover:-translate-y-1 transition-all flex items-center gap-3.5 group" href="#">
+<div class="w-14 h-14 rounded-full bg-surface-container overflow-hidden shrink-0">
+<img class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300" data-alt="Vintage photograph of writer Nguyen Tuan holding a fountain pen with an artistic thoughtful expression, warm sepia studio portrait, classic literary tone" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAJ3EKivyXXHpe_jg16QhBM9hqEqo7grdoYa5LJXNHoE45FZlDsBTmRF4atvG3ycDjVFR6Eu8KCzy-7YidGRxDEx9JBBig2szpBF_I2hQ8Wxo35BA6m56mENhm4CwERSpSjtS8_O2hI6ljrQ8TKRUJGaXADtyXt4Q8NrzTLn7kmQjaTWg86xTwuy-lURshhb1vv4rIpNa8OvY__G_Vuxpobfa04oeftkE86xc6wxq9faolFt4BkDOiO"/>
+</div>
+<div class="min-w-0 flex-1">
+<h4 class="font-title-md text-title-md font-bold text-on-surface group-hover:text-primary transition-colors truncate">Nguyễn Tuân</h4>
+<p class="font-body-sm text-[12px] text-outline truncate">Bậc thầy tùy bút &amp; phong vị</p>
+<span class="inline-block mt-1 px-2 py-0.5 rounded bg-surface-container text-secondary font-label-sm text-[11px] font-semibold">8 tựa sách sẵn có</span>
+</div>
+</a>
+<!-- Author Card 5: Albert Camus -->
+<a class="bg-surface-container-lowest p-4 rounded-2xl shadow-sm hover:shadow-md hover:-translate-y-1 transition-all flex items-center gap-3.5 group" href="#">
+<div class="w-14 h-14 rounded-full bg-surface-container overflow-hidden shrink-0">
+<img class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300" data-alt="Classic portrait of philosopher Albert Camus with turned-up coat collar, cinematic soft vintage lighting, black and white sepia warmth" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBrixe15YQFcuv_ERciN_6BFAEMWeZYocmY8ANDieyIA11KQIPyrG_D8s1YYCQL_q6wv6FxBdPgGukP8RahV6JDyM_JyP_pPd-TXUo6jHde9sv1cz3lorr5AA19dTt78ktHl-CBT8vOB3itlxTfehEEIZCfxML0kKJw-KbKhbc8J7DkktQKFh76BrKvAoaZ7cpCc5LO58cycVnQysRLgHsVkjaf1Wxvd1pICiW5GfEYXHCJOly3NL33"/>
+</div>
+<div class="min-w-0 flex-1">
+<h4 class="font-title-md text-title-md font-bold text-on-surface group-hover:text-primary transition-colors truncate">Albert Camus</h4>
+<p class="font-body-sm text-[12px] text-outline truncate">Triết học phi lý &amp; Khởi nghĩa</p>
+<span class="inline-block mt-1 px-2 py-0.5 rounded bg-surface-container text-secondary font-label-sm text-[11px] font-semibold">16 tựa sách sẵn có</span>
+</div>
+</a>
+<!-- Author Card 6: Franz Kafka -->
+<a class="bg-surface-container-lowest p-4 rounded-2xl shadow-sm hover:shadow-md hover:-translate-y-1 transition-all flex items-center gap-3.5 group" href="#">
+<div class="w-14 h-14 rounded-full bg-surface-container overflow-hidden shrink-0">
+<img class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300" data-alt="Historic archival sepia photo of Franz Kafka in suit, intense piercing eyes, Prague turn-of-the-century aesthetic, textured paper background" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBDl1ME2VdKJuCMosKb7edlTDw-BmsqWDoJsXKfaJEYgZguFJ3LybKGRxOTTDVZDlfMCof3_IFqzWSiSAvO85QzxsCkr2pQyMoe6Na4_hrrPz31a-GgSDGad3Z6w516MwhYtLMMtbn219H6BztERawpPZ8Vfr7eaNbeNcBvtaC5sH42KJaO64yxmwP3Kgtj_wpdAPlm-A0DRg13woOOasDa6fR7524XlzXajtFjMBrSdzlYpwg3aAyn"/>
+</div>
+<div class="min-w-0 flex-1">
+<h4 class="font-title-md text-title-md font-bold text-on-surface group-hover:text-primary transition-colors truncate">Franz Kafka</h4>
+<p class="font-body-sm text-[12px] text-outline truncate">Văn học hiện sinh &amp; Dị biến</p>
+<span class="inline-block mt-1 px-2 py-0.5 rounded bg-surface-container text-secondary font-label-sm text-[11px] font-semibold">7 tựa sách sẵn có</span>
+</div>
+</a>
+<!-- Author Card 7: George Orwell -->
+<a class="bg-surface-container-lowest p-4 rounded-2xl shadow-sm hover:shadow-md hover:-translate-y-1 transition-all flex items-center gap-3.5 group" href="#">
+<div class="w-14 h-14 rounded-full bg-surface-container overflow-hidden shrink-0">
+<img class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300" data-alt="Vintage sepia portrait of writer George Orwell in classic British mid-century attire, intellectual thoughtful look, warm paper grain" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBFvWetfP6_u21qVZBgY-utosdNA5g2iXt0WwDAglia_L2l1GrRRbBJClu1PvbE1YEzo9GRrXJqPeD6Jh-W1FqXrPX6ZkDezHf_T-Ilr5BoLI9J8hUf8_dojTWEeF7kzmLQ88-FGkwGlD8tX_9-2srIupbsAIjfj0qECkmJ1JSSHl_pRB3zfcvSOL0FPejVuExy-GMDa6Dmg5Axme5rbroFFwHZH1KjLPYMTGCyekWLjCs8GVfSYxtQ"/>
+</div>
+<div class="min-w-0 flex-1">
+<h4 class="font-title-md text-title-md font-bold text-on-surface group-hover:text-primary transition-colors truncate">George Orwell</h4>
+<p class="font-body-sm text-[12px] text-outline truncate">Văn học viễn tưởng chính trị</p>
+<span class="inline-block mt-1 px-2 py-0.5 rounded bg-surface-container text-secondary font-label-sm text-[11px] font-semibold">12 tựa sách sẵn có</span>
+</div>
+</a>
+<!-- Author Card 8: Fyodor Dostoevsky -->
+<a class="bg-surface-container-lowest p-4 rounded-2xl shadow-sm hover:shadow-md hover:-translate-y-1 transition-all flex items-center gap-3.5 group" href="#">
+<div class="w-14 h-14 rounded-full bg-surface-container overflow-hidden shrink-0">
+<img class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300" data-alt="Archival portrait painting of Russian novelist Fyodor Dostoevsky with iconic beard and contemplative solemn expression, warm mahogany library tone" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCTHgvsSPfrDqlgWNwrwgHIxNJhgeHtXV9OKDGGUA-2vKbkGkjwOFHe57-MsubKNUjVbreEJMkrDVB6RYTUTaaZu5t10mtorjHo0fzdqdk9iD87W0I08od_AeIFVjm1-sR86ERvf6TrygINFLJ2czio86Xt5brWwmYZJQY5shkw8GdM1xHqwS-jVYvxWF-xWflZjW9YEN1iq_CdUNNRK_i_vTE-lG8_u7_St-B5j_zCnrxqOKFwdAm6"/>
+</div>
+<div class="min-w-0 flex-1">
+<h4 class="font-title-md text-title-md font-bold text-on-surface group-hover:text-primary transition-colors truncate">Fyodor Dostoevsky</h4>
+<p class="font-body-sm text-[12px] text-outline truncate">Tâm lý học chiều sâu Nga</p>
+<span class="inline-block mt-1 px-2 py-0.5 rounded bg-surface-container text-secondary font-label-sm text-[11px] font-semibold">15 tựa sách sẵn có</span>
+</div>
+</a>
+<!-- Author Card 9: Jane Austen -->
+<a class="bg-surface-container-lowest p-4 rounded-2xl shadow-sm hover:shadow-md hover:-translate-y-1 transition-all flex items-center gap-3.5 group" href="#">
+<div class="w-14 h-14 rounded-full bg-surface-container overflow-hidden shrink-0">
+<img class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300" data-alt="Delicate Regency era watercolor portrait of author Jane Austen in bonnet and dress, soft pastel and sepia tones, English literary classic look" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDk9_SFDPfBe5nGQPh8VQVZTGN8-Z8M3vjo8-r1qAPanY8VmdAKgvPftFTldd7HHh1AWg55Dsbb1YAqsHIvvHtJyl8RzFU0uXsDTv3-HmcpLs4FIoa5n1QLNlMbuf9vJpNTXvQ8rAEeaHT-fgIJNlr26ApoQ9fvCRD4w6OOS5kZK8i4R-ex2Qy8QaTFnxudJgGXcTpXAjxnOFZi_o2p3EIW1-tGdlXZaXww_SyrE9LgNM6p07cCNACd"/>
+</div>
+<div class="min-w-0 flex-1">
+<h4 class="font-title-md text-title-md font-bold text-on-surface group-hover:text-primary transition-colors truncate">Jane Austen</h4>
+<p class="font-body-sm text-[12px] text-outline truncate">Cổ điển lãng mạn Anh Quốc</p>
+<span class="inline-block mt-1 px-2 py-0.5 rounded bg-surface-container text-secondary font-label-sm text-[11px] font-semibold">10 tựa sách sẵn có</span>
+</div>
+</a>
+<!-- Author Card 10: J.D. Salinger -->
+<a class="bg-surface-container-lowest p-4 rounded-2xl shadow-sm hover:shadow-md hover:-translate-y-1 transition-all flex items-center gap-3.5 group" href="#">
+<div class="w-14 h-14 rounded-full bg-surface-container overflow-hidden shrink-0">
+<img class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300" data-alt="Rare vintage candid photograph of young J.D. Salinger smiling subtly, 1940s American literary style, rich warm tone, analog photo print texture" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDRM_O2VBkbp5S3MyHKC6BhT3PhuZahPQlvtxdsUTvR3YW5ZERWEkAYKisp1FZBUOABX378g7fFxGSK9s9NPSIJUj_Nsv3cUExe9lG7JbVSLaWdzYD1lL-i-kbN2lEuztt5-acecLFyubZP2y3T5D8QAYCbuEhTFJqHp_rzp_r-eDlTndvfGYBn_4Bo2Mt7G1YfYYbtr_zXidlS6tWLjUO1lM4dGFUbBJLx2wIJSJkvqGvQN3BvnBxK"/>
+</div>
+<div class="min-w-0 flex-1">
+<h4 class="font-title-md text-title-md font-bold text-on-surface group-hover:text-primary transition-colors truncate">J.D. Salinger</h4>
+<p class="font-body-sm text-[12px] text-outline truncate">Tiếng nói tuổi trẻ nổi loạn</p>
+<span class="inline-block mt-1 px-2 py-0.5 rounded bg-surface-container text-secondary font-label-sm text-[11px] font-semibold">6 tựa sách sẵn có</span>
+</div>
+</a>
+<!-- Author Card 11: Ernest Hemingway -->
+<a class="bg-surface-container-lowest p-4 rounded-2xl shadow-sm hover:shadow-md hover:-translate-y-1 transition-all flex items-center gap-3.5 group" href="#">
+<div class="w-14 h-14 rounded-full bg-surface-container overflow-hidden shrink-0">
+<img class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300" data-alt="Charismatic black and white portrait of Ernest Hemingway in heavy knit fisherman sweater, rugged warm lighting, timeless storytelling aura" src="https://lh3.googleusercontent.com/aida-public/AB6AXuASJW5Ei55M1l7gk8BlaPYb5HAv7_ICGCXEP2igNFWyBANaQj0R6rWoR3hQFUHq2-HNTub-StonHB52UPoH3c7E26Zvc4_d789qy-PHWUUnDeLoVJVNOKZuEilfuIV7GDwsCLyrbnej1p2g2d3BynylHJSRu7Lmm1Qv-wMYfksbB0cDP3WcsP0VDRNkAgye9d_reaJi_At-G9fAoejof2kg-eAQ0Q3qR-V-Jh2n05i9fLh_SWA6yPxP"/>
+</div>
+<div class="min-w-0 flex-1">
+<h4 class="font-title-md text-title-md font-bold text-on-surface group-hover:text-primary transition-colors truncate">Ernest Hemingway</h4>
+<p class="font-body-sm text-[12px] text-outline truncate">Nguyên lý Tảng Băng Trôi</p>
+<span class="inline-block mt-1 px-2 py-0.5 rounded bg-surface-container text-secondary font-label-sm text-[11px] font-semibold">13 tựa sách sẵn có</span>
+</div>
+</a>
+<!-- Author Card 12: View All / Explore Directory CTA -->
+<div class="bg-surface-container-low p-4 rounded-2xl shadow-sm flex flex-col justify-center items-center text-center group cursor-pointer hover:bg-surface-container transition-colors">
+<div class="w-12 h-12 rounded-full bg-primary-container/30 text-primary flex items-center justify-center mb-2 group-hover:scale-110 transition-transform">
+<span class="material-symbols-outlined text-[24px]">explore</span>
+</div>
+<h4 class="font-title-md text-title-md font-bold text-on-surface">Toàn Bộ Danh Bạ</h4>
+<p class="font-body-sm text-[12px] text-outline mt-0.5">Khám phá hơn 250+ tác giả khác</p>
+<span class="font-label-sm text-label-sm text-primary font-bold mt-2 flex items-center gap-1">
+            Xem ngay <span class="material-symbols-outlined text-[14px]">arrow_forward</span>
+</span>
+</div>
+</div>
+</section>
+<!-- Rare Book Alert / Collector's Wishlist Notification Banner -->
+<section class="max-w-7xl mx-auto px-6 pt-4 pb-16">
+<div class="bg-gradient-to-r from-secondary-fixed/40 via-surface-container-low to-tertiary-fixed/30 rounded-3xl p-8 lg:p-12 shadow-sm relative overflow-hidden">
+<div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
+<div class="lg:col-span-7 space-y-3">
+<div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-surface-container-lowest text-primary font-label-sm text-label-sm font-semibold shadow-xs">
+<span class="material-symbols-outlined text-[16px]">notifications_active</span>
+              Dịch vụ săn tìm sách hiếm &amp; Bản in cổ
+            </div>
+<h3 class="font-headline-md text-headline-md font-bold text-on-surface">Đăng ký thông báo khi có sách mới về kho</h3>
+<p class="font-body-md text-body-md text-on-surface-variant leading-relaxed">
+              Bạn đang tìm kiếm bản in đầu tiên, sách có chữ ký tác giả hoặc các ấn bản đã ngừng xuất bản từ lâu? Hãy để lại tên tác giả bạn yêu thích và phương thức liên hệ, thủ thư Book4Life sẽ ưu tiên thông báo ngay khi sách vừa cập bến.
+            </p>
+</div>
+<div class="lg:col-span-5 bg-surface-container-lowest rounded-2xl p-6 shadow-md space-y-3">
+<div class="space-y-1">
+<label class="font-label-sm text-label-sm font-semibold text-on-surface">Tác giả bạn quan tâm</label>
+<div class="w-full flex items-center bg-surface-container-low rounded-xl px-3 py-2 text-on-surface">
+<span class="material-symbols-outlined text-outline text-[18px] mr-2">person_search</span>
+<input class="w-full bg-transparent font-body-sm text-body-sm text-on-surface focus:outline-none" placeholder="Nhập tên tác giả..." type="text" value="Haruki Murakami"/>
+</div>
+</div>
+<div class="space-y-1">
+<label class="font-label-sm text-label-sm font-semibold text-on-surface">Email hoặc Số Zalo nhận tin</label>
+<div class="w-full flex items-center bg-surface-container-low rounded-xl px-3 py-2 text-on-surface">
+<span class="material-symbols-outlined text-outline text-[18px] mr-2">mail</span>
+<input class="w-full bg-transparent font-body-sm text-body-sm text-on-surface focus:outline-none" placeholder="nhanban@booklover.vn" type="email"/>
+</div>
+</div>
+<button class="w-full py-3 rounded-xl bg-primary-container hover:bg-primary-container/90 text-on-primary-container font-label-lg text-label-lg font-bold transition-all shadow-sm flex items-center justify-center gap-2 mt-2" id="notify-submit-btn" type="button">
+<span class="material-symbols-outlined text-[18px]">bookmark_add</span>
+              Nhận thông báo sách hiếm
+            </button>
+<p class="font-label-sm text-[11px] text-outline text-center">Hoàn toàn miễn phí • Hủy nhận thông báo bất kỳ lúc nào</p>
+</div>
+</div>
+</div>
+</section>
+</div>
+</div>
+<script>
+  // Interactive micro-behavior for the notify button
+  document.getElementById('notify-submit-btn')?.addEventListener('click', function() {
+    const btn = this;
+    const originalText = btn.innerHTML;
+    btn.innerHTML = `<span class="material-symbols-outlined text-[18px]">check_circle</span> Đã lưu thông báo thành công!`;
+    btn.classList.add('bg-primary', 'text-on-primary');
+    btn.classList.remove('bg-primary-container', 'text-on-primary-container');
+    setTimeout(() => {
+      btn.innerHTML = originalText;
+      btn.classList.remove('bg-primary', 'text-on-primary');
+      btn.classList.add('bg-primary-container', 'text-on-primary-container');
+    }, 3500);
+  });
+</script></main><footer class="w-full bg-[#2C1E16] text-[#FAF9F6]"><div class="max-w-7xl mx-auto px-6 py-16"><div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-10"><div class="space-y-4"><div class="flex items-center gap-2.5"><div class="w-8 h-8 rounded-full bg-primary-container/20 flex items-center justify-center text-primary-container"><span class="material-symbols-outlined text-[20px]">eco</span></div><span class="font-headline-sm text-headline-sm font-bold text-primary-container tracking-tight">Book4Life</span></div><p class="font-body-sm text-body-sm text-outline-variant leading-relaxed">Tiệm sách cũ trực tuyến gìn giữ di sản tri thức và văn hóa đọc truyền thống. Mỗi tựa sách sang tay góp phần giảm dấu chân carbon, nuôi dưỡng tình yêu sách và lối sống bền vững.</p><div class="flex items-center gap-3 pt-2 text-[#FAF9F6]"><span class="material-symbols-outlined text-primary-container text-[20px]">nature_people</span><span class="font-label-sm text-label-sm text-outline-variant">Vòng đời sách tuần hoàn &amp; Ươm mầm xanh</span></div></div><div class="space-y-3"><h4 class="font-title-md text-title-md text-[#FAF9F6] font-semibold">Khám Phá &amp; Danh Mục</h4><ul class="space-y-2 font-body-sm text-body-sm text-outline-variant"><li><a class="hover:text-primary-container transition-colors" data-path="the-loai" href="#">Toàn bộ danh mục thể loại</a></li><li><a class="hover:text-primary-container transition-colors" data-path="tac-gia" href="#">Tuyển tập tác giả tiêu biểu</a></li><li><a class="hover:text-primary-container transition-colors" data-path="the-loai" href="#">Bản in đầu &amp; Sách hiếm tuyển chọn</a></li><li><a class="hover:text-primary-container transition-colors" data-path="goc-doc-sach-blog" href="#">Góc đọc sách &amp; Bình phẩm văn học</a></li><li><a class="hover:text-primary-container transition-colors" data-path="lien-he-va-diem-thu-mua" href="#">Quy trình ký gửi &amp; Thu mua sách cũ</a></li></ul></div><div class="space-y-3"><h4 class="font-title-md text-title-md text-[#FAF9F6] font-semibold">Thẩm Định &amp; Bảo Tồn</h4><p class="font-body-sm text-body-sm text-outline-variant">Quy chuẩn đánh giá tình trạng sách chuẩn xác:</p><div class="space-y-2 pt-1"><div class="flex items-start gap-2"><span class="px-2 py-0.5 rounded bg-surface-container-highest/10 text-primary-container font-label-sm text-[11px] font-bold shrink-0">Rare</span><span class="font-body-sm text-[12px] text-outline-variant">Sách cổ, có chữ ký, ấn bản đặc biệt</span></div><div class="flex items-start gap-2"><span class="px-2 py-0.5 rounded bg-surface-container-highest/10 text-[#FAF9F6] font-label-sm text-[11px] font-bold shrink-0">Like New</span><span class="font-body-sm text-[12px] text-outline-variant">Gần như mới nguyên, gáy và mép phẳng</span></div><div class="flex items-start gap-2"><span class="px-2 py-0.5 rounded bg-surface-container-highest/10 text-outline-variant font-label-sm text-[11px] font-bold shrink-0">Good</span><span class="font-body-sm text-[12px] text-outline-variant">Dấu thời gian nhẹ, ruột sách vẹn nguyên</span></div></div><div class="pt-2"><a class="font-label-sm text-label-sm text-primary-container hover:underline" data-path="lien-he-va-diem-thu-mua" href="#">Tra cứu điểm thu mua &amp; Báo giá →</a></div></div><div class="space-y-4"><h4 class="font-title-md text-title-md text-[#FAF9F6] font-semibold">Bản Tin Mọt Sách</h4><p class="font-body-sm text-body-sm text-outline-variant">Nhận danh sách tựa sách hiếm mới cập nhật hàng tuần cùng ưu đãi dành riêng cho bạn đọc.</p><div class="flex items-center gap-2"><input class="w-full px-3 py-2 rounded-lg bg-surface-container-highest/10 font-body-sm text-body-sm text-[#FAF9F6] placeholder:text-outline-variant/60 focus:outline-none focus:ring-1 focus:ring-primary-container" placeholder="Nhập địa chỉ email..." type="email"/><button class="px-4 py-2 bg-primary-container text-on-primary-container font-label-sm text-label-sm font-semibold rounded-lg shrink-0 hover:bg-primary-fixed-dim transition-colors" type="button">Nhận tin</button></div><span class="inline-block font-label-sm text-[11px] text-outline-variant/80">*Cam kết bảo mật thông tin và không quảng cáo phiền phà.</span></div></div><div class="mt-12 pt-8 border-t border-outline-variant/20 flex flex-col md:flex-row items-center justify-between gap-4 font-body-sm text-body-sm text-outline-variant"><div class="flex items-center gap-4"><span>© 2025 Book4Life. Di sản sách &amp; Lối sống bền vững.</span><span class="inline-block w-1 h-1 rounded-full bg-outline-variant/40"></span><span class="flex items-center gap-1"><span class="material-symbols-outlined text-[16px]">eco</span>Phát triển bền vững</span></div><div class="flex items-center gap-6"><div class="flex items-center gap-3 text-[12px]"><span>Thanh toán:</span><span class="material-symbols-outlined text-[20px] text-outline-variant">credit_card</span><span class="material-symbols-outlined text-[20px] text-outline-variant">account_balance_wallet</span><span class="material-symbols-outlined text-[20px] text-outline-variant">qr_code_2</span></div><div class="flex items-center gap-3"><a aria-label="Cộng đồng" class="hover:text-primary-container transition-colors" href="#"><span class="material-symbols-outlined text-[20px]">forum</span></a><a aria-label="Chia sẻ" class="hover:text-primary-container transition-colors" href="#"><span class="material-symbols-outlined text-[20px]">share</span></a></div></div></div></div></footer></body></html>

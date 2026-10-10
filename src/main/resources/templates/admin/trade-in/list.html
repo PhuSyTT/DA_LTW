@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{layout/admin-layout :: html(
+        pageTitle='Quản Lý Thu Mua Sách Cũ (Nhóm 8)',
+        pageSubtitle='Tiếp nhận và thẩm định phiếu bán sách cũ từ khách hàng - Trade-in / Buy-back Workflow',
+        content=~{::section}
+      )}">
+<body>
+<section>
+    <!-- Filter + Main Table -->
+    <div class="content-card">
+        <div class="content-card-header">
+            <div class="d-flex align-items-center gap-2">
+                <h5 class="fw-bold mb-0 text-dark">
+                    <i class="fas fa-hand-holding-dollar text-warning me-2"></i> Danh Sách Phiếu Thu Mua Sách Cũ
+                </h5>
+            </div>
+        </div>
+
+        <!-- Filter Form -->
+        <div class="p-3 border-bottom bg-light">
+            <form th:action="@{/admin/trade-in}" method="get" class="row g-2 align-items-center">
+                <div class="col-md-4">
+                    <label class="form-label small fw-semibold text-muted mb-1">Chi Nhánh Tiếp Nhận</label>
+                    <select name="branchId" class="form-select form-select-sm" onchange="this.form.submit()">
+                        <option value="">-- Chọn chi nhánh --</option>
+                        <option th:each="branch : ${branches}"
+                                th:value="${branch.id}"
+                                th:text="${branch.branchName}"
+                                th:selected="${branch.id == selectedBranchId}">
+                        </option>
+                    </select>
+                </div>
+                <div class="col-md-4">
+                    <label class="form-label small fw-semibold text-muted mb-1">Trạng Thái Phiếu</label>
+                    <select name="status" class="form-select form-select-sm" onchange="this.form.submit()">
+                        <option value="ALL" th:selected="${selectedStatus == 'ALL'}">Tất cả trạng thái</option>
+                        <option value="PENDING_REVIEW" th:selected="${selectedStatus == 'PENDING_REVIEW'}">🔍 Chờ thẩm định</option>
+                        <option value="OFFERED" th:selected="${selectedStatus == 'OFFERED'}">💰 Đã báo giá</option>
+                        <option value="ACCEPTED_AWAITING_DELIVERY" th:selected="${selectedStatus == 'ACCEPTED_AWAITING_DELIVERY'}">✅ Chờ bàn giao</option>
+                        <option value="RECEIVED_STOCKED" th:selected="${selectedStatus == 'RECEIVED_STOCKED'}">📦 Đã nhập kho</option>
+                        <option value="CANCELLED" th:selected="${selectedStatus == 'CANCELLED'}">❌ Đã hủy</option>
+                    </select>
+                </div>
+            </form>
+        </div>
+
+        <!-- No branch selected -->
+        <div class="text-center py-5 text-muted" th:if="${selectedBranchId == null}">
+            <i class="fas fa-store fa-3x mb-3 opacity-25"></i>
+            <p class="fs-6">Vui lòng chọn chi nhánh để xem danh sách phiếu thu mua.</p>
+        </div>
+
+        <!-- Empty requests -->
+        <div class="text-center py-5 text-muted"
+             th:if="${selectedBranchId != null and (requests == null or #lists.isEmpty(requests))}">
+            <i class="fas fa-inbox fa-3x mb-3 opacity-25"></i>
+            <p class="fs-6">Không có phiếu thu mua nào phù hợp với bộ lọc.</p>
+        </div>
+
+        <!-- Requests Table -->
+        <div class="table-responsive" th:if="${requests != null and not #lists.isEmpty(requests)}">
+            <table class="table table-hover align-middle mb-0">
+                <thead class="table-light">
+                    <tr>
+                        <th>Mã Phiếu</th>
+                        <th>Khách Hàng</th>
+                        <th>Tựa Sách</th>
+                        <th>Độ Cũ (KH)</th>
+                        <th>Giá Auto</th>
+                        <th>Giá Staff</th>
+                        <th>Trạng Thái</th>
+                        <th>Ngày Gửi</th>
+                        <th class="text-center">Thao Tác</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr th:each="req : ${requests}">
+                        <td>
+                            <code th:text="${req.requestCode}">TI-2026-001</code>
+                        </td>
+                        <td>
+                            <div th:text="${req.customerName}">Nguyễn Văn A</div>
+                            <small class="text-muted" th:text="${req.customerPhone}">0900000001</small>
+                        </td>
+                        <td>
+                            <div th:text="${req.bookTitle}">Tên Sách</div>
+                            <small class="text-muted" th:text="${req.bookIsbn}">ISBN</small>
+                        </td>
+                        <td>
+                            <span th:switch="${req.userConditionGrade}">
+                                <span th:case="'LIKE_NEW'" class="badge bg-success">LIKE_NEW</span>
+                                <span th:case="'VERY_GOOD'" class="badge bg-primary">VERY_GOOD</span>
+                                <span th:case="'GOOD'" class="badge bg-info text-dark">GOOD</span>
+                                <span th:case="'ACCEPTABLE'" class="badge bg-warning text-dark">ACCEPTABLE</span>
+                                <span th:case="*" class="badge bg-secondary" th:text="${req.userConditionGrade}">N/A</span>
+                            </span>
+                        </td>
+                        <td>
+                            <span class="text-muted"
+                                  th:text="${#numbers.formatDecimal(req.autoEstimatedPrice, 0, 'COMMA', 0, 'POINT')} + 'đ'">0đ</span>
+                        </td>
+                        <td>
+                            <span class="fw-semibold text-success"
+                                  th:text="${req.staffReviewedPrice != null ? #numbers.formatDecimal(req.staffReviewedPrice, 0, 'COMMA', 0, 'POINT') + 'đ' : '—'}">—</span>
+                        </td>
+                        <td>
+                            <span th:switch="${req.status}">
+                                <span th:case="'PENDING_REVIEW'" class="badge bg-warning text-dark">🔍 Chờ thẩm định</span>
+                                <span th:case="'OFFERED'" class="badge bg-info text-white">💰 Đã báo giá</span>
+                                <span th:case="'ACCEPTED_AWAITING_DELIVERY'" class="badge bg-primary text-white">✅ Chờ bàn giao</span>
+                                <span th:case="'RECEIVED_STOCKED'" class="badge bg-success text-white">📦 Đã nhập kho</span>
+                                <span th:case="'CANCELLED'" class="badge bg-danger text-white">❌ Đã hủy</span>
+                                <span th:case="*" class="badge bg-secondary" th:text="${req.status}">N/A</span>
+                            </span>
+                        </td>
+                        <td>
+                            <small class="text-muted"
+                                   th:text="${#temporals.format(req.createdAt, 'dd/MM/yyyy')}">01/01/2026</small>
+                        </td>
+                        <td class="text-center">
+                            <a th:href="@{/admin/trade-in/{id}(id=${req.id})}"
+                               class="btn btn-sm btn-outline-warning fw-semibold" title="Xem chi tiết & Thẩm định">
+                                <i class="fas fa-magnifying-glass me-1"></i> Thẩm Định
+                            </a>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</section>
+</body>
+</html>

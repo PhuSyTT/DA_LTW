@@ -1,0 +1,356 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security" lang="vi">
+<head>
+    <meta charset="utf-8"/>
+    <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+    <title th:text="${pageTitle} ?: 'Lịch Sử Bán Sách Cũ - Book4Life'">Lịch Sử Bán Sách Cũ - Book4Life</title>
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet"/>
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet"/>
+
+    <!-- Tailwind CSS with Book4Life Literary Warmth Tokens -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#835500",
+                        "primary-container": "#f5a623",
+                        "on-primary": "#ffffff",
+                        "on-primary-container": "#644000",
+                        "secondary": "#6c5b51",
+                        "secondary-container": "#f6ded1",
+                        "surface": "#faf9f6",
+                        "surface-container-lowest": "#ffffff",
+                        "surface-container-low": "#f4f3f1",
+                        "surface-container": "#efeeeb",
+                        "surface-container-high": "#e9e8e5",
+                        "surface-container-highest": "#e3e2e0",
+                        "on-surface": "#1a1c1a",
+                        "on-surface-variant": "#524534",
+                        "outline": "#857462",
+                        "outline-variant": "#d7c3ae",
+                        "background": "#faf9f6",
+                        "error": "#ba1a1a"
+                    },
+                    fontFamily: {
+                        "sans": ["'Plus Jakarta Sans'", "Inter", "sans-serif"]
+                    }
+                }
+            }
+        };
+    </script>
+    <style>
+        * { font-family: 'Plus Jakarta Sans', 'Inter', sans-serif !important; }
+        .material-symbols-outlined { font-family: 'Material Symbols Outlined' !important; }
+        .toast-notification {
+            position: fixed; bottom: 24px; right: 24px; background: #2C1E16; color: #FAF9F6;
+            padding: 14px 22px; border-radius: 12px; box-shadow: 0 10px 30px rgba(0,0,0,0.25);
+            display: flex; align-items: center; gap: 10px; z-index: 9999;
+            transform: translateY(120%); transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+        .toast-notification.show { transform: translateY(0); }
+    </style>
+</head>
+<body class="bg-background font-sans text-on-surface antialiased min-h-screen flex flex-col justify-between">
+
+    <div id="toastNotification" class="toast-notification">
+        <span class="material-symbols-outlined text-primary-container" id="toastIcon">check_circle</span>
+        <span id="toastMessage" class="text-sm font-medium">Thông báo hệ thống</span>
+    </div>
+
+    <!-- HEADER -->
+    <header class="fixed top-0 left-0 right-0 z-50 bg-surface/95 backdrop-blur-xl border-b border-outline-variant/30 shadow-[0_1px_8px_rgba(44,30,22,0.04)]">
+        <div class="h-20 w-full max-w-7xl mx-auto px-4 sm:px-6 flex items-center justify-between gap-4">
+            <div class="flex items-center gap-3 shrink-0">
+                <a th:href="@{/}" href="/" class="flex items-center gap-3 group">
+                    <img th:src="@{/images/book4life-logo.png}"
+                         src="/images/book4life-logo.png"
+                         onerror="this.onerror=null; this.src='https://lh3.googleusercontent.com/aida/AEtjO1VFRXY_NxriMnSUoyOlnJkpi_znEOfbT5nqVF_bWOeMuQrL28jtA3tETNkUlNIEvXJm19CEHOkGmCwnVISoEMhl5cfEIGWneqFqQTEH2YVxCJT61G2j2-6D0aqTouvk9S4LMHzp7_D4BtPEKRDgZ-a42hUwlA9vSusc7zVTRfWF9HyMuFlJPcKDbdvyCu6om3wwYvn8--WJGC61Nv6WZJ_H2WA8IPtCQmf7qoGvV5cvAnQdgl-cs0nr3g';"
+                         alt="Book4Life Logo" class="h-9 w-auto object-contain transition-transform group-hover:scale-105"/>
+                    <div class="flex flex-col">
+                        <span class="font-bold text-2xl text-on-surface tracking-tight leading-none group-hover:text-primary transition-colors">Book4Life</span>
+                        <span class="text-[10px] text-primary font-semibold tracking-wider uppercase mt-0.5">Thu Mua Sách Cũ • Trade-in</span>
+                    </div>
+                </a>
+            </div>
+
+            <nav class="hidden md:flex items-center gap-6 text-sm font-semibold text-on-surface-variant">
+                <a th:href="@{/books}" class="hover:text-primary transition-colors">Kho sách</a>
+                <a th:href="@{/trade-in/new}" class="hover:text-primary transition-colors">Bán sách cũ</a>
+                <a th:href="@{/my-trade-in}" class="text-primary font-bold">Yêu cầu của tôi</a>
+                <a th:href="@{/my-wishlist}" class="hover:text-primary transition-colors">Săn sách (Wishlist)</a>
+            </nav>
+
+            <div class="flex items-center gap-3">
+                <a th:href="@{/trade-in/new}" class="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-primary text-on-primary text-xs font-bold hover:bg-amber-800 transition-all shadow-sm">
+                    <span class="material-symbols-outlined text-[16px]">add_circle</span>
+                    <span>Tạo yêu cầu mới</span>
+                </a>
+            </div>
+        </div>
+    </header>
+
+    <!-- MAIN CONTENT -->
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 pt-28 pb-16 w-full flex-grow">
+        <!-- Title Banner -->
+        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-8">
+            <div>
+                <span class="px-3 py-1 rounded-full text-xs font-bold bg-amber-100 text-amber-800 uppercase tracking-wider inline-flex items-center gap-1">
+                    <span class="material-symbols-outlined text-sm">receipt_long</span> Quản lý yêu cầu cá nhân (FR-TRD-05)
+                </span>
+                <h1 class="text-3xl font-extrabold text-on-surface mt-2 tracking-tight">Lịch Sử Phiếu Thu Mua Của Bạn</h1>
+                <p class="text-secondary mt-1 text-sm">Theo dõi tiến độ thẩm định của chuyên viên và phản hồi đề nghị giá mua từ Book4Life.</p>
+            </div>
+            <a th:href="@{/trade-in/new}" class="inline-flex items-center justify-center gap-2 px-5 py-3 rounded-xl bg-primary text-on-primary font-bold text-sm hover:bg-amber-800 transition-all shadow-md self-start sm:self-auto">
+                <span class="material-symbols-outlined text-[18px]">post_add</span>
+                <span>Bán thêm sách cũ</span>
+            </a>
+        </div>
+
+        <!-- Requests Container -->
+        <div id="requestsContainer" class="space-y-4">
+            <!-- Loading indicator -->
+            <div id="loadingState" class="p-12 text-center text-secondary">
+                <span class="material-symbols-outlined text-4xl animate-spin text-primary">progress_activity</span>
+                <p class="mt-3 text-sm font-medium">Đang tải danh sách phiếu thu mua...</p>
+            </div>
+
+            <!-- Empty state (hidden by default) -->
+            <div id="emptyState" class="hidden bg-surface-container-lowest p-12 rounded-2xl border border-outline-variant/30 text-center shadow-sm">
+                <span class="material-symbols-outlined text-5xl text-outline mb-3">inventory_2</span>
+                <h3 class="text-lg font-bold text-on-surface">Bạn chưa có yêu cầu thu mua nào</h3>
+                <p class="text-secondary text-sm max-w-md mx-auto mt-1 mb-6">Hãy gửi sách cũ của bạn để tái tuần hoàn và nhận lại khoản thanh toán hấp dẫn từ Book4Life.</p>
+                <a th:href="@{/trade-in/new}" class="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-primary text-on-primary font-bold text-sm hover:bg-amber-800 transition-all shadow">
+                    <span class="material-symbols-outlined text-[18px]">add_circle</span> Bắt đầu bán sách ngay
+                </a>
+            </div>
+
+            <!-- Request Cards List -->
+            <div id="requestsList" class="space-y-4 hidden"></div>
+        </div>
+    </main>
+
+    <!-- Modal phản hồi giá OFFERED -->
+    <div id="responseModal" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center hidden p-4">
+        <div class="bg-surface-container-lowest max-w-lg w-full rounded-2xl border border-outline-variant/40 p-6 shadow-2xl relative">
+            <h3 class="text-lg font-bold text-on-surface mb-2 flex items-center gap-2">
+                <span class="material-symbols-outlined text-primary">payments</span>
+                Phản Hồi Báo Giá Thu Mua
+            </h3>
+            <p class="text-xs text-secondary mb-4">
+                Phiếu thu mua: <span id="modalRequestCode" class="font-bold text-on-surface">TRD-XXXX</span>
+            </p>
+
+            <div class="p-4 rounded-xl bg-surface-container-low mb-4 text-center">
+                <div class="text-xs text-secondary">Giá chính thức do Book4Life đề xuất:</div>
+                <div id="modalOfferedPrice" class="text-2xl font-extrabold text-primary mt-1">0 ₫</div>
+                <div id="modalStaffNotes" class="text-xs text-secondary italic mt-1">"..."</div>
+            </div>
+
+            <div class="mb-5">
+                <label class="block text-xs font-bold uppercase tracking-wider text-secondary mb-2">Nếu bạn đồng ý, chọn hình thức giao sách:</label>
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <label class="flex items-center gap-2.5 p-3 rounded-xl border border-outline-variant/40 cursor-pointer has-[:checked]:border-primary has-[:checked]:bg-amber-50">
+                        <input type="radio" name="modalDeliveryMethod" value="BRING_TO_STORE" checked class="accent-primary"/>
+                        <span class="text-xs font-semibold">Mang tới chi nhánh</span>
+                    </label>
+                    <label class="flex items-center gap-2.5 p-3 rounded-xl border border-outline-variant/40 cursor-pointer has-[:checked]:border-primary has-[:checked]:bg-amber-50">
+                        <input type="radio" name="modalDeliveryMethod" value="POSTAL_SHIPPING" class="accent-primary"/>
+                        <span class="text-xs font-semibold">Gửi bưu điện/ship</span>
+                    </label>
+                </div>
+            </div>
+
+            <div class="flex items-center justify-end gap-3 pt-3 border-t border-outline-variant/30">
+                <button type="button" onclick="closeResponseModal()" class="px-4 py-2 rounded-xl text-xs font-bold text-secondary hover:bg-surface-container transition-all">
+                    Đóng
+                </button>
+                <button type="button" onclick="sendCustomerResponse(false)" class="px-4 py-2 rounded-xl text-xs font-bold bg-red-100 text-red-700 hover:bg-red-200 transition-all">
+                    Từ chối báo giá
+                </button>
+                <button type="button" onclick="sendCustomerResponse(true)" class="px-4 py-2 rounded-xl text-xs font-bold bg-primary text-on-primary hover:bg-amber-800 transition-all shadow">
+                    Đồng ý bán sách
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- FOOTER -->
+    <footer class="w-full bg-[#2C1E16] text-[#FAF9F6] border-t border-[#4A3B32] py-8">
+        <div class="max-w-7xl mx-auto px-6 text-center text-xs text-outline-variant font-medium">
+            © 2025 Book4Life Inc. — Chương Trình Thu Mua & Tuần Hoàn Sách Cũ Tuyển Chọn.
+        </div>
+    </footer>
+
+    <script>
+        let currentRequestId = null;
+
+        function showToast(message, isError = false) {
+            const toast = document.getElementById('toastNotification');
+            const toastMsg = document.getElementById('toastMessage');
+            const toastIcon = document.getElementById('toastIcon');
+            if (toast && toastMsg) {
+                toastMsg.innerText = message;
+                toastIcon.innerText = isError ? 'error' : 'check_circle';
+                toastIcon.className = isError ? 'material-symbols-outlined text-red-400' : 'material-symbols-outlined text-primary-container';
+                toast.classList.add('show');
+                setTimeout(() => toast.classList.remove('show'), 3500);
+            }
+        }
+
+        const STATUS_MAP = {
+            'PENDING_REVIEW': { text: 'Chờ Thẩm Định Ảnh', color: 'bg-amber-100 text-amber-800 border-amber-300' },
+            'OFFERED': { text: 'Đã Báo Giá - Chờ Khách Phản Hồi', color: 'bg-blue-100 text-blue-800 border-blue-300' },
+            'ACCEPTED_AWAITING_DELIVERY': { text: 'Đã Đồng Ý - Chờ Nhận Sách', color: 'bg-purple-100 text-purple-800 border-purple-300' },
+            'RECEIVED_STOCKED': { text: 'Đã Nhận & Nhập Kho Hoàn Tất', color: 'bg-green-100 text-green-800 border-green-300' },
+            'REJECTED_BY_STAFF': { text: 'Từ Chối Thu Mua', color: 'bg-red-100 text-red-800 border-red-300' },
+            'REJECTED_BY_CUSTOMER': { text: 'Khách Đã Từ Chối Giá', color: 'bg-gray-100 text-gray-800 border-gray-300' },
+            'CANCELLED': { text: 'Đã Hủy', color: 'bg-gray-100 text-gray-800 border-gray-300' }
+        };
+
+        const GRADE_MAP = {
+            'LIKE_NEW': 'Như mới',
+            'VERY_GOOD': 'Rất tốt',
+            'GOOD': 'Tốt',
+            'ACCEPTABLE': 'Chấp nhận được'
+        };
+
+        async function loadMyRequests() {
+            try {
+                const res = await fetch('/api/trade-in/my-requests');
+                document.getElementById('loadingState').classList.add('hidden');
+
+                if (res.ok) {
+                    const list = await res.json();
+                    if (!list || list.length === 0) {
+                        document.getElementById('emptyState').classList.remove('hidden');
+                        return;
+                    }
+
+                    renderRequests(list);
+                    document.getElementById('requestsList').classList.remove('hidden');
+                } else {
+                    showToast('Không thể tải danh sách phiếu thu mua!', true);
+                }
+            } catch (err) {
+                document.getElementById('loadingState').classList.add('hidden');
+                showToast('Lỗi mạng: ' + err.message, true);
+            }
+        }
+
+        function renderRequests(list) {
+            const container = document.getElementById('requestsList');
+            container.innerHTML = '';
+
+            list.forEach(item => {
+                const statusMeta = STATUS_MAP[item.status] || { text: item.status, color: 'bg-gray-100 text-gray-700 border-gray-200' };
+                const originalPriceStr = item.bookOriginalPrice ? new Intl.NumberFormat('vi-VN').format(item.bookOriginalPrice) + ' ₫' : 'N/A';
+                const estPriceStr = item.autoEstimatedPrice ? new Intl.NumberFormat('vi-VN').format(item.autoEstimatedPrice) + ' ₫' : 'N/A';
+                const offeredPriceStr = item.staffReviewedPrice ? new Intl.NumberFormat('vi-VN').format(item.staffReviewedPrice) + ' ₫' : null;
+                const coverImg = item.bookCoverUrl || 'https://images.unsplash.com/photo-1544947950-fa07a98d237f?auto=format&fit=crop&w=300&q=80';
+
+                let actionHtml = '';
+                if (item.status === 'OFFERED') {
+                    actionHtml = `
+                        <div class="mt-4 pt-3 border-t border-outline-variant/30 flex items-center justify-between gap-3">
+                            <span class="text-xs text-blue-700 font-bold flex items-center gap-1">
+                                <span class="material-symbols-outlined text-[16px]">campaign</span> Đề xuất giá mới: ${offeredPriceStr}
+                            </span>
+                            <button onclick="openResponseModal(${item.id}, '${item.requestCode}', '${offeredPriceStr}', '${item.staffNotes || ''}')"
+                                    class="px-4 py-2 rounded-xl bg-primary text-on-primary font-bold text-xs hover:bg-amber-800 transition-all shadow">
+                                Xem & Phản hồi giá
+                            </button>
+                        </div>
+                    `;
+                }
+
+                const card = document.createElement('div');
+                card.className = 'bg-surface-container-lowest p-5 rounded-2xl border border-outline-variant/30 shadow-sm hover:shadow-md transition-all';
+                card.innerHTML = `
+                    <div class="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+                        <div class="flex items-center gap-4">
+                            <img src="${coverImg}" alt="${item.bookTitle}" class="w-16 h-22 object-cover rounded-lg shadow-sm border border-outline-variant/30"/>
+                            <div>
+                                <div class="flex items-center gap-2">
+                                    <span class="font-extrabold text-xs uppercase px-2 py-0.5 rounded bg-surface-container text-secondary">${item.requestCode}</span>
+                                    <span class="text-[11px] font-bold px-2 py-0.5 rounded border ${statusMeta.color}">${statusMeta.text}</span>
+                                </div>
+                                <h3 class="font-bold text-base text-on-surface mt-1">${item.bookTitle}</h3>
+                                <div class="text-xs text-secondary mt-0.5">
+                                    Điểm nhận: <span class="font-semibold text-on-surface">${item.targetBranchName || 'Hệ thống HQ'}</span>
+                                    • Đánh giá: <span class="font-semibold">${GRADE_MAP[item.userConditionGrade] || item.userConditionGrade}</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="flex md:flex-col items-end justify-between w-full md:w-auto text-right border-t md:border-t-0 pt-3 md:pt-0 border-outline-variant/20">
+                            <div>
+                                <span class="text-[11px] text-secondary">Giá ước tính sơ bộ:</span>
+                                <div class="text-sm font-bold text-secondary">${estPriceStr}</div>
+                            </div>
+                            ${offeredPriceStr ? `
+                            <div class="mt-1">
+                                <span class="text-[11px] text-primary font-bold">Giá Book4Life đề xuất:</span>
+                                <div class="text-lg font-extrabold text-primary">${offeredPriceStr}</div>
+                            </div>
+                            ` : ''}
+                        </div>
+                    </div>
+                    ${actionHtml}
+                `;
+                container.appendChild(card);
+            });
+        }
+
+        function openResponseModal(id, code, priceStr, notes) {
+            currentRequestId = id;
+            document.getElementById('modalRequestCode').innerText = code;
+            document.getElementById('modalOfferedPrice').innerText = priceStr;
+            document.getElementById('modalStaffNotes').innerText = notes ? `Ghi chú thẩm định: "${notes}"` : 'Chuyên viên đã thẩm định kỹ lưỡng hình ảnh.';
+            document.getElementById('responseModal').classList.remove('hidden');
+        }
+
+        function closeResponseModal() {
+            document.getElementById('responseModal').classList.add('hidden');
+            currentRequestId = null;
+        }
+
+        async function sendCustomerResponse(accepted) {
+            if (!currentRequestId) return;
+            const deliveryMethod = document.querySelector('input[name="modalDeliveryMethod"]:checked')?.value || 'BRING_TO_STORE';
+
+            const payload = {
+                accepted: accepted,
+                deliveryMethod: deliveryMethod
+            };
+
+            try {
+                const res = await fetch(`/api/trade-in/requests/${currentRequestId}/customer-response`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+
+                if (res.ok) {
+                    showToast(accepted ? 'Bạn đã đồng ý đề xuất giá thành công!' : 'Đã ghi nhận từ chối đề xuất giá.');
+                    closeResponseModal();
+                    loadMyRequests();
+                } else {
+                    const err = await res.text();
+                    showToast('Lỗi: ' + err, true);
+                }
+            } catch (err) {
+                showToast('Lỗi gửi phản hồi: ' + err.message, true);
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', loadMyRequests);
+    </script>
+</body>
+</html>

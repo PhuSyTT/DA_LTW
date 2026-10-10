@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<body>
+<div th:fragment="alerts">
+    <div th:if="${successMessage}" class="alert alert-success alert-dismissible fade show alert-auto-dismiss d-flex align-items-center mb-4 shadow-sm" role="alert">
+        <i class="fas fa-check-circle fs-5 me-2"></i>
+        <div th:text="${successMessage}">Thao tác thành công!</div>
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+
+    <div th:if="${errorMessage}" class="alert alert-danger alert-dismissible fade show alert-auto-dismiss d-flex align-items-center mb-4 shadow-sm" role="alert">
+        <i class="fas fa-exclamation-triangle fs-5 me-2"></i>
+        <div th:text="${errorMessage}">Đã xảy ra lỗi!</div>
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+</div>
+</body>
+</html>

@@ -1,0 +1,642 @@
+<!DOCTYPE html>
+
+<html lang="vi"><head><meta charset="utf-8"/><meta content="width=device-width, initial-scale=1.0" name="viewport"/><meta content="web_standard" name="shell-type"/><link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,600;0,700;1,400&amp;family=Inter:wght@400;500;600&amp;display=swap" rel="stylesheet"/><link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/><style>@layer base{html,body{margin:0;padding:0;}body{overscroll-behavior:none;}main>:first-child{margin-top:0!important;}main>:last-child{margin-bottom:0!important;}}::-webkit-scrollbar{display:none;}</style><script src="https://cdn.tailwindcss.com"></script><script id="tailwind-config">tailwind.config={darkMode:"class",theme:{extend:{colors:{"on-secondary-container":"#726157","secondary-fixed-dim":"#d9c2b6","surface":"#faf9f6","outline":"#857462","primary":"#835500","primary-fixed":"#ffddb4","surface-dim":"#dbdad7","on-primary-fixed":"#291800","on-error-container":"#93000a","on-primary-container":"#644000","error-container":"#ffdad6","on-tertiary-fixed":"#261911","secondary":"#6c5b51","background":"#faf9f6","inverse-on-surface":"#f2f1ee","surface-variant":"#e3e2e0","inverse-surface":"#2f312f","secondary-fixed":"#f6ded1","on-secondary-fixed":"#251911","inverse-primary":"#ffb955","surface-tint":"#835500","on-tertiary":"#ffffff","on-primary-fixed-variant":"#633f00","surface-bright":"#faf9f6","tertiary-fixed":"#f7ddd0","on-tertiary-fixed-variant":"#54433a","secondary-container":"#f6ded1","primary-container":"#f5a623","error":"#ba1a1a","on-secondary-fixed-variant":"#53443a","on-background":"#1a1c1a","surface-container-lowest":"#ffffff","primary-fixed-dim":"#ffb955","surface-container-low":"#f4f3f1","tertiary-container":"#c9b1a5","surface-container-highest":"#e3e2e0","surface-container":"#efeeeb","outline-variant":"#d7c3ae","on-surface-variant":"#524534","on-tertiary-container":"#55433a","on-error":"#ffffff","surface-container-high":"#e9e8e5","on-surface":"#1a1c1a","on-secondary":"#ffffff","tertiary":"#6d5a50","on-primary":"#ffffff","tertiary-fixed-dim":"#dac2b5"},borderRadius:{"DEFAULT":"0.25rem","lg":"0.5rem","xl":"0.75rem","full":"9999px"},spacing:{"margin":"3rem","gutter":"1.5rem","space-xl":"2.5rem","space-sm":"0.5rem","space-xs":"0.25rem","gutter-mobile":"1rem","space-lg":"1.5rem","margin-mobile":"1.25rem","space-md":"1rem"},fontFamily:{"display-lg-mobile":["Playfair Display"],"headline-lg":["Playfair Display"],"label-md":["Inter"],"body-sm":["Inter"],"body-lg":["Inter"],"label-sm":["Inter"],"label-lg":["Inter"],"display-md-mobile":["Playfair Display"],"display-lg":["Playfair Display"],"headline-sm":["Playfair Display"],"title-md":["Inter"],"headline-lg-mobile":["Playfair Display"],"body-md":["Inter"],"title-lg":["Inter"],"display-md":["Playfair Display"],"headline-md":["Playfair Display"]},fontSize:{"display-lg-mobile":["38px",{"lineHeight":"44px","letterSpacing":"-0.01em","fontWeight":"700"}],"headline-lg":["32px",{"lineHeight":"40px","fontWeight":"600"}],"label-md":["12px",{"lineHeight":"16px","letterSpacing":"0.04em","fontWeight":"600"}],"body-sm":["13px",{"lineHeight":"18px","fontWeight":"400"}],"body-lg":["18px",{"lineHeight":"28px","fontWeight":"400"}],"label-sm":["11px",{"lineHeight":"14px","letterSpacing":"0.02em","fontWeight":"500"}],"label-lg":["14px",{"lineHeight":"20px","fontWeight":"500"}],"display-md-mobile":["32px",{"lineHeight":"38px","letterSpacing":"-0.01em","fontWeight":"600"}],"display-lg":["56px",{"lineHeight":"64px","letterSpacing":"-0.02em","fontWeight":"700"}],"headline-sm":["20px",{"lineHeight":"26px","fontWeight":"600"}],"title-md":["16px",{"lineHeight":"22px","fontWeight":"600"}],"headline-lg-mobile":["26px",{"lineHeight":"32px","fontWeight":"600"}],"body-md":["15px",{"lineHeight":"24px","fontWeight":"400"}],"title-lg":["18px",{"lineHeight":"24px","fontWeight":"600"}],"display-md":["44px",{"lineHeight":"52px","letterSpacing":"-0.02em","fontWeight":"600"}],"headline-md":["24px",{"lineHeight":"30px","fontWeight":"600"}]}}}}</script></head><body class="bg-background font-body-md text-on-surface antialiased min-h-screen"><header class="fixed top-0 left-0 right-0 z-50 bg-surface/90 backdrop-blur-xl shadow-[0_1px_8px_rgba(44,30,22,0.05)]"><div class="h-28 w-full"><div class="h-16 w-full max-w-7xl mx-auto px-6 flex items-center justify-between gap-6"><div class="flex items-center gap-3 shrink-0"><div class="w-10 h-10 rounded-full bg-primary-container/20 flex items-center justify-center text-primary"><span class="material-symbols-outlined text-[24px]">eco</span></div><a class="font-headline-md text-headline-md text-on-surface tracking-tight font-bold flex items-center gap-1.5" data-path="trang-chu" href="#"><span>Book4Life</span></a></div><div class="flex-1 max-w-xl mx-2 hidden lg:flex items-center"><div class="w-full flex items-center bg-surface-container-low rounded-xl px-4 py-2 shadow-[0_1px_4px_rgba(44,30,22,0.04)] focus-within:bg-surface-container-lowest focus-within:shadow-[0_2px_12px_rgba(44,30,22,0.08)] transition-all"><span class="material-symbols-outlined text-outline text-[20px] mr-2.5">search</span><input class="w-full bg-transparent font-body-sm text-body-sm text-on-surface placeholder:text-outline focus:outline-none" placeholder="Tìm tựa sách cũ, tác giả, bản in hiếm hoặc ISBN..." type="text"/><span class="material-symbols-outlined text-outline-variant text-[18px] ml-2 shrink-0">auto_stories</span></div></div><div class="flex items-center gap-4 shrink-0"><div class="flex items-center gap-1.5"><a aria-label="Danh sách yêu thích" class="relative p-2 rounded-full hover:bg-surface-container-high text-on-surface-variant hover:text-on-surface transition-all" data-path="danh-sach-yeu-thich" href="#"><span class="material-symbols-outlined text-[22px]">favorite</span><span class="absolute top-1 right-1 flex items-center justify-center min-w-[16px] h-4 px-1 rounded-full bg-secondary text-on-secondary font-label-sm text-[10px] font-bold">5</span></a><a aria-label="Giỏ hàng" class="relative p-2 rounded-full hover:bg-surface-container-high text-on-surface-variant hover:text-on-surface transition-all" data-path="gio-hang" href="#"><span class="material-symbols-outlined text-[22px]">shopping_bag</span><span class="absolute top-1 right-1 flex items-center justify-center min-w-[16px] h-4 px-1 rounded-full bg-primary-container text-on-primary-container font-label-sm text-[10px] font-bold">3</span></a></div><a class="flex items-center gap-2 pl-2" data-path="tai-khoan" href="#"><div class="w-8 h-8 rounded-full bg-primary flex items-center justify-center shrink-0"><span class="material-symbols-outlined text-on-primary text-[18px]">person</span></div><span class="hidden md:inline-block font-label-sm text-label-sm text-on-surface font-semibold hover:text-primary transition-colors">Tài khoản</span></a></div></div><div class="h-12 w-full bg-surface-container-low/70 border-t border-outline-variant/15"><div class="h-full max-w-7xl mx-auto px-6 flex items-center justify-between overflow-x-auto"><nav class="flex items-center gap-2 text-nowrap font-label-md text-label-md" data-active-classes="bg-primary-container text-on-primary-container font-semibold"><a class="text-on-surface-variant hover:text-on-surface px-3 py-1.5 rounded-lg hover:bg-surface-container transition-colors" data-path="trang-chu" href="#">Trang Chủ</a><a class="text-on-surface-variant hover:text-on-surface px-3 py-1.5 rounded-lg hover:bg-surface-container transition-colors" data-path="the-loai" href="#">Thể Loại</a><a class="text-on-surface-variant hover:text-on-surface px-3 py-1.5 rounded-lg hover:bg-surface-container transition-colors" data-path="tac-gia" href="#">Tác Giả</a><a class="text-on-surface-variant hover:text-on-surface px-3 py-1.5 rounded-lg hover:bg-surface-container transition-colors" data-path="goc-doc-sach-blog" href="#">Góc Đọc Sách / Blog</a><a class="text-on-surface-variant hover:text-on-surface px-3 py-1.5 rounded-lg hover:bg-surface-container transition-colors" data-path="lien-he-va-diem-thu-mua" href="#">Liên Hệ &amp; Điểm Thu Mua</a></nav><div class="hidden md:flex items-center gap-2 shrink-0 ml-4"><span class="flex items-center gap-1.5 text-[11px] font-label-sm text-tertiary"><span class="material-symbols-outlined text-[15px] text-primary">verified_user</span>Thẩm định nguyên bản &amp; Bảo vệ môi trường</span></div></div></div></div></header><main class="w-full pt-28 bg-surface"><div class="flex flex-col w-full">
+<!-- Subtle Ambient Glow -->
+<div class="w-full max-w-7xl mx-auto px-6 py-6 lg:py-10">
+<!-- Breadcrumb -->
+<nav aria-label="Breadcrumb" class="flex items-center gap-2 font-label-md text-label-md text-on-surface-variant mb-6">
+<a class="hover:text-primary transition-colors flex items-center gap-1" data-path="trang-chu" href="#">
+<span class="material-symbols-outlined text-[16px]">home</span>
+        Trang Chủ
+      </a>
+<span class="material-symbols-outlined text-[14px] text-outline-variant">chevron_right</span>
+<a class="hover:text-primary transition-colors" data-path="the-loai" href="#">Văn Học Thế Giới</a>
+<span class="material-symbols-outlined text-[14px] text-outline-variant">chevron_right</span>
+<a class="hover:text-primary transition-colors" data-path="the-loai" href="#">Tiểu Thuyết</a>
+<span class="material-symbols-outlined text-[14px] text-outline-variant">chevron_right</span>
+<span class="text-on-surface font-semibold truncate max-w-xs md:max-w-md">Trăm Năm Cô Đơn (Ấn bản 1986)</span>
+</nav>
+<!-- Main Detail Grid -->
+<div class="grid grid-cols-1 lg:grid-cols-12 gap-10 items-start">
+<!-- LEFT COLUMN: Physical Book Gallery & Verification -->
+<div class="lg:col-span-6 flex flex-col gap-5">
+<!-- Main Focal Image Card -->
+<div class="relative bg-surface-container-low rounded-xl p-6 lg:p-8 shadow-sm overflow-hidden group">
+<!-- Condition Badge Stamp -->
+<div class="absolute top-5 left-5 z-20 flex items-center gap-2 bg-surface/90 backdrop-blur-md px-3.5 py-1.5 rounded-full shadow-sm">
+<span class="w-2.5 h-2.5 rounded-full bg-primary-container animate-pulse"></span>
+<span class="font-label-md text-label-md text-on-surface font-semibold">Tình Trạng: Bản Hiếm 95% (Good Vintage)</span>
+</div>
+<!-- Provenance Archival Stamp -->
+<div class="absolute top-5 right-5 z-20 hidden sm:flex items-center gap-1.5 bg-secondary-container/80 text-on-secondary-container px-3 py-1 rounded-lg font-label-sm text-label-sm font-semibold">
+<span class="material-symbols-outlined text-[16px] text-primary">verified</span>
+            Đã thẩm định UV
+          </div>
+<!-- Main Book Image with Physical Spine Shadow -->
+<div class="relative w-full aspect-[4/5] max-h-[520px] mx-auto flex items-center justify-center p-4">
+<div class="relative w-full h-full max-w-md shadow-xl rounded-lg overflow-hidden">
+<img class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" data-alt="Close-up shot of a vintage 1986 Vietnamese hardcover edition of One Hundred Years of Solitude, weathered yellow cloth spine with gilt embossing, aged textured deckled paper pages, resting on a warm oak library desk with gentle morning window light, cinematic atmosphere, warm sepia tone" id="main-book-image" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBfICj1UEsEcN-TORakrsXlfd81rXoZ8dlF244uDjdL65InUSh3fL_Mj6uWWyhTxlZP-4F8QNFETbKw0xajNvW63DrTcoYnbhcipTs5Zvcpa0hzoPnDWv22PWw0cq845rISjUwqoCmnr7BlC2RUDCy0KnR4nPjZHcXkuP4tfNWrzJNSSeSqC2iOsh9xDObOTDxh4hdnI46QxfW6srt6qEfWJq7Qr4PINGPE6wXINaDJyrNgpWrxLLSZ"/>
+<!-- Book spine inner shadow overlay -->
+<div class="absolute inset-y-0 left-0 w-8 bg-gradient-to-r from-black/25 via-black/5 to-transparent pointer-events-none"></div>
+</div>
+</div>
+<!-- Bottom Micro Tag -->
+<div class="flex items-center justify-between pt-3 text-on-surface-variant font-label-sm text-label-sm">
+<span class="flex items-center gap-1">
+<span class="material-symbols-outlined text-[16px] text-primary">photo_camera</span>
+              Ảnh chụp quang học thực tế 100% tại kho lưu trữ
+            </span>
+<span class="font-mono text-outline">SKU: B4L-1986-MCD-01</span>
+</div>
+</div>
+<!-- Thumbnail Gallery Strip -->
+<div class="grid grid-cols-4 gap-3">
+<button class="thumb-btn ring-2 ring-primary bg-surface-container-low rounded-xl p-2.5 flex flex-col items-center gap-1.5 hover:bg-surface-container transition-all text-left" onclick="swapThumb(0)" type="button">
+<div class="w-full aspect-square rounded-lg overflow-hidden bg-surface-container">
+<img class="w-full h-full object-cover" data-alt="Front cover view of antique 1986 One Hundred Years of Solitude book showing textured beige canvas hardcover and original Vietnamese typography" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDrPVyCFkwoc9MY8ichG8YV0GbH_jTg6a3XwjqDejZ5LtVg2C8f2CxAAxB71K8rKuDO84zkTRisYjvMCcofr08IUnfSHpz4N3ooNTAdEomAU_rtE2qZZBF3Lf2BECGq43Vwgs1ESuD7t_fvS80bCkzDP5IcbrkS4_C_gboYUL7V1mH-gJ96iDkK5HM3I039JLpq0BO42n1bkHpQAXhfRaXtGixLRDiGra2Dys-VFIOxP-vFRMe0pFCc"/>
+</div>
+<span class="font-label-sm text-[11px] text-on-surface font-semibold text-center leading-tight">Bìa ngoài</span>
+</button>
+<button class="thumb-btn bg-surface-container-low rounded-xl p-2.5 flex flex-col items-center gap-1.5 hover:bg-surface-container transition-all text-left" onclick="swapThumb(1)" type="button">
+<div class="w-full aspect-square rounded-lg overflow-hidden bg-surface-container">
+<img class="w-full h-full object-cover" data-alt="Detailed macro angle of the sewn spine and headbands of 1986 book showing intact cloth binding and gold title letters" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBWJ0mSC2wpfCcNMm0HHCut8e1nkQzpJIpcV2u_r9sTmBiFL6ypGclS1wK-Nftn7pDY4xyBN91kcOlWlIXEdpOePpbb6Hr5cmRd93Y8Mm32Izyaec5Db5qbN1dmUtDaH5QOSRJzEwUZDyeSsmyQH6RQGCedonzxpD32ORoqjX7FPfHWShjZQB3nCcejzEhOCi_RmfQpVs0ICxihRMep_mIl1kkewHu_ShxnHZwiWqawYRNMkHhqH03v"/>
+</div>
+<span class="font-label-sm text-[11px] text-on-surface-variant text-center leading-tight">Gáy sách</span>
+</button>
+<button class="thumb-btn bg-surface-container-low rounded-xl p-2.5 flex flex-col items-center gap-1.5 hover:bg-surface-container transition-all text-left" onclick="swapThumb(2)" type="button">
+<div class="w-full aspect-square rounded-lg overflow-hidden bg-surface-container">
+<img class="w-full h-full object-cover" data-alt="Open book pages showing aged warm yellow woodpulp paper, vintage serif typesetting, and neat handwritten 1989 inscription on title page" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDT3Hn8riIw5bJbxCKYo_Cw0AdnpW6aAzej6UJi9NYF4Ty-KoNPxaNEODb6_EEnmSgUWl9_1t0MJC65IGkPThnuoZo_M50t6mhZgVDPSsbPjmsz4PWdHX4eB-WwlnjyeTCW4pfAzPl2ylIqrr83Ulf93EH7soRS6OxTVmWT98labe1JwOoP4OFJLcJfnaztsy0J6f3GFCg3e4MbbA1YADz-d4H8EYDJJo5fdru_izL6QWBY-ZSFFeof"/>
+</div>
+<span class="font-label-sm text-[11px] text-on-surface-variant text-center leading-tight">Trang ruột 1989</span>
+</button>
+<button class="thumb-btn bg-surface-container-low rounded-xl p-2.5 flex flex-col items-center gap-1.5 hover:bg-surface-container transition-all text-left" onclick="swapThumb(3)" type="button">
+<div class="w-full aspect-square rounded-lg overflow-hidden bg-surface-container">
+<img class="w-full h-full object-cover" data-alt="Ultraviolet inspection chamber test showing sanitization and authentic vintage seal on the rear inner board of the book" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDedJa9O1y3oywUvMAWQo2Kwfh9w26Ko4ZTp4elzsmbUUSkEZAs3O8II1uK9C4o2T3yeQ0GrnvPu44tejakj8HlA0hbh4X_dT_bayRrDKnxKp5t6xye2C1mK2ko2hFnCETL7PjBudX9ith-NzjgS94jBIuUsNjZNJ2AVeVOj8ghQmeKjJEci7Y7ysH88wTjcM_oVr_HgxdhCcgmO5r_xDlVn_osWLXE1lfubefp5Rl-x1J-mVMnVDIh"/>
+</div>
+<span class="font-label-sm text-[11px] text-on-surface-variant text-center leading-tight">Tem UV kiểm định</span>
+</button>
+</div>
+<!-- Archival Heritage Note -->
+<div class="bg-surface-container-lowest rounded-xl p-4.5 shadow-sm flex items-start gap-3.5">
+<div class="w-9 h-9 rounded-full bg-secondary-fixed flex items-center justify-center shrink-0 text-on-secondary-fixed">
+<span class="material-symbols-outlined text-[20px]">history_edu</span>
+</div>
+<div>
+<h4 class="font-title-md text-title-md text-on-surface font-semibold">Lai lịch &amp; Hồ sơ lưu trữ (Provenance)</h4>
+<p class="font-body-sm text-body-sm text-on-surface-variant mt-1 leading-relaxed">
+              Ấn bản thuộc bộ sưu tập của giáo sư văn học cổ điển Hà Nội, bảo quản trong tủ kính hút ẩm hơn 3 thập kỷ. Ruột sách còn nguyên vẹn mùi thơm gỗ sồi tự nhiên, mực in chì sắc sảo của thời kỳ bao cấp.
+            </p>
+</div>
+</div>
+</div>
+<!-- RIGHT COLUMN: Purchase Decisions, Specs, Pricing -->
+<div class="lg:col-span-6 flex flex-col gap-6">
+<!-- Title & Metadata -->
+<div class="space-y-3">
+<div class="flex flex-wrap items-center gap-2">
+<span class="px-2.5 py-0.5 rounded bg-primary/10 text-primary font-label-sm text-label-sm font-semibold tracking-wide uppercase">Ấn bản đầu tiên 1986</span>
+<span class="px-2.5 py-0.5 rounded bg-surface-container-high text-secondary font-label-sm text-label-sm font-semibold">Tác phẩm đạt giải Nobel</span>
+</div>
+<h1 class="font-headline-lg text-headline-lg lg:font-display-md lg:text-display-md text-on-surface tracking-tight leading-tight">
+            Trăm Năm Cô Đơn
+          </h1>
+<p class="font-headline-sm text-headline-sm text-secondary italic">
+            Cien años de soledad — Bản Bìa Cứng Nguyên Bản 1986
+          </p>
+<div class="grid grid-cols-1 sm:grid-cols-3 gap-2 pt-2 text-on-surface-variant font-body-sm text-body-sm">
+<div>
+<span class="text-outline text-[12px] block">Tác giả</span>
+<strong class="text-on-surface font-medium">Gabriel García Márquez</strong>
+</div>
+<div>
+<span class="text-outline text-[12px] block">Dịch giả</span>
+<strong class="text-on-surface font-medium">Nguyễn Trung Đức</strong>
+</div>
+<div>
+<span class="text-outline text-[12px] block">Nhà xuất bản</span>
+<strong class="text-on-surface font-medium">NXB Văn Học (1986)</strong>
+</div>
+</div>
+<!-- Review Stars & Collector Rating -->
+<div class="flex items-center gap-3 pt-1">
+<div class="flex items-center text-primary-container">
+<span class="material-symbols-outlined text-[20px]" style="font-variation-settings: 'FILL' 1;">star</span>
+<span class="material-symbols-outlined text-[20px]" style="font-variation-settings: 'FILL' 1;">star</span>
+<span class="material-symbols-outlined text-[20px]" style="font-variation-settings: 'FILL' 1;">star</span>
+<span class="material-symbols-outlined text-[20px]" style="font-variation-settings: 'FILL' 1;">star</span>
+<span class="material-symbols-outlined text-[20px]" style="font-variation-settings: 'FILL' 1;">star</span>
+</div>
+<span class="font-title-md text-title-md text-on-surface font-bold">4.9</span>
+<span class="text-outline-variant">•</span>
+<a class="font-label-md text-label-md text-primary hover:underline font-semibold" href="#reviews-section">
+              128 đánh giá từ nhà sưu tầm
+            </a>
+</div>
+</div>
+<!-- Pricing & Urgency Block -->
+<div class="bg-surface-container-low rounded-xl p-5 shadow-sm space-y-3">
+<div class="flex items-baseline gap-3">
+<span class="font-display-md text-display-md text-primary font-bold tracking-tight">185.000₫</span>
+<span class="font-title-lg text-title-lg text-outline line-through">350.000₫</span>
+<span class="px-2.5 py-1 rounded bg-error-container text-on-error-container font-label-md text-label-md font-bold">
+              Tiết kiệm 47%
+            </span>
+</div>
+<!-- Scarcity Badge -->
+<div class="flex items-center gap-2 text-primary font-label-md text-label-md bg-primary-fixed/40 px-3 py-2 rounded-lg">
+<span class="material-symbols-outlined text-[18px]">inventory_2</span>
+<span>Chỉ còn duy nhất <strong>1 cuốn độc bản</strong> trong kho bảo quản Book4Life</span>
+</div>
+</div>
+<!-- 5-Point Condition Matrix -->
+<div class="bg-surface-container-lowest rounded-xl p-5 shadow-sm space-y-3">
+<div class="flex items-center justify-between">
+<h3 class="font-title-md text-title-md text-on-surface font-semibold flex items-center gap-2">
+<span class="material-symbols-outlined text-primary text-[20px]">fact_check</span>
+              Bảng Thẩm Định Tình Trạng Thực Tế (5 Tiêu Chí)
+            </h3>
+<span class="font-label-sm text-label-sm text-outline">Đạt chuẩn A-Grade</span>
+</div>
+<div class="space-y-2.5 text-body-sm font-body-sm">
+<div class="flex items-start justify-between py-1.5 bg-surface-container-low/50 px-3 rounded-lg">
+<span class="text-secondary font-medium flex items-center gap-2">
+<span class="material-symbols-outlined text-[16px] text-primary">bookmark</span>
+                Gáy &amp; Bìa sách:
+              </span>
+<span class="text-on-surface font-semibold text-right">Nguyên vẹn, không gãy nếp gáy</span>
+</div>
+<div class="flex items-start justify-between py-1.5 bg-surface-container-low/50 px-3 rounded-lg">
+<span class="text-secondary font-medium flex items-center gap-2">
+<span class="material-symbols-outlined text-[16px] text-primary">menu_book</span>
+                Chất lượng giấy:
+              </span>
+<span class="text-on-surface font-semibold text-right">Ngả vàng đồng đều, không rách mép</span>
+</div>
+<div class="flex items-start justify-between py-1.5 bg-surface-container-low/50 px-3 rounded-lg">
+<span class="text-secondary font-medium flex items-center gap-2">
+<span class="material-symbols-outlined text-[16px] text-primary">edit_note</span>
+                Ghi chú &amp; Đánh dấu:
+              </span>
+<span class="text-on-surface font-semibold text-right">Không viết vẽ, có chữ ký lưu niệm 1989</span>
+</div>
+<div class="flex items-start justify-between py-1.5 bg-surface-container-low/50 px-3 rounded-lg">
+<span class="text-secondary font-medium flex items-center gap-2">
+<span class="material-symbols-outlined text-[16px] text-primary">clean_hands</span>
+                Xử lý vi sinh &amp; Mùi:
+              </span>
+<span class="text-on-surface font-semibold text-right">Khô ráo hoàn toàn, đã khử trùng UV 100%</span>
+</div>
+<div class="flex items-start justify-between py-1.5 bg-surface-container-low/50 px-3 rounded-lg">
+<span class="text-secondary font-medium flex items-center gap-2">
+<span class="material-symbols-outlined text-[16px] text-primary">account_balance</span>
+                Nguồn gốc tiếp nhận:
+              </span>
+<span class="text-on-surface font-semibold text-right">Thư viện tư nhân phố cổ Hà Nội</span>
+</div>
+</div>
+</div>
+<!-- CTAs (Primary, Instant Buy, Favorite) -->
+<div class="flex flex-col sm:flex-row gap-3 pt-1">
+<button class="flex-1 bg-primary-container text-on-primary-container hover:bg-primary-fixed-dim transition-all py-3.5 px-6 rounded-xl font-label-lg text-label-lg font-bold shadow-md hover:shadow-lg flex items-center justify-center gap-2.5 active:scale-[0.98]" id="add-to-cart-btn" type="button">
+<span class="material-symbols-outlined text-[22px]">shopping_bag</span>
+<span>Thêm Vào Giỏ Hàng — 185.000₫</span>
+</button>
+<button class="bg-secondary-fixed text-on-secondary-fixed hover:bg-secondary-fixed-dim transition-all py-3.5 px-6 rounded-xl font-label-lg text-label-lg font-semibold flex items-center justify-center gap-2 active:scale-[0.98]" type="button">
+<span class="material-symbols-outlined text-[20px]">bolt</span>
+<span>Mua Ngay 1 Cú Click</span>
+</button>
+<button aria-label="Lưu vào danh sách yêu thích" class="bg-surface-container-low hover:bg-surface-container-high text-on-surface-variant hover:text-error transition-all p-3.5 rounded-xl flex items-center justify-center shrink-0" id="fav-btn" type="button">
+<span class="material-symbols-outlined text-[24px]">favorite</span>
+</button>
+</div>
+<!-- Trust Badges & Guarantee Grid -->
+<div class="grid grid-cols-2 gap-3 pt-2">
+<div class="bg-surface-container-low/70 rounded-xl p-3 flex items-start gap-2.5">
+<span class="material-symbols-outlined text-primary text-[20px] shrink-0 mt-0.5">local_shipping</span>
+<div>
+<h5 class="font-title-md text-[13px] text-on-surface font-semibold">Giao hỏa tốc 2H</h5>
+<p class="font-body-sm text-[11px] text-outline leading-tight mt-0.5">Áp dụng nội thành Hà Nội &amp; TP.HCM</p>
+</div>
+</div>
+<div class="bg-surface-container-low/70 rounded-xl p-3 flex items-start gap-2.5">
+<span class="material-symbols-outlined text-primary text-[20px] shrink-0 mt-0.5">inventory</span>
+<div>
+<h5 class="font-title-md text-[13px] text-on-surface font-semibold">Đóng gói 3 lớp bảo quản</h5>
+<p class="font-body-sm text-[11px] text-outline leading-tight mt-0.5">Màng co kháng ẩm + bọc xốp chống va đập</p>
+</div>
+</div>
+<div class="bg-surface-container-low/70 rounded-xl p-3 flex items-start gap-2.5">
+<span class="material-symbols-outlined text-primary text-[20px] shrink-0 mt-0.5">verified_user</span>
+<div>
+<h5 class="font-title-md text-[13px] text-on-surface font-semibold">Đồng kiểm khi nhận</h5>
+<p class="font-body-sm text-[11px] text-outline leading-tight mt-0.5">Mở kiện kiểm tra đúng bản in trước khi trả tiền</p>
+</div>
+</div>
+<div class="bg-surface-container-low/70 rounded-xl p-3 flex items-start gap-2.5">
+<span class="material-symbols-outlined text-primary text-[20px] shrink-0 mt-0.5">assignment_return</span>
+<div>
+<h5 class="font-title-md text-[13px] text-on-surface font-semibold">Đổi trả 7 ngày</h5>
+<p class="font-body-sm text-[11px] text-outline leading-tight mt-0.5">Cam kết hoàn 100% nếu sai mô tả thực tế</p>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- Editorial Deep-Dive Tabs Section -->
+<div class="mt-16 bg-surface-container-lowest rounded-2xl p-6 lg:p-10 shadow-sm">
+<!-- Tabs Navigation Header -->
+<div class="flex items-center gap-3 overflow-x-auto pb-4">
+<button class="tab-trigger px-5 py-2.5 rounded-xl font-label-lg text-label-lg font-bold bg-primary text-on-primary transition-all flex items-center gap-2" id="tab-btn-intro" onclick="switchDetailTab('intro')">
+<span class="material-symbols-outlined text-[18px]">auto_stories</span>
+          Nội Dung &amp; Giá Trị Bản In
+        </button>
+<button class="tab-trigger px-5 py-2.5 rounded-xl font-label-lg text-label-lg font-medium bg-surface-container text-on-surface-variant hover:text-on-surface transition-all flex items-center gap-2" id="tab-btn-specs" onclick="switchDetailTab('specs')">
+<span class="material-symbols-outlined text-[18px]">tune</span>
+          Thông Số Kỹ Thuật Chi Tiết
+        </button>
+<button class="tab-trigger px-5 py-2.5 rounded-xl font-label-lg text-label-lg font-medium bg-surface-container text-on-surface-variant hover:text-on-surface transition-all flex items-center gap-2" id="tab-btn-reviews" onclick="switchDetailTab('reviews')">
+<span class="material-symbols-outlined text-[18px]">rate_review</span>
+          Đánh Giá Có Ảnh Thật (128)
+        </button>
+</div>
+<!-- Tab Content 1: Intro & Cultural Value -->
+<div class="tab-panel pt-6 space-y-8" id="tab-content-intro">
+<!-- Literary Quote Callout -->
+<div class="bg-surface-container-low rounded-xl p-6 lg:p-8 relative overflow-hidden">
+<span class="material-symbols-outlined text-outline-variant/30 text-[80px] absolute -right-2 -bottom-4 select-none pointer-events-none">format_quote</span>
+<blockquote class="font-headline-md text-headline-md text-on-surface italic max-w-3xl leading-relaxed">
+            “Rất nhiều năm sau này, trước đội hành quyết, Đại tá Aureliano Buendía sẽ nhớ lại cái buổi chiều xa xăm khi cha chàng đưa chàng đi khám phá ra băng đá...”
+          </blockquote>
+<p class="font-label-md text-label-md text-primary font-semibold mt-4">
+            — Dòng mở đầu bất hủ qua bản dịch kinh điển của dịch giả Nguyễn Trung Đức
+          </p>
+</div>
+<div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+<div class="lg:col-span-8 space-y-4 font-body-md text-body-md text-on-surface-variant leading-relaxed">
+<h3 class="font-headline-sm text-headline-sm text-on-surface font-bold">
+              Bối Cảnh Làng Macondo &amp; Đỉnh Cao Chủ Nghĩa Hiện Thực Huyền Ảo
+            </h3>
+<p>
+              Xuất bản lần đầu năm 1967 tại Buenos Aires, <em>Trăm Năm Cô Đơn</em> là biên niên sử kỳ vĩ về bảy thế hệ gia đình Buendía tại ngôi làng giả tưởng Macondo. Tác phẩm đã đưa tên tuổi của nhà văn Colombia Gabriel García Márquez bước lên vũ đài văn chương thế giới và mang về cho ông giải Nobel Văn học danh giá năm 1982.
+            </p>
+<p>
+              Tại Việt Nam, ấn bản năm 1986 do Nhà xuất bản Văn Học phát hành được các học giả và người sưu tầm đánh giá là bản in “vàng son” mang tính biểu tượng nhất. Dịch giả Nguyễn Trung Đức đã chuyển tải trọn vẹn văn phong huyền hoặc, dày đặc phép ẩn dụ và hơi thở ma thuật của văn học Mỹ Latinh sang một thứ tiếng Việt uyển chuyển, giàu chất thơ và chuẩn xác đến từng điển tích.
+            </p>
+<h4 class="font-title-lg text-title-lg text-on-surface font-semibold pt-2">
+              Tại sao bản in bìa cứng 1986 lại có giá trị sưu tầm đặc biệt?
+            </h4>
+<p>
+              Đây là một trong số rất ít các ấn bản tiểu thuyết phương Tây được đóng bìa cứng simili dập chìm hoa văn thời kỳ Đổi Mới. Khác với các bản in hiện đại dùng giấy xốp xơ công nghiệp, bản in 1986 sử dụng giấy bãi bằng ngả màu rơm tự nhiên, sợi cellulose dẻo dai giúp từng trang sách không bị giòn gãy sau gần 40 năm lưu giữ.
+            </p>
+</div>
+<!-- Collector's Note Card -->
+<div class="lg:col-span-4 bg-surface-container rounded-xl p-5 space-y-3">
+<div class="flex items-center gap-2 text-primary font-title-md text-title-md font-semibold">
+<span class="material-symbols-outlined text-[20px]">award_star</span>
+              Điểm Thẩm Định Bảo Tồn
+            </div>
+<p class="font-body-sm text-body-sm text-on-surface-variant">
+              Cuốn sách này đạt thang điểm 9.2/10 theo quy chuẩn phân hạng sách cổ Việt Nam. Dấu khắc mộc tròn của dịch giả và dòng thủ bút đề tặng ngày 12/03/1989 ở trang tiêu đề làm tăng giá trị lịch sử thêm 30%.
+            </p>
+<div class="pt-2 text-label-sm text-label-sm text-outline flex items-center gap-1.5">
+<span class="material-symbols-outlined text-[16px] text-primary">eco</span>
+              Kéo dài tuổi thọ di sản in ấn &amp; giảm thiểu dấu chân carbon
+            </div>
+</div>
+</div>
+</div>
+<!-- Tab Content 2: Technical Specifications -->
+<div class="tab-panel hidden pt-6" id="tab-content-specs">
+<div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+<div class="bg-surface-container-low rounded-xl p-6 space-y-3">
+<h4 class="font-title-md text-title-md text-on-surface font-semibold pb-2">Thông Số Vật Lý Ấn Bản</h4>
+<div class="space-y-2 text-body-sm font-body-sm">
+<div class="flex justify-between py-1.5 bg-surface-container-lowest px-3 rounded-lg">
+<span class="text-secondary">Tựa nguyên tác:</span>
+<span class="text-on-surface font-medium">Cien años de soledad</span>
+</div>
+<div class="flex justify-between py-1.5 bg-surface-container-lowest px-3 rounded-lg">
+<span class="text-secondary">Năm xuất bản:</span>
+<span class="text-on-surface font-medium">1986 (Ấn bản đầu tiên tại VN)</span>
+</div>
+<div class="flex justify-between py-1.5 bg-surface-container-lowest px-3 rounded-lg">
+<span class="text-secondary">Số trang:</span>
+<span class="text-on-surface font-medium">496 trang (Trọn bộ không cắt xén)</span>
+</div>
+<div class="flex justify-between py-1.5 bg-surface-container-lowest px-3 rounded-lg">
+<span class="text-secondary">Kích thước chuẩn:</span>
+<span class="text-on-surface font-medium">14.0 x 20.5 cm</span>
+</div>
+<div class="flex justify-between py-1.5 bg-surface-container-lowest px-3 rounded-lg">
+<span class="text-secondary">Trọng lượng sách:</span>
+<span class="text-on-surface font-medium">520 gram</span>
+</div>
+</div>
+</div>
+<div class="bg-surface-container-low rounded-xl p-6 space-y-3">
+<h4 class="font-title-md text-title-md text-on-surface font-semibold pb-2">Kỹ Thuật Đóng Bìa &amp; Giấy In</h4>
+<div class="space-y-2 text-body-sm font-body-sm">
+<div class="flex justify-between py-1.5 bg-surface-container-lowest px-3 rounded-lg">
+<span class="text-secondary">Hình thức bìa:</span>
+<span class="text-on-surface font-medium">Bìa cứng Simili dập nổi chữ chìm</span>
+</div>
+<div class="flex justify-between py-1.5 bg-surface-container-lowest px-3 rounded-lg">
+<span class="text-secondary">Chất liệu giấy:</span>
+<span class="text-on-surface font-medium">Giấy bãi bằng ngả vàng mộc thời bao cấp</span>
+</div>
+<div class="flex justify-between py-1.5 bg-surface-container-lowest px-3 rounded-lg">
+<span class="text-secondary">Kỹ thuật đóng gáy:</span>
+<span class="text-on-surface font-medium">Chỉ may tép thủ công kèm dây đánh dấu trang</span>
+</div>
+<div class="flex justify-between py-1.5 bg-surface-container-lowest px-3 rounded-lg">
+<span class="text-secondary">Ngôn ngữ:</span>
+<span class="text-on-surface font-medium">Tiếng Việt (Dịch từ bản thảo Tây Ban Nha)</span>
+</div>
+<div class="flex justify-between py-1.5 bg-surface-container-lowest px-3 rounded-lg">
+<span class="text-secondary">Tình trạng chữ ký:</span>
+<span class="text-on-surface font-medium">Có bút tích người sưu tầm (1989)</span>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- Tab Content 3: Real Buyer Reviews with Photos -->
+<div class="tab-panel hidden pt-6 space-y-6" id="tab-content-reviews">
+<div class="flex flex-col md:flex-row items-start md:items-center justify-between gap-4 bg-surface-container-low p-6 rounded-xl">
+<div class="flex items-center gap-4">
+<div class="text-center">
+<span class="font-display-lg text-display-lg text-primary font-bold leading-none block">4.9</span>
+<span class="font-label-sm text-label-sm text-outline">trên 5.0 sao</span>
+</div>
+<div>
+<div class="flex items-center text-primary-container">
+<span class="material-symbols-outlined text-[20px]" style="font-variation-settings: 'FILL' 1;">star</span>
+<span class="material-symbols-outlined text-[20px]" style="font-variation-settings: 'FILL' 1;">star</span>
+<span class="material-symbols-outlined text-[20px]" style="font-variation-settings: 'FILL' 1;">star</span>
+<span class="material-symbols-outlined text-[20px]" style="font-variation-settings: 'FILL' 1;">star</span>
+<span class="material-symbols-outlined text-[20px]" style="font-variation-settings: 'FILL' 1;">star</span>
+</div>
+<p class="font-body-sm text-body-sm text-on-surface-variant mt-1">100% người mua xác nhận sách đúng mô tả kiểm định</p>
+</div>
+</div>
+<button class="bg-surface-container-high hover:bg-surface-container-highest text-on-surface font-label-md text-label-md font-semibold px-4 py-2.5 rounded-lg transition-colors flex items-center gap-1.5" type="button">
+<span class="material-symbols-outlined text-[18px]">add_comment</span>
+            Viết cảm nhận của bạn
+          </button>
+</div>
+<!-- Review Cards -->
+<div class="space-y-4">
+<!-- Review 1 -->
+<div class="bg-surface-container-low/40 rounded-xl p-5 space-y-3">
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-3">
+<div class="w-9 h-9 rounded-full bg-secondary text-on-secondary font-label-md text-label-md flex items-center justify-center font-bold">
+                  LH
+                </div>
+<div>
+<h5 class="font-title-md text-title-md text-on-surface font-semibold">Lê Hoàng Nam</h5>
+<span class="font-label-sm text-label-sm text-outline">Đã sưu tầm bản in 1986 vào tháng 11/2024</span>
+</div>
+</div>
+<div class="flex text-primary-container">
+<span class="material-symbols-outlined text-[16px]" style="font-variation-settings: 'FILL' 1;">star</span>
+<span class="material-symbols-outlined text-[16px]" style="font-variation-settings: 'FILL' 1;">star</span>
+<span class="material-symbols-outlined text-[16px]" style="font-variation-settings: 'FILL' 1;">star</span>
+<span class="material-symbols-outlined text-[16px]" style="font-variation-settings: 'FILL' 1;">star</span>
+<span class="material-symbols-outlined text-[16px]" style="font-variation-settings: 'FILL' 1;">star</span>
+</div>
+</div>
+<p class="font-body-sm text-body-sm text-on-surface-variant leading-relaxed">
+              Nhận sách đóng gói cực kỳ cẩn thận với 3 lớp bọc chống ẩm. Bản in năm 1986 cầm rất đầm tay, thơm mùi sách cũ nguyên bản chứ không hề bị ẩm mốc. Rất khâm phục đội ngũ thẩm định của Book4Life vì đã giữ được một cuốn sách quý nguyên vẹn thế này!
+            </p>
+<div class="flex items-center gap-2 pt-1">
+<div class="w-16 h-16 rounded-lg overflow-hidden bg-surface-container">
+<img class="w-full h-full object-cover" data-alt="Customer photo showing the received vintage book on a wooden coffee table beside an espresso cup" src="https://lh3.googleusercontent.com/aida-public/AB6AXuC0AJGkOI6m-E_KEd7N4Jc4KuBT5VD8O6ncennA2AnnpWWxc29aHWFF8TWfb9oFm30uU4xyUn5yQOQ0xL_rUmfZCMTH14Dsz45VNqFZNNis1isYiMhpQzAYqK5g4qWCW7AE7xIz3KM7WA3ivz9SWg3g8OsRFLQTmHmyeFOyxnLdGIpEcJEzEKwFGmOa8X5S4jUBioyW_dhmEthnG5Ez5WgoDbw2iMmZGerJpCUCykmXWECDJI4a7d52"/>
+</div>
+<div class="w-16 h-16 rounded-lg overflow-hidden bg-surface-container">
+<img class="w-full h-full object-cover" data-alt="Customer photo close up of the crisp pages and genuine bookstore verification bookmark" src="https://lh3.googleusercontent.com/aida-public/AB6AXuA56sTpLEnZphsSKort0Hqew5eVYIgX0IvZgn8TJEyqto-xg5I-Ac2TCJosoDtNLjhyto3xUsNt4kLZKruC1p5yY2ydyMYlSGZQT2-1Bs50ReZQGlKrwcfAPJUmeaP0xOKdYvs_OWi8hF4g4T1m-SWf5XsjwrAhMtA8l6Loyju2R78Uy5yAHO37w5O5pPJysWGY0zVIhCO7Ud1VIpY1WsahE9KeM81mB0CN_FQK0Cs3RUUlgjgmLJiG"/>
+</div>
+</div>
+</div>
+<!-- Review 2 -->
+<div class="bg-surface-container-low/40 rounded-xl p-5 space-y-3">
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-3">
+<div class="w-9 h-9 rounded-full bg-primary-fixed text-on-primary-fixed font-label-md text-label-md flex items-center justify-center font-bold">
+                  VT
+                </div>
+<div>
+<h5 class="font-title-md text-title-md text-on-surface font-semibold">Vũ Thuỳ Trang</h5>
+<span class="font-label-sm text-label-sm text-outline">Đã mua tại chi nhánh Hà Nội</span>
+</div>
+</div>
+<div class="flex text-primary-container">
+<span class="material-symbols-outlined text-[16px]" style="font-variation-settings: 'FILL' 1;">star</span>
+<span class="material-symbols-outlined text-[16px]" style="font-variation-settings: 'FILL' 1;">star</span>
+<span class="material-symbols-outlined text-[16px]" style="font-variation-settings: 'FILL' 1;">star</span>
+<span class="material-symbols-outlined text-[16px]" style="font-variation-settings: 'FILL' 1;">star</span>
+<span class="material-symbols-outlined text-[16px]" style="font-variation-settings: 'FILL' 1;">star</span>
+</div>
+</div>
+<p class="font-body-sm text-body-sm text-on-surface-variant leading-relaxed">
+              Bản dịch của thầy Nguyễn Trung Đức xứng đáng là bản dịch hay nhất của tác phẩm này. Tình trạng sách đúng như ảnh chụp trên web, giấy ngả vàng rất hoài niệm.
+            </p>
+</div>
+</div>
+</div>
+</div>
+<!-- Related Books & Same Author Recommendations -->
+<div class="mt-16 space-y-6">
+<div class="flex flex-col sm:flex-row sm:items-end justify-between gap-2">
+<div>
+<span class="font-label-md text-label-md text-primary font-semibold uppercase tracking-wider">Cùng Tủ Sách Kinh Điển</span>
+<h2 class="font-headline-md text-headline-md text-on-surface font-bold mt-1">
+            Tác Phẩm Khuyên Đọc Dành Riêng Cho Bạn
+          </h2>
+</div>
+<a class="font-label-md text-label-md text-primary hover:underline font-semibold flex items-center gap-1" data-path="the-loai" href="#">
+          Xem toàn bộ thể loại <span class="material-symbols-outlined text-[16px]">arrow_forward</span>
+</a>
+</div>
+<!-- 4-Book Responsive Grid -->
+<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+<!-- Card 1 -->
+<div class="group bg-surface-container-lowest rounded-xl p-4 shadow-sm hover:shadow-xl transition-all duration-300 flex flex-col justify-between">
+<div class="space-y-3">
+<div class="relative w-full aspect-[3/4] rounded-lg overflow-hidden bg-surface-container-low">
+<span class="absolute top-2 left-2 z-10 px-2 py-0.5 rounded bg-surface/90 font-label-sm text-[11px] font-bold text-on-surface shadow-sm">
+                Like New 98%
+              </span>
+<img class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" data-alt="Cover of the book Love in the Time of Cholera by Gabriel Garcia Marquez vintage edition on cream linen textured background" src="https://lh3.googleusercontent.com/aida-public/AB6AXuA_12KqMjD-_aGA9KxL2AkwqUatajz2HIp9TxyJYjFQi6PvG8Unm0STvDETqoYN4jnzqcIRLgLvMFglly_gGZG-tHvws2cZORpUG_L7oq5Dk50Tvol6YVfoaOIKw4a7TKw_LhHc3F6Plt9T6u_y-fahOhgVQEYgLqqHZxwJqqE7u0HlU4rUh1CJ0MgRR8IK3iaYkuhRvTrl8TpbfesTtgwBsKpSGSHHQUE0AJKZquD37Q_uWVjZerVs"/>
+</div>
+<div class="space-y-1">
+<span class="font-label-sm text-[11px] text-outline">Gabriel García Márquez</span>
+<h4 class="font-title-md text-title-md text-on-surface font-bold leading-snug group-hover:text-primary transition-colors line-clamp-1">
+                Tình Yêu Thời Thổ Tả
+              </h4>
+<p class="font-body-sm text-[12px] text-on-surface-variant line-clamp-2">
+                Ấn bản bìa mềm NXB Đà Nẵng 1999, trang ruột trắng sáng nguyên bản.
+              </p>
+</div>
+</div>
+<div class="pt-4 flex items-center justify-between">
+<div>
+<span class="font-title-md text-title-md text-primary font-bold">145.000₫</span>
+<span class="text-outline line-through text-[11px] ml-1.5">220.000₫</span>
+</div>
+<button aria-label="Thêm vào giỏ" class="w-8 h-8 rounded-full bg-surface-container-high hover:bg-primary hover:text-on-primary text-on-surface transition-colors flex items-center justify-center" type="button">
+<span class="material-symbols-outlined text-[18px]">add_shopping_cart</span>
+</button>
+</div>
+</div>
+<!-- Card 2 -->
+<div class="group bg-surface-container-lowest rounded-xl p-4 shadow-sm hover:shadow-xl transition-all duration-300 flex flex-col justify-between">
+<div class="space-y-3">
+<div class="relative w-full aspect-[3/4] rounded-lg overflow-hidden bg-surface-container-low">
+<span class="absolute top-2 left-2 z-10 px-2 py-0.5 rounded bg-surface/90 font-label-sm text-[11px] font-bold text-on-surface shadow-sm">
+                Rare Vintage
+              </span>
+<img class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" data-alt="Vintage book cover of The Old Man and the Sea by Ernest Hemingway antique leatherette spine" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCfpWBkkuoEXIzqa4rXa9mQGl0PVukqlnLRUlbqSX3taY2vhi_lK1Z0b-VmH8PyjCUXC1oUHPI_oFaKoa0mHoI58hZuPmPPj5PePLj_jFoE_QmHLQ8YDXPdMi61RVqkjbCsCoy7C2R-b_1xC5bfqXhPLCCy4mIz53KXEIPnr2QEoh4SOHx127SLETcw2t2KojwEZhzjEZbGsgMibEuOvAGP2xvvaDc6jJzbJNeY4Bri70Zs-vr2HNbU"/>
+</div>
+<div class="space-y-1">
+<span class="font-label-sm text-[11px] text-outline">Ernest Hemingway</span>
+<h4 class="font-title-md text-title-md text-on-surface font-bold leading-snug group-hover:text-primary transition-colors line-clamp-1">
+                Ông Già Và Biển Cả
+              </h4>
+<p class="font-body-sm text-[12px] text-on-surface-variant line-clamp-2">
+                Bản dịch Lê Huy Bắc, in ấn năm 1994, gáy phẳng đẹp không sờn.
+              </p>
+</div>
+</div>
+<div class="pt-4 flex items-center justify-between">
+<div>
+<span class="font-title-md text-title-md text-primary font-bold">120.000₫</span>
+<span class="text-outline line-through text-[11px] ml-1.5">180.000₫</span>
+</div>
+<button aria-label="Thêm vào giỏ" class="w-8 h-8 rounded-full bg-surface-container-high hover:bg-primary hover:text-on-primary text-on-surface transition-colors flex items-center justify-center" type="button">
+<span class="material-symbols-outlined text-[18px]">add_shopping_cart</span>
+</button>
+</div>
+</div>
+<!-- Card 3 -->
+<div class="group bg-surface-container-lowest rounded-xl p-4 shadow-sm hover:shadow-xl transition-all duration-300 flex flex-col justify-between">
+<div class="space-y-3">
+<div class="relative w-full aspect-[3/4] rounded-lg overflow-hidden bg-surface-container-low">
+<span class="absolute top-2 left-2 z-10 px-2 py-0.5 rounded bg-surface/90 font-label-sm text-[11px] font-bold text-on-surface shadow-sm">
+                Good 92%
+              </span>
+<img class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" data-alt="Cover of The Great Gatsby in classic retro illustrated style with warm amber vintage tint" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAWtY3opijAbpQKkyc0lNPuBtEeKvFPqWyqhH3XPFD50o73wYZOaukZ7tljnZvYTXoRsQ8NVwQ9xCeJ9SKtptUS5o8a11LGrfeawH5PZzkc2R3nR5ImIHj_Mhy3GTCfTguYFKU8RrUM84IzdyBC8qCNdhYImj1v4kK2NhLWNsM3ryLz2urJD6WZ44Ev_2kncoVAJa3MxjYXp8xQoarn6nt2Y7wTn671qrCj0Nb_BSykNHxcn9KEdmtw"/>
+</div>
+<div class="space-y-1">
+<span class="font-label-sm text-[11px] text-outline">F. Scott Fitzgerald</span>
+<h4 class="font-title-md text-title-md text-on-surface font-bold leading-snug group-hover:text-primary transition-colors line-clamp-1">
+                Đại Gia Gatsby
+              </h4>
+<p class="font-body-sm text-[12px] text-on-surface-variant line-clamp-2">
+                Bản in NXB Trẻ 2002, bìa gập còn nguyên vẹn, ruột sách sạch.
+              </p>
+</div>
+</div>
+<div class="pt-4 flex items-center justify-between">
+<div>
+<span class="font-title-md text-title-md text-primary font-bold">95.000₫</span>
+<span class="text-outline line-through text-[11px] ml-1.5">150.000₫</span>
+</div>
+<button aria-label="Thêm vào giỏ" class="w-8 h-8 rounded-full bg-surface-container-high hover:bg-primary hover:text-on-primary text-on-surface transition-colors flex items-center justify-center" type="button">
+<span class="material-symbols-outlined text-[18px]">add_shopping_cart</span>
+</button>
+</div>
+</div>
+<!-- Card 4 -->
+<div class="group bg-surface-container-lowest rounded-xl p-4 shadow-sm hover:shadow-xl transition-all duration-300 flex flex-col justify-between">
+<div class="space-y-3">
+<div class="relative w-full aspect-[3/4] rounded-lg overflow-hidden bg-surface-container-low">
+<span class="absolute top-2 left-2 z-10 px-2 py-0.5 rounded bg-surface/90 font-label-sm text-[11px] font-bold text-on-surface shadow-sm">
+                Collector 96%
+              </span>
+<img class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" data-alt="Cover of The Castle by Franz Kafka antique European translation with aged deckled paper" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCAaJ_qbG0sxOb-5Cr93oqRldN9num6l3vDA1MxZNFrYHNCVIl5cg4ChnbvHo5e3AyFrYZhPBsxXxg-bJWdGjhHLZXzqQhlxf_gQW88WxK4akQ9Z0uzaATiAgJ794qo2eLnRBwhGgr-fO2rUkMSrnS6iDThmyGVj-J_mIJa5wbjz-_d95zHhvXBf3gfRzWmUmfccOQza5_-wg0qo-EpbRh-YA-4pWVIJSvmg84qsJhqlbWTh2XJEVrE"/>
+</div>
+<div class="space-y-1">
+<span class="font-label-sm text-[11px] text-outline">Franz Kafka</span>
+<h4 class="font-title-md text-title-md text-on-surface font-bold leading-snug group-hover:text-primary transition-colors line-clamp-1">
+                Lâu Đài (Bản Bìa Cứng)
+              </h4>
+<p class="font-body-sm text-[12px] text-on-surface-variant line-clamp-2">
+                Bản dịch Trương Đăng Dung, ấn phẩm văn học kinh điển thế giới.
+              </p>
+</div>
+</div>
+<div class="pt-4 flex items-center justify-between">
+<div>
+<span class="font-title-md text-title-md text-primary font-bold">160.000₫</span>
+<span class="text-outline line-through text-[11px] ml-1.5">250.000₫</span>
+</div>
+<button aria-label="Thêm vào giỏ" class="w-8 h-8 rounded-full bg-surface-container-high hover:bg-primary hover:text-on-primary text-on-surface transition-colors flex items-center justify-center" type="button">
+<span class="material-symbols-outlined text-[18px]">add_shopping_cart</span>
+</button>
+</div>
+</div>
+</div>
+</div>
+<!-- Notification Toast Element -->
+<div class="fixed bottom-6 right-6 z-50 bg-inverse-surface text-inverse-on-surface px-5 py-3 rounded-xl shadow-xl flex items-center gap-3 translate-y-24 opacity-0 pointer-events-none transition-all duration-300" id="cart-toast">
+<span class="material-symbols-outlined text-primary-container text-[22px]">check_circle</span>
+<span class="font-label-md text-label-md">Đã thêm "Trăm Năm Cô Đơn (1986)" vào giỏ hàng!</span>
+</div>
+</div>
+</div>
+<script>
+  function switchDetailTab(tabId) {
+    const tabs = ['intro', 'specs', 'reviews'];
+    tabs.forEach(t => {
+      const panel = document.getElementById('tab-content-' + t);
+      const btn = document.getElementById('tab-btn-' + t);
+      if (t === tabId) {
+        panel.classList.remove('hidden');
+        btn.classList.add('bg-primary', 'text-on-primary', 'font-bold');
+        btn.classList.remove('bg-surface-container', 'text-on-surface-variant', 'font-medium');
+      } else {
+        panel.classList.add('hidden');
+        btn.classList.remove('bg-primary', 'text-on-primary', 'font-bold');
+        btn.classList.add('bg-surface-container', 'text-on-surface-variant', 'font-medium');
+      }
+    });
+  }
+
+  function swapThumb(index) {
+    const thumbBtns = document.querySelectorAll('.thumb-btn');
+    thumbBtns.forEach((btn, i) => {
+      if (i === index) {
+        btn.classList.add('ring-2', 'ring-primary');
+      } else {
+        btn.classList.remove('ring-2', 'ring-primary');
+      }
+    });
+  }
+
+  const addToCartBtn = document.getElementById('add-to-cart-btn');
+  const cartToast = document.getElementById('cart-toast');
+  if (addToCartBtn && cartToast) {
+    addToCartBtn.addEventListener('click', () => {
+      cartToast.classList.remove('translate-y-24', 'opacity-0', 'pointer-events-none');
+      setTimeout(() => {
+        cartToast.classList.add('translate-y-24', 'opacity-0', 'pointer-events-none');
+      }, 3500);
+    });
+  }
+
+  const favBtn = document.getElementById('fav-btn');
+  if (favBtn) {
+    favBtn.addEventListener('click', function() {
+      const icon = this.querySelector('.material-symbols-outlined');
+      if (icon.getAttribute('style')) {
+        icon.removeAttribute('style');
+        this.classList.remove('text-error');
+      } else {
+        icon.setAttribute('style', "font-variation-settings: 'FILL' 1;");
+        this.classList.add('text-error');
+      }
+    });
+  }
+</script></main><footer class="w-full bg-[#2C1E16] text-[#FAF9F6]"><div class="max-w-7xl mx-auto px-6 py-16"><div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-10"><div class="space-y-4"><div class="flex items-center gap-2.5"><div class="w-8 h-8 rounded-full bg-primary-container/20 flex items-center justify-center text-primary-container"><span class="material-symbols-outlined text-[20px]">eco</span></div><span class="font-headline-sm text-headline-sm font-bold text-primary-container tracking-tight">Book4Life</span></div><p class="font-body-sm text-body-sm text-outline-variant leading-relaxed">Tiệm sách cũ trực tuyến gìn giữ di sản tri thức và văn hóa đọc truyền thống. Mỗi tựa sách sang tay góp phần giảm dấu chân carbon, nuôi dưỡng tình yêu sách và lối sống bền vững.</p><div class="flex items-center gap-3 pt-2 text-[#FAF9F6]"><span class="material-symbols-outlined text-primary-container text-[20px]">nature_people</span><span class="font-label-sm text-label-sm text-outline-variant">Vòng đời sách tuần hoàn &amp; Ươm mầm xanh</span></div></div><div class="space-y-3"><h4 class="font-title-md text-title-md text-[#FAF9F6] font-semibold">Khám Phá &amp; Danh Mục</h4><ul class="space-y-2 font-body-sm text-body-sm text-outline-variant"><li><a class="hover:text-primary-container transition-colors" data-path="the-loai" href="#">Toàn bộ danh mục thể loại</a></li><li><a class="hover:text-primary-container transition-colors" data-path="tac-gia" href="#">Tuyển tập tác giả tiêu biểu</a></li><li><a class="hover:text-primary-container transition-colors" data-path="the-loai" href="#">Bản in đầu &amp; Sách hiếm tuyển chọn</a></li><li><a class="hover:text-primary-container transition-colors" data-path="goc-doc-sach-blog" href="#">Góc đọc sách &amp; Bình phẩm văn học</a></li><li><a class="hover:text-primary-container transition-colors" data-path="lien-he-va-diem-thu-mua" href="#">Quy trình ký gửi &amp; Thu mua sách cũ</a></li></ul></div><div class="space-y-3"><h4 class="font-title-md text-title-md text-[#FAF9F6] font-semibold">Thẩm Định &amp; Bảo Tồn</h4><p class="font-body-sm text-body-sm text-outline-variant">Quy chuẩn đánh giá tình trạng sách chuẩn xác:</p><div class="space-y-2 pt-1"><div class="flex items-start gap-2"><span class="px-2 py-0.5 rounded bg-surface-container-highest/10 text-primary-container font-label-sm text-[11px] font-bold shrink-0">Rare</span><span class="font-body-sm text-[12px] text-outline-variant">Sách cổ, có chữ ký, ấn bản đặc biệt</span></div><div class="flex items-start gap-2"><span class="px-2 py-0.5 rounded bg-surface-container-highest/10 text-[#FAF9F6] font-label-sm text-[11px] font-bold shrink-0">Like New</span><span class="font-body-sm text-[12px] text-outline-variant">Gần như mới nguyên, gáy và mép phẳng</span></div><div class="flex items-start gap-2"><span class="px-2 py-0.5 rounded bg-surface-container-highest/10 text-outline-variant font-label-sm text-[11px] font-bold shrink-0">Good</span><span class="font-body-sm text-[12px] text-outline-variant">Dấu thời gian nhẹ, ruột sách vẹn nguyên</span></div></div><div class="pt-2"><a class="font-label-sm text-label-sm text-primary-container hover:underline" data-path="lien-he-va-diem-thu-mua" href="#">Tra cứu điểm thu mua &amp; Báo giá →</a></div></div><div class="space-y-4"><h4 class="font-title-md text-title-md text-[#FAF9F6] font-semibold">Bản Tin Mọt Sách</h4><p class="font-body-sm text-body-sm text-outline-variant">Nhận danh sách tựa sách hiếm mới cập nhật hàng tuần cùng ưu đãi dành riêng cho bạn đọc.</p><div class="flex items-center gap-2"><input class="w-full px-3 py-2 rounded-lg bg-surface-container-highest/10 font-body-sm text-body-sm text-[#FAF9F6] placeholder:text-outline-variant/60 focus:outline-none focus:ring-1 focus:ring-primary-container" placeholder="Nhập địa chỉ email..." type="email"/><button class="px-4 py-2 bg-primary-container text-on-primary-container font-label-sm text-label-sm font-semibold rounded-lg shrink-0 hover:bg-primary-fixed-dim transition-colors" type="button">Nhận tin</button></div><span class="inline-block font-label-sm text-[11px] text-outline-variant/80">*Cam kết bảo mật thông tin và không quảng cáo phiền phà.</span></div></div><div class="mt-12 pt-8 border-t border-outline-variant/20 flex flex-col md:flex-row items-center justify-between gap-4 font-body-sm text-body-sm text-outline-variant"><div class="flex items-center gap-4"><span>© 2025 Book4Life. Di sản sách &amp; Lối sống bền vững.</span><span class="inline-block w-1 h-1 rounded-full bg-outline-variant/40"></span><span class="flex items-center gap-1"><span class="material-symbols-outlined text-[16px]">eco</span>Phát triển bền vững</span></div><div class="flex items-center gap-6"><div class="flex items-center gap-3 text-[12px]"><span>Thanh toán:</span><span class="material-symbols-outlined text-[20px] text-outline-variant">credit_card</span><span class="material-symbols-outlined text-[20px] text-outline-variant">account_balance_wallet</span><span class="material-symbols-outlined text-[20px] text-outline-variant">qr_code_2</span></div><div class="flex items-center gap-3"><a aria-label="Cộng đồng" class="hover:text-primary-container transition-colors" href="#"><span class="material-symbols-outlined text-[20px]">forum</span></a><a aria-label="Chia sẻ" class="hover:text-primary-container transition-colors" href="#"><span class="material-symbols-outlined text-[20px]">share</span></a></div></div></div></div></footer></body></html>

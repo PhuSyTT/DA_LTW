@@ -1,0 +1,583 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="OldBooks - Nền tảng mua bán sách cũ chất lượng cao, mang theo giá trị và câu chuyện vượt thời gian.">
+    <title>OldBooks - Tìm Những Cuốn Sách Đã Có Một Câu Chuyện</title>
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;0,800;1,400;1,600&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+
+    <!-- FontAwesome 6 -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" rel="stylesheet">
+
+    <!-- Custom Landing Page CSS -->
+    <link href="css/landing-page.css" rel="stylesheet">
+</head>
+<body>
+
+    <!-- Paper Grain Overlay -->
+    <div class="vintage-grain-overlay"></div>
+
+    <!-- 1. HEADER SECTION -->
+    <header class="site-header">
+        <div class="container header-container">
+            <!-- Brand Logo -->
+            <a href="index.html" class="brand-logo" id="header-logo">
+                <div class="logo-icon-wrap">
+                    <i class="fa-solid fa-book-bookmark"></i>
+                </div>
+                <div class="logo-text-wrap">
+                    <span class="brand-name">OldBooks</span>
+                    <span class="brand-tagline">Timeless Stories</span>
+                </div>
+            </a>
+
+            <!-- Navigation Links -->
+            <nav>
+                <ul class="nav-menu" id="nav-menu">
+                    <li><a href="index.html" class="nav-link active">Home</a></li>
+                    <li><a href="#featured-books" class="nav-link">Sách</a></li>
+                    <li><a href="#categories" class="nav-link">Thể loại</a></li>
+                    <li><a href="#value-prop" class="nav-link">Về chúng tôi</a></li>
+                    <li><a href="#community" class="nav-link">Blog</a></li>
+                    <li><a href="#contact" class="nav-link">Liên hệ</a></li>
+                </ul>
+            </nav>
+
+            <!-- Search Bar -->
+            <div class="header-search">
+                <i class="fa-solid fa-magnifying-glass search-icon"></i>
+                <input type="text" class="search-input" id="main-search-input" placeholder="Tìm tên sách, tác giả...">
+            </div>
+
+            <!-- Header Action Icons -->
+            <div class="header-actions">
+                <!-- Wishlist Icon -->
+                <a href="#wishlist" class="action-btn" title="Danh sách yêu thích" id="wishlist-btn">
+                    <i class="fa-regular fa-heart"></i>
+                    <span class="badge-count">2</span>
+                </a>
+
+                <!-- Cart Icon -->
+                <a href="#cart" class="action-btn" title="Giỏ hàng" id="cart-btn">
+                    <i class="fa-solid fa-bag-shopping"></i>
+                    <span class="badge-count">0</span>
+                </a>
+
+                <!-- User / Login -->
+                <a href="#login" class="user-login-btn" id="login-btn">
+                    <i class="fa-regular fa-user"></i>
+                    <span>Tài khoản</span>
+                </a>
+
+                <!-- Mobile Hamburger Toggle -->
+                <button class="mobile-toggle" id="mobile-menu-toggle" aria-label="Toggle navigation">
+                    <i class="fa-solid fa-bars"></i>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- MAIN CONTENT -->
+    <main>
+        <!-- 2. HERO SECTION -->
+        <section class="hero-section" id="hero">
+            <div class="hero-shape-1"></div>
+            <div class="hero-shape-2"></div>
+
+            <div class="container hero-grid">
+                <!-- Left Column Content -->
+                <div class="hero-content">
+                    <div class="hero-badge">
+                        <i class="fa-solid fa-feather-pointed"></i>
+                        <span>BOOKS WITH A STORY</span>
+                    </div>
+
+                    <h1 class="hero-heading">
+                        Tìm Những Cuốn Sách<br>
+                        <span class="gradient-text">Đã Có Một Câu Chuyện</span>
+                    </h1>
+
+                    <p class="hero-subheading">
+                        Khám phá những cuốn sách cũ chất lượng, mang theo giá trị và câu chuyện riêng của chúng. Từng trang sách cũ lưu giữ những dấu ấn tri thức vượt thời gian.
+                    </p>
+
+                    <!-- CTA Buttons -->
+                    <div class="hero-cta-group">
+                        <a href="/books" class="btn-primary-gold" id="cta-explore">
+                            <i class="fa-solid fa-book-open-reader"></i>
+                            <span>Khám phá kho sách</span>
+                            <i class="fa-solid fa-arrow-right"></i>
+                        </a>
+
+                        <a href="#featured-books" class="btn-outline-vintage" id="cta-learn-more">
+                            <i class="fa-solid fa-star"></i>
+                            <span>Sách tuyển chọn</span>
+                        </a>
+                    </div>
+
+                    <!-- Social Proof Stats -->
+                    <div class="hero-stats">
+                        <div class="stat-item">
+                            <span class="stat-number">15,000+</span>
+                            <span class="stat-label">Đầu sách tuyển chọn</span>
+                        </div>
+                        <div class="stat-divider"></div>
+                        <div class="stat-item">
+                            <span class="stat-number">4.9/5</span>
+                            <span class="stat-label">Đánh giá chất lượng</span>
+                        </div>
+                        <div class="stat-divider"></div>
+                        <div class="stat-item">
+                            <span class="stat-number">30,000+</span>
+                            <span class="stat-label">Độc giả tin yêu</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Right Column Visual Art -->
+                <div class="hero-visual-wrap">
+                    <div class="hero-art-backdrop"></div>
+                    
+                    <div class="hero-main-card">
+                        <img src="images/hero-vintage-books.jpg" alt="Vintage Books and Reading Lamp" class="hero-img">
+                    </div>
+
+                    <!-- Decorative Floating Badges -->
+                    <div class="floating-badge badge-top-left">
+                        <div class="floating-icon-box">
+                            <i class="fa-solid fa-ribbon"></i>
+                        </div>
+                        <div>
+                            <div class="floating-text-title">Bản in Sưu tầm</div>
+                            <div class="floating-text-desc">Nguyên vẹn & Độc bản</div>
+                        </div>
+                    </div>
+
+                    <div class="floating-badge badge-bottom-right">
+                        <div class="floating-icon-box">
+                            <i class="fa-solid fa-shield-halved"></i>
+                        </div>
+                        <div>
+                            <div class="floating-text-title">Kiểm định 100%</div>
+                            <div class="floating-text-desc">Từng trang sách kỹ lưỡng</div>
+                        </div>
+                    </div>
+
+                    <div class="deco-dots"></div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 3. FEATURED CATEGORIES SECTION -->
+        <section class="categories-section" id="categories">
+            <div class="container">
+                <div class="section-header">
+                    <span class="section-eyebrow">Danh mục tuyển chọn</span>
+                    <h2 class="section-title">Khám phá theo thể loại</h2>
+                    <p class="section-subtitle">
+                        Tìm kiếm những tác phẩm thuộc các thể loại phong phú từ văn học kinh điển đến sách chuyên ngành quý giá.
+                    </p>
+                </div>
+
+                <div class="categories-grid">
+                    <!-- Category 1: Văn học -->
+                    <a href="/books?categoryId=1" class="category-card" id="cat-van-hoc" style="text-decoration: none; color: inherit;">
+                        <div class="category-icon-wrap">
+                            <i class="fa-solid fa-book-open"></i>
+                        </div>
+                        <h3 class="category-name">Văn học</h3>
+                        <span class="category-count">3,420+ cuốn</span>
+                        <div class="category-arrow"><i class="fa-solid fa-arrow-right"></i></div>
+                    </a>
+
+                    <!-- Category 2: Kinh tế -->
+                    <a href="/books?categoryId=2" class="category-card" id="cat-kinh-te" style="text-decoration: none; color: inherit;">
+                        <div class="category-icon-wrap">
+                            <i class="fa-solid fa-chart-line"></i>
+                        </div>
+                        <h3 class="category-name">Kinh tế</h3>
+                        <span class="category-count">1,850+ cuốn</span>
+                        <div class="category-arrow"><i class="fa-solid fa-arrow-right"></i></div>
+                    </a>
+
+                    <!-- Category 3: Kỹ năng -->
+                    <a href="/books?categoryId=3" class="category-card" id="cat-ky-nang" style="text-decoration: none; color: inherit;">
+                        <div class="category-icon-wrap">
+                            <i class="fa-solid fa-lightbulb"></i>
+                        </div>
+                        <h3 class="category-name">Kỹ năng</h3>
+                        <span class="category-count">2,100+ cuốn</span>
+                        <div class="category-arrow"><i class="fa-solid fa-arrow-right"></i></div>
+                    </a>
+
+                    <!-- Category 4: Công nghệ -->
+                    <a href="/books?categoryId=4" class="category-card" id="cat-cong-nghe" style="text-decoration: none; color: inherit;">
+                        <div class="category-icon-wrap">
+                            <i class="fa-solid fa-microchip"></i>
+                        </div>
+                        <h3 class="category-name">Công nghệ</h3>
+                        <span class="category-count">940+ cuốn</span>
+                        <div class="category-arrow"><i class="fa-solid fa-arrow-right"></i></div>
+                    </a>
+
+                    <!-- Category 5: Lịch sử -->
+                    <a href="/books?categoryId=5" class="category-card" id="cat-lich-su" style="text-decoration: none; color: inherit;">
+                        <div class="category-icon-wrap">
+                            <i class="fa-solid fa-landmark"></i>
+                        </div>
+                        <h3 class="category-name">Lịch sử</h3>
+                        <span class="category-count">1,630+ cuốn</span>
+                        <div class="category-arrow"><i class="fa-solid fa-arrow-right"></i></div>
+                    </a>
+
+                    <!-- Category 6: Tiểu thuyết -->
+                    <a href="/books?categoryId=6" class="category-card" id="cat-tieu-thuyet" style="text-decoration: none; color: inherit;">
+                        <div class="category-icon-wrap">
+                            <i class="fa-solid fa-scroll"></i>
+                        </div>
+                        <h3 class="category-name">Tiểu thuyết</h3>
+                        <span class="category-count">4,280+ cuốn</span>
+                        <div class="category-arrow"><i class="fa-solid fa-arrow-right"></i></div>
+                    </a>
+                </div>
+            </div>
+        </section>
+
+        <!-- 4. FEATURED BOOKS SECTION -->
+        <section class="featured-books-section" id="featured-books">
+            <div class="container">
+                <div class="section-header">
+                    <span class="section-eyebrow">Tác phẩm kinh điển</span>
+                    <h2 class="section-title">Sách được yêu thích</h2>
+                    <p class="section-subtitle">
+                        Những cuốn sách được độc giả săn đón nhiều nhất với tình trạng bảo quản tốt và mức giá tiết kiệm.
+                    </p>
+                </div>
+
+                <div class="books-grid">
+                    <!-- Book 1: Hoàng Tử Bé -->
+                    <article class="book-card" id="book-card-1">
+                        <div class="book-cover-wrap">
+                            <span class="condition-badge like-new">Like New</span>
+                            <button class="book-wishlist-btn" title="Thêm vào yêu thích" aria-label="Thêm vào yêu thích">
+                                <i class="fa-regular fa-heart"></i>
+                            </button>
+                            <img src="images/book-little-prince.jpg" alt="Hoàng Tử Bé - Antoine de Saint-Exupéry" class="book-cover-img">
+                        </div>
+                        <div class="book-body">
+                            <span class="book-category-tag">Văn học cổ điển</span>
+                            <h3 class="book-title" title="Hoàng Tử Bé (Bản minh họa màu bìa cứng cổ điển)">Hoàng Tử Bé</h3>
+                            <p class="book-author">Antoine de Saint-Exupéry</p>
+                            <div class="book-rating">
+                                <i class="fa-solid fa-star"></i>
+                                <i class="fa-solid fa-star"></i>
+                                <i class="fa-solid fa-star"></i>
+                                <i class="fa-solid fa-star"></i>
+                                <i class="fa-solid fa-star"></i>
+                                <span>(4.9)</span>
+                            </div>
+                            <div class="book-footer">
+                                <div class="book-price-box">
+                                    <span class="current-price">68.000 ₫</span>
+                                    <span class="original-price">110.000 ₫</span>
+                                </div>
+                                <a href="/books/1" class="btn-book-detail">
+                                    <span>Xem chi tiết</span>
+                                    <i class="fa-solid fa-chevron-right"></i>
+                                </a>
+                            </div>
+                        </div>
+                    </article>
+
+                    <!-- Book 2: Nhà Giả Kim -->
+                    <article class="book-card" id="book-card-2">
+                        <div class="book-cover-wrap">
+                            <span class="condition-badge good">Good</span>
+                            <button class="book-wishlist-btn" title="Thêm vào yêu thích" aria-label="Thêm vào yêu thích">
+                                <i class="fa-regular fa-heart"></i>
+                            </button>
+                            <img src="images/book-alchemist.jpg" alt="Nhà Giả Kim - Paulo Coelho" class="book-cover-img">
+                        </div>
+                        <div class="book-body">
+                            <span class="book-category-tag">Triết lý sống</span>
+                            <h3 class="book-title" title="Nhà Giả Kim (The Alchemist - Bản dịch kinh điển)">Nhà Giả Kim</h3>
+                            <p class="book-author">Paulo Coelho</p>
+                            <div class="book-rating">
+                                <i class="fa-solid fa-star"></i>
+                                <i class="fa-solid fa-star"></i>
+                                <i class="fa-solid fa-star"></i>
+                                <i class="fa-solid fa-star"></i>
+                                <i class="fa-solid fa-star-half-stroke"></i>
+                                <span>(4.8)</span>
+                            </div>
+                            <div class="book-footer">
+                                <div class="book-price-box">
+                                    <span class="current-price">52.000 ₫</span>
+                                    <span class="original-price">89.000 ₫</span>
+                                </div>
+                                <a href="/books/2" class="btn-book-detail">
+                                    <span>Xem chi tiết</span>
+                                    <i class="fa-solid fa-chevron-right"></i>
+                                </a>
+                            </div>
+                        </div>
+                    </article>
+
+                    <!-- Book 3: Bắt Trẻ Đồng Xanh -->
+                    <article class="book-card" id="book-card-3">
+                        <div class="book-cover-wrap">
+                            <span class="condition-badge used">Used</span>
+                            <button class="book-wishlist-btn" title="Thêm vào yêu thích" aria-label="Thêm vào yêu thích">
+                                <i class="fa-regular fa-heart"></i>
+                            </button>
+                            <img src="images/book-catcher-rye.jpg" alt="Bắt Trẻ Đồng Xanh - J.D. Salinger" class="book-cover-img">
+                        </div>
+                        <div class="book-body">
+                            <span class="book-category-tag">Tiểu thuyết hiện đại</span>
+                            <h3 class="book-title" title="Bắt Trẻ Đồng Xanh (The Catcher in the Rye)">Bắt Trẻ Đồng Xanh</h3>
+                            <p class="book-author">J.D. Salinger</p>
+                            <div class="book-rating">
+                                <i class="fa-solid fa-star"></i>
+                                <i class="fa-solid fa-star"></i>
+                                <i class="fa-solid fa-star"></i>
+                                <i class="fa-solid fa-star"></i>
+                                <i class="fa-regular fa-star"></i>
+                                <span>(4.7)</span>
+                            </div>
+                            <div class="book-footer">
+                                <div class="book-price-box">
+                                    <span class="current-price">45.000 ₫</span>
+                                    <span class="original-price">95.000 ₫</span>
+                                </div>
+                                <a href="/books/3" class="btn-book-detail">
+                                    <span>Xem chi tiết</span>
+                                    <i class="fa-solid fa-chevron-right"></i>
+                                </a>
+                            </div>
+                        </div>
+                    </article>
+
+                    <!-- Book 4: Những Người Khốn Khổ -->
+                    <article class="book-card" id="book-card-4">
+                        <div class="book-cover-wrap">
+                            <span class="condition-badge like-new">Like New</span>
+                            <button class="book-wishlist-btn" title="Thêm vào yêu thích" aria-label="Thêm vào yêu thích">
+                                <i class="fa-regular fa-heart"></i>
+                            </button>
+                            <img src="images/book-les-miserables.jpg" alt="Những Người Khốn Khổ - Victor Hugo" class="book-cover-img">
+                        </div>
+                        <div class="book-body">
+                            <span class="book-category-tag">Sử thi văn học</span>
+                            <h3 class="book-title" title="Những Người Khốn Khổ (Les Misérables - Bìa da dập nhũ vàng)">Những Người Khốn Khổ</h3>
+                            <p class="book-author">Victor Hugo</p>
+                            <div class="book-rating">
+                                <i class="fa-solid fa-star"></i>
+                                <i class="fa-solid fa-star"></i>
+                                <i class="fa-solid fa-star"></i>
+                                <i class="fa-solid fa-star"></i>
+                                <i class="fa-solid fa-star"></i>
+                                <span>(5.0)</span>
+                            </div>
+                            <div class="book-footer">
+                                <div class="book-price-box">
+                                    <span class="current-price">125.000 ₫</span>
+                                    <span class="original-price">220.000 ₫</span>
+                                </div>
+                                <a href="/books/4" class="btn-book-detail">
+                                    <span>Xem chi tiết</span>
+                                    <i class="fa-solid fa-chevron-right"></i>
+                                </a>
+                            </div>
+                        </div>
+                    </article>
+                </div>
+
+                <!-- CTA to All Books -->
+                <div style="text-align: center; margin-top: 48px;">
+                    <a href="/books" class="btn-primary-gold" style="padding: 16px 36px; font-size: 1.05rem; display: inline-flex; align-items: center; gap: 10px;">
+                        <i class="fa-solid fa-book-open-reader"></i>
+                        <span>Xem Toàn Bộ Kho Sách Tuyển Chọn</span>
+                        <i class="fa-solid fa-arrow-right"></i>
+                    </a>
+                </div>
+            </div>
+        </section>
+
+        <!-- 5. VALUE PROPOSITION SECTION -->
+        <section class="value-section" id="value-prop">
+            <div class="container">
+                <div class="value-banner">
+                    <div class="value-header">
+                        <span class="section-eyebrow">Cam kết chất lượng</span>
+                        <h2 class="section-title">Tại sao chọn OldBooks?</h2>
+                        <p class="section-subtitle">
+                            Chúng tôi tin rằng mỗi cuốn sách cũ đều chứa đựng những giá trị vĩnh cửu. Đội ngũ OldBooks luôn nỗ lực đem đến trải nghiệm đọc trọn vẹn nhất.
+                        </p>
+                    </div>
+
+                    <div class="value-grid">
+                        <!-- Pillar 1 -->
+                        <div class="value-card">
+                            <div class="value-icon-box">
+                                <i class="fa-solid fa-clipboard-check"></i>
+                            </div>
+                            <h3 class="value-card-title">Kiểm tra chất lượng</h3>
+                            <p class="value-card-desc">
+                                Từng trang sách, gáy sách và bìa đều được kiểm định cẩn thận, đánh giá đúng chuẩn tình trạng thực tế.
+                            </p>
+                        </div>
+
+                        <!-- Pillar 2 -->
+                        <div class="value-card">
+                            <div class="value-icon-box">
+                                <i class="fa-solid fa-tags"></i>
+                            </div>
+                            <h3 class="value-card-title">Giá cả hợp lý</h3>
+                            <p class="value-card-desc">
+                                Tiết kiệm từ 40% đến 70% so với giá bìa mới, giúp bạn dễ dàng tiếp cận kho tàng tri thức vô tận.
+                            </p>
+                        </div>
+
+                        <!-- Pillar 3 -->
+                        <div class="value-card">
+                            <div class="value-icon-box">
+                                <i class="fa-solid fa-truck-fast"></i>
+                            </div>
+                            <h3 class="value-card-title">Giao hàng toàn quốc</h3>
+                            <p class="value-card-desc">
+                                Đóng gói chống sốc và chống ẩm chuyên nghiệp, giao tận tay người đọc an toàn trên khắp 63 tỉnh thành.
+                            </p>
+                        </div>
+
+                        <!-- Pillar 4 -->
+                        <div class="value-card">
+                            <div class="value-icon-box">
+                                <i class="fa-solid fa-recycle"></i>
+                            </div>
+                            <h3 class="value-card-title">Tái sử dụng sách</h3>
+                            <p class="value-card-desc">
+                                Chung tay bảo vệ môi trường và kéo dài vòng đời của tri thức bằng phong cách sống đọc bền vững.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- BONUS: COMMUNITY & NEWSLETTER SECTION -->
+        <section class="community-section" id="community">
+            <div class="container">
+                <div class="community-box">
+                    <div class="community-text">
+                        <h2 class="community-title">Tham gia cộng đồng yêu sách cũ</h2>
+                        <p class="community-desc">
+                            Đăng ký nhận thông báo sớm nhất khi có các bản in hiếm, sách sưu tầm và ưu đãi độc quyền hàng tuần.
+                        </p>
+                    </div>
+                    <form class="community-form" id="newsletter-form">
+                        <input type="email" class="community-input" placeholder="Nhập địa chỉ email của bạn..." required>
+                        <button type="submit" class="btn-primary-gold" style="white-space: nowrap;">
+                            <span>Đăng ký</span>
+                            <i class="fa-solid fa-paper-plane"></i>
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- 6. FOOTER SECTION -->
+    <footer class="site-footer" id="contact">
+        <div class="container">
+            <div class="footer-grid">
+                <!-- Col 1: Brand & Bio -->
+                <div class="footer-brand">
+                    <a href="index.html" class="brand-logo">
+                        <div class="logo-icon-wrap">
+                            <i class="fa-solid fa-book-bookmark"></i>
+                        </div>
+                        <div class="logo-text-wrap">
+                            <span class="brand-name">OldBooks</span>
+                            <span class="brand-tagline">Timeless Stories</span>
+                        </div>
+                    </a>
+                    <p class="footer-about">
+                        OldBooks là ngôi nhà của những người yêu sách cũ, nơi mỗi cuốn sách là một hành trình kỳ diệu nối liền quá khứ và hiện tại.
+                    </p>
+                    <div class="footer-socials">
+                        <a href="#facebook" class="social-link" title="Facebook" aria-label="Facebook"><i class="fa-brands fa-facebook-f"></i></a>
+                        <a href="#instagram" class="social-link" title="Instagram" aria-label="Instagram"><i class="fa-brands fa-instagram"></i></a>
+                        <a href="#goodreads" class="social-link" title="Goodreads" aria-label="Goodreads"><i class="fa-brands fa-goodreads-g"></i></a>
+                        <a href="#tiktok" class="social-link" title="TikTok" aria-label="TikTok"><i class="fa-brands fa-tiktok"></i></a>
+                    </div>
+                </div>
+
+                <!-- Col 2: Quick Links -->
+                <div class="footer-col">
+                    <h4 class="footer-column-title">Quick Links</h4>
+                    <ul class="footer-links">
+                        <li><a href="index.html"><i class="fa-solid fa-chevron-right"></i> Trang chủ</a></li>
+                        <li><a href="#featured-books"><i class="fa-solid fa-chevron-right"></i> Sách mới về</a></li>
+                        <li><a href="#categories"><i class="fa-solid fa-chevron-right"></i> Bộ sưu tập hiếm</a></li>
+                        <li><a href="#value-prop"><i class="fa-solid fa-chevron-right"></i> Đổi sách cũ</a></li>
+                        <li><a href="#community"><i class="fa-solid fa-chevron-right"></i> Blog yêu sách</a></li>
+                    </ul>
+                </div>
+
+                <!-- Col 3: Categories -->
+                <div class="footer-col">
+                    <h4 class="footer-column-title">Danh mục sách</h4>
+                    <ul class="footer-links">
+                        <li><a href="#cat-van-hoc"><i class="fa-solid fa-chevron-right"></i> Văn học cổ điển</a></li>
+                        <li><a href="#cat-kinh-te"><i class="fa-solid fa-chevron-right"></i> Kinh tế & Quản trị</a></li>
+                        <li><a href="#cat-ky-nang"><i class="fa-solid fa-chevron-right"></i> Kỹ năng & Phát triển</a></li>
+                        <li><a href="#cat-lich-su"><i class="fa-solid fa-chevron-right"></i> Lịch sử & Triết học</a></li>
+                        <li><a href="#cat-tieu-thuyet"><i class="fa-solid fa-chevron-right"></i> Tiểu thuyết & Ký sự</a></li>
+                    </ul>
+                </div>
+
+                <!-- Col 4: Contact & Stores -->
+                <div class="footer-col">
+                    <h4 class="footer-column-title">Liên hệ & Chi nhánh</h4>
+                    <ul class="footer-contact-info">
+                        <li class="footer-contact-item">
+                            <i class="fa-solid fa-location-dot"></i>
+                            <span>Chi nhánh 1: 125 Phố Sách 19/12, Hoàn Kiếm, Hà Nội</span>
+                        </li>
+                        <li class="footer-contact-item">
+                            <i class="fa-solid fa-location-dot"></i>
+                            <span>Chi nhánh 2: 45 Đường Sách Nguyễn Văn Bình, Q.1, TP.HCM</span>
+                        </li>
+                        <li class="footer-contact-item">
+                            <i class="fa-solid fa-phone"></i>
+                            <span>Hotline: 1900 6868 (8:00 - 21:00)</span>
+                        </li>
+                        <li class="footer-contact-item">
+                            <i class="fa-solid fa-envelope"></i>
+                            <span>Email: contact@oldbooks.vn</span>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Footer Bottom Bar -->
+            <div class="footer-bottom">
+                <p>&copy; 2026 OldBooks Store Chain. All rights reserved. Thiết kế với trọn vẹn tình yêu dành cho sách.</p>
+                <div class="footer-legal-links">
+                    <a href="#terms">Điều khoản sử dụng</a>
+                    <a href="#privacy">Chính sách bảo mật</a>
+                    <a href="#shipping">Chính sách vận chuyển</a>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Interactive JS -->
+    <script src="js/landing-page.js"></script>
+</body>
+</html>

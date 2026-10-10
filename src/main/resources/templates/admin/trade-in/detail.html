@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{layout/admin-layout :: html(
+        pageTitle='Chi Tiết Phiếu Thu Mua - Thẩm Định',
+        pageSubtitle='Soi ảnh Cloudinary, đánh giá chất lượng thực tế và ra giá mua sách cũ từ khách hàng',
+        content=~{::section}
+      )}">
+<body>
+<section>
+    <div class="alert alert-danger" th:if="${errorMessage != null}" th:text="${errorMessage}"></div>
+
+    <div th:if="${request != null}">
+        <div class="row g-4">
+            <!-- Left: Appraisal Form -->
+            <div class="col-lg-5">
+
+                <!-- Request Info Card -->
+                <div class="content-card mb-3">
+                    <div class="content-card-header">
+                        <h5 class="fw-bold mb-0">
+                            <i class="fas fa-file-invoice text-warning me-2"></i>
+                            Phiếu Thu Mua
+                        </h5>
+                        <span th:switch="${request.status}">
+                            <span th:case="'PENDING_REVIEW'" class="badge bg-warning text-dark">🔍 Chờ thẩm định</span>
+                            <span th:case="'OFFERED'" class="badge bg-info text-white">💰 Đã báo giá</span>
+                            <span th:case="'ACCEPTED_AWAITING_DELIVERY'" class="badge bg-primary text-white">✅ Chờ bàn giao</span>
+                            <span th:case="'RECEIVED_STOCKED'" class="badge bg-success text-white">📦 Đã nhập kho</span>
+                            <span th:case="'CANCELLED'" class="badge bg-danger text-white">❌ Đã hủy</span>
+                        </span>
+                    </div>
+                    <div class="p-3">
+                        <table class="table table-borderless table-sm mb-0">
+                            <tr>
+                                <td class="text-muted fw-semibold" width="40%">Mã phiếu:</td>
+                                <td><code th:text="${request.requestCode}">TI-2026-001</code></td>
+                            </tr>
+                            <tr>
+                                <td class="text-muted fw-semibold">Khách hàng:</td>
+                                <td>
+                                    <div th:text="${request.customerName}">Nguyễn Văn A</div>
+                                    <small class="text-muted" th:text="${request.customerPhone}">0900000001</small>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="text-muted fw-semibold">Tựa sách:</td>
+                                <td>
+                                    <div class="fw-semibold" th:text="${request.bookTitle}">Nhà Giả Kim</div>
+                                    <small class="text-muted" th:text="'ISBN: ' + ${request.bookIsbn}">ISBN</small>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="text-muted fw-semibold">Giá bìa gốc:</td>
+                                <td th:text="${#numbers.formatDecimal(request.bookOriginalPrice, 0, 'COMMA', 0, 'POINT')} + 'đ'">0đ</td>
+                            </tr>
+                            <tr>
+                                <td class="text-muted fw-semibold">Độ mới (KH):</td>
+                                <td>
+                                    <span th:switch="${request.userConditionGrade}">
+                                        <span th:case="'LIKE_NEW'" class="badge bg-success">LIKE_NEW ✨</span>
+                                        <span th:case="'VERY_GOOD'" class="badge bg-primary">VERY_GOOD ⭐</span>
+                                        <span th:case="'GOOD'" class="badge bg-info text-dark">GOOD 👍</span>
+                                        <span th:case="'ACCEPTABLE'" class="badge bg-warning text-dark">ACCEPTABLE 📖</span>
+                                        <span th:case="*" class="badge bg-secondary" th:text="${request.userConditionGrade}">N/A</span>
+                                    </span>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="text-muted fw-semibold">Giá ước tính auto:</td>
+                                <td class="fw-semibold"
+                                    th:text="${#numbers.formatDecimal(request.autoEstimatedPrice, 0, 'COMMA', 0, 'POINT')} + 'đ'">0đ</td>
+                            </tr>
+                            <tr th:if="${request.staffReviewedPrice != null}">
+                                <td class="text-muted fw-semibold">Giá nhân viên ra:</td>
+                                <td class="fw-bold text-success"
+                                    th:text="${#numbers.formatDecimal(request.staffReviewedPrice, 0, 'COMMA', 0, 'POINT')} + 'đ'">0đ</td>
+                            </tr>
+                            <tr>
+                                <td class="text-muted fw-semibold">Hình thức giao:</td>
+                                <td th:text="${request.deliveryMethod == 'BRING_TO_STORE' ? '🏪 Mang đến quầy' : '📬 Gửi bưu điện'}">Mang đến quầy</td>
+                            </tr>
+                            <tr>
+                                <td class="text-muted fw-semibold">Ngày gửi:</td>
+                                <td th:text="${#temporals.format(request.createdAt, 'dd/MM/yyyy HH:mm')}">01/01/2026</td>
+                            </tr>
+                            <tr th:if="${request.staffNotes != null}">
+                                <td class="text-muted fw-semibold">Ghi chú staff:</td>
+                                <td class="text-muted fst-italic" th:text="${request.staffNotes}">Ghi chú...</td>
+                            </tr>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Appraisal Action Card (FR-TRD-04) - Only for PENDING_REVIEW -->
+                <div class="content-card mb-3" th:if="${request.status == 'PENDING_REVIEW'}">
+                    <div class="content-card-header">
+                        <h6 class="fw-bold mb-0"><i class="fas fa-star text-warning me-2"></i>Thẩm Định & Ra Giá (FR-TRD-04)</h6>
+                    </div>
+                    <div class="p-3">
+                        <div class="mb-3">
+                            <label class="form-label fw-semibold">Độ Cũ Thực Tế (Staff chấm)</label>
+                            <select id="staffGradeSelect" class="form-select">
+                                <option value="LIKE_NEW">LIKE_NEW ✨ (95-99%)</option>
+                                <option value="VERY_GOOD">VERY_GOOD ⭐ (85-94%)</option>
+                                <option value="GOOD" selected>GOOD 👍 (70-84%)</option>
+                                <option value="ACCEPTABLE">ACCEPTABLE 📖 (50-69%)</option>
+                                <option value="COLLECTIBLE">COLLECTIBLE 💎 (Sách hiếm)</option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <div class="form-check mb-2">
+                                <input class="form-check-input" type="checkbox" id="acceptAutoPrice">
+                                <label class="form-check-label fw-semibold" for="acceptAutoPrice">
+                                    Chấp nhận giá Auto
+                                    (<span th:text="${#numbers.formatDecimal(request.autoEstimatedPrice, 0, 'COMMA', 0, 'POINT')} + 'đ'">0đ</span>)
+                                </label>
+                            </div>
+                            <input type="number" id="staffPriceInput" class="form-control"
+                                   placeholder="Hoặc nhập giá thẩm định mới (VNĐ)"
+                                   th:attr="value=${request.autoEstimatedPrice}">
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label fw-semibold">Ghi Chú Thẩm Định</label>
+                            <textarea id="staffNotesInput" class="form-control" rows="3"
+                                      placeholder="Mô tả chi tiết tình trạng thực tế so với ảnh khách gửi..."></textarea>
+                        </div>
+                        <button class="btn btn-warning fw-semibold w-100" id="btn-review">
+                            <i class="fas fa-stamp me-2"></i> Gửi Kết Quả Thẩm Định & Báo Giá
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Confirm Stock Action Card (FR-TRD-06) - Only for ACCEPTED_AWAITING_DELIVERY -->
+                <div class="content-card" th:if="${request.status == 'ACCEPTED_AWAITING_DELIVERY'}">
+                    <div class="content-card-header">
+                        <h6 class="fw-bold mb-0 text-success"><i class="fas fa-warehouse me-2"></i>Xác Nhận Nhập Kho (FR-TRD-06)</h6>
+                    </div>
+                    <div class="p-3">
+                        <div class="alert alert-info small">
+                            <i class="fas fa-info-circle me-2"></i>
+                            Khách hàng đã đồng ý mức giá <strong th:text="${#numbers.formatDecimal(request.staffReviewedPrice, 0, 'COMMA', 0, 'POINT')} + 'đ'">0đ</strong>.
+                            Hãy kiểm tra sách thực tế và xác nhận nhập kho khi đã đối chiếu xong.
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label fw-semibold">Vị Trí Kệ Lưu Trữ</label>
+                            <input type="text" id="shelfLocationInput" class="form-control"
+                                   placeholder="VD: Kệ Thu Mua - Dãy T1 - Tầng 1">
+                        </div>
+                        <button class="btn btn-success fw-semibold w-100" id="btn-confirm-stock">
+                            <i class="fas fa-check-double me-2"></i> Xác Nhận Nhập Kho & Tạo Phiếu Chi
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right: Images from Cloudinary -->
+            <div class="col-lg-7">
+                <div class="content-card">
+                    <div class="content-card-header">
+                        <h5 class="fw-bold mb-0">
+                            <i class="fas fa-images text-primary me-2"></i>
+                            Ảnh Thực Tế từ Khách Hàng
+                        </h5>
+                        <span class="badge bg-primary-subtle text-primary border border-primary-subtle"
+                              th:text="${request.images != null ? #lists.size(request.images) : 0} + ' ảnh'">0 ảnh</span>
+                    </div>
+                    <div class="p-3">
+                        <!-- Image Gallery -->
+                        <div class="row g-3" th:if="${request.images != null and not #lists.isEmpty(request.images)}">
+                            <div class="col-md-6" th:each="img : ${request.images}">
+                                <div class="card h-100 border shadow-sm">
+                                    <a th:href="${img.imageUrl}" target="_blank">
+                                        <img th:src="${img.imageUrl}"
+                                             class="card-img-top"
+                                             style="height: 200px; object-fit: cover; cursor: zoom-in;"
+                                             alt="Ảnh thực tế sách cũ"
+                                             onerror="this.src='https://via.placeholder.com/300x200?text=Không+tải+được+ảnh'">
+                                    </a>
+                                    <div class="card-footer bg-light py-1 text-center">
+                                        <small class="text-muted fw-semibold"
+                                               th:text="${img.imageType != null ? img.imageType : 'PHOTO'}">COVER</small>
+                                        <a th:href="${img.imageUrl}" target="_blank"
+                                           class="btn btn-xs btn-outline-primary ms-2" style="font-size:0.7rem; padding: 1px 6px;">
+                                            <i class="fas fa-expand"></i> Zoom
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- No images -->
+                        <div class="text-center py-4 text-muted"
+                             th:if="${request.images == null or #lists.isEmpty(request.images)}">
+                            <i class="fas fa-image fa-3x opacity-25 mb-3"></i>
+                            <p class="mb-0">Khách hàng chưa tải ảnh lên.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<script th:inline="javascript">
+    const requestId = /*[[${request != null ? request.id : 0}]]*/ 0;
+
+    // Auto price checkbox toggle
+    document.getElementById('acceptAutoPrice')?.addEventListener('change', function() {
+        document.getElementById('staffPriceInput').disabled = this.checked;
+    });
+
+    // FR-TRD-04: Submit appraisal
+    document.getElementById('btn-review')?.addEventListener('click', async function() {
+        const acceptAuto = document.getElementById('acceptAutoPrice').checked;
+        const staffPrice = document.getElementById('staffPriceInput').value;
+        const staffGrade = document.getElementById('staffGradeSelect').value;
+        const staffNotes = document.getElementById('staffNotesInput').value;
+
+        if (!acceptAuto && (!staffPrice || parseFloat(staffPrice) <= 0)) {
+            alert('❌ Vui lòng nhập giá thẩm định hợp lệ hoặc chọn "Chấp nhận giá Auto"!');
+            return;
+        }
+
+        const body = {
+            acceptInitialEstimate: acceptAuto,
+            staffReviewedPrice: acceptAuto ? null : parseFloat(staffPrice),
+            staffConditionGrade: staffGrade,
+            staffNotes: staffNotes
+        };
+
+        const res = await fetch(`/api/trade-in/requests/${requestId}/review`, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(body)
+        });
+        const data = await res.text();
+        if (res.ok) { alert('✅ Đã gửi kết quả thẩm định! Khách hàng sẽ nhận thông báo.'); window.location.reload(); }
+        else { alert('❌ Lỗi: ' + data); }
+    });
+
+    // FR-TRD-06: Confirm physical receipt and stock in
+    document.getElementById('btn-confirm-stock')?.addEventListener('click', async function() {
+        const shelf = document.getElementById('shelfLocationInput').value.trim();
+        if (!shelf) {
+            alert('❌ Vui lòng nhập vị trí kệ lưu trữ cho sách!');
+            return;
+        }
+        if (!confirm(`Xác nhận nhập kho tại vị trí: "${shelf}"?\n\nThao tác này sẽ tạo BookItem mới và phiếu chi thanh toán cho khách hàng.`)) return;
+
+        const res = await fetch(`/api/trade-in/requests/${requestId}/confirm-stock?shelfLocation=${encodeURIComponent(shelf)}`, {
+            method: 'POST'
+        });
+        const data = await res.text();
+        if (res.ok) { alert('✅ Nhập kho thành công! BookItem mới đã được tạo và phiếu chi đã xuất.'); window.location.reload(); }
+        else { alert('❌ Lỗi: ' + data); }
+    });
+</script>
+</body>
+</html>

@@ -25,11 +25,28 @@ public class SubOrder {
     private BigDecimal branchSubtotal;
     private BigDecimal branchShippingFee;
     private String trackingNumber;
-    private String status;
+    private String status = "PENDING";
+
+    @Column(name = "created_at")
+    private java.time.LocalDateTime createdAt;
+
+    @Column(name = "updated_at")
+    private java.time.LocalDateTime updatedAt;
 
     @OneToMany(mappedBy = "subOrder", cascade = CascadeType.ALL)
     private List<SubOrderItem> items;
 
+    @PrePersist
+    protected void onCreate() {
+        if (createdAt == null) {
+            createdAt = java.time.LocalDateTime.now();
+        }
+    }
+
+    @PreUpdate
+    protected void onUpdate() {
+        updatedAt = java.time.LocalDateTime.now();
+    }
 	public Long getId() {
 		return id;
 	}
@@ -102,4 +119,19 @@ public class SubOrder {
 		this.items = items;
 	}
 
+	public java.time.LocalDateTime getCreatedAt() {
+		return createdAt;
+	}
+
+	public void setCreatedAt(java.time.LocalDateTime createdAt) {
+		this.createdAt = createdAt;
+	}
+
+	public java.time.LocalDateTime getUpdatedAt() {
+		return updatedAt;
+	}
+
+	public void setUpdatedAt(java.time.LocalDateTime updatedAt) {
+		this.updatedAt = updatedAt;
+	}
 }

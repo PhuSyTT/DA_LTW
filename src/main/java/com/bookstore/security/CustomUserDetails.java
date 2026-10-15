@@ -11,6 +11,7 @@ import java.util.List;
 
 public class CustomUserDetails implements UserDetails {
 
+    private final User user;
     private final Long id;
     private final String email;
     private final String password;
@@ -24,6 +25,7 @@ public class CustomUserDetails implements UserDetails {
     private final Collection<? extends GrantedAuthority> authorities;
 
     public CustomUserDetails(User user) {
+        this.user = user;
         this.id = user.getId();
         this.email = user.getEmail();
         this.password = user.getPassword();
@@ -54,6 +56,9 @@ public class CustomUserDetails implements UserDetails {
         this.authorities = auths;
     }
 
+    public User getUser() {
+        return user;
+    }
     public Long getId() {
         return id;
     }

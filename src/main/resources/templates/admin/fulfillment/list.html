@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{layout/admin-layout :: html(
+        pageTitle='Quản Lý Đơn Hàng Chi Nhánh (Nhóm 4)',
+        pageSubtitle='Tiếp nhận, đóng gói và xử lý giao vận đơn hàng theo chi nhánh theo thời gian thực',
+        content=~{::section}
+      )}">
+<body>
+<section>
+
+    <!-- Stats Cards (hiển thị khi đã chọn chi nhánh) -->
+    <div class="row g-3 mb-4" th:if="${stats != null}">
+        <div class="col-md-2">
+            <div class="stat-card">
+                <div class="stat-icon bg-warning-subtle text-warning">
+                    <i class="fas fa-clock"></i>
+                </div>
+                <div class="stat-info">
+                    <h3 th:text="${stats.pendingCount}">0</h3>
+                    <p>Chờ Xử Lý</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-2">
+            <div class="stat-card">
+                <div class="stat-icon bg-info-subtle text-info">
+                    <i class="fas fa-boxes-stacked"></i>
+                </div>
+                <div class="stat-info">
+                    <h3 th:text="${stats.packingCount}">0</h3>
+                    <p>Đang Đóng Gói</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-2">
+            <div class="stat-card">
+                <div class="stat-icon bg-primary-subtle text-primary">
+                    <i class="fas fa-truck"></i>
+                </div>
+                <div class="stat-info">
+                    <h3 th:text="${stats.shippedCount}">0</h3>
+                    <p>Đã Giao Vận</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-2">
+            <div class="stat-card">
+                <div class="stat-icon bg-success-subtle text-success">
+                    <i class="fas fa-circle-check"></i>
+                </div>
+                <div class="stat-info">
+                    <h3 th:text="${stats.completedCount}">0</h3>
+                    <p>Hoàn Thành</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-2">
+            <div class="stat-card">
+                <div class="stat-icon bg-danger-subtle text-danger">
+                    <i class="fas fa-ban"></i>
+                </div>
+                <div class="stat-info">
+                    <h3 th:text="${stats.cancelledCount}">0</h3>
+                    <p>Đã Hủy</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-2">
+            <div class="stat-card">
+                <div class="stat-icon bg-secondary-subtle text-secondary">
+                    <i class="fas fa-layer-group"></i>
+                </div>
+                <div class="stat-info">
+                    <h3 th:text="${stats.totalCount}">0</h3>
+                    <p>Tổng Đơn</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Filter + Main Table -->
+    <div class="content-card">
+        <div class="content-card-header">
+            <div class="d-flex align-items-center gap-2">
+                <h5 class="fw-bold mb-0 text-dark">
+                    <i class="fas fa-truck-ramp-box text-primary me-2"></i> Danh Sách Đơn Hàng Chi Nhánh
+                </h5>
+            </div>
+        </div>
+
+        <!-- Filter Form -->
+        <div class="p-3 border-bottom bg-light">
+            <form th:action="@{/admin/fulfillment}" method="get" class="row g-2 align-items-center">
+                <div class="col-md-4">
+                    <label class="form-label small fw-semibold text-muted mb-1">Chi Nhánh</label>
+                    <select name="branchId" id="branchId" class="form-select form-select-sm" onchange="this.form.submit()">
+                        <option value="">-- Chọn chi nhánh --</option>
+                        <option th:each="branch : ${branches}"
+                                th:value="${branch.id}"
+                                th:text="${branch.branchName}"
+                                th:selected="${branch.id == selectedBranchId}">
+                        </option>
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label small fw-semibold text-muted mb-1">Trạng Thái</label>
+                    <select name="status" class="form-select form-select-sm" onchange="this.form.submit()">
+                        <option value="ALL" th:selected="${selectedStatus == 'ALL'}">Tất cả trạng thái</option>
+                        <option value="PENDING" th:selected="${selectedStatus == 'PENDING'}">⏳ Chờ xử lý (PENDING)</option>
+                        <option value="PACKING" th:selected="${selectedStatus == 'PACKING'}">📦 Đang đóng gói (PACKING)</option>
+                        <option value="SHIPPED" th:selected="${selectedStatus == 'SHIPPED'}">🚚 Đã giao vận (SHIPPED)</option>
+                        <option value="COMPLETED" th:selected="${selectedStatus == 'COMPLETED'}">✅ Hoàn thành (COMPLETED)</option>
+                        <option value="CANCELLED" th:selected="${selectedStatus == 'CANCELLED'}">❌ Đã hủy (CANCELLED)</option>
+                    </select>
+                </div>
+            </form>
+        </div>
+
+        <!-- No branch selected message -->
+        <div class="text-center py-5 text-muted" th:if="${selectedBranchId == null}">
+            <i class="fas fa-store fa-3x mb-3 opacity-25"></i>
+            <p class="fs-6">Vui lòng chọn chi nhánh để xem danh sách đơn hàng.</p>
+        </div>
+
+        <!-- Empty orders -->
+        <div class="text-center py-5 text-muted" th:if="${selectedBranchId != null and (orders == null or #lists.isEmpty(orders))}">
+            <i class="fas fa-inbox fa-3x mb-3 opacity-25"></i>
+            <p class="fs-6">Không có đơn hàng nào phù hợp với bộ lọc hiện tại.</p>
+        </div>
+
+        <!-- Orders table -->
+        <div class="table-responsive" th:if="${orders != null and not #lists.isEmpty(orders)}">
+            <table class="table table-hover align-middle mb-0">
+                <thead class="table-light">
+                    <tr>
+                        <th>Mã Đơn Con</th>
+                        <th>Khách Hàng</th>
+                        <th>Số Mặt Hàng</th>
+                        <th>Tổng Tiền</th>
+                        <th>Mã Vận Đơn</th>
+                        <th>Trạng Thái</th>
+                        <th>Ngày Tạo</th>
+                        <th class="text-center">Hành Động</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr th:each="order : ${orders}">
+                        <td>
+                            <span class="fw-semibold text-primary" th:text="${order.subOrderCode}">SUB-Q1-001</span>
+                        </td>
+                        <td>
+                            <div th:text="${order.customerName}">Nguyễn Văn A</div>
+                            <small class="text-muted" th:text="${order.customerPhone}">0900000001</small>
+                        </td>
+                        <td>
+                            <span class="badge bg-secondary-subtle text-secondary border"
+                                  th:text="${order.items != null ? #lists.size(order.items) : 0} + ' sách'">0 sách</span>
+                        </td>
+                        <td>
+                            <span class="fw-semibold text-success"
+                                  th:text="${#numbers.formatDecimal(order.totalAmount, 0, 'COMMA', 0, 'POINT')} + 'đ'">0đ</span>
+                        </td>
+                        <td>
+                            <code th:text="${order.trackingNumber != null ? order.trackingNumber : '—'}">—</code>
+                        </td>
+                        <td>
+                            <span th:switch="${order.status}">
+                                <span th:case="'PENDING'" class="badge bg-warning text-dark">⏳ Chờ xử lý</span>
+                                <span th:case="'PACKING'" class="badge bg-info text-white">📦 Đóng gói</span>
+                                <span th:case="'SHIPPED'" class="badge bg-primary text-white">🚚 Giao vận</span>
+                                <span th:case="'COMPLETED'" class="badge bg-success text-white">✅ Hoàn thành</span>
+                                <span th:case="'CANCELLED'" class="badge bg-danger text-white">❌ Đã hủy</span>
+                                <span th:case="*" class="badge bg-secondary" th:text="${order.status}">N/A</span>
+                            </span>
+                        </td>
+                        <td>
+                            <small class="text-muted"
+                                   th:text="${#temporals.format(order.createdAt, 'dd/MM/yyyy HH:mm')}">01/01/2026</small>
+                        </td>
+                        <td class="text-center">
+                            <a th:href="@{/admin/fulfillment/orders/{id}(id=${order.id})}"
+                               class="btn btn-sm btn-outline-primary" title="Xem chi tiết & Xử lý">
+                                <i class="fas fa-eye me-1"></i> Xử Lý
+                            </a>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Hủy đơn Modal (FR-FUL-04) -->
+    <div class="modal fade" id="cancelOrderModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title text-danger"><i class="fas fa-ban me-2"></i>Hủy Đơn Hàng & Hoàn Kho</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <p class="text-muted">Đơn hàng sẽ bị hủy và tồn kho sẽ được hoàn trả tự động. Hành động này không thể hoàn tác!</p>
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">Lý Do Hủy Đơn</label>
+                        <textarea id="cancelReason" class="form-control" rows="3"
+                                  placeholder="VD: Khách hàng đổi ý / Sách bị hư hỏng khi đóng gói..."></textarea>
+                    </div>
+                    <input type="hidden" id="cancelOrderId">
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Đóng</button>
+                    <button type="button" class="btn btn-danger" id="confirmCancelBtn">
+                        <i class="fas fa-trash me-1"></i> Xác Nhận Hủy & Hoàn Kho
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<script th:inline="javascript">
+    function openCancelModal(orderId) {
+        document.getElementById('cancelOrderId').value = orderId;
+        new bootstrap.Modal(document.getElementById('cancelOrderModal')).show();
+    }
+
+    document.getElementById('confirmCancelBtn').addEventListener('click', function() {
+        const orderId = document.getElementById('cancelOrderId').value;
+        const reason = document.getElementById('cancelReason').value.trim() || 'Khách hàng yêu cầu hủy đơn';
+
+        fetch(`/api/fulfillment/orders/${orderId}/cancel?reason=${encodeURIComponent(reason)}`, {
+            method: 'POST', headers: {'Content-Type': 'application/json'}
+        })
+        .then(r => r.text())
+        .then(msg => { alert(msg); window.location.reload(); })
+        .catch(err => alert('Lỗi: ' + err.message));
+    });
+</script>
+</body>
+</html>

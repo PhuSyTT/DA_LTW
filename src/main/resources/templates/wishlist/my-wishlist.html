@@ -1,0 +1,368 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security" lang="vi">
+<head>
+    <meta charset="utf-8"/>
+    <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+    <title th:text="${pageTitle} ?: 'Săn Sách & Thông Báo Hàng Về - Book4Life'">Săn Sách & Thông Báo Hàng Về - Book4Life</title>
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet"/>
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet"/>
+
+    <!-- Tailwind CSS with Book4Life Literary Warmth Tokens -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#835500",
+                        "primary-container": "#f5a623",
+                        "on-primary": "#ffffff",
+                        "on-primary-container": "#644000",
+                        "secondary": "#6c5b51",
+                        "secondary-container": "#f6ded1",
+                        "surface": "#faf9f6",
+                        "surface-container-lowest": "#ffffff",
+                        "surface-container-low": "#f4f3f1",
+                        "surface-container": "#efeeeb",
+                        "surface-container-high": "#e9e8e5",
+                        "surface-container-highest": "#e3e2e0",
+                        "on-surface": "#1a1c1a",
+                        "on-surface-variant": "#524534",
+                        "outline": "#857462",
+                        "outline-variant": "#d7c3ae",
+                        "background": "#faf9f6",
+                        "error": "#ba1a1a"
+                    },
+                    fontFamily: {
+                        "sans": ["'Plus Jakarta Sans'", "Inter", "sans-serif"]
+                    }
+                }
+            }
+        };
+    </script>
+    <style>
+        * { font-family: 'Plus Jakarta Sans', 'Inter', sans-serif !important; }
+        .material-symbols-outlined { font-family: 'Material Symbols Outlined' !important; }
+        .toast-notification {
+            position: fixed; bottom: 24px; right: 24px; background: #2C1E16; color: #FAF9F6;
+            padding: 14px 22px; border-radius: 12px; box-shadow: 0 10px 30px rgba(0,0,0,0.25);
+            display: flex; align-items: center; gap: 10px; z-index: 9999;
+            transform: translateY(120%); transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+        .toast-notification.show { transform: translateY(0); }
+    </style>
+</head>
+<body class="bg-background font-sans text-on-surface antialiased min-h-screen flex flex-col justify-between">
+
+    <div id="toastNotification" class="toast-notification">
+        <span class="material-symbols-outlined text-primary-container" id="toastIcon">check_circle</span>
+        <span id="toastMessage" class="text-sm font-medium">Thông báo hệ thống</span>
+    </div>
+
+    <!-- HEADER -->
+    <header class="fixed top-0 left-0 right-0 z-50 bg-surface/95 backdrop-blur-xl border-b border-outline-variant/30 shadow-[0_1px_8px_rgba(44,30,22,0.04)]">
+        <div class="h-20 w-full max-w-7xl mx-auto px-4 sm:px-6 flex items-center justify-between gap-4">
+            <div class="flex items-center gap-3 shrink-0">
+                <a th:href="@{/}" href="/" class="flex items-center gap-3 group">
+                    <img th:src="@{/images/book4life-logo.png}"
+                         src="/images/book4life-logo.png"
+                         onerror="this.onerror=null; this.src='https://lh3.googleusercontent.com/aida/AEtjO1VFRXY_NxriMnSUoyOlnJkpi_znEOfbT5nqVF_bWOeMuQrL28jtA3tETNkUlNIEvXJm19CEHOkGmCwnVISoEMhl5cfEIGWneqFqQTEH2YVxCJT61G2j2-6D0aqTouvk9S4LMHzp7_D4BtPEKRDgZ-a42hUwlA9vSusc7zVTRfWF9HyMuFlJPcKDbdvyCu6om3wwYvn8--WJGC61Nv6WZJ_H2WA8IPtCQmf7qoGvV5cvAnQdgl-cs0nr3g';"
+                         alt="Book4Life Logo" class="h-9 w-auto object-contain transition-transform group-hover:scale-105"/>
+                    <div class="flex flex-col">
+                        <span class="font-bold text-2xl text-on-surface tracking-tight leading-none group-hover:text-primary transition-colors">Book4Life</span>
+                        <span class="text-[10px] text-primary font-semibold tracking-wider uppercase mt-0.5">Săn Sách Hiếm • Wishlist N6</span>
+                    </div>
+                </a>
+            </div>
+
+            <nav class="hidden md:flex items-center gap-6 text-sm font-semibold text-on-surface-variant">
+                <a th:href="@{/books}" class="hover:text-primary transition-colors">Kho sách</a>
+                <a th:href="@{/trade-in/new}" class="hover:text-primary transition-colors">Bán sách cũ</a>
+                <a th:href="@{/my-trade-in}" class="hover:text-primary transition-colors">Yêu cầu của tôi</a>
+                <a th:href="@{/my-wishlist}" class="text-primary font-bold">Săn sách (Wishlist)</a>
+            </nav>
+
+            <div class="flex items-center gap-3">
+                <a th:href="@{/books}" class="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-surface-container border border-outline-variant/40 text-xs font-bold text-on-surface hover:bg-surface-container-high transition-all">
+                    <span class="material-symbols-outlined text-[16px]">menu_book</span>
+                    <span>Khám phá kho sách</span>
+                </a>
+            </div>
+        </div>
+    </header>
+
+    <!-- MAIN CONTENT -->
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 pt-28 pb-16 w-full flex-grow">
+        <!-- Title Banner -->
+        <div class="mb-8">
+            <span class="px-3 py-1 rounded-full text-xs font-bold bg-rose-100 text-rose-800 uppercase tracking-wider inline-flex items-center gap-1">
+                <span class="material-symbols-outlined text-sm">notifications_active</span> Chức năng Săn sách & Chuông báo Restock N6
+            </span>
+            <h1 class="text-3xl sm:text-4xl font-extrabold text-on-surface mt-2 tracking-tight">Danh Sách Săn Sách Yêu Thích</h1>
+            <p class="text-secondary mt-1 text-sm sm:text-base">Đăng ký tựa sách bạn đang tìm kiếm. Ngay khi có cuốn sách phù hợp được nhập kho hoặc thu mua về, hệ thống sẽ lập tức gửi thông báo ưu tiên tới bạn.</p>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            <!-- Left Col: Form Đăng Ký Săn Sách Mới (FR-WSH-01) -->
+            <div class="lg:col-span-1">
+                <div class="bg-surface-container-lowest p-6 rounded-2xl border border-outline-variant/30 shadow-md sticky top-28">
+                    <h2 class="text-lg font-bold text-on-surface flex items-center gap-2 mb-4">
+                        <span class="material-symbols-outlined text-primary">add_alert</span>
+                        Đăng Ký Săn Sách Mới
+                    </h2>
+
+                    <form id="addWishlistForm" onsubmit="submitAddToWishlist(event)" class="space-y-4">
+                        <div>
+                            <label class="block text-xs font-bold uppercase tracking-wider text-secondary mb-1">Chọn Tựa Sách Cần Săn *</label>
+                            <select id="wishlistBookSelect" required class="w-full px-3.5 py-2.5 rounded-xl bg-surface-container border border-outline-variant/40 text-xs font-semibold focus:outline-none focus:ring-2 focus:ring-primary/40">
+                                <option value="">-- Chọn sách bạn đang mong muốn --</option>
+                                <option th:each="b : ${books}"
+                                        th:value="${b.id}"
+                                        th:text="${b.title + ' (' + (b.authorName != null ? b.authorName : 'Tác giả') + ')'}">
+                                    Nhà Giả Kim (Paulo Coelho)
+                                </option>
+                            </select>
+                        </div>
+
+                        <div>
+                            <label class="block text-xs font-bold uppercase tracking-wider text-secondary mb-1">Chi Nhánh Ưu Tiên Nhận Sách</label>
+                            <select id="wishlistBranchSelect" class="w-full px-3.5 py-2.5 rounded-xl bg-surface-container border border-outline-variant/40 text-xs font-semibold focus:outline-none focus:ring-2 focus:ring-primary/40">
+                                <option value="">-- Bất kỳ chi nhánh nào trong chuỗi --</option>
+                                <option th:each="br : ${branches}"
+                                        th:value="${br.id}"
+                                        th:text="${br.name}">
+                                    Chi nhánh Quận 1
+                                </option>
+                            </select>
+                            <p class="text-[10px] text-secondary mt-1">Để trống nếu bạn chấp nhận nhận sách từ bất kỳ chi nhánh nào.</p>
+                        </div>
+
+                        <div>
+                            <label class="block text-xs font-bold uppercase tracking-wider text-secondary mb-1">Yêu Cầu Tình Trạng Tối Thiểu *</label>
+                            <select id="wishlistGradeSelect" required class="w-full px-3.5 py-2.5 rounded-xl bg-surface-container border border-outline-variant/40 text-xs font-semibold focus:outline-none focus:ring-2 focus:ring-primary/40">
+                                <option value="GOOD" selected>Tốt (Good) - Khuyên dùng</option>
+                                <option value="VERY_GOOD">Rất Tốt (Very Good)</option>
+                                <option value="LIKE_NEW">Như Mới (Like New)</option>
+                                <option value="ACCEPTABLE">Chấp Nhận Được (Acceptable)</option>
+                            </select>
+                            <p class="text-[10px] text-secondary mt-1">Hệ thống chỉ thông báo nếu sách nhập về đạt chuẩn độ mới này trở lên.</p>
+                        </div>
+
+                        <button type="submit" id="submitWishlistBtn" class="w-full py-3 px-4 rounded-xl bg-primary text-on-primary font-bold text-xs hover:bg-amber-800 transition-all shadow-md flex items-center justify-center gap-2 mt-4">
+                            <span class="material-symbols-outlined text-[16px]">notifications_active</span>
+                            <span>Kích Hoạt Chuông Báo Săn Sách</span>
+                        </button>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Right Col: Danh Sách Săn Sách Hiện Tại (FR-WSH-03) -->
+            <div class="lg:col-span-2 space-y-4">
+                <div class="flex items-center justify-between pb-2 border-b border-outline-variant/30">
+                    <h2 class="text-lg font-bold text-on-surface flex items-center gap-2">
+                        <span class="material-symbols-outlined text-rose-500">favorite</span>
+                        Mục Đang Săn Của Bạn (<span id="wishlistCount">0</span>)
+                    </h2>
+                    <button onclick="loadMyWishlists()" class="text-xs text-primary font-bold hover:underline flex items-center gap-1">
+                        <span class="material-symbols-outlined text-[14px]">refresh</span> Làm mới
+                    </button>
+                </div>
+
+                <!-- Loading State -->
+                <div id="loadingWishlist" class="p-12 text-center text-secondary">
+                    <span class="material-symbols-outlined text-4xl animate-spin text-primary">progress_activity</span>
+                    <p class="mt-3 text-sm font-medium">Đang tải danh sách săn sách...</p>
+                </div>
+
+                <!-- Empty State -->
+                <div id="emptyWishlist" class="hidden bg-surface-container-lowest p-12 rounded-2xl border border-outline-variant/30 text-center shadow-sm">
+                    <span class="material-symbols-outlined text-5xl text-outline mb-3">heart_broken</span>
+                    <h3 class="text-lg font-bold text-on-surface">Bạn chưa có tựa sách nào trong danh sách săn</h3>
+                    <p class="text-secondary text-sm max-w-md mx-auto mt-1">
+                        Đăng ký ngay ở khung bên trái khi cuốn sách yêu thích đang tạm hết hàng để không bỏ lỡ đợt restock tiếp theo.
+                    </p>
+                </div>
+
+                <!-- Wishlist Items -->
+                <div id="wishlistItemsContainer" class="space-y-3 hidden"></div>
+            </div>
+        </div>
+    </main>
+
+    <!-- FOOTER -->
+    <footer class="w-full bg-[#2C1E16] text-[#FAF9F6] border-t border-[#4A3B32] py-8">
+        <div class="max-w-7xl mx-auto px-6 text-center text-xs text-outline-variant font-medium">
+            © 2025 Book4Life Inc. — Hệ Thống Đăng Ký Săn Sách Tự Động Restock Alert.
+        </div>
+    </footer>
+
+    <script>
+        const GRADE_MAP = {
+            'LIKE_NEW': 'Như Mới (Like New)',
+            'VERY_GOOD': 'Rất Tốt (Very Good)',
+            'GOOD': 'Tốt (Good)',
+            'ACCEPTABLE': 'Chấp Nhận Được'
+        };
+
+        function showToast(message, isError = false) {
+            const toast = document.getElementById('toastNotification');
+            const toastMsg = document.getElementById('toastMessage');
+            const toastIcon = document.getElementById('toastIcon');
+            if (toast && toastMsg) {
+                toastMsg.innerText = message;
+                toastIcon.innerText = isError ? 'error' : 'check_circle';
+                toastIcon.className = isError ? 'material-symbols-outlined text-red-400' : 'material-symbols-outlined text-primary-container';
+                toast.classList.add('show');
+                setTimeout(() => toast.classList.remove('show'), 3500);
+            }
+        }
+
+        async function loadMyWishlists() {
+            try {
+                const res = await fetch('/api/wishlists/my');
+                document.getElementById('loadingWishlist').classList.add('hidden');
+
+                if (res.ok) {
+                    const list = await res.json();
+                    document.getElementById('wishlistCount').innerText = list.length;
+
+                    if (!list || list.length === 0) {
+                        document.getElementById('emptyWishlist').classList.remove('hidden');
+                        document.getElementById('wishlistItemsContainer').classList.add('hidden');
+                        return;
+                    }
+
+                    renderWishlists(list);
+                    document.getElementById('emptyWishlist').classList.add('hidden');
+                    document.getElementById('wishlistItemsContainer').classList.remove('hidden');
+                } else {
+                    showToast('Không thể tải danh sách săn sách!', true);
+                }
+            } catch (err) {
+                document.getElementById('loadingWishlist').classList.add('hidden');
+                showToast('Lỗi mạng: ' + err.message, true);
+            }
+        }
+
+        function renderWishlists(list) {
+            const container = document.getElementById('wishlistItemsContainer');
+            container.innerHTML = '';
+
+            list.forEach(item => {
+                const coverImg = item.coverImageUrl || 'https://images.unsplash.com/photo-1544947950-fa07a98d237f?auto=format&fit=crop&w=300&q=80';
+                const branchText = item.preferredBranchName || 'Bất kỳ chi nhánh nào';
+                const gradeText = GRADE_MAP[item.minConditionGrade] || item.minConditionGrade;
+                
+                const card = document.createElement('div');
+                card.className = 'bg-surface-container-lowest p-4 rounded-2xl border border-outline-variant/30 shadow-sm flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 hover:shadow-md transition-all';
+                
+                card.innerHTML = `
+                    <div class="flex items-center gap-3.5">
+                        <img src="${coverImg}" alt="${item.bookTitle}" class="w-14 h-20 object-cover rounded-lg shadow-sm border border-outline-variant/30"/>
+                        <div>
+                            <h3 class="font-bold text-sm text-on-surface">${item.bookTitle}</h3>
+                            <div class="text-xs text-secondary mt-0.5">${item.authorName || 'Nhiều tác giả'}</div>
+                            <div class="flex flex-wrap gap-2 mt-2">
+                                <span class="text-[10px] font-semibold px-2 py-0.5 rounded bg-surface-container text-secondary flex items-center gap-1">
+                                    <span class="material-symbols-outlined text-[12px]">store</span> ${branchText}
+                                </span>
+                                <span class="text-[10px] font-semibold px-2 py-0.5 rounded bg-amber-50 text-amber-800 border border-amber-200">
+                                    Chuẩn: ≥ ${gradeText}
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="flex sm:flex-col items-end justify-between w-full sm:w-auto border-t sm:border-t-0 pt-3 sm:pt-0 border-outline-variant/20 gap-2">
+                        ${item.isNotified ? `
+                            <span class="px-2.5 py-1 rounded-full text-[11px] font-bold bg-green-100 text-green-800 flex items-center gap-1 border border-green-200">
+                                <span class="material-symbols-outlined text-[14px]">check_circle</span> Đã có hàng!
+                            </span>
+                        ` : `
+                            <span class="px-2.5 py-1 rounded-full text-[11px] font-bold bg-amber-50 text-amber-700 flex items-center gap-1 border border-amber-200">
+                                <span class="material-symbols-outlined text-[14px]">hourglass_empty</span> Đang theo dõi
+                            </span>
+                        `}
+                        <button onclick="removeWishlistItem(${item.id})" class="text-xs text-error hover:text-red-700 font-bold flex items-center gap-1 hover:underline">
+                            <span class="material-symbols-outlined text-[14px]">delete</span> Hủy theo dõi
+                        </button>
+                    </div>
+                `;
+                container.appendChild(card);
+            });
+        }
+
+        async function submitAddToWishlist(e) {
+            e.preventDefault();
+            const bookId = document.getElementById('wishlistBookSelect').value;
+            const branchIdVal = document.getElementById('wishlistBranchSelect').value;
+            const minGrade = document.getElementById('wishlistGradeSelect').value;
+
+            if (!bookId) {
+                showToast('Vui lòng chọn tựa sách cần săn!', true);
+                return;
+            }
+
+            const payload = {
+                bookId: parseInt(bookId),
+                preferredBranchId: branchIdVal ? parseInt(branchIdVal) : null,
+                minConditionGrade: minGrade
+            };
+
+            const btn = document.getElementById('submitWishlistBtn');
+            btn.disabled = true;
+            btn.innerHTML = '<span class="material-symbols-outlined animate-spin text-[16px]">progress_activity</span> Đang đăng ký...';
+
+            try {
+                const res = await fetch('/api/wishlists', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+
+                if (res.ok) {
+                    showToast('Đăng ký săn sách thành công! Hệ thống sẽ thông báo ngay khi có hàng.');
+                    document.getElementById('wishlistBookSelect').value = '';
+                    document.getElementById('wishlistBranchSelect').value = '';
+                    loadMyWishlists();
+                } else {
+                    const err = await res.text();
+                    showToast('Lỗi: ' + err, true);
+                }
+            } catch (err) {
+                showToast('Lỗi máy chủ: ' + err.message, true);
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = '<span class="material-symbols-outlined text-[16px]">notifications_active</span> Kích Hoạt Chuông Báo Săn Sách';
+            }
+        }
+
+        async function removeWishlistItem(id) {
+            if (!confirm('Bạn có chắc muốn hủy theo dõi tựa sách này?')) return;
+
+            try {
+                const res = await fetch(`/api/wishlists/${id}`, {
+                    method: 'DELETE'
+                });
+
+                if (res.ok) {
+                    showToast('Đã xóa khỏi danh sách săn sách.');
+                    loadMyWishlists();
+                } else {
+                    const err = await res.text();
+                    showToast('Lỗi: ' + err, true);
+                }
+            } catch (err) {
+                showToast('Lỗi xóa mục: ' + err.message, true);
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', loadMyWishlists);
+    </script>
+</body>
+</html>

@@ -23,13 +23,22 @@ public class AdminMasterDataController {
     private final MasterDataService masterDataService;
     private final AuthorService authorService;
     private final CategoryService categoryService;
+    private final com.bookstore.service.CloudinaryService cloudinaryService;
+    private final com.bookstore.repository.CategoryRepository categoryRepository;
+    private final com.bookstore.repository.AuthorRepository authorRepository;
 
     public AdminMasterDataController(MasterDataService masterDataService,
                                      AuthorService authorService,
-                                     CategoryService categoryService) {
+                                     CategoryService categoryService,
+                                     com.bookstore.service.CloudinaryService cloudinaryService,
+                                     com.bookstore.repository.CategoryRepository categoryRepository,
+                                     com.bookstore.repository.AuthorRepository authorRepository) {
         this.masterDataService = masterDataService;
         this.authorService = authorService;
         this.categoryService = categoryService;
+        this.cloudinaryService = cloudinaryService;
+        this.categoryRepository = categoryRepository;
+        this.authorRepository = authorRepository;
     }
 
     @GetMapping
@@ -87,6 +96,8 @@ public class AdminMasterDataController {
             RedirectAttributes redirectAttributes,
             Model model
     ) {
+        resolveCustomCategoryAndAuthor(bookDto, bindingResult);
+
         if (!masterDataService.isIsbnAvailable(bookDto.getIsbn(), null)) {
             bindingResult.rejectValue("isbn", "duplicate.isbn", "Mã ISBN '" + bookDto.getIsbn() + "' đã tồn tại trong Master Data!");
         }
@@ -137,6 +148,8 @@ public class AdminMasterDataController {
             RedirectAttributes redirectAttributes,
             Model model
     ) {
+        resolveCustomCategoryAndAuthor(bookDto, bindingResult);
+
         if (!masterDataService.isIsbnAvailable(bookDto.getIsbn(), id)) {
             bindingResult.rejectValue("isbn", "duplicate.isbn", "Mã ISBN '" + bookDto.getIsbn() + "' đã thuộc về đầu sách khác!");
         }
@@ -161,6 +174,54 @@ public class AdminMasterDataController {
             model.addAttribute("isEdit", true);
             model.addAttribute("activeMenu", "books");
             return "admin/books/form";
+        }
+    }
+
+    private void resolveCustomCategoryAndAuthor(BookDto bookDto, BindingResult bindingResult) {
+        if (bookDto.getCategoryId() != null && bookDto.getCategoryId() == -1L) {
+            if (bookDto.getCustomCategoryName() != null && !bookDto.getCustomCategoryName().trim().isEmpty()) {
+                String catName = bookDto.getCustomCategoryName().trim();
+                com.bookstore.entity.Category cat = categoryRepository.findByNameIgnoreCase(catName)
+                        .orElseGet(() -> categoryRepository.save(com.bookstore.entity.Category.builder().name(catName).build()));
+                bookDto.setCategoryId(cat.getId());
+                bookDto.setCategoryName(cat.getName());
+            } else {
+                bindingResult.rejectValue("categoryId", "invalid.category", "Vui lòng nhập tên thể loại mới");
+            }
+        }
+
+        if (bookDto.getAuthorId() != null && bookDto.getAuthorId() == -1L) {
+            if (bookDto.getCustomAuthorName() != null && !bookDto.getCustomAuthorName().trim().isEmpty()) {
+                String authorName = bookDto.getCustomAuthorName().trim();
+                com.bookstore.entity.Author author = authorRepository.findByNameIgnoreCase(authorName)
+                        .orElseGet(() -> authorRepository.save(com.bookstore.entity.Author.builder().name(authorName).build()));
+                bookDto.setAuthorId(author.getId());
+                bookDto.setAuthorName(author.getName());
+            } else {
+                bindingResult.rejectValue("authorId", "invalid.author", "Vui lòng nhập tên tác giả mới");
+            }
+        }
+    }
+
+    @PostMapping("/upload-cover")
+    @ResponseBody
+    public org.springframework.http.ResponseEntity<?> uploadCoverImage(
+            @RequestParam("file") org.springframework.web.multipart.MultipartFile file
+    ) {
+        try {
+            if (file == null || file.isEmpty()) {
+                return org.springframework.http.ResponseEntity.badRequest()
+                        .body(java.util.Map.of("success", false, "message", "Tệp ảnh không hợp lệ hoặc rỗng!"));
+            }
+            com.bookstore.service.CloudinaryService.UploadResult result = cloudinaryService.uploadImage(file, "bookstore/covers");
+            return org.springframework.http.ResponseEntity.ok(java.util.Map.of(
+                    "success", true,
+                    "url", result.imageUrl(),
+                    "publicId", result.publicId()
+            ));
+        } catch (Exception e) {
+            return org.springframework.http.ResponseEntity.status(500)
+                    .body(java.util.Map.of("success", false, "message", "Lỗi tải ảnh lên: " + e.getMessage()));
         }
     }
 

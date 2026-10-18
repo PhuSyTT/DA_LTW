@@ -57,19 +57,22 @@ public class SecurityConfig {
                 .dispatcherTypeMatchers(DispatcherType.FORWARD, DispatcherType.ERROR).permitAll()
                 .requestMatchers(PathRequest.toStaticResources().atCommonLocations()).permitAll()
                 .requestMatchers(
-                    "/css/**", "/js/**", "/images/**", "/webjars/**", "/favicon.ico"
+                    "/css/**", "/js/**", "/images/**", "/uploads/**", "/webjars/**", "/favicon.ico"
                 ).permitAll()
                 .requestMatchers(
                     "/", "/home", "/books", "/books/**", "/authors", "/authors/**", 
                     "/blog", "/blog/**", "/about", "/contact", "/categories", "/categories/**",
-                    "/recycle", "/thu-mua-sach", "/login", "/register", "/error", "/api/**"
+                    "/cart", "/cart/**", "/checkout", "/checkout/**",
+                    "/recycle", "/thu-mua-sach", "/trade-in/**", "/my-trade-in", "/my-wishlist", "/login", "/register", "/error", "/api/**"
                 ).permitAll()
                 .requestMatchers("/admin/users/**").hasAnyAuthority("ROLE_ADMIN", "ADMIN")
                 .requestMatchers("/admin/**").hasAnyAuthority(
                     "ROLE_ADMIN", "ADMIN",
                     "ROLE_BRANCH_MANAGER", "BRANCH_MANAGER",
                     "ROLE_WAREHOUSE_STAFF", "WAREHOUSE_STAFF",
-                    "ROLE_CASHIER", "CASHIER"
+                    "ROLE_CASHIER", "CASHIER",
+                    "ROLE_STAFF_GENERAL", "STAFF_GENERAL",
+                    "ROLE_STAFF_APPRAISER", "STAFF_APPRAISER"
                 )
                 .anyRequest().authenticated()
             )

@@ -18,4 +18,13 @@ public interface SubOrderRepository extends JpaRepository<SubOrder, Long> {
 
     // Lấy danh sách các đơn hàng con thuộc về một Đơn hàng tổng (Master Order)
     List<SubOrder> findByMasterOrderId(Long masterOrderId);
+
+    // Lấy danh sách đơn hàng con theo chi nhánh và trạng thái
+    List<SubOrder> findByBranchIdAndStatusOrderByIdDesc(Long branchId, String status);
+
+    // Đếm số lượng đơn hàng theo trạng thái tại chi nhánh
+    long countByBranchIdAndStatus(Long branchId, String status);
+
+    // Tìm theo ID và Chi nhánh
+    Optional<SubOrder> findByIdAndBranchId(Long id, Long branchId);
 }

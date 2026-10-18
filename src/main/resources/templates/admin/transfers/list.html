@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{layout/admin-layout :: html(
+        pageTitle='Luân Chuyển Kho Liên Chi Nhánh (Nhóm 5)',
+        pageSubtitle='Điều phối luân chuyển sách cũ giữa các chi nhánh - Internal Stock Transfer',
+        content=~{::section}
+      )}">
+<body>
+<section>
+    <!-- Thống kê luân chuyển toàn chuỗi (FR-TRF-04) -->
+    <div class="row g-3 mb-4" th:if="${stats != null}">
+        <div class="col-sm-6 col-xl-3">
+            <div class="stat-card">
+                <div class="stat-card-icon bg-primary bg-opacity-10 text-primary">
+                    <i class="fas fa-boxes-packing"></i>
+                </div>
+                <div class="stat-card-info">
+                    <div class="stat-card-title">Tổng Phiếu Luân Chuyển</div>
+                    <div class="stat-card-value text-primary" th:text="${stats.totalTransfers}">0</div>
+                </div>
+            </div>
+        </div>
+        <div class="col-sm-6 col-xl-3">
+            <div class="stat-card">
+                <div class="stat-card-icon bg-success bg-opacity-10 text-success">
+                    <i class="fas fa-circle-check"></i>
+                </div>
+                <div class="stat-card-info">
+                    <div class="stat-card-title">Đã Hoàn Thành</div>
+                    <div class="stat-card-value text-success" th:text="${stats.completedTransfers}">0</div>
+                </div>
+            </div>
+        </div>
+        <div class="col-sm-6 col-xl-3">
+            <div class="stat-card">
+                <div class="stat-card-icon bg-info bg-opacity-10 text-info">
+                    <i class="fas fa-clock"></i>
+                </div>
+                <div class="stat-card-info">
+                    <div class="stat-card-title">Thời Gian Vận Chuyển TB</div>
+                    <div class="stat-card-value text-info" th:text="${#numbers.formatDecimal(stats.averageTransitTimeHours, 1, 1) + ' giờ'}">0 giờ</div>
+                </div>
+            </div>
+        </div>
+        <div class="col-sm-6 col-xl-3">
+            <div class="stat-card">
+                <div class="stat-card-icon bg-warning bg-opacity-10 text-warning">
+                    <i class="fas fa-triangle-exclamation"></i>
+                </div>
+                <div class="stat-card-info">
+                    <div class="stat-card-title">Tỷ Lệ Thất Thoát</div>
+                    <div class="stat-card-value text-warning" th:text="${stats.lossRatePercentage + '%'}">0%</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bảng danh sách phiếu điều chuyển -->
+    <div class="content-card">
+        <div class="content-card-header d-flex justify-content-between align-items-center">
+            <div class="d-flex align-items-center gap-2">
+                <h5 class="fw-bold mb-0 text-dark">
+                    <i class="fas fa-dolly text-primary me-2"></i> Danh Sách Phiếu Luân Chuyển Kho Liên Chi Nhánh
+                </h5>
+            </div>
+            <span class="badge bg-primary bg-opacity-10 text-primary fw-bold px-3 py-2">
+                FR-TRF-01, FR-TRF-02, FR-TRF-03, FR-TRF-04
+            </span>
+        </div>
+
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+                <thead class="table-light">
+                    <tr>
+                        <th class="ps-4">Mã Phiếu</th>
+                        <th>Chi Nhánh Nguồn</th>
+                        <th>Chi Nhánh Đích</th>
+                        <th>Người Yêu Cầu</th>
+                        <th>Lý Do Điều Chuyển</th>
+                        <th>Số Mặt Hàng</th>
+                        <th>Trạng Thái</th>
+                        <th>Thời Gian Tạo</th>
+                        <th class="text-end pe-4">Thao Tác</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr th:if="${transfers == null or #lists.isEmpty(transfers)}">
+                        <td colspan="9" class="text-center py-5 text-muted">
+                            <i class="fas fa-inbox fa-3x mb-3 opacity-25"></i>
+                            <p class="fs-6">Chưa có phiếu luân chuyển kho nào trong hệ thống.</p>
+                        </td>
+                    </tr>
+                    <tr th:each="trf : ${transfers}">
+                        <td class="ps-4 fw-bold font-monospace text-primary" th:text="${trf.transferCode}">TRF-2026-001</td>
+                        <td>
+                            <div class="d-flex align-items-center gap-2">
+                                <i class="fas fa-store text-muted small"></i>
+                                <span class="fw-semibold" th:text="${trf.fromBranch != null ? trf.fromBranch.branchName : '---'}">Chi nhánh Quận 1</span>
+                            </div>
+                        </td>
+                        <td>
+                            <div class="d-flex align-items-center gap-2">
+                                <i class="fas fa-arrow-right text-primary small"></i>
+                                <span class="fw-semibold text-dark" th:text="${trf.toBranch != null ? trf.toBranch.branchName : '---'}">Chi nhánh Thủ Đức</span>
+                            </div>
+                        </td>
+                        <td>
+                            <span class="small text-muted" th:text="${trf.requestedByUser != null ? trf.requestedByUser.fullName : 'Hệ thống'}">Nguyễn Văn Admin</span>
+                        </td>
+                        <td style="max-width: 200px;">
+                            <span class="text-truncate d-inline-block" style="max-width: 180px;" th:title="${trf.reason}" th:text="${trf.reason != null ? trf.reason : 'Không có ghi chú'}">Cân đối tồn kho</span>
+                        </td>
+                        <td>
+                            <span class="badge bg-light text-dark border px-2.5 py-1 fw-bold" th:text="${trf.items != null ? #lists.size(trf.items) + ' cuốn' : '0 cuốn'}">1 cuốn</span>
+                        </td>
+                        <td>
+                            <span th:if="${trf.status == 'PENDING_APPROVAL'}" class="badge bg-warning bg-opacity-10 text-warning border border-warning px-2.5 py-1">
+                                <i class="fas fa-clock me-1"></i> Chờ duyệt xuất
+                            </span>
+                            <span th:if="${trf.status == 'IN_TRANSIT'}" class="badge bg-info bg-opacity-10 text-info border border-info px-2.5 py-1">
+                                <i class="fas fa-truck-fast me-1"></i> Đang vận chuyển
+                            </span>
+                            <span th:if="${trf.status == 'COMPLETED'}" class="badge bg-success bg-opacity-10 text-success border border-success px-2.5 py-1">
+                                <i class="fas fa-check-double me-1"></i> Đã tiếp nhận
+                            </span>
+                            <span th:if="${trf.status == 'REJECTED'}" class="badge bg-danger bg-opacity-10 text-danger border border-danger px-2.5 py-1">
+                                <i class="fas fa-ban me-1"></i> Đã từ chối
+                            </span>
+                        </td>
+                        <td class="small text-muted" th:text="${#temporals.format(trf.createdAt, 'dd/MM/yyyy HH:mm')}">16/10/2026 14:00</td>
+                        <td class="text-end pe-4">
+                            <!-- Nút xuất kho nếu PENDING_APPROVAL (FR-TRF-03) -->
+                            <button th:if="${trf.status == 'PENDING_APPROVAL'}"
+                                    type="button"
+                                    class="btn btn-sm btn-outline-primary"
+                                    th:onclick="'exportTransfer(' + ${trf.id} + ')'"
+                                    title="Xác nhận xuất kho nguồn">
+                                <i class="fas fa-box me-1"></i> Xuất Kho
+                            </button>
+                            <!-- Nút nhận hàng nếu IN_TRANSIT (FR-TRF-03) -->
+                            <button th:if="${trf.status == 'IN_TRANSIT'}"
+                                    type="button"
+                                    class="btn btn-sm btn-success"
+                                    th:onclick="'receiveTransfer(' + ${trf.id} + ')'"
+                                    title="Tiếp nhận và cộng tồn kho đích">
+                                <i class="fas fa-dolly-flatbed me-1"></i> Nhận Hàng
+                            </button>
+                            <!-- Đã hoàn thành -->
+                            <span th:if="${trf.status == 'COMPLETED'}" class="text-success small fw-bold">
+                                <i class="fas fa-check-circle"></i> Đã nhập kho đích
+                            </span>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</section>
+
+<!-- Script xử lý thao tác Xuất kho / Nhận hàng qua REST API -->
+<script>
+    async function exportTransfer(id) {
+        if (!confirm('Xác nhận xuất kho cho phiếu luân chuyển #' + id + '? (Số lượng tồn kho tại chi nhánh nguồn sẽ tạm trừ)')) return;
+        try {
+            const res = await fetch('/api/transfers/' + id + '/export', { method: 'POST' });
+            if (res.ok) {
+                alert('Xuất kho thành công! Hàng đang trong trạng thái vận chuyển.');
+                location.reload();
+            } else {
+                const msg = await res.text();
+                alert('Lỗi xuất kho: ' + msg);
+            }
+        } catch (e) {
+            alert('Lỗi kết nối: ' + e.message);
+        }
+    }
+
+    async function receiveTransfer(id) {
+        if (!confirm('Xác nhận đã tiếp nhận sách cho phiếu #' + id + '? (Quyền sở hữu và số lượng sẽ cộng vào chi nhánh đích)')) return;
+        try {
+            const res = await fetch('/api/transfers/' + id + '/receive', { method: 'POST' });
+            if (res.ok) {
+                alert('Tiếp nhận hàng thành công! Đã cập nhật tồn kho chi nhánh đích.');
+                location.reload();
+            } else {
+                const msg = await res.text();
+                alert('Lỗi nhận hàng: ' + msg);
+            }
+        } catch (e) {
+            alert('Lỗi kết nối: ' + e.message);
+        }
+    }
+</script>
+</body>
+</html>
+

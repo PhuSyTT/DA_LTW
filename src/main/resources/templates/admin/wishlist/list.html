@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{layout/admin-layout :: html(
+        pageTitle='Quản Lý Danh Sách Săn Sách (Nhóm 6)',
+        pageSubtitle='Xem và kích hoạt thông báo Wishlist - Tự động bắn email khi sách về kho',
+        content=~{::section}
+      )}">
+<body>
+<section>
+    <!-- Info Banner: How FR-WSH-02 works -->
+    <div class="alert alert-info border-0 mb-4" style="background: linear-gradient(135deg, #dbeafe, #eff6ff);">
+        <div class="d-flex align-items-start gap-3">
+            <i class="fas fa-bullhorn text-primary fs-4 mt-1"></i>
+            <div>
+                <strong>Cơ chế Săn sách tự động (FR-WSH-02):</strong>
+                Khi nhân viên nhập kho một <code>BookItem</code> mới, hệ thống tự động quét danh sách Wishlist,
+                kiểm tra chi nhánh và độ cũ tối thiểu, rồi bắn Email thông báo tới các khách hàng đăng ký.
+                Trang này cho phép Admin kiểm tra danh sách Wishlist và kích hoạt thủ công nếu cần.
+            </div>
+        </div>
+    </div>
+
+    <!-- Trigger Restock Check (FR-WSH-02) -->
+    <div class="content-card mb-4">
+        <div class="content-card-header">
+            <h5 class="fw-bold mb-0 text-dark">
+                <i class="fas fa-bolt text-warning me-2"></i> Kích Hoạt Thông Báo Sách Về Kho (FR-WSH-02)
+            </h5>
+        </div>
+        <div class="p-3">
+            <p class="text-muted small mb-3">
+                Nhập ID của <code>BookItem</code> vừa nhập kho để hệ thống quét toàn bộ Wishlist và gửi thông báo cho độc giả đang chờ.
+            </p>
+            <div class="row g-2 align-items-end">
+                <div class="col-md-4">
+                    <label class="form-label fw-semibold small">BookItem ID</label>
+                    <input type="number" id="bookItemIdInput" class="form-control" placeholder="VD: 42">
+                </div>
+                <div class="col-md-auto">
+                    <button class="btn btn-warning fw-semibold" id="btn-trigger-restock">
+                        <i class="fas fa-bell me-2"></i> Kích Hoạt Quét Wishlist
+                    </button>
+                </div>
+            </div>
+            <div id="restockResult" class="mt-2" style="display:none"></div>
+        </div>
+    </div>
+
+    <!-- Wishlist Lookup by User -->
+    <div class="content-card">
+        <div class="content-card-header">
+            <h5 class="fw-bold mb-0 text-dark">
+                <i class="fas fa-heart text-danger me-2"></i> Tra Cứu Danh Sách Săn Sách (FR-WSH-03)
+            </h5>
+        </div>
+
+        <!-- Filter Form -->
+        <div class="p-3 border-bottom bg-light">
+            <form th:action="@{/admin/wishlists}" method="get" class="row g-2 align-items-end">
+                <div class="col-md-4">
+                    <label class="form-label small fw-semibold text-muted mb-1">User ID</label>
+                    <input type="number" name="userId" class="form-control form-control-sm"
+                           placeholder="Nhập User ID để xem Wishlist"
+                           th:value="${filterUserId}">
+                </div>
+                <div class="col-md-auto">
+                    <button type="submit" class="btn btn-primary btn-sm">
+                        <i class="fas fa-search me-1"></i> Tra Cứu
+                    </button>
+                </div>
+            </form>
+        </div>
+
+        <!-- No filter applied -->
+        <div class="text-center py-5 text-muted" th:if="${filterUserId == null}">
+            <i class="fas fa-search fa-3x mb-3 opacity-25"></i>
+            <p class="fs-6">Nhập User ID để xem danh sách sách đang theo dõi của người dùng đó.</p>
+        </div>
+
+        <!-- Empty wishlists -->
+        <div class="text-center py-5 text-muted"
+             th:if="${filterUserId != null and (wishlists == null or #lists.isEmpty(wishlists))}">
+            <i class="fas fa-heart-crack fa-3x mb-3 opacity-25"></i>
+            <p class="fs-6">Người dùng này chưa đăng ký theo dõi cuốn sách nào.</p>
+        </div>
+
+        <!-- Wishlist Table -->
+        <div class="table-responsive" th:if="${wishlists != null and not #lists.isEmpty(wishlists)}">
+            <table class="table table-hover align-middle mb-0">
+                <thead class="table-light">
+                    <tr>
+                        <th>ID</th>
+                        <th>Tựa Sách</th>
+                        <th>Tác Giả</th>
+                        <th>Độ Cũ Tối Thiểu</th>
+                        <th>Chi Nhánh Ưu Tiên</th>
+                        <th>Đã Thông Báo</th>
+                        <th>Ngày Đăng Ký</th>
+                        <th>Ngày Nhận TB</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr th:each="w : ${wishlists}">
+                        <td><small class="text-muted" th:text="${w.id}">1</small></td>
+                        <td>
+                            <div class="fw-semibold" th:text="${w.bookTitle}">Nhà Giả Kim</div>
+                        </td>
+                        <td>
+                            <small th:text="${w.authorName}">Paulo Coelho</small>
+                        </td>
+                        <td>
+                            <span th:switch="${w.minConditionGrade}">
+                                <span th:case="'LIKE_NEW'" class="badge bg-success">LIKE_NEW ✨</span>
+                                <span th:case="'VERY_GOOD'" class="badge bg-primary">VERY_GOOD ⭐</span>
+                                <span th:case="'GOOD'" class="badge bg-info text-dark">GOOD 👍</span>
+                                <span th:case="'ACCEPTABLE'" class="badge bg-warning text-dark">ACCEPTABLE 📖</span>
+                                <span th:case="*" class="badge bg-secondary" th:text="${w.minConditionGrade}">N/A</span>
+                            </span>
+                        </td>
+                        <td>
+                            <small th:text="${w.preferredBranchName != null ? w.preferredBranchName : 'Toàn chuỗi'}">Toàn chuỗi</small>
+                        </td>
+                        <td class="text-center">
+                            <i class="fas fa-circle-check text-success" th:if="${w.isNotified}"></i>
+                            <i class="fas fa-clock text-warning" th:if="${!w.isNotified}"></i>
+                            <span class="badge ms-1"
+                                  th:classappend="${w.isNotified} ? 'bg-success' : 'bg-warning text-dark'"
+                                  th:text="${w.isNotified} ? 'Đã gửi TB' : 'Chờ sách về'">Chờ sách về</span>
+                        </td>
+                        <td>
+                            <small class="text-muted"
+                                   th:text="${#temporals.format(w.createdAt, 'dd/MM/yyyy')}">01/01/2026</small>
+                        </td>
+                        <td>
+                            <small class="text-success"
+                                   th:text="${w.notifiedAt != null ? #temporals.format(w.notifiedAt, 'dd/MM/yyyy HH:mm') : '—'}">—</small>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</section>
+
+<script th:inline="javascript">
+    document.getElementById('btn-trigger-restock')?.addEventListener('click', async function() {
+        const bookItemId = document.getElementById('bookItemIdInput').value;
+        if (!bookItemId || parseInt(bookItemId) <= 0) {
+            alert('❌ Vui lòng nhập BookItem ID hợp lệ!');
+            return;
+        }
+
+        const resultDiv = document.getElementById('restockResult');
+        resultDiv.style.display = 'block';
+        resultDiv.innerHTML = '<div class="alert alert-info"><i class="fas fa-spinner fa-spin me-2"></i>Đang quét Wishlist...</div>';
+
+        const res = await fetch(`/api/wishlists/check-restock/${bookItemId}`, { method: 'POST' });
+        const msg = await res.text();
+
+        if (res.ok) {
+            resultDiv.innerHTML = `<div class="alert alert-success"><i class="fas fa-bell me-2"></i>${msg}</div>`;
+        } else {
+            resultDiv.innerHTML = `<div class="alert alert-danger"><i class="fas fa-exclamation me-2"></i>${msg}</div>`;
+        }
+    });
+</script>
+</body>
+</html>

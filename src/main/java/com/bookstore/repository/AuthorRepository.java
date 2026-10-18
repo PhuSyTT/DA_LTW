@@ -15,6 +15,8 @@ public interface AuthorRepository extends JpaRepository<Author, Long> {
 
     boolean existsByNameIgnoreCase(String name);
 
+    java.util.Optional<Author> findByNameIgnoreCase(String name);
+
     List<Author> findByNameContainingIgnoreCaseOrderByNameAsc(String name);
 
     @Query("SELECT a FROM Author a WHERE :keyword IS NULL OR LOWER(a.name) LIKE LOWER(CONCAT('%', :keyword, '%')) ORDER BY a.name ASC")

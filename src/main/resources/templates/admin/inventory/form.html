@@ -69,7 +69,7 @@
                             <img id="previewCover"
                                  th:src="${selectedBook != null} ? ${selectedBook.coverImageUrl} : (${item != null} ? ${item.bookCoverImageUrl} : 'https://images.unsplash.com/photo-1544716278-ca5e3f4abd8c?w=200&q=80')"
                                  class="rounded shadow-sm mb-3"
-                                 style="max-width: 140px; height: 190px; object-fit: cover;"
+                                 style="width: 110px; height: 150px; object-fit: cover;"
                                  alt="Bìa sách">
                             <h6 id="previewTitle" class="fw-bold text-dark mb-1"
                                 th:text="${selectedBook != null} ? ${selectedBook.title} : (${item != null} ? ${item.bookTitle} : '')">

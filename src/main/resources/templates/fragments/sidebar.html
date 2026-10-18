@@ -32,17 +32,25 @@
             <i class="fas fa-boxes-stacked"></i>
             <span>Tồn Kho Chi Nhánh <span class="badge bg-warning text-dark ms-auto" style="font-size: 0.65rem;">N2</span></span>
         </a>
-        <a href="javascript:void(0)" class="sidebar-link text-muted" title="Sắp phát triển ở Nhóm 3,4">
+        <a th:href="@{/admin/fulfillment}" class="sidebar-link" th:classappend="${activeMenu == 'fulfillment'} ? 'active' : ''">
             <i class="fas fa-truck-ramp-box"></i>
-            <span>Đơn Hàng Phân Bổ <span class="badge bg-secondary ms-auto" style="font-size: 0.65rem;">N3</span></span>
+            <span>Đơn Hàng Phân Bổ <span class="badge bg-primary ms-auto" style="font-size: 0.65rem;">N4</span></span>
         </a>
-        <a href="javascript:void(0)" class="sidebar-link text-muted" title="Sắp phát triển ở Nhóm 5">
+        <a th:href="@{/admin/wishlists}" class="sidebar-link" th:classappend="${activeMenu == 'wishlists'} ? 'active' : ''">
+            <i class="fas fa-heart"></i>
+            <span>Săn Sách (Wishlist) <span class="badge bg-danger ms-auto" style="font-size: 0.65rem;">N6</span></span>
+        </a>
+        <a th:href="@{/admin/transfers}" class="sidebar-link" th:classappend="${activeMenu == 'transfers'} ? 'active' : ''">
             <i class="fas fa-dolly"></i>
-            <span>Luân Chuyển Kho <span class="badge bg-secondary ms-auto" style="font-size: 0.65rem;">N5</span></span>
+            <span>Luân Chuyển Kho <span class="badge bg-info text-dark ms-auto" style="font-size: 0.65rem;">N5</span></span>
         </a>
-        <a href="javascript:void(0)" class="sidebar-link text-muted" title="Sắp phát triển ở Nhóm 8">
+        <a th:href="@{/admin/coupons}" class="sidebar-link" th:classappend="${activeMenu == 'coupons'} ? 'active' : ''">
+            <i class="fas fa-ticket-simple"></i>
+            <span>Khuyến Mãi & Coupon <span class="badge bg-success ms-auto" style="font-size: 0.65rem;">N7</span></span>
+        </a>
+        <a th:href="@{/admin/trade-in}" class="sidebar-link" th:classappend="${activeMenu == 'tradeIn'} ? 'active' : ''">
             <i class="fas fa-hand-holding-dollar"></i>
-            <span>Thu Mua Sách Cũ <span class="badge bg-secondary ms-auto" style="font-size: 0.65rem;">N8</span></span>
+            <span>Thu Mua Sách Cũ <span class="badge bg-warning text-dark ms-auto" style="font-size: 0.65rem;">N8</span></span>
         </a>
 
         <div class="nav-section-title mt-3">Hệ Thống</div>

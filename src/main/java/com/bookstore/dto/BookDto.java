@@ -43,6 +43,10 @@ public class BookDto {
 
     private Long inventoryCount;
 
+    private String customCategoryName;
+
+    private String customAuthorName;
+
     public BookDto() {
     }
 
@@ -132,6 +136,10 @@ public class BookDto {
         return publishYear;
     }
 
+    public Integer getPublicationYear() {
+        return publishYear;
+    }
+
     public void setPublishYear(Integer publishYear) {
         this.publishYear = publishYear;
     }
@@ -166,6 +174,22 @@ public class BookDto {
 
     public void setInventoryCount(Long inventoryCount) {
         this.inventoryCount = inventoryCount;
+    }
+
+    public String getCustomCategoryName() {
+        return customCategoryName;
+    }
+
+    public void setCustomCategoryName(String customCategoryName) {
+        this.customCategoryName = customCategoryName;
+    }
+
+    public String getCustomAuthorName() {
+        return customAuthorName;
+    }
+
+    public void setCustomAuthorName(String customAuthorName) {
+        this.customAuthorName = customAuthorName;
     }
 
     public static Builder builder() {

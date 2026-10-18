@@ -55,13 +55,19 @@
         }
     </script>
     <style>
-        body { font-family: 'Plus Jakarta Sans', 'Inter', sans-serif; }
+        body, input, button, select, textarea, p, span, h1, h2, h3, h4, h5, h6, a, label, div { font-family: 'Plus Jakarta Sans', 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; }
+        .material-symbols-outlined { font-family: 'Material Symbols Outlined' !important; }
+        .fa, .fas, .far, .fab, .fa-solid, .fa-regular, .fa-brands, [class*="fa-"]::before { font-family: 'Font Awesome 6 Free' !important; }
         ::-webkit-scrollbar { width: 6px; height: 6px; }
         ::-webkit-scrollbar-thumb { background: #D7C3AE; border-radius: 9999px; }
         ::-webkit-scrollbar-track { background: transparent; }
     </style>
+    <!-- Page Transition Styles -->
+    <th:block th:replace="~{fragments/page-transition :: transitionStyles}"></th:block>
 </head>
 <body class="bg-surface text-on-surface antialiased min-h-screen flex flex-col font-sans">
+    <!-- Page Transition Overlay -->
+    <div th:replace="~{fragments/page-transition :: transitionOverlay}"></div>
 
     <!-- HEADER -->
     <header class="fixed top-0 left-0 right-0 z-50 bg-surface/95 backdrop-blur-xl border-b border-outline-variant/30 shadow-[0_1px_8px_rgba(44,30,22,0.04)]">
@@ -85,9 +91,10 @@
             <!-- Search Bar -->
             <div class="flex-1 max-w-xl mx-2 hidden md:flex items-center">
                 <form th:action="@{/books}" method="get" class="w-full flex items-center bg-surface-container-low border border-outline-variant/40 rounded-xl px-3 py-1.5 shadow-[0_1px_4px_rgba(44,30,22,0.04)] focus-within:bg-surface-container-lowest focus-within:border-primary focus-within:shadow-[0_2px_12px_rgba(131,85,0,0.12)] transition-all">
-                    <span class="material-symbols-outlined text-on-surface-variant text-[20px] mr-2 shrink-0">search</span>
-                    <input name="keyword" class="w-full bg-transparent text-sm text-on-surface placeholder:text-outline focus:outline-none" placeholder="Tìm tác giả, tác phẩm, tựa sách cũ..." type="text"/>
-                    <button type="submit" class="px-3 py-1 bg-primary-container text-on-primary-container text-xs font-bold rounded-lg hover:brightness-95 transition-all">Tìm</button>
+                    <button type="submit" aria-label="Tìm kiếm" class="flex items-center justify-center text-on-surface-variant hover:text-primary transition-colors focus:outline-none shrink-0 mr-2">
+                        <span class="material-symbols-outlined text-[20px]">search</span>
+                    </button>
+                    <input name="keyword" class="w-full bg-transparent text-sm text-on-surface focus:outline-none" type="text"/>
                 </form>
             </div>
 
@@ -106,10 +113,10 @@
                         <span class="material-symbols-outlined text-[22px]">favorite</span>
                         <span class="absolute top-1 right-1 flex items-center justify-center min-w-[16px] h-4 px-1 rounded-full bg-secondary text-on-secondary text-[10px] font-bold">5</span>
                     </button>
-                    <button onclick="alert('Giỏ hàng có 3 cuốn sách!')" aria-label="Giỏ hàng" class="relative p-2 rounded-full hover:bg-surface-container-high text-on-surface-variant hover:text-primary transition-all">
+                    <a th:href="@{/cart}" href="/cart" aria-label="Giỏ hàng" class="relative p-2 rounded-full hover:bg-surface-container-high text-on-surface-variant hover:text-primary transition-all" title="Giỏ hàng">
                         <span class="material-symbols-outlined text-[22px]">shopping_bag</span>
-                        <span class="absolute top-1 right-1 flex items-center justify-center min-w-[16px] h-4 px-1 rounded-full bg-primary-container text-on-primary-container text-[10px] font-bold">3</span>
-                    </button>
+                        <span id="globalCartBadge" class="cart-count-badge hidden absolute -top-0.5 -right-0.5 w-5 h-5 bg-error text-white text-[10px] font-extrabold rounded-full flex items-center justify-center shadow-md animate-pulse">0</span>
+                    </a>
                 </div>
 
                 <!-- Auth Controls -->
@@ -400,5 +407,25 @@
             </div>
         </div>
     </footer>
+    <script>
+        document.addEventListener('DOMContentLoaded', async () => {
+            try {
+                const res = await fetch('/api/cart/count');
+                if (res.ok) {
+                    const data = await res.json();
+                    const badge = document.getElementById('globalCartBadge');
+                    if (badge) {
+                        badge.textContent = data.count || 0;
+                        if ((data.count || 0) > 0) badge.classList.remove('hidden');
+                        else badge.classList.add('hidden');
+                    }
+                }
+            } catch (e) {
+                console.error(e);
+            }
+        });
+    </script>
+    <!-- Page Transition Script -->
+    <th:block th:replace="~{fragments/page-transition :: transitionScripts}"></th:block>
 </body>
 </html>

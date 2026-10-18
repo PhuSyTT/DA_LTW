@@ -65,11 +65,14 @@
         };
     </script>
     <style>
-        * {
-            font-family: 'Plus Jakarta Sans', 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif !important;
+        body, input, button, select, textarea, p, span, h1, h2, h3, h4, h5, h6, a, label, div {
+            font-family: 'Plus Jakarta Sans', 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
         }
         .material-symbols-outlined {
             font-family: 'Material Symbols Outlined' !important;
+        }
+        .fa, .fas, .far, .fab, .fa-solid, .fa-regular, .fa-brands, [class*="fa-"]::before {
+            font-family: 'Font Awesome 6 Free' !important;
         }
         html { scroll-behavior: smooth; }
         .toast-notification {
@@ -92,8 +95,12 @@
             transform: translateY(0);
         }
     </style>
+    <!-- Page Transition Styles -->
+    <th:block th:replace="~{fragments/page-transition :: transitionStyles}"></th:block>
 </head>
 <body class="bg-background font-sans text-on-surface antialiased min-h-screen">
+    <!-- Page Transition Overlay -->
+    <div th:replace="~{fragments/page-transition :: transitionOverlay}"></div>
 
     <!-- Toast Notification -->
     <div id="toastNotification" class="toast-notification">
@@ -123,10 +130,11 @@
             <!-- Omni Search Bar -->
             <div class="flex-1 max-w-xl mx-2 hidden md:flex items-center">
                 <form th:action="@{/books}" method="get" class="w-full flex items-center bg-surface-container-low border border-outline-variant/40 rounded-xl px-3 py-1.5 shadow-[0_1px_4px_rgba(44,30,22,0.04)] focus-within:bg-surface-container-lowest focus-within:border-primary focus-within:shadow-[0_2px_12px_rgba(131,85,0,0.12)] transition-all">
-                    <span class="material-symbols-outlined text-on-surface-variant text-[20px] mr-2 shrink-0">search</span>
-                    <input name="keyword" th:value="${keyword}" class="w-full bg-transparent text-sm text-on-surface placeholder:text-outline focus:outline-none" placeholder="Tìm tên sách, ISBN, tác giả..." type="text"/>
+                    <button type="submit" aria-label="Tìm kiếm" class="flex items-center justify-center text-on-surface-variant hover:text-primary transition-colors focus:outline-none shrink-0 mr-2">
+                        <span class="material-symbols-outlined text-[20px]">search</span>
+                    </button>
+                    <input name="keyword" th:value="${keyword}" class="w-full bg-transparent text-sm text-on-surface focus:outline-none" type="text"/>
                     <input type="hidden" name="categoryId" th:value="${selectedCategoryId}" th:if="${selectedCategoryId != null}"/>
-                    <button type="submit" class="px-3 py-1 bg-primary-container text-on-primary-container text-xs font-bold rounded-lg hover:brightness-95 transition-all">Tìm</button>
                 </form>
             </div>
 
@@ -146,10 +154,10 @@
                         <span class="material-symbols-outlined text-[22px]">favorite</span>
                         <span class="absolute top-1 right-1 flex items-center justify-center min-w-[16px] h-4 px-1 rounded-full bg-secondary text-on-secondary text-[10px] font-bold">5</span>
                     </button>
-                    <button onclick="showToast('Giỏ hàng có 3 cuốn sách!')" aria-label="Giỏ hàng" class="relative p-2 rounded-full hover:bg-surface-container-high text-on-surface-variant hover:text-primary transition-all">
+                    <a th:href="@{/cart}" href="/cart" aria-label="Giỏ hàng" class="relative p-2 rounded-full hover:bg-surface-container-high text-on-surface-variant hover:text-primary transition-all" title="Giỏ hàng">
                         <span class="material-symbols-outlined text-[22px]">shopping_bag</span>
-                        <span class="absolute top-1 right-1 flex items-center justify-center min-w-[16px] h-4 px-1 rounded-full bg-primary-container text-on-primary-container text-[10px] font-bold">3</span>
-                    </button>
+                        <span id="globalCartBadge" class="cart-count-badge hidden absolute -top-0.5 -right-0.5 w-5 h-5 bg-error text-white text-[10px] font-extrabold rounded-full flex items-center justify-center shadow-md animate-pulse">0</span>
+                    </a>
                 </div>
 
                 <!-- Auth -->
@@ -284,7 +292,7 @@
                                         th:value="${auth.id}" 
                                         th:text="${auth.name}" 
                                         th:selected="${selectedAuthorId != null and selectedAuthorId == auth.id}">
-                                    Dale Carnegie
+                                    Nguyễn Du
                                 </option>
                             </select>
                         </div>
@@ -324,7 +332,7 @@
                             <th:block th:each="auth : ${authors}">
                                 <span th:if="${auth.id == selectedAuthorId}"
                                       class="inline-flex items-center gap-1 px-2 py-1 rounded-lg bg-primary-container text-on-primary-container font-bold text-[11px]">
-                                    <span th:text="'Tác giả: ' + ${auth.name}">Tác giả: Dale Carnegie</span>
+                                    <span th:text="'Tác giả: ' + ${auth.name}">Tác giả: Nguyễn Du</span>
                                     <a th:href="@{/books(keyword=${keyword}, categoryId=${selectedCategoryId})}" class="hover:text-error ml-1 font-bold">✕</a>
                                 </span>
                             </th:block>
@@ -369,7 +377,7 @@
                            th:href="@{/books(authorId=${author.id}, categoryId=${selectedCategoryId}, keyword=${keyword})}"
                            th:classappend="${selectedAuthorId == author.id} ? 'bg-primary-container text-on-primary-container font-bold shadow-sm' : 'text-on-surface-variant hover:bg-surface-container hover:text-on-surface font-medium'"
                            class="flex items-center justify-between px-3 py-1.5 rounded-xl transition-all">
-                            <span th:text="${author.name}">Haruki Murakami</span>
+                            <span th:text="${author.name}">Nguyễn Du</span>
                             <span class="material-symbols-outlined text-[14px]">chevron_right</span>
                         </a>
                     </div>
@@ -479,7 +487,12 @@
                                     <a th:href="@{/books/{id}(id=${book.id})}" class="px-2.5 py-1.5 rounded-xl bg-surface-container-high hover:bg-surface-container-highest text-on-surface text-xs font-bold transition-colors whitespace-nowrap">
                                         Chi tiết
                                     </a>
-                                    <button onclick="showToast('Đã thêm vào giỏ hàng!')" aria-label="Thêm vào giỏ" class="w-8 h-8 sm:w-9 sm:h-9 rounded-xl bg-primary-container text-on-primary-container flex items-center justify-center hover:brightness-95 shadow-sm hover:scale-105 active:scale-95 transition-all shrink-0" type="button">
+                                    <button type="button" 
+                                            th:data-book-id="${book.id}" 
+                                            th:data-book-title="${book.title}" 
+                                            onclick="addToCart(this.dataset.bookId, this.dataset.bookTitle, 1)" 
+                                            aria-label="Thêm vào giỏ" 
+                                            class="w-8 h-8 sm:w-9 sm:h-9 rounded-xl bg-primary-container text-on-primary-container flex items-center justify-center hover:brightness-95 shadow-sm hover:scale-105 active:scale-95 transition-all shrink-0">
                                         <span class="material-symbols-outlined text-[18px]">add_shopping_cart</span>
                                     </button>
                                 </div>
@@ -535,6 +548,63 @@
                 }, 3000);
             }
         }
+
+        function updateCartBadge(count) {
+            const badges = document.querySelectorAll('#globalCartBadge, .cart-count-badge');
+            badges.forEach(b => {
+                b.textContent = count;
+                if (count > 0) {
+                    b.classList.remove('hidden');
+                } else {
+                    b.classList.add('hidden');
+                }
+            });
+        }
+
+        async function fetchCartCount() {
+            try {
+                const res = await fetch('/api/cart/count');
+                if (res.ok) {
+                    const data = await res.json();
+                    updateCartBadge(data.count || 0);
+                }
+            } catch (e) {
+                console.error('Error fetching cart count:', e);
+            }
+        }
+
+        async function addToCart(bookId, bookTitle, quantity = 1) {
+            try {
+                const formData = new URLSearchParams();
+                formData.append('bookId', bookId);
+                formData.append('quantity', quantity);
+
+                const response = await fetch('/cart/add', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                    body: formData.toString()
+                });
+
+                if (response.ok) {
+                    const data = await response.json();
+                    if (data.status === 'success' || data.success) {
+                        updateCartBadge(data.totalQuantity || data.count || 0);
+                        showToast(`Đã thêm "${bookTitle}" vào giỏ hàng!`);
+                    } else {
+                        showToast(data.message || 'Không thể thêm vào giỏ hàng.');
+                    }
+                } else {
+                    showToast('Có lỗi xảy ra khi thêm vào giỏ.');
+                }
+            } catch (err) {
+                console.error(err);
+                showToast('Không thể kết nối đến máy chủ.');
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', fetchCartCount);
     </script>
+    <!-- Page Transition Script -->
+    <th:block th:replace="~{fragments/page-transition :: transitionScripts}"></th:block>
 </body>
 </html>

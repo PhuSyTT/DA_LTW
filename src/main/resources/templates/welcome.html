@@ -103,21 +103,22 @@
         };
     </script>
     <style>
-        * {
-            font-family: 'Plus Jakarta Sans', 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif !important;
-        }
-        .material-symbols-outlined, .fa-solid, .fa-regular, .fas, .far {
-            font-family: inherit;
+        body, input, button, select, textarea, p, span, h1, h2, h3, h4, h5, h6, a, label, div {
+            font-family: 'Plus Jakarta Sans', 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
         }
         .material-symbols-outlined {
             font-family: 'Material Symbols Outlined' !important;
         }
-        .fa-solid, .fas {
+        .fa, .fas, .fa-solid, .fa-solid::before, .fas::before, .fa::before, [class*="fa-"]::before {
             font-family: 'Font Awesome 6 Free' !important;
             font-weight: 900 !important;
         }
-        .fa-regular, .far {
+        .fa-regular, .far, .fa-regular::before, .far::before {
             font-family: 'Font Awesome 6 Free' !important;
+            font-weight: 400 !important;
+        }
+        .fa-brands, .fab, .fa-brands::before, .fab::before {
+            font-family: 'Font Awesome 6 Brands' !important;
             font-weight: 400 !important;
         }
         html { scroll-behavior: smooth; }
@@ -141,8 +142,12 @@
             transform: translateY(0);
         }
     </style>
+    <!-- Page Transition Styles -->
+    <th:block th:replace="~{fragments/page-transition :: transitionStyles}"></th:block>
 </head>
 <body class="bg-background font-sans text-on-surface antialiased min-h-screen">
+    <!-- Page Transition Overlay -->
+    <div th:replace="~{fragments/page-transition :: transitionOverlay}"></div>
 
     <!-- Toast Notification Popup -->
     <div id="toastNotification" class="toast-notification">
@@ -183,9 +188,10 @@
                             </select>
                             <span class="material-symbols-outlined pointer-events-none absolute right-2 top-1/2 -translate-y-1/2 text-[14px] text-on-surface-variant">expand_more</span>
                         </div>
-                        <span class="material-symbols-outlined text-on-surface-variant text-[20px] mr-2 shrink-0">search</span>
-                        <input name="keyword" class="w-full bg-transparent text-sm text-on-surface placeholder:text-outline focus:outline-none" placeholder="Tìm tựa sách, tác giả, thể loại hoặc ISBN..." type="text"/>
-                        <button type="submit" class="hidden">Tìm</button>
+                        <button type="submit" aria-label="Tìm kiếm" class="flex items-center justify-center text-on-surface-variant hover:text-primary transition-colors focus:outline-none shrink-0 mr-2">
+                            <span class="material-symbols-outlined text-[20px]">search</span>
+                        </button>
+                        <input name="keyword" class="w-full bg-transparent text-sm text-on-surface focus:outline-none" type="text"/>
                     </form>
                 </div>
 
@@ -194,20 +200,22 @@
                     <nav class="hidden xl:flex items-center gap-5 text-sm font-semibold text-on-surface-variant">
                         <a th:href="@{/books}" class="hover:text-primary transition-colors">Kho sách</a>
                         <a th:href="@{/authors}" class="hover:text-primary transition-colors">Tác giả</a>
+                        <a th:href="@{/trade-in/new}" class="hover:text-primary transition-colors">Thu mua sách</a>
+                        <a th:href="@{/my-wishlist}" class="hover:text-primary transition-colors">Săn sách</a>
                         <a th:href="@{/blog}" class="hover:text-primary transition-colors">Blog</a>
                         <a th:href="@{/about}" class="hover:text-primary transition-colors">Về chúng tôi</a>
                     </nav>
 
                     <!-- Wishlist & Cart Badges -->
                     <div class="flex items-center gap-1">
-                        <button onclick="showToast('Danh sách yêu thích đã được lưu!')" aria-label="Yêu thích" class="relative p-2 rounded-full hover:bg-surface-container-high text-on-surface-variant hover:text-primary transition-all">
+                        <a th:href="@{/my-wishlist}" href="/my-wishlist" aria-label="Săn Sách Yêu Thích" class="relative p-2 rounded-full hover:bg-surface-container-high text-on-surface-variant hover:text-primary transition-all">
                             <span class="material-symbols-outlined text-[22px]">favorite</span>
-                            <span class="absolute top-1 right-1 flex items-center justify-center min-w-[16px] h-4 px-1 rounded-full bg-secondary text-on-secondary text-[10px] font-bold">5</span>
-                        </button>
-                        <button onclick="showToast('Giỏ hàng có 3 cuốn sách sẵn sàng thanh toán!')" aria-label="Giỏ hàng" class="relative p-2 rounded-full hover:bg-surface-container-high text-on-surface-variant hover:text-primary transition-all">
+                            <span class="absolute top-1 right-1 flex items-center justify-center min-w-[16px] h-4 px-1 rounded-full bg-secondary text-on-secondary text-[10px] font-bold">★</span>
+                        </a>
+                        <a href="/cart" aria-label="Giỏ hàng" class="relative p-2 rounded-full hover:bg-surface-container-high text-on-surface-variant hover:text-primary transition-all">
                             <span class="material-symbols-outlined text-[22px]">shopping_bag</span>
-                            <span class="absolute top-1 right-1 flex items-center justify-center min-w-[16px] h-4 px-1 rounded-full bg-primary-container text-on-primary-container text-[10px] font-bold">3</span>
-                        </button>
+                            <span id="globalCartBadge" class="absolute top-1 right-1 flex items-center justify-center min-w-[16px] h-4 px-1 rounded-full bg-primary text-white text-[10px] font-bold" style="display: none;">0</span>
+                        </a>
                     </div>
 
                     <!-- Multi-Role Auth Controls -->
@@ -303,7 +311,7 @@
                                 <span>Khám Phá Bộ Sưu Tập</span>
                                 <span class="material-symbols-outlined text-[20px]">auto_stories</span>
                             </a>
-                            <a th:href="@{/about}" href="/about" class="px-7 py-4 rounded-xl bg-surface-container-low border border-outline-variant/40 text-on-surface text-base font-bold shadow-sm hover:bg-surface-container-high transition-all duration-300 flex items-center gap-2">
+                            <a th:href="@{/trade-in/new}" href="/trade-in/new" class="px-7 py-4 rounded-xl bg-surface-container-low border border-outline-variant/40 text-on-surface text-base font-bold shadow-sm hover:bg-surface-container-high transition-all duration-300 flex items-center gap-2">
                                 <span>Bán Lại Sách Cũ</span>
                                 <span class="material-symbols-outlined text-[20px]">recycling</span>
                             </a>
@@ -485,101 +493,48 @@
                 <div class="max-w-7xl mx-auto px-6">
                     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-7">
 
-                        <!-- Book 1: Trăm Năm Cô Đơn -->
+                        <!-- Book 1: Truyện Kiều -->
                         <div class="group relative flex flex-col rounded-2xl bg-surface-container-lowest border border-outline-variant/30 p-4 shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300">
                             <div class="relative w-full aspect-[3/4] rounded-xl overflow-hidden bg-surface-container-low mb-4">
                                 <a th:href="@{/books/1}" href="/books/1">
-                                    <img th:src="@{/images/book-les-miserables.jpg}"
-                                         src="/images/book-les-miserables.jpg"
-                                         onerror="this.onerror=null; this.src='https://lh3.googleusercontent.com/aida-public/AB6AXuD2a-YRwN7bSV9_HclRw6fNlbvYqIwyDZa4zWchG_tg_BZWACIVMkRLvMhtDnX6b5XtGrlmOcF0dFDJ2D3f09PIQbapmHzp0dEULVnFd4NdjOSUhPQWCQmguQh5qNr7k4sorCt2PQefTr7LXpXQhn_mVcTeSyHvAcVl7rEjjRzSUqHytjwpfwc_kbLr63o-LgrhbZeh6xSDr8uflMx81KufWKah7LRVi-SytErkoWKJ_-QM2XraVTwi';"
-                                         alt="Trăm Năm Cô Đơn" 
+                                    <img th:src="@{/images/books/book_1.jpg}" src="/images/books/book_1.jpg" 
+                                         alt="Truyện Kiều" 
                                          class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"/>
                                 </a>
                                 <span class="absolute top-3 left-3 px-2.5 py-1 rounded-md bg-secondary text-on-secondary text-[11px] font-bold shadow-md">
                                     Bản Hiếm
                                 </span>
-                                <button onclick="showToast('Đã thêm Trăm Năm Cô Đơn vào danh sách yêu thích!')" aria-label="Lưu vào yêu thích" class="absolute top-3 right-3 w-8 h-8 rounded-full bg-surface/90 backdrop-blur-sm text-on-surface flex items-center justify-center hover:text-error hover:bg-surface shadow-sm transition-colors" type="button">
+                                <button onclick="showToast('Đã thêm Truyện Kiều vào danh sách yêu thích!')" aria-label="Lưu vào yêu thích" class="absolute top-3 right-3 w-8 h-8 rounded-full bg-surface/90 backdrop-blur-sm text-on-surface flex items-center justify-center hover:text-error hover:bg-surface shadow-sm transition-colors" type="button">
                                     <span class="material-symbols-outlined text-[18px]">favorite</span>
                                 </button>
                             </div>
                             <div class="flex-1 flex flex-col justify-between">
                                 <div>
-                                    <p class="text-xs text-tertiary font-bold">Gabriel García Márquez</p>
+                                    <p class="text-xs text-tertiary font-bold">Nguyễn Du</p>
                                     <a th:href="@{/books/1}" href="/books/1">
                                         <h3 class="text-base font-bold text-on-surface leading-snug line-clamp-2 mt-1 group-hover:text-primary transition-colors">
-                                            Trăm Năm Cô Đơn (Bìa Cứng 1986)
-                                        </h3>
-                                    </a>
-                                    <div class="flex items-center gap-1.5 mt-2">
-                                        <span class="material-symbols-outlined text-[16px] text-primary-container" style="font-variation-settings: 'FILL' 1;">star</span>
-                                        <span class="text-xs font-extrabold text-on-surface">4.9</span>
-                                        <span class="text-xs text-outline">(128 đánh giá)</span>
-                                    </div>
-                                </div>
-                                <div class="mt-4 pt-3 border-t border-outline-variant/20 flex items-center justify-between gap-2">
-                                    <div class="flex flex-col items-start min-w-0">
-                                        <div class="flex items-center gap-1.5 whitespace-nowrap">
-                                            <span class="text-xs line-through text-outline whitespace-nowrap">350.000₫</span>
-                                            <span class="inline-flex items-center px-1.5 py-0.5 rounded bg-error-container text-on-error-container text-[10px] font-bold">-47%</span>
-                                        </div>
-                                        <span class="text-base sm:text-lg font-extrabold text-on-surface whitespace-nowrap mt-0.5">185.000₫</span>
-                                    </div>
-                                    <div class="flex items-center gap-1.5 shrink-0">
-                                        <a th:href="@{/books/1}" href="/books/1" class="px-2.5 py-1.5 rounded-xl bg-surface-container-high hover:bg-surface-container-highest text-on-surface text-xs font-bold transition-colors whitespace-nowrap">
-                                            Chi tiết
-                                        </a>
-                                        <button onclick="showToast('Đã thêm Trăm Năm Cô Đơn vào giỏ hàng!')" aria-label="Thêm vào giỏ" class="w-8 h-8 sm:w-9 sm:h-9 rounded-xl bg-primary-container text-on-primary-container flex items-center justify-center hover:brightness-95 shadow-sm hover:scale-105 active:scale-95 transition-all shrink-0" type="button">
-                                            <span class="material-symbols-outlined text-[18px]">add_shopping_cart</span>
-                                        </button>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Book 2: Nhà Giả Kim -->
-                        <div class="group relative flex flex-col rounded-2xl bg-surface-container-lowest border border-outline-variant/30 p-4 shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300">
-                            <div class="relative w-full aspect-[3/4] rounded-xl overflow-hidden bg-surface-container-low mb-4">
-                                <a th:href="@{/books/2}" href="/books/2">
-                                    <img th:src="@{/images/book-alchemist.jpg}"
-                                         src="/images/book-alchemist.jpg"
-                                         onerror="this.onerror=null; this.src='https://lh3.googleusercontent.com/aida-public/AB6AXuBZpHLtdRX6GRNiR1MEzYMlxFSlrZf5DqjRxQOaV3kJMIPT0PsKo58RNfPRg6-KL-dyaAHaMSo7gciN3vT2bc2y07Zee38XoaSP9IKPY1OZYWwFtfIjTeKFwOEdJaxB8NwUk6gfjvCLtVm6R9ESRjgdJX19tRIFde08XvI2dhJg5ea-Q5aKTbFnPwO-hjSc2eUGM1dEUT9tX7qzNpug5khNdMr5cpAlyKaJeMuYTUsizQ01WQlgNtGp';"
-                                         alt="Nhà Giả Kim" 
-                                         class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"/>
-                                </a>
-                                <span class="absolute top-3 left-3 px-2.5 py-1 rounded-md bg-surface-container-highest text-on-surface text-[11px] font-bold shadow-md">
-                                    Như Mới 95%
-                                </span>
-                                <button onclick="showToast('Đã thêm Nhà Giả Kim vào danh sách yêu thích!')" aria-label="Lưu vào yêu thích" class="absolute top-3 right-3 w-8 h-8 rounded-full bg-surface/90 backdrop-blur-sm text-on-surface flex items-center justify-center hover:text-error hover:bg-surface shadow-sm transition-colors" type="button">
-                                    <span class="material-symbols-outlined text-[18px]">favorite</span>
-                                </button>
-                            </div>
-                            <div class="flex-1 flex flex-col justify-between">
-                                <div>
-                                    <p class="text-xs text-tertiary font-bold">Paulo Coelho</p>
-                                    <a th:href="@{/books/2}" href="/books/2">
-                                        <h3 class="text-base font-bold text-on-surface leading-snug line-clamp-2 mt-1 group-hover:text-primary transition-colors">
-                                            Nhà Giả Kim (Ấn bản kỷ niệm)
+                                            Truyện Kiều (Đoạn Trường Tân Thanh)
                                         </h3>
                                     </a>
                                     <div class="flex items-center gap-1.5 mt-2">
                                         <span class="material-symbols-outlined text-[16px] text-primary-container" style="font-variation-settings: 'FILL' 1;">star</span>
                                         <span class="text-xs font-extrabold text-on-surface">5.0</span>
-                                        <span class="text-xs text-outline">(342 đánh giá)</span>
+                                        <span class="text-xs text-outline">(328 đánh giá)</span>
                                     </div>
                                 </div>
                                 <div class="mt-4 pt-3 border-t border-outline-variant/20 flex items-center justify-between gap-2">
                                     <div class="flex flex-col items-start min-w-0">
                                         <div class="flex items-center gap-1.5 whitespace-nowrap">
-                                            <span class="text-xs line-through text-outline whitespace-nowrap">120.000₫</span>
-                                            <span class="inline-flex items-center px-1.5 py-0.5 rounded bg-error-container text-on-error-container text-[10px] font-bold">-43%</span>
+                                            <span class="text-xs line-through text-outline whitespace-nowrap">180.000₫</span>
+                                            <span class="inline-flex items-center px-1.5 py-0.5 rounded bg-error-container text-on-error-container text-[10px] font-bold">-47%</span>
                                         </div>
-                                        <span class="text-base sm:text-lg font-extrabold text-on-surface whitespace-nowrap mt-0.5">68.000₫</span>
+                                        <span class="text-base sm:text-lg font-extrabold text-on-surface whitespace-nowrap mt-0.5">95.000₫</span>
                                     </div>
                                     <div class="flex items-center gap-1.5 shrink-0">
-                                        <a th:href="@{/books/2}" href="/books/2" class="px-2.5 py-1.5 rounded-xl bg-surface-container-high hover:bg-surface-container-highest text-on-surface text-xs font-bold transition-colors whitespace-nowrap">
+                                        <a th:href="@{/books/1}" href="/books/1" class="px-2.5 py-1.5 rounded-xl bg-surface-container-high hover:bg-surface-container-highest text-on-surface text-xs font-bold transition-colors whitespace-nowrap">
                                             Chi tiết
                                         </a>
-                                        <button onclick="showToast('Đã thêm Nhà Giả Kim vào giỏ hàng!')" aria-label="Thêm vào giỏ" class="w-8 h-8 sm:w-9 sm:h-9 rounded-xl bg-primary-container text-on-primary-container flex items-center justify-center hover:brightness-95 shadow-sm hover:scale-105 active:scale-95 transition-all shrink-0" type="button">
+                                        <button onclick="addToCart(1, 'Truyện Kiều')" aria-label="Thêm vào giỏ" class="w-8 h-8 sm:w-9 sm:h-9 rounded-xl bg-primary-container text-on-primary-container flex items-center justify-center hover:brightness-95 shadow-sm hover:scale-105 active:scale-95 transition-all shrink-0" type="button">
                                             <span class="material-symbols-outlined text-[18px]">add_shopping_cart</span>
                                         </button>
                                     </div>
@@ -587,50 +542,48 @@
                             </div>
                         </div>
 
-                        <!-- Book 3: Bắt Trẻ Đồng Xanh -->
+                        <!-- Book 2: Số Đỏ -->
                         <div class="group relative flex flex-col rounded-2xl bg-surface-container-lowest border border-outline-variant/30 p-4 shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300">
                             <div class="relative w-full aspect-[3/4] rounded-xl overflow-hidden bg-surface-container-low mb-4">
-                                <a th:href="@{/books/3}" href="/books/3">
-                                    <img th:src="@{/images/book-catcher-rye.jpg}"
-                                         src="/images/book-catcher-rye.jpg"
-                                         onerror="this.onerror=null; this.src='https://lh3.googleusercontent.com/aida-public/AB6AXuCF9PAijh4Z68xzGPMqhnFME1viF-gW5tKVyMtiq69lWNxZFHOaYZVFjOj7TSfROcx0WmhSVJ15IYgAmXzbe6uKBFamVmrxinRXP0eRIMKyI590oTao-5Nwh1H4mn7yh9c7KD73HErgWUYYvs7vkGuXxxUsO03olkKZLdu3VToP2XvvLyH9JvTEFVl62auu8FUITdQiP9D1sYJQW0X1E0UV6t5IkM2dmy_BdQhPAsXFopZMMMBX1Jw2';"
-                                         alt="Bắt Trẻ Đồng Xanh" 
+                                <a th:href="@{/books/18}" href="/books/18">
+                                    <img th:src="@{/images/books/book_18.jpg}" src="/images/books/book_18.jpg" 
+                                         alt="Số Đỏ" 
                                          class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"/>
                                 </a>
-                                <span class="absolute top-3 left-3 px-2.5 py-1 rounded-md bg-secondary-container text-on-secondary-container text-[11px] font-bold shadow-md">
-                                    Rất Tốt 85%
+                                <span class="absolute top-3 left-3 px-2.5 py-1 rounded-md bg-surface-container-highest text-on-surface text-[11px] font-bold shadow-md">
+                                    Như Mới 95%
                                 </span>
-                                <button onclick="showToast('Đã thêm Bắt Trẻ Đồng Xanh vào danh sách yêu thích!')" aria-label="Lưu vào yêu thích" class="absolute top-3 right-3 w-8 h-8 rounded-full bg-surface/90 backdrop-blur-sm text-on-surface flex items-center justify-center hover:text-error hover:bg-surface shadow-sm transition-colors" type="button">
+                                <button onclick="showToast('Đã thêm Số Đỏ vào danh sách yêu thích!')" aria-label="Lưu vào yêu thích" class="absolute top-3 right-3 w-8 h-8 rounded-full bg-surface/90 backdrop-blur-sm text-on-surface flex items-center justify-center hover:text-error hover:bg-surface shadow-sm transition-colors" type="button">
                                     <span class="material-symbols-outlined text-[18px]">favorite</span>
                                 </button>
                             </div>
                             <div class="flex-1 flex flex-col justify-between">
                                 <div>
-                                    <p class="text-xs text-tertiary font-bold">J.D. Salinger</p>
-                                    <a th:href="@{/books/3}" href="/books/3">
+                                    <p class="text-xs text-tertiary font-bold">Vũ Trọng Phụng</p>
+                                    <a th:href="@{/books/18}" href="/books/18">
                                         <h3 class="text-base font-bold text-on-surface leading-snug line-clamp-2 mt-1 group-hover:text-primary transition-colors">
-                                            Bắt Trẻ Đồng Xanh (Bản in cổ điển)
+                                            Số Đỏ (Kiệt Tác Tiểu Thuyết Trào Phúng)
                                         </h3>
                                     </a>
                                     <div class="flex items-center gap-1.5 mt-2">
                                         <span class="material-symbols-outlined text-[16px] text-primary-container" style="font-variation-settings: 'FILL' 1;">star</span>
-                                        <span class="text-xs font-extrabold text-on-surface">4.8</span>
-                                        <span class="text-xs text-outline">(96 đánh giá)</span>
+                                        <span class="text-xs font-extrabold text-on-surface">5.0</span>
+                                        <span class="text-xs text-outline">(242 đánh giá)</span>
                                     </div>
                                 </div>
                                 <div class="mt-4 pt-3 border-t border-outline-variant/20 flex items-center justify-between gap-2">
                                     <div class="flex flex-col items-start min-w-0">
                                         <div class="flex items-center gap-1.5 whitespace-nowrap">
                                             <span class="text-xs line-through text-outline whitespace-nowrap">150.000₫</span>
-                                            <span class="inline-flex items-center px-1.5 py-0.5 rounded bg-error-container text-on-error-container text-[10px] font-bold">-47%</span>
+                                            <span class="inline-flex items-center px-1.5 py-0.5 rounded bg-error-container text-on-error-container text-[10px] font-bold">-37%</span>
                                         </div>
-                                        <span class="text-base sm:text-lg font-extrabold text-on-surface whitespace-nowrap mt-0.5">79.000₫</span>
+                                        <span class="text-base sm:text-lg font-extrabold text-on-surface whitespace-nowrap mt-0.5">95.000₫</span>
                                     </div>
                                     <div class="flex items-center gap-1.5 shrink-0">
-                                        <a th:href="@{/books/3}" href="/books/3" class="px-2.5 py-1.5 rounded-xl bg-surface-container-high hover:bg-surface-container-highest text-on-surface text-xs font-bold transition-colors whitespace-nowrap">
+                                        <a th:href="@{/books/18}" href="/books/18" class="px-2.5 py-1.5 rounded-xl bg-surface-container-high hover:bg-surface-container-highest text-on-surface text-xs font-bold transition-colors whitespace-nowrap">
                                             Chi tiết
                                         </a>
-                                        <button onclick="showToast('Đã thêm Bắt Trẻ Đồng Xanh vào giỏ hàng!')" aria-label="Thêm vào giỏ" class="w-8 h-8 sm:w-9 sm:h-9 rounded-xl bg-primary-container text-on-primary-container flex items-center justify-center hover:brightness-95 shadow-sm hover:scale-105 active:scale-95 transition-all shrink-0" type="button">
+                                        <button onclick="addToCart(18, 'Số Đỏ')" aria-label="Thêm vào giỏ" class="w-8 h-8 sm:w-9 sm:h-9 rounded-xl bg-primary-container text-on-primary-container flex items-center justify-center hover:brightness-95 shadow-sm hover:scale-105 active:scale-95 transition-all shrink-0" type="button">
                                             <span class="material-symbols-outlined text-[18px]">add_shopping_cart</span>
                                         </button>
                                     </div>
@@ -638,27 +591,76 @@
                             </div>
                         </div>
 
-                        <!-- Book 4: Suối Nguồn -->
+                        <!-- Book 3: Chí Phèo -->
                         <div class="group relative flex flex-col rounded-2xl bg-surface-container-lowest border border-outline-variant/30 p-4 shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300">
                             <div class="relative w-full aspect-[3/4] rounded-xl overflow-hidden bg-surface-container-low mb-4">
-                                <a th:href="@{/books/4}" href="/books/4">
-                                    <img src="https://lh3.googleusercontent.com/aida-public/AB6AXuC0dIjpisbfRvaWRjHeFDY9Vy3eo6iskfLtDjiZk7laJ6tZ01XXszHqy5NwOy_T50MkA0muMQ17CJwO24q17eYQM7sZywZEdeMothOcVvZ1DI4kzhobfbwRMGYYKWxfcl0AsV61iS51DIdlA0M8hQxY_ll_lus4eH-FUULieNZlTLOekdWtmWeCuTtX-q3o6uOePkChocF78jLS2wYowWC6RKo7OhokOaArW7_e0Grtsn1gz2mEEddH" 
-                                         alt="Suối Nguồn" 
+                                <a th:href="@{/books/22}" href="/books/22">
+                                    <img th:src="@{/images/books/book_22.jpg}" src="/images/books/book_22.jpg" 
+                                         alt="Chí Phèo" 
                                          class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"/>
                                 </a>
                                 <span class="absolute top-3 left-3 px-2.5 py-1 rounded-md bg-secondary-container text-on-secondary-container text-[11px] font-bold shadow-md">
                                     Rất Tốt 90%
                                 </span>
-                                <button onclick="showToast('Đã thêm Suối Nguồn vào danh sách yêu thích!')" aria-label="Lưu vào yêu thích" class="absolute top-3 right-3 w-8 h-8 rounded-full bg-surface/90 backdrop-blur-sm text-on-surface flex items-center justify-center hover:text-error hover:bg-surface shadow-sm transition-colors" type="button">
+                                <button onclick="showToast('Đã thêm Chí Phèo vào danh sách yêu thích!')" aria-label="Lưu vào yêu thích" class="absolute top-3 right-3 w-8 h-8 rounded-full bg-surface/90 backdrop-blur-sm text-on-surface flex items-center justify-center hover:text-error hover:bg-surface shadow-sm transition-colors" type="button">
                                     <span class="material-symbols-outlined text-[18px]">favorite</span>
                                 </button>
                             </div>
                             <div class="flex-1 flex flex-col justify-between">
                                 <div>
-                                    <p class="text-xs text-tertiary font-bold">Ayn Rand</p>
-                                    <a th:href="@{/books/4}" href="/books/4">
+                                    <p class="text-xs text-tertiary font-bold">Nam Cao</p>
+                                    <a th:href="@{/books/22}" href="/books/22">
                                         <h3 class="text-base font-bold text-on-surface leading-snug line-clamp-2 mt-1 group-hover:text-primary transition-colors">
-                                            Suối Nguồn (Tập 1 &amp; 2 Trọn Bộ)
+                                            Chí Phèo (Tuyển Tập Hiện Thực Phê Phán)
+                                        </h3>
+                                    </a>
+                                    <div class="flex items-center gap-1.5 mt-2">
+                                        <span class="material-symbols-outlined text-[16px] text-primary-container" style="font-variation-settings: 'FILL' 1;">star</span>
+                                        <span class="text-xs font-extrabold text-on-surface">4.9</span>
+                                        <span class="text-xs text-outline">(196 đánh giá)</span>
+                                    </div>
+                                </div>
+                                <div class="mt-4 pt-3 border-t border-outline-variant/20 flex items-center justify-between gap-2">
+                                    <div class="flex flex-col items-start min-w-0">
+                                        <div class="flex items-center gap-1.5 whitespace-nowrap">
+                                            <span class="text-xs line-through text-outline whitespace-nowrap">130.000₫</span>
+                                            <span class="inline-flex items-center px-1.5 py-0.5 rounded bg-error-container text-on-error-container text-[10px] font-bold">-35%</span>
+                                        </div>
+                                        <span class="text-base sm:text-lg font-extrabold text-on-surface whitespace-nowrap mt-0.5">85.000₫</span>
+                                    </div>
+                                    <div class="flex items-center gap-1.5 shrink-0">
+                                        <a th:href="@{/books/22}" href="/books/22" class="px-2.5 py-1.5 rounded-xl bg-surface-container-high hover:bg-surface-container-highest text-on-surface text-xs font-bold transition-colors whitespace-nowrap">
+                                            Chi tiết
+                                        </a>
+                                        <button onclick="addToCart(22, 'Chí Phèo')" aria-label="Thêm vào giỏ" class="w-8 h-8 sm:w-9 sm:h-9 rounded-xl bg-primary-container text-on-primary-container flex items-center justify-center hover:brightness-95 shadow-sm hover:scale-105 active:scale-95 transition-all shrink-0" type="button">
+                                            <span class="material-symbols-outlined text-[18px]">add_shopping_cart</span>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Book 4: Hà Nội 36 Phố Phường -->
+                        <div class="group relative flex flex-col rounded-2xl bg-surface-container-lowest border border-outline-variant/30 p-4 shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300">
+                            <div class="relative w-full aspect-[3/4] rounded-xl overflow-hidden bg-surface-container-low mb-4">
+                                <a th:href="@{/books/26}" href="/books/26">
+                                    <img th:src="@{/images/books/book_26.jpg}" src="/images/books/book_26.jpg" 
+                                         alt="Hà Nội Băm Sáu Phố Phường" 
+                                         class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"/>
+                                </a>
+                                <span class="absolute top-3 left-3 px-2.5 py-1 rounded-md bg-secondary-container text-on-secondary-container text-[11px] font-bold shadow-md">
+                                    Rất Tốt 90%
+                                </span>
+                                <button onclick="showToast('Đã thêm Hà Nội 36 Phố Phường vào danh sách yêu thích!')" aria-label="Lưu vào yêu thích" class="absolute top-3 right-3 w-8 h-8 rounded-full bg-surface/90 backdrop-blur-sm text-on-surface flex items-center justify-center hover:text-error hover:bg-surface shadow-sm transition-colors" type="button">
+                                    <span class="material-symbols-outlined text-[18px]">favorite</span>
+                                </button>
+                            </div>
+                            <div class="flex-1 flex flex-col justify-between">
+                                <div>
+                                    <p class="text-xs text-tertiary font-bold">Thạch Lam</p>
+                                    <a th:href="@{/books/26}" href="/books/26">
+                                        <h3 class="text-base font-bold text-on-surface leading-snug line-clamp-2 mt-1 group-hover:text-primary transition-colors">
+                                            Hà Nội Băm Sáu Phố Phường
                                         </h3>
                                     </a>
                                     <div class="flex items-center gap-1.5 mt-2">
@@ -670,16 +672,16 @@
                                 <div class="mt-4 pt-3 border-t border-outline-variant/20 flex items-center justify-between gap-2">
                                     <div class="flex flex-col items-start min-w-0">
                                         <div class="flex items-center gap-1.5 whitespace-nowrap">
-                                            <span class="text-xs line-through text-outline whitespace-nowrap">420.000₫</span>
-                                            <span class="inline-flex items-center px-1.5 py-0.5 rounded bg-error-container text-on-error-container text-[10px] font-bold">-50%</span>
+                                            <span class="text-xs line-through text-outline whitespace-nowrap">110.000₫</span>
+                                            <span class="inline-flex items-center px-1.5 py-0.5 rounded bg-error-container text-on-error-container text-[10px] font-bold">-36%</span>
                                         </div>
-                                        <span class="text-base sm:text-lg font-extrabold text-on-surface whitespace-nowrap mt-0.5">210.000₫</span>
+                                        <span class="text-base sm:text-lg font-extrabold text-on-surface whitespace-nowrap mt-0.5">70.000₫</span>
                                     </div>
                                     <div class="flex items-center gap-1.5 shrink-0">
-                                        <a th:href="@{/books/4}" href="/books/4" class="px-2.5 py-1.5 rounded-xl bg-surface-container-high hover:bg-surface-container-highest text-on-surface text-xs font-bold transition-colors whitespace-nowrap">
+                                        <a th:href="@{/books/26}" href="/books/26" class="px-2.5 py-1.5 rounded-xl bg-surface-container-high hover:bg-surface-container-highest text-on-surface text-xs font-bold transition-colors whitespace-nowrap">
                                             Chi tiết
                                         </a>
-                                        <button onclick="showToast('Đã thêm Suối Nguồn vào giỏ hàng!')" aria-label="Thêm vào giỏ" class="w-8 h-8 sm:w-9 sm:h-9 rounded-xl bg-primary-container text-on-primary-container flex items-center justify-center hover:brightness-95 shadow-sm hover:scale-105 active:scale-95 transition-all shrink-0" type="button">
+                                        <button onclick="addToCart(26, 'Hà Nội Băm Sáu Phố Phường')" aria-label="Thêm vào giỏ" class="w-8 h-8 sm:w-9 sm:h-9 rounded-xl bg-primary-container text-on-primary-container flex items-center justify-center hover:brightness-95 shadow-sm hover:scale-105 active:scale-95 transition-all shrink-0" type="button">
                                             <span class="material-symbols-outlined text-[18px]">add_shopping_cart</span>
                                         </button>
                                     </div>
@@ -687,29 +689,27 @@
                             </div>
                         </div>
 
-                        <!-- Book 5: Hoàng Tử Bé -->
+                        <!-- Book 5: Dế Mèn Phiêu Lưu Ký -->
                         <div class="group relative flex flex-col rounded-2xl bg-surface-container-lowest border border-outline-variant/30 p-4 shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300">
                             <div class="relative w-full aspect-[3/4] rounded-xl overflow-hidden bg-surface-container-low mb-4">
-                                <a th:href="@{/books/5}" href="/books/5">
-                                    <img th:src="@{/images/book-little-prince.jpg}"
-                                         src="/images/book-little-prince.jpg"
-                                         onerror="this.onerror=null; this.src='https://lh3.googleusercontent.com/aida-public/AB6AXuDZ-omZ6FBgTQtqsU2vpNF_I6PHUC4k5uxZU6Du3fkroFquxaPf1GolaPrvUcZPlqqPiwyjUYwiOlVZar1khupF-B8a_7RbJvnj5AR561TwJqyJLyURYbIv5-uygFQW_b3hpgmm-GrPGdYdrA847RuoptuI5EEFz03PfXKt-mKLQNmstdG7mPS0wZCOawa_Ugjx-zLhdGMvR7JvjpOgsau-1n-fw0H9D0bpdYmKOJBQCVT2rYXBN7A5';"
-                                         alt="Hoàng Tử Bé" 
+                                <a th:href="@{/books/29}" href="/books/29">
+                                    <img th:src="@{/images/books/book_29.jpg}" src="/images/books/book_29.jpg" 
+                                         alt="Dế Mèn Phiêu Lưu Ký" 
                                          class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"/>
                                 </a>
                                 <span class="absolute top-3 left-3 px-2.5 py-1 rounded-md bg-surface-container-highest text-on-surface text-[11px] font-bold shadow-md">
                                     Như Mới 98%
                                 </span>
-                                <button onclick="showToast('Đã thêm Hoàng Tử Bé vào danh sách yêu thích!')" aria-label="Lưu vào yêu thích" class="absolute top-3 right-3 w-8 h-8 rounded-full bg-surface/90 backdrop-blur-sm text-on-surface flex items-center justify-center hover:text-error hover:bg-surface shadow-sm transition-colors" type="button">
+                                <button onclick="showToast('Đã thêm Dế Mèn Phiêu Lưu Ký vào danh sách yêu thích!')" aria-label="Lưu vào yêu thích" class="absolute top-3 right-3 w-8 h-8 rounded-full bg-surface/90 backdrop-blur-sm text-on-surface flex items-center justify-center hover:text-error hover:bg-surface shadow-sm transition-colors" type="button">
                                     <span class="material-symbols-outlined text-[18px]">favorite</span>
                                 </button>
                             </div>
                             <div class="flex-1 flex flex-col justify-between">
                                 <div>
-                                    <p class="text-xs text-tertiary font-bold">Antoine de Saint-Exupéry</p>
-                                    <a th:href="@{/books/5}" href="/books/5">
+                                    <p class="text-xs text-tertiary font-bold">Tô Hoài</p>
+                                    <a th:href="@{/books/29}" href="/books/29">
                                         <h3 class="text-base font-bold text-on-surface leading-snug line-clamp-2 mt-1 group-hover:text-primary transition-colors">
-                                            Hoàng Tử Bé (Bản dịch kinh điển)
+                                            Dế Mèn Phiêu Lưu Ký (Ấn Bản Cổ Điển)
                                         </h3>
                                     </a>
                                     <div class="flex items-center gap-1.5 mt-2">
@@ -722,15 +722,15 @@
                                     <div class="flex flex-col items-start min-w-0">
                                         <div class="flex items-center gap-1.5 whitespace-nowrap">
                                             <span class="text-xs line-through text-outline whitespace-nowrap">110.000₫</span>
-                                            <span class="inline-flex items-center px-1.5 py-0.5 rounded bg-error-container text-on-error-container text-[10px] font-bold">-50%</span>
+                                            <span class="inline-flex items-center px-1.5 py-0.5 rounded bg-error-container text-on-error-container text-[10px] font-bold">-32%</span>
                                         </div>
-                                        <span class="text-base sm:text-lg font-extrabold text-on-surface whitespace-nowrap mt-0.5">55.000₫</span>
+                                        <span class="text-base sm:text-lg font-extrabold text-on-surface whitespace-nowrap mt-0.5">75.000₫</span>
                                     </div>
                                     <div class="flex items-center gap-1.5 shrink-0">
-                                        <a th:href="@{/books/5}" href="/books/5" class="px-2.5 py-1.5 rounded-xl bg-surface-container-high hover:bg-surface-container-highest text-on-surface text-xs font-bold transition-colors whitespace-nowrap">
+                                        <a th:href="@{/books/29}" href="/books/29" class="px-2.5 py-1.5 rounded-xl bg-surface-container-high hover:bg-surface-container-highest text-on-surface text-xs font-bold transition-colors whitespace-nowrap">
                                             Chi tiết
                                         </a>
-                                        <button onclick="showToast('Đã thêm Hoàng Tử Bé vào giỏ hàng!')" aria-label="Thêm vào giỏ" class="w-8 h-8 sm:w-9 sm:h-9 rounded-xl bg-primary-container text-on-primary-container flex items-center justify-center hover:brightness-95 shadow-sm hover:scale-105 active:scale-95 transition-all shrink-0" type="button">
+                                        <button onclick="addToCart(29, 'Dế Mèn Phiêu Lưu Ký', 1)" aria-label="Thêm vào giỏ" class="w-8 h-8 sm:w-9 sm:h-9 rounded-xl bg-primary-container text-on-primary-container flex items-center justify-center hover:brightness-95 shadow-sm hover:scale-105 active:scale-95 transition-all shrink-0" type="button">
                                             <span class="material-symbols-outlined text-[18px]">add_shopping_cart</span>
                                         </button>
                                     </div>
@@ -738,27 +738,27 @@
                             </div>
                         </div>
 
-                        <!-- Book 6: Lược Sử Loài Người -->
+                        <!-- Book 6: Việt Nam Sử Lược -->
                         <div class="group relative flex flex-col rounded-2xl bg-surface-container-lowest border border-outline-variant/30 p-4 shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300">
                             <div class="relative w-full aspect-[3/4] rounded-xl overflow-hidden bg-surface-container-low mb-4">
-                                <a th:href="@{/books/6}" href="/books/6">
-                                    <img src="https://lh3.googleusercontent.com/aida-public/AB6AXuAd_nc3Tc2LNVXtFb8PRE4vVLErg3NoqFITt6H8DWdNSQmnmkbSf9RwEdPVufqIVlRFXQ5CrkpgEgN_qs-VUzOzp6GvmAb_0hWkLXJlOcTJraKbpF_cXtI9lXJWKZvkjx2L-3k0VdhAcqAdcil0qq-BuGTP8Zev9PZ2iD2Z8OutkMMZYIlO6I1Pl0VSW7IqX9kd-SeEzHu6BaG3Wdl_D4zHdub9Jvrm9qfLX3G3EMklSPU4byMhEHhG" 
-                                         alt="Lược Sử Loài Người" 
+                                <a th:href="@{/books/73}" href="/books/73">
+                                    <img th:src="@{/images/books/book_73.jpg}" src="/images/books/book_73.jpg" 
+                                         alt="Việt Nam Sử Lược" 
                                          class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"/>
                                 </a>
                                 <span class="absolute top-3 left-3 px-2.5 py-1 rounded-md bg-secondary-container text-on-secondary-container text-[11px] font-bold shadow-md">
                                     Rất Tốt 85%
                                 </span>
-                                <button onclick="showToast('Đã thêm Lược Sử Loài Người vào danh sách yêu thích!')" aria-label="Lưu vào yêu thích" class="absolute top-3 right-3 w-8 h-8 rounded-full bg-surface/90 backdrop-blur-sm text-on-surface flex items-center justify-center hover:text-error hover:bg-surface shadow-sm transition-colors" type="button">
+                                <button onclick="showToast('Đã thêm Việt Nam Sử Lược vào danh sách yêu thích!')" aria-label="Lưu vào yêu thích" class="absolute top-3 right-3 w-8 h-8 rounded-full bg-surface/90 backdrop-blur-sm text-on-surface flex items-center justify-center hover:text-error hover:bg-surface shadow-sm transition-colors" type="button">
                                     <span class="material-symbols-outlined text-[18px]">favorite</span>
                                 </button>
                             </div>
                             <div class="flex-1 flex flex-col justify-between">
                                 <div>
-                                    <p class="text-xs text-tertiary font-bold">Yuval Noah Harari</p>
-                                    <a th:href="@{/books/6}" href="/books/6">
+                                    <p class="text-xs text-tertiary font-bold">Trần Trọng Kim</p>
+                                    <a th:href="@{/books/73}" href="/books/73">
                                         <h3 class="text-base font-bold text-on-surface leading-snug line-clamp-2 mt-1 group-hover:text-primary transition-colors">
-                                            Lược Sử Loài Người (Sapiens)
+                                            Việt Nam Sử Lược (Bộ Sử Ký Quốc Ngữ Đầu Tiên)
                                         </h3>
                                     </a>
                                     <div class="flex items-center gap-1.5 mt-2">
@@ -770,16 +770,16 @@
                                 <div class="mt-4 pt-3 border-t border-outline-variant/20 flex items-center justify-between gap-2">
                                     <div class="flex flex-col items-start min-w-0">
                                         <div class="flex items-center gap-1.5 whitespace-nowrap">
-                                            <span class="text-xs line-through text-outline whitespace-nowrap">260.000₫</span>
-                                            <span class="inline-flex items-center px-1.5 py-0.5 rounded bg-error-container text-on-error-container text-[10px] font-bold">-44%</span>
+                                            <span class="text-xs line-through text-outline whitespace-nowrap">220.000₫</span>
+                                            <span class="inline-flex items-center px-1.5 py-0.5 rounded bg-error-container text-on-error-container text-[10px] font-bold">-34%</span>
                                         </div>
                                         <span class="text-base sm:text-lg font-extrabold text-on-surface whitespace-nowrap mt-0.5">145.000₫</span>
                                     </div>
                                     <div class="flex items-center gap-1.5 shrink-0">
-                                        <a th:href="@{/books/6}" href="/books/6" class="px-2.5 py-1.5 rounded-xl bg-surface-container-high hover:bg-surface-container-highest text-on-surface text-xs font-bold transition-colors whitespace-nowrap">
+                                        <a th:href="@{/books/73}" href="/books/73" class="px-2.5 py-1.5 rounded-xl bg-surface-container-high hover:bg-surface-container-highest text-on-surface text-xs font-bold transition-colors whitespace-nowrap">
                                             Chi tiết
                                         </a>
-                                        <button onclick="showToast('Đã thêm Lược Sử Loài Người vào giỏ hàng!')" aria-label="Thêm vào giỏ" class="w-8 h-8 sm:w-9 sm:h-9 rounded-xl bg-primary-container text-on-primary-container flex items-center justify-center hover:brightness-95 shadow-sm hover:scale-105 active:scale-95 transition-all shrink-0" type="button">
+                                        <button onclick="addToCart(73, 'Việt Nam Sử Lược', 1)" aria-label="Thêm vào giỏ" class="w-8 h-8 sm:w-9 sm:h-9 rounded-xl bg-primary-container text-on-primary-container flex items-center justify-center hover:brightness-95 shadow-sm hover:scale-105 active:scale-95 transition-all shrink-0" type="button">
                                             <span class="material-symbols-outlined text-[18px]">add_shopping_cart</span>
                                         </button>
                                     </div>
@@ -787,48 +787,48 @@
                             </div>
                         </div>
 
-                        <!-- Book 7: Tội Ác Và Trừng Phạt -->
+                        <!-- Book 7: Vang Bóng Một Thời -->
                         <div class="group relative flex flex-col rounded-2xl bg-surface-container-lowest border border-outline-variant/30 p-4 shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300">
                             <div class="relative w-full aspect-[3/4] rounded-xl overflow-hidden bg-surface-container-low mb-4">
-                                <a th:href="@{/books/7}" href="/books/7">
-                                    <img src="https://lh3.googleusercontent.com/aida-public/AB6AXuClr4w4CZFc7APii_5XXB8fqifqAlF1HEFgubDd6i_MdpYobBBDrfkOTlNW8Q1UihF4H_ftAZmG35vG4PthO-AZMWdKkSWqE2VSBWnJZPjVvJiwVhmPM6lwe3DoSIFQx-LDWOY4D376Y4O-xddcGbovygkzA5C1kZuRph-QdKWbrB7qXv5pSS1behpXbIUsluPunle-8TqEH6aLJZw-TKzIyWqmCs5T36SmtVD3iUwYajoQmBvlbrOj" 
-                                         alt="Tội Ác Và Trừng Phạt" 
+                                <a th:href="@{/books/13}" href="/books/13">
+                                    <img th:src="@{/images/books/book_13.jpg}" src="/images/books/book_13.jpg" 
+                                         alt="Vang Bóng Một Thời" 
                                          class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"/>
                                 </a>
                                 <span class="absolute top-3 left-3 px-2.5 py-1 rounded-md bg-secondary text-on-secondary text-[11px] font-bold shadow-md">
-                                    Bản Cũ 1992
+                                    Bản Cũ Quý
                                 </span>
-                                <button onclick="showToast('Đã thêm Tội Ác Và Trừng Phạt vào danh sách yêu thích!')" aria-label="Lưu vào yêu thích" class="absolute top-3 right-3 w-8 h-8 rounded-full bg-surface/90 backdrop-blur-sm text-on-surface flex items-center justify-center hover:text-error hover:bg-surface shadow-sm transition-colors" type="button">
+                                <button onclick="showToast('Đã thêm Vang Bóng Một Thời vào danh sách yêu thích!')" aria-label="Lưu vào yêu thích" class="absolute top-3 right-3 w-8 h-8 rounded-full bg-surface/90 backdrop-blur-sm text-on-surface flex items-center justify-center hover:text-error hover:bg-surface shadow-sm transition-colors" type="button">
                                     <span class="material-symbols-outlined text-[18px]">favorite</span>
                                 </button>
                             </div>
                             <div class="flex-1 flex flex-col justify-between">
                                 <div>
-                                    <p class="text-xs text-tertiary font-bold">Fyodor Dostoevsky</p>
-                                    <a th:href="@{/books/7}" href="/books/7">
+                                    <p class="text-xs text-tertiary font-bold">Nguyễn Tuân</p>
+                                    <a th:href="@{/books/13}" href="/books/13">
                                         <h3 class="text-base font-bold text-on-surface leading-snug line-clamp-2 mt-1 group-hover:text-primary transition-colors">
-                                            Tội Ác Và Trừng Phạt (Trọn bộ)
+                                            Vang Bóng Một Thời (Tập Tùy Bút Cổ Điển)
                                         </h3>
                                     </a>
                                     <div class="flex items-center gap-1.5 mt-2">
                                         <span class="material-symbols-outlined text-[16px] text-primary-container" style="font-variation-settings: 'FILL' 1;">star</span>
-                                        <span class="text-xs font-extrabold text-on-surface">4.8</span>
-                                        <span class="text-xs text-outline">(74 đánh giá)</span>
+                                        <span class="text-xs font-extrabold text-on-surface">4.9</span>
+                                        <span class="text-xs text-outline">(174 đánh giá)</span>
                                     </div>
                                 </div>
                                 <div class="mt-4 pt-3 border-t border-outline-variant/20 flex items-center justify-between gap-2">
                                     <div class="flex flex-col items-start min-w-0">
                                         <div class="flex items-center gap-1.5 whitespace-nowrap">
-                                            <span class="text-xs line-through text-outline whitespace-nowrap">290.000₫</span>
-                                            <span class="inline-flex items-center px-1.5 py-0.5 rounded bg-error-container text-on-error-container text-[10px] font-bold">-53%</span>
+                                            <span class="text-xs line-through text-outline whitespace-nowrap">140.000₫</span>
+                                            <span class="inline-flex items-center px-1.5 py-0.5 rounded bg-error-container text-on-error-container text-[10px] font-bold">-39%</span>
                                         </div>
-                                        <span class="text-base sm:text-lg font-extrabold text-on-surface whitespace-nowrap mt-0.5">135.000₫</span>
+                                        <span class="text-base sm:text-lg font-extrabold text-on-surface whitespace-nowrap mt-0.5">85.000₫</span>
                                     </div>
                                     <div class="flex items-center gap-1.5 shrink-0">
-                                        <a th:href="@{/books/7}" href="/books/7" class="px-2.5 py-1.5 rounded-xl bg-surface-container-high hover:bg-surface-container-highest text-on-surface text-xs font-bold transition-colors whitespace-nowrap">
+                                        <a th:href="@{/books/13}" href="/books/13" class="px-2.5 py-1.5 rounded-xl bg-surface-container-high hover:bg-surface-container-highest text-on-surface text-xs font-bold transition-colors whitespace-nowrap">
                                             Chi tiết
                                         </a>
-                                        <button onclick="showToast('Đã thêm Tội Ác Và Trừng Phạt vào giỏ hàng!')" aria-label="Thêm vào giỏ" class="w-8 h-8 sm:w-9 sm:h-9 rounded-xl bg-primary-container text-on-primary-container flex items-center justify-center hover:brightness-95 shadow-sm hover:scale-105 active:scale-95 transition-all shrink-0" type="button">
+                                        <button onclick="addToCart(13, 'Vang Bóng Một Thời', 1)" aria-label="Thêm vào giỏ" class="w-8 h-8 sm:w-9 sm:h-9 rounded-xl bg-primary-container text-on-primary-container flex items-center justify-center hover:brightness-95 shadow-sm hover:scale-105 active:scale-95 transition-all shrink-0" type="button">
                                             <span class="material-symbols-outlined text-[18px]">add_shopping_cart</span>
                                         </button>
                                     </div>
@@ -836,48 +836,48 @@
                             </div>
                         </div>
 
-                        <!-- Book 8: Đắc Nhân Tâm -->
+                        <!-- Book 8: Hương Rừng Cà Mau -->
                         <div class="group relative flex flex-col rounded-2xl bg-surface-container-lowest border border-outline-variant/30 p-4 shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300">
                             <div class="relative w-full aspect-[3/4] rounded-xl overflow-hidden bg-surface-container-low mb-4">
-                                <a th:href="@{/books/8}" href="/books/8">
-                                    <img src="https://lh3.googleusercontent.com/aida-public/AB6AXuA0_PWmT6SjaUmSTh-E49e7xvMTnMA4CsOF4Rr8R4Jy1vEpwVyC3J5Q0Fnj6iQEM8Js4IccUiiBpdEOck_zy_8OydjBA_LTbo-qtOJuAOHTSBZQXoMOtj9nGxqDuSN7XafBEo6Q8kuBU0Myiui3pewuznzu1AqIE_IEYjxkPioiYKtf160ufCh3Wyc_isLdV7rBRc5rID7JPn9OUbP28YBK1tWCgQVIl-T2mspvMipEUK00Oy7DY3Q8" 
-                                         alt="Đắc Nhân Tâm" 
+                                <a th:href="@{/books/39}" href="/books/39">
+                                    <img th:src="@{/images/books/book_39.jpg}" src="/images/books/book_39.jpg" 
+                                         alt="Hương Rừng Cà Mau" 
                                          class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"/>
                                 </a>
-                                <span class="absolute top-3 left-3 px-2.5 py-1 rounded-md bg-secondary-container text-on-secondary-container text-[11px] font-bold shadow-md">
-                                    Rất Tốt 80%
+                                <span class="absolute top-3 left-3 px-2.5 py-1 rounded-md bg-surface-container-highest text-on-surface text-[11px] font-bold shadow-md">
+                                    Rất Tốt 90%
                                 </span>
-                                <button onclick="showToast('Đã thêm Đắc Nhân Tâm vào danh sách yêu thích!')" aria-label="Lưu vào yêu thích" class="absolute top-3 right-3 w-8 h-8 rounded-full bg-surface/90 backdrop-blur-sm text-on-surface flex items-center justify-center hover:text-error hover:bg-surface shadow-sm transition-colors" type="button">
+                                <button onclick="showToast('Đã thêm Hương Rừng Cà Mau vào danh sách yêu thích!')" aria-label="Lưu vào yêu thích" class="absolute top-3 right-3 w-8 h-8 rounded-full bg-surface/90 backdrop-blur-sm text-on-surface flex items-center justify-center hover:text-error hover:bg-surface shadow-sm transition-colors" type="button">
                                     <span class="material-symbols-outlined text-[18px]">favorite</span>
                                 </button>
                             </div>
                             <div class="flex-1 flex flex-col justify-between">
                                 <div>
-                                    <p class="text-xs text-tertiary font-bold">Dale Carnegie</p>
-                                    <a th:href="@{/books/8}" href="/books/8">
+                                    <p class="text-xs text-tertiary font-bold">Sơn Nam</p>
+                                    <a th:href="@{/books/39}" href="/books/39">
                                         <h3 class="text-base font-bold text-on-surface leading-snug line-clamp-2 mt-1 group-hover:text-primary transition-colors">
-                                            Đắc Nhân Tâm (Bản dịch đầu tiên)
+                                            Hương Rừng Cà Mau (Tuyển Tập Truyện Ngắn)
                                         </h3>
                                     </a>
                                     <div class="flex items-center gap-1.5 mt-2">
                                         <span class="material-symbols-outlined text-[16px] text-primary-container" style="font-variation-settings: 'FILL' 1;">star</span>
-                                        <span class="text-xs font-extrabold text-on-surface">4.7</span>
-                                        <span class="text-xs text-outline">(420 đánh giá)</span>
+                                        <span class="text-xs font-extrabold text-on-surface">4.9</span>
+                                        <span class="text-xs text-outline">(182 đánh giá)</span>
                                     </div>
                                 </div>
                                 <div class="mt-4 pt-3 border-t border-outline-variant/20 flex items-center justify-between gap-2">
                                     <div class="flex flex-col items-start min-w-0">
                                         <div class="flex items-center gap-1.5 whitespace-nowrap">
-                                            <span class="text-xs line-through text-outline whitespace-nowrap">105.000₫</span>
-                                            <span class="inline-flex items-center px-1.5 py-0.5 rounded bg-error-container text-on-error-container text-[10px] font-bold">-50%</span>
+                                            <span class="text-xs line-through text-outline whitespace-nowrap">165.000₫</span>
+                                            <span class="inline-flex items-center px-1.5 py-0.5 rounded bg-error-container text-on-error-container text-[10px] font-bold">-33%</span>
                                         </div>
-                                        <span class="text-base sm:text-lg font-extrabold text-on-surface whitespace-nowrap mt-0.5">52.000₫</span>
+                                        <span class="text-base sm:text-lg font-extrabold text-on-surface whitespace-nowrap mt-0.5">110.000₫</span>
                                     </div>
                                     <div class="flex items-center gap-1.5 shrink-0">
-                                        <a th:href="@{/books/8}" href="/books/8" class="px-2.5 py-1.5 rounded-xl bg-surface-container-high hover:bg-surface-container-highest text-on-surface text-xs font-bold transition-colors whitespace-nowrap">
+                                        <a th:href="@{/books/39}" href="/books/39" class="px-2.5 py-1.5 rounded-xl bg-surface-container-high hover:bg-surface-container-highest text-on-surface text-xs font-bold transition-colors whitespace-nowrap">
                                             Chi tiết
                                         </a>
-                                        <button onclick="showToast('Đã thêm Đắc Nhân Tâm vào giỏ hàng!')" aria-label="Thêm vào giỏ" class="w-8 h-8 sm:w-9 sm:h-9 rounded-xl bg-primary-container text-on-primary-container flex items-center justify-center hover:brightness-95 shadow-sm hover:scale-105 active:scale-95 transition-all shrink-0" type="button">
+                                        <button onclick="addToCart(39, 'Hương Rừng Cà Mau', 1)" aria-label="Thêm vào giỏ" class="w-8 h-8 sm:w-9 sm:h-9 rounded-xl bg-primary-container text-on-primary-container flex items-center justify-center hover:brightness-95 shadow-sm hover:scale-105 active:scale-95 transition-all shrink-0" type="button">
                                             <span class="material-symbols-outlined text-[18px]">add_shopping_cart</span>
                                         </button>
                                     </div>
@@ -982,10 +982,10 @@
                                 <span class="material-symbols-outlined text-primary text-[24px]">support_agent</span>
                                 <span class="text-xs sm:text-sm text-on-surface-variant">Hỗ trợ thu gom số lượng lớn từ các tủ sách gia đình và viện nghiên cứu: <strong class="text-on-surface font-bold">1900 6868</strong></span>
                             </div>
-                            <button onclick="showToast('Hệ thống tiếp nhận yêu cầu thu mua đang kết nối tổng đài viên!')" class="px-8 py-4 rounded-xl bg-primary-container text-on-primary-container text-sm font-bold shadow-md hover:brightness-95 transition-all flex items-center gap-2">
+                            <a th:href="@{/trade-in/new}" href="/trade-in/new" class="px-8 py-4 rounded-xl bg-primary-container text-on-primary-container text-sm font-bold shadow-md hover:brightness-95 transition-all flex items-center gap-2">
                                 <span>Gửi Yêu Cầu Thu Mua Ngay</span>
                                 <span class="material-symbols-outlined text-[20px]">arrow_forward</span>
-                            </button>
+                            </a>
                         </div>
                     </div>
                 </div>
@@ -1276,7 +1276,7 @@
         </div>
     </footer>
 
-    <!-- JavaScript for Interactive Notifications -->
+    <!-- JavaScript for Interactive Notifications & Cart Integration -->
     <script>
         function showToast(message) {
             const toast = document.getElementById('toastNotification');
@@ -1289,6 +1289,65 @@
                 }, 3000);
             }
         }
+
+        function updateCartBadge(count) {
+            const badges = document.querySelectorAll('#globalCartBadge, .cart-count-badge');
+            badges.forEach(b => {
+                b.textContent = count;
+                if (count > 0) {
+                    b.classList.remove('hidden');
+                } else {
+                    b.classList.add('hidden');
+                }
+            });
+        }
+
+        async function fetchCartCount() {
+            try {
+                const res = await fetch('/api/cart/count');
+                if (res.ok) {
+                    const data = await res.json();
+                    updateCartBadge(data.count || 0);
+                }
+            } catch (e) {
+                console.error('Error fetching cart count:', e);
+            }
+        }
+
+        async function addToCart(bookId, bookTitle, quantity = 1) {
+            try {
+                const formData = new URLSearchParams();
+                formData.append('bookId', bookId);
+                formData.append('quantity', quantity);
+
+                const response = await fetch('/cart/add', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                    },
+                    body: formData.toString()
+                });
+
+                if (response.ok) {
+                    const data = await response.json();
+                    if (data.status === 'success' || data.success) {
+                        updateCartBadge(data.totalQuantity || data.count || 0);
+                        showToast(`Đã thêm "${bookTitle}" vào giỏ hàng!`);
+                    } else {
+                        showToast(data.message || 'Không thể thêm vào giỏ hàng.');
+                    }
+                } else {
+                    showToast('Có lỗi xảy ra khi thêm sách vào giỏ.');
+                }
+            } catch (err) {
+                console.error('Add to cart error:', err);
+                showToast('Không thể kết nối đến máy chủ.');
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', fetchCartCount);
     </script>
+    <!-- Page Transition Script -->
+    <th:block th:replace="~{fragments/page-transition :: transitionScripts}"></th:block>
 </body>
 </html>

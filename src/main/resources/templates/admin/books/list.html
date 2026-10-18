@@ -91,7 +91,7 @@
             <table class="table custom-table mb-0 align-middle">
                 <thead>
                 <tr>
-                    <th style="width: 70px;">Bìa</th>
+                    <th style="width: 55px;" class="text-center">Bìa</th>
                     <th>Tên Đầu Sách & ISBN</th>
                     <th>Tác Giả</th>
                     <th>Thể Loại</th>
@@ -108,9 +108,10 @@
                     </td>
                 </tr>
                 <tr th:each="book : ${books}">
-                    <td>
+                    <td class="text-center py-2" style="width: 55px;">
                         <img th:src="${book.coverImageUrl} ?: 'https://images.unsplash.com/photo-1544716278-ca5e3f4abd8c?w=100&q=80'"
-                             alt="Bìa sách" class="book-cover-thumb"
+                             alt="Bìa sách" class="book-cover-thumb mx-auto"
+                             style="width: 44px; height: 60px; object-fit: cover; border-radius: 6px;"
                              onerror="this.src='https://images.unsplash.com/photo-1544716278-ca5e3f4abd8c?w=100&q=80'">
                     </td>
                     <td>

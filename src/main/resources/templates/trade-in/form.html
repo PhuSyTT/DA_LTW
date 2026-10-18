@@ -8,7 +8,7 @@
     <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet"/>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700&family=Libre+Barcode+39+Text&display=swap" rel="stylesheet"/>
     <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet"/>
 
     <!-- Tailwind CSS with Book4Life Literary Warmth Tokens -->
@@ -39,15 +39,18 @@
                         "error": "#ba1a1a"
                     },
                     fontFamily: {
-                        "sans": ["'Plus Jakarta Sans'", "Inter", "sans-serif"]
+                        "sans": ["'Plus Jakarta Sans'", "Inter", "sans-serif"],
+                        "barcode": ["'Libre Barcode 39 Text'", "monospace"]
                     }
                 }
             }
         };
     </script>
     <style>
-        * { font-family: 'Plus Jakarta Sans', 'Inter', sans-serif !important; }
+        body, input, button, select, textarea, p, span, h1, h2, h3, h4, h5, h6, a, label, div { font-family: 'Plus Jakarta Sans', 'Inter', sans-serif; }
         .material-symbols-outlined { font-family: 'Material Symbols Outlined' !important; }
+        .fa, .fas, .far, .fab, .fa-solid, .fa-regular, .fa-brands, [class*="fa-"]::before { font-family: 'Font Awesome 6 Free' !important; }
+        .barcode-font { font-family: 'Libre Barcode 39 Text', monospace !important; }
         .toast-notification {
             position: fixed; bottom: 24px; right: 24px; background: #2C1E16; color: #FAF9F6;
             padding: 14px 22px; border-radius: 12px; box-shadow: 0 10px 30px rgba(0,0,0,0.25);
@@ -55,16 +58,27 @@
             transform: translateY(120%); transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
         }
         .toast-notification.show { transform: translateY(0); }
+        .receipt-card {
+            background-color: #FFFDF9;
+            background-image: radial-gradient(#835500 0.5px, transparent 0.5px);
+            background-size: 16px 16px;
+        }
     </style>
+    <!-- Page Transition Styles -->
+    <th:block th:replace="~{fragments/page-transition :: transitionStyles}"></th:block>
 </head>
 <body class="bg-background font-sans text-on-surface antialiased min-h-screen flex flex-col justify-between">
+    <!-- Page Transition Overlay -->
+    <div th:replace="~{fragments/page-transition :: transitionOverlay}"></div>
 
     <div id="toastNotification" class="toast-notification">
         <span class="material-symbols-outlined text-primary-container" id="toastIcon">check_circle</span>
         <span id="toastMessage" class="text-sm font-medium">Thông báo hệ thống</span>
     </div>
 
-    <!-- HEADER -->
+    <!-- ========================================== -->
+    <!-- HEADER: Book4Life Top Navigation -->
+    <!-- ========================================== -->
     <header class="fixed top-0 left-0 right-0 z-50 bg-surface/95 backdrop-blur-xl border-b border-outline-variant/30 shadow-[0_1px_8px_rgba(44,30,22,0.04)]">
         <div class="h-20 w-full max-w-7xl mx-auto px-4 sm:px-6 flex items-center justify-between gap-4">
             <div class="flex items-center gap-3 shrink-0">
@@ -96,250 +110,755 @@
         </div>
     </header>
 
-    <!-- MAIN FORM -->
+    <!-- ========================================== -->
+    <!-- MAIN CONTENT -->
+    <!-- ========================================== -->
     <main class="max-w-7xl mx-auto px-4 sm:px-6 pt-28 pb-16 w-full flex-grow">
-        <!-- Title Banner -->
-        <div class="mb-8">
-            <span class="px-3 py-1 rounded-full text-xs font-bold bg-amber-100 text-amber-800 uppercase tracking-wider inline-flex items-center gap-1">
-                <span class="material-symbols-outlined text-sm">recycling</span> Quy trình thu mua tuần hoàn N8
-            </span>
-            <h1 class="text-3xl sm:text-4xl font-extrabold text-on-surface mt-2 tracking-tight">Định Giá & Bán Lại Sách Cũ</h1>
-            <p class="text-secondary mt-1 text-sm sm:text-base">Gửi thông tin tự đánh giá tình trạng sách để nhận báo giá sơ bộ tức thì theo công thức chuẩn hóa của Book4Life.</p>
+
+        <!-- Title & Introduction -->
+        <div class="mb-6 flex flex-wrap items-center justify-between gap-4">
+            <div>
+                <span class="px-3 py-1 rounded-full text-xs font-bold bg-amber-100 text-amber-800 uppercase tracking-wider inline-flex items-center gap-1">
+                    <span class="material-symbols-outlined text-sm">recycling</span> Quy trình thu mua tuần hoàn 3 nhóm hoạt động
+                </span>
+                <h1 class="text-3xl sm:text-4xl font-extrabold text-on-surface mt-2 tracking-tight">Định Giá & Bán Lại Sách Cũ</h1>
+                <p class="text-secondary mt-1 text-sm sm:text-base">Giao diện đăng ký bán sách cũ trực tiếp tại cửa hàng, tự thẩm định 10 tiêu chí và sinh biên lai chính thức.</p>
+            </div>
+
         </div>
 
-        <form id="tradeInForm" onsubmit="submitTradeIn(event)" class="grid grid-cols-1 lg:grid-cols-3 gap-8">
-            <!-- Left & Middle: Form inputs (2 cols) -->
-            <div class="lg:col-span-2 space-y-6">
-                <!-- Step 1: Chọn sách & Chi nhánh -->
-                <div class="bg-surface-container-lowest p-6 rounded-2xl border border-outline-variant/30 shadow-sm">
-                    <h2 class="text-lg font-bold text-on-surface flex items-center gap-2 mb-4">
-                        <span class="w-6 h-6 rounded-full bg-primary text-on-primary text-xs flex items-center justify-center font-bold">1</span>
-                        Thông Tin Tựa Sách & Điểm Tiếp Nhận
-                    </h2>
-
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <div>
-                            <label class="block text-xs font-bold uppercase tracking-wider text-secondary mb-1">Tựa Sách Muốn Bán *</label>
-                            <select id="bookSelect" onchange="onBookChanged()" required class="w-full px-3.5 py-2.5 rounded-xl bg-surface-container border border-outline-variant/40 text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-primary/40">
-                                <option value="">-- Chọn sách trong danh mục hệ thống --</option>
-                                <option th:each="b : ${books}"
-                                        th:value="${b.id}"
-                                        th:data-price="${b.originalPrice}"
-                                        th:data-isbn="${b.isbn}"
-                                        th:data-cover="${b.coverImageUrl}"
-                                        th:text="${b.title + ' - ISBN: ' + (b.isbn != null ? b.isbn : 'N/A')}">
-                                    Đắc Nhân Tâm - ISBN: 9781234567
-                                </option>
-                            </select>
-                            <p class="text-[11px] text-secondary mt-1">Hệ thống áp dụng công thức định giá trên giá niêm yết bìa gốc.</p>
-                        </div>
-
-                        <div>
-                            <label class="block text-xs font-bold uppercase tracking-wider text-secondary mb-1">Chi Nhánh Tiếp Nhận Gần Bạn *</label>
-                            <select id="branchSelect" required class="w-full px-3.5 py-2.5 rounded-xl bg-surface-container border border-outline-variant/40 text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-primary/40">
-                                <option value="">-- Chọn chi nhánh nhận sách --</option>
-                                <option th:each="br : ${branches}"
-                                        th:value="${br.id}"
-                                        th:text="${br.name + ' (' + br.address + ')'}">
-                                    Chi nhánh Quận 1 - 123 Lê Lợi
-                                </option>
-                            </select>
-                        </div>
+        <!-- ========================================== -->
+        <!-- THANH TRÊN CÙNG: CHỌN CỬA HÀNG BÁN SÁCH -->
+        <!-- ========================================== -->
+        <div class="mb-8 p-5 rounded-2xl bg-gradient-to-r from-amber-50/90 via-orange-50/70 to-surface-container-lowest border-2 border-primary/30 shadow-md">
+            <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
+                <div class="flex items-start md:items-center gap-3">
+                    <div class="w-12 h-12 rounded-xl bg-primary text-on-primary flex items-center justify-center shrink-0 shadow-sm">
+                        <span class="material-symbols-outlined text-[28px]">storefront</span>
                     </div>
-
-                    <!-- Book info badge -->
-                    <div id="bookInfoBox" class="mt-4 p-3.5 rounded-xl bg-surface-container-low border border-outline-variant/20 hidden flex items-center gap-4">
-                        <img id="bookPreviewImg" src="" alt="Book Cover" class="w-12 h-16 object-cover rounded shadow-sm border border-outline-variant/40"/>
-                        <div>
-                            <div id="bookTitleDisplay" class="font-bold text-sm text-on-surface">Tên sách</div>
-                            <div class="text-xs text-secondary mt-0.5">Giá bìa gốc niêm yết: <span id="originalPriceDisplay" class="font-bold text-primary">0 ₫</span></div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Step 2: Khảo sát chất lượng theo chuẩn FR-TRD-02 -->
-                <div class="bg-surface-container-lowest p-6 rounded-2xl border border-outline-variant/30 shadow-sm">
-                    <h2 class="text-lg font-bold text-on-surface flex items-center gap-2 mb-4">
-                        <span class="w-6 h-6 rounded-full bg-primary text-on-primary text-xs flex items-center justify-center font-bold">2</span>
-                        Tự Đánh Giá Tình Trạng Sách (FR-TRD-02)
-                    </h2>
-
-                    <!-- Condition Grade -->
-                    <label class="block text-xs font-bold uppercase tracking-wider text-secondary mb-2">Độ Mới Tổng Quan Của Sách *</label>
-                    <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-5">
-                        <label class="flex flex-col p-3 rounded-xl border border-outline-variant/40 cursor-pointer hover:bg-amber-50/50 transition-all has-[:checked]:border-primary has-[:checked]:bg-amber-50">
-                            <input type="radio" name="conditionGrade" value="LIKE_NEW" checked onchange="triggerAutoEstimate()" class="accent-primary"/>
-                            <span class="text-xs font-bold text-on-surface mt-1.5">Như Mới (Like New)</span>
-                            <span class="text-[10px] text-secondary">Định mức 50% giá gốc</span>
-                        </label>
-                        <label class="flex flex-col p-3 rounded-xl border border-outline-variant/40 cursor-pointer hover:bg-amber-50/50 transition-all has-[:checked]:border-primary has-[:checked]:bg-amber-50">
-                            <input type="radio" name="conditionGrade" value="VERY_GOOD" onchange="triggerAutoEstimate()" class="accent-primary"/>
-                            <span class="text-xs font-bold text-on-surface mt-1.5">Rất Tốt (Very Good)</span>
-                            <span class="text-[10px] text-secondary">Định mức 40% giá gốc</span>
-                        </label>
-                        <label class="flex flex-col p-3 rounded-xl border border-outline-variant/40 cursor-pointer hover:bg-amber-50/50 transition-all has-[:checked]:border-primary has-[:checked]:bg-amber-50">
-                            <input type="radio" name="conditionGrade" value="GOOD" onchange="triggerAutoEstimate()" class="accent-primary"/>
-                            <span class="text-xs font-bold text-on-surface mt-1.5">Tốt (Good)</span>
-                            <span class="text-[10px] text-secondary">Định mức 30% giá gốc</span>
-                        </label>
-                        <label class="flex flex-col p-3 rounded-xl border border-outline-variant/40 cursor-pointer hover:bg-amber-50/50 transition-all has-[:checked]:border-primary has-[:checked]:bg-amber-50">
-                            <input type="radio" name="conditionGrade" value="ACCEPTABLE" onchange="triggerAutoEstimate()" class="accent-primary"/>
-                            <span class="text-xs font-bold text-on-surface mt-1.5">Chấp Nhận Được</span>
-                            <span class="text-[10px] text-secondary">Định mức 20% giá gốc</span>
-                        </label>
-                    </div>
-
-                    <!-- Penalty Checklist -->
-                    <label class="block text-xs font-bold uppercase tracking-wider text-secondary mb-2">Bảng Kiểm Tra Tỳ Vết & Khấu Trừ Thẩm Định</label>
-                    <div class="space-y-2 bg-surface-container-low p-4 rounded-xl border border-outline-variant/30 text-xs">
-                        <label class="flex items-center justify-between cursor-pointer py-1">
-                            <div class="flex items-center gap-2">
-                                <input type="checkbox" id="coverDamaged" onchange="triggerAutoEstimate()" class="accent-primary rounded"/>
-                                <span class="font-medium text-on-surface">Bìa ngoài bị rách mép / có vết gấp nếp rõ</span>
-                            </div>
-                            <span class="font-bold text-error bg-red-50 px-2 py-0.5 rounded">-5% giá</span>
-                        </label>
-
-                        <label class="flex items-center justify-between cursor-pointer py-1 border-t border-outline-variant/20 pt-2">
-                            <div class="flex items-center gap-2">
-                                <input type="checkbox" id="spineDamaged" onchange="triggerAutoEstimate()" class="accent-primary rounded"/>
-                                <span class="font-medium text-on-surface">Gáy sách bị lỏng / nứt keo gáy</span>
-                            </div>
-                            <span class="font-bold text-error bg-red-50 px-2 py-0.5 rounded">-10% giá</span>
-                        </label>
-
-                        <label class="flex items-center justify-between cursor-pointer py-1 border-t border-outline-variant/20 pt-2">
-                            <div class="flex items-center gap-2">
-                                <input type="checkbox" id="yellowPages" onchange="triggerAutoEstimate()" class="accent-primary rounded"/>
-                                <span class="font-medium text-on-surface">Trang sách ố vàng theo thời gian / ẩm nhẹ</span>
-                            </div>
-                            <span class="font-bold text-error bg-red-50 px-2 py-0.5 rounded">-10% giá</span>
-                        </label>
-
-                        <label class="flex items-center justify-between cursor-pointer py-1 border-t border-outline-variant/20 pt-2">
-                            <div class="flex items-center gap-2">
-                                <input type="checkbox" id="markingsPresent" onchange="triggerAutoEstimate()" class="accent-primary rounded"/>
-                                <span class="font-medium text-on-surface">Có chữ viết tay, ghi chú, gạch chân bút dạ</span>
-                            </div>
-                            <span class="font-bold text-error bg-red-50 px-2 py-0.5 rounded">-10% giá</span>
-                        </label>
-
-                        <label class="flex items-center justify-between cursor-pointer py-1 border-t border-outline-variant/20 pt-2">
-                            <div class="flex items-center gap-2">
-                                <input type="checkbox" id="missingAccessory" onchange="triggerAutoEstimate()" class="accent-primary rounded"/>
-                                <span class="font-medium text-on-surface">Thiếu bìa áo (jacket), đai sách (obi) hoặc bookmark gốc</span>
-                            </div>
-                            <span class="font-bold text-error bg-red-50 px-2 py-0.5 rounded">-5% giá</span>
-                        </label>
-                    </div>
-
-                    <!-- User Note -->
-                    <div class="mt-4">
-                        <label class="block text-xs font-bold uppercase tracking-wider text-secondary mb-1">Ghi chú bổ sung của bạn (Tùy chọn)</label>
-                        <input type="text" id="userNote" placeholder="Ví dụ: Sách đọc 1 lần giữ kỹ, có bọc bìa kiếng..." class="w-full px-3.5 py-2.5 rounded-xl bg-surface-container border border-outline-variant/40 text-xs font-medium focus:outline-none focus:ring-2 focus:ring-primary/40"/>
-                    </div>
-                </div>
-
-                <!-- Step 3: Hình ảnh & Hình thức chuyển giao -->
-                <div class="bg-surface-container-lowest p-6 rounded-2xl border border-outline-variant/30 shadow-sm">
-                    <h2 class="text-lg font-bold text-on-surface flex items-center gap-2 mb-4">
-                        <span class="w-6 h-6 rounded-full bg-primary text-on-primary text-xs flex items-center justify-center font-bold">3</span>
-                        Hình Ảnh Minh Chứng & Bàn Giao
-                    </h2>
-
-                    <div class="mb-4">
-                        <label class="block text-xs font-bold uppercase tracking-wider text-secondary mb-1">
-                            Link Ảnh Thực Tế Của Sách (Tối thiểu 3 góc chụp: Bìa, Gáy, Ruột giấy) *
-                        </label>
-                        <div class="space-y-2">
-                            <input type="url" id="imgCover" required placeholder="URL ảnh bìa trước (VD: https://images.unsplash.com/...)" class="w-full px-3.5 py-2 rounded-xl bg-surface-container border border-outline-variant/40 text-xs focus:ring-2 focus:ring-primary/40"/>
-                            <input type="url" id="imgSpine" required placeholder="URL ảnh gáy sách (VD: https://images.unsplash.com/...)" class="w-full px-3.5 py-2 rounded-xl bg-surface-container border border-outline-variant/40 text-xs focus:ring-2 focus:ring-primary/40"/>
-                            <input type="url" id="imgPages" required placeholder="URL ảnh cạnh giấy / trang ruột (VD: https://images.unsplash.com/...)" class="w-full px-3.5 py-2 rounded-xl bg-surface-container border border-outline-variant/40 text-xs focus:ring-2 focus:ring-primary/40"/>
-                        </div>
-                        <div class="flex gap-2 mt-2">
-                            <button type="button" onclick="fillSampleImages()" class="text-[11px] text-primary hover:underline font-bold flex items-center gap-1">
-                                <span class="material-symbols-outlined text-[14px]">auto_fix_high</span> Điền ảnh mẫu demo nhanh
-                            </button>
-                        </div>
-                    </div>
-
                     <div>
-                        <label class="block text-xs font-bold uppercase tracking-wider text-secondary mb-1">Phương Thức Bàn Giao Sau Khi Báo Giá Được Chấp Thuận</label>
-                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                            <label class="flex items-center gap-3 p-3 rounded-xl border border-outline-variant/40 cursor-pointer hover:bg-surface-container has-[:checked]:border-primary has-[:checked]:bg-amber-50">
-                                <input type="radio" name="deliveryMethod" value="BRING_TO_STORE" checked class="accent-primary"/>
-                                <div>
-                                    <div class="text-xs font-bold text-on-surface">Mang trực tiếp đến quầy</div>
-                                    <div class="text-[10px] text-secondary">Nhận tiền mặt / chuyển khoản ngay sau thẩm định</div>
-                                </div>
-                            </label>
-
-                            <label class="flex items-center gap-3 p-3 rounded-xl border border-outline-variant/40 cursor-pointer hover:bg-surface-container has-[:checked]:border-primary has-[:checked]:bg-amber-50">
-                                <input type="radio" name="deliveryMethod" value="POSTAL_SHIPPING" class="accent-primary"/>
-                                <div>
-                                    <div class="text-xs font-bold text-on-surface">Gửi bưu điện / Ship tận nơi</div>
-                                    <div class="text-[10px] text-secondary">Book4Life hỗ trợ 50% phí ship đơn từ 3 cuốn</div>
-                                </div>
-                            </label>
+                        <div class="flex items-center gap-2">
+                            <span class="text-xs font-extrabold uppercase tracking-wider text-primary">Bước Đầu Tiên Quan Trọng</span>
+                            <span class="px-2 py-0.5 text-[10px] font-bold rounded bg-amber-200 text-amber-900">Bắt buộc</span>
                         </div>
+                        <h2 class="text-base sm:text-lg font-bold text-on-surface">Chọn Chi Nhánh / Cửa Hàng Bán Sách Tiếp Nhận *</h2>
+                        <p class="text-xs text-secondary mt-0.5">Chọn cửa hàng Book4Life gần bạn nhất để mang sách đến bàn giao và nhận tiền mặt.</p>
                     </div>
+                </div>
+
+                <!-- Dropdown chọn chi nhánh -->
+                <div class="w-full md:w-80 shrink-0">
+                    <select id="branchSelect" onchange="onBranchChanged()" required class="w-full px-4 py-3 rounded-xl bg-surface-container-lowest border-2 border-primary/50 text-sm font-bold text-on-surface focus:outline-none focus:ring-2 focus:ring-primary shadow-sm cursor-pointer">
+                        <option value="">-- Chọn chi nhánh nhận sách --</option>
+                        <option th:each="br : ${branches}"
+                                th:value="${br.id}"
+                                th:data-name="${br.branchName != null ? br.branchName : br.name}"
+                                th:data-address="${br.address != null ? br.address : br.city}"
+                                th:data-phone="${br.phone != null ? br.phone : '1900 6868'}"
+                                th:text="${(br.branchName != null ? br.branchName : br.name) + ' (' + (br.address != null ? br.address : br.city) + ')'}">
+                            Chi nhánh Quận 1 - 123 Lê Lợi
+                        </option>
+                    </select>
                 </div>
             </div>
 
-            <!-- Right Column: Live Auto-Estimate Box (Sticky) (FR-TRD-03) -->
-            <div class="lg:col-span-1">
-                <div class="sticky top-28 bg-surface-container-lowest p-6 rounded-2xl border border-outline-variant/30 shadow-lg">
+            <!-- Chi nhánh đã chọn badge info -->
+            <div id="selectedBranchInfoBox" class="mt-4 pt-3 border-t border-primary/20 flex flex-wrap items-center justify-between text-xs text-secondary gap-3">
+                <div class="flex items-center gap-2">
+                    <span class="material-symbols-outlined text-primary text-[18px]">location_on</span>
+                    <span>Địa chỉ quầy tiếp nhận: <strong id="branchAddressDisplay" class="text-on-surface font-semibold">Vui lòng chọn chi nhánh ở trên</strong></span>
+                </div>
+                <div class="flex items-center gap-4">
+                    <span class="flex items-center gap-1">
+                        <span class="material-symbols-outlined text-primary text-[16px]">call</span>
+                        <span>Hotline: <strong id="branchPhoneDisplay" class="text-on-surface font-semibold">1900 6868</strong></span>
+                    </span>
+                    <span class="flex items-center gap-1">
+                        <span class="material-symbols-outlined text-primary text-[16px]">schedule</span>
+                        <span>Giờ mở cửa: <strong class="text-on-surface font-semibold">08:00 - 21:30 hàng ngày</strong></span>
+                    </span>
+                </div>
+            </div>
+        </div>
+
+        <!-- ========================================== -->
+        <!-- FORM 3 NHÓM HOẠT ĐỘNG CHÍNH -->
+        <!-- ========================================== -->
+        <form id="tradeInForm" onsubmit="submitTradeIn(event)" class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+
+            <!-- LEFT COLUMN: 3 NHÓM HOẠT ĐỘNG (Col 1-8) -->
+            <div class="lg:col-span-8 space-y-8">
+
+                <!-- ========================================== -->
+                <!-- NHÓM 1: THÔNG TIN SÁCH -->
+                <!-- ========================================== -->
+                <div class="bg-surface-container-lowest p-6 sm:p-7 rounded-2xl border border-outline-variant/30 shadow-sm">
+                    <div class="flex items-center justify-between pb-4 mb-5 border-b border-outline-variant/30">
+                        <div class="flex items-center gap-3">
+                            <span class="w-8 h-8 rounded-full bg-primary text-on-primary font-bold text-sm flex items-center justify-center shadow">1</span>
+                            <div>
+                                <h3 class="text-lg font-bold text-on-surface">Nhóm 1: Thông Tin Chi Tiết Về Tựa Sách Cũ</h3>
+                                <p class="text-xs text-secondary mt-0.5">Khách hàng tự điền các thông tin của cuốn sách và cung cấp ảnh chụp 6 mặt.</p>
+                            </div>
+                        </div>
+                        <span class="text-xs px-2.5 py-1 rounded-full bg-primary/10 text-primary font-bold">Tự điền thông tin</span>
+                    </div>
+
+                    <!-- 4 Text box / Controls cơ bản -->
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-5">
+                        
+                        <!-- 1. Tựa sách (Text box khách hàng tự nhập) -->
+                        <div>
+                            <label class="block text-xs font-bold uppercase tracking-wider text-secondary mb-1.5">
+                                Tựa Sách Cần Bán * (Text box)
+                            </label>
+                            <input type="text" id="bookTitleInput" required oninput="triggerAutoEstimate()" placeholder="Ví dụ: Tuổi Thơ Dữ Dội, Dế Mèn Phiêu Lưu Ký..." class="w-full px-3.5 py-2.5 rounded-xl bg-surface-container border border-outline-variant/40 text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-primary/40 focus:bg-white"/>
+                            <p class="text-[11px] text-secondary mt-1">Khách hàng tự do nhập tên bất kỳ cuốn sách cũ nào.</p>
+                        </div>
+
+                        <!-- 2. Thể loại (Danh sách thả xuống - Select dropdown) -->
+                        <div>
+                            <label class="block text-xs font-bold uppercase tracking-wider text-secondary mb-1.5">
+                                Thể Loại Sách * (Danh sách thả xuống)
+                            </label>
+                            <select id="bookCategorySelect" required onchange="onCategorySelectChanged(this)" class="w-full px-3.5 py-2.5 rounded-xl bg-surface-container border border-outline-variant/40 text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-primary/40 focus:bg-white cursor-pointer">
+                                <option value="">-- Chọn thể loại sách --</option>
+                                <option th:each="c : ${categories}" th:value="${c.name}" th:text="${c.name}">Văn Học Việt Nam</option>
+                                <option value="Tiểu thuyết kinh điển">Tiểu thuyết kinh điển</option>
+                                <option value="Thơ ca & Kịch bản">Thơ ca & Kịch bản</option>
+                                <option value="Lịch sử & Địa chí">Lịch sử & Địa chí</option>
+                                <option value="Văn hóa & Nghệ thuật">Văn hóa & Nghệ thuật</option>
+                                <option value="Triết học & Tư tưởng">Triết học & Tư tưởng</option>
+                                <option value="Sách nghiên cứu & Khảo luận">Sách nghiên cứu & Khảo luận</option>
+                                <option value="Khác">Thể loại khác (Tự nhập)</option>
+                            </select>
+
+                            <!-- Ô nhập text box xuất hiện khi chọn 'Thể loại khác' -->
+                            <div id="otherCategoryBox" class="hidden mt-2.5 p-2.5 rounded-xl bg-amber-50/80 border border-primary/30 transition-all">
+                                <label class="block text-[11px] font-bold text-primary mb-1 flex items-center gap-1">
+                                    <span class="material-symbols-outlined text-[15px]">edit_note</span>
+                                    <span>Nhập tên thể loại sách của bạn: *</span>
+                                </label>
+                                <input type="text" id="otherCategoryInput" placeholder="Ví dụ: Kỹ năng sống, Truyện tranh, Khoa học vũ trụ..." class="w-full px-3 py-2 rounded-lg bg-white border border-primary/50 text-xs font-semibold focus:outline-none focus:ring-2 focus:ring-primary text-on-surface shadow-sm"/>
+                            </div>
+
+                            <p class="text-[11px] text-secondary mt-1">Chọn thể loại phù hợp nhất với chủ đề của sách.</p>
+                        </div>
+
+                        <!-- 3. Nhà xuất bản (Text box khách hàng tự nhập) -->
+                        <div>
+                            <label class="block text-xs font-bold uppercase tracking-wider text-secondary mb-1.5">
+                                Nhà Xuất Bản * (Text box)
+                            </label>
+                            <input type="text" id="publisherInput" required placeholder="Ví dụ: NXB Văn Học, NXB Kim Đồng, NXB Trẻ..." class="w-full px-3.5 py-2.5 rounded-xl bg-surface-container border border-outline-variant/40 text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-primary/40 focus:bg-white"/>
+                            <p class="text-[11px] text-secondary mt-1">Ghi tên NXB in trên trang bìa hoặc trang lót của sách.</p>
+                        </div>
+
+                        <!-- 4. Năm xuất bản (Thanh cuộn - Slider / Range) -->
+                        <div>
+                            <div class="flex items-center justify-between mb-1.5">
+                                <label class="text-xs font-bold uppercase tracking-wider text-secondary">
+                                    Năm Xuất Bản * (Thanh cuộn dễ chọn)
+                                </label>
+                                <span id="yearDisplayBadge" class="text-xs font-extrabold text-primary bg-amber-50 px-2.5 py-0.5 rounded-lg border border-amber-200">
+                                    2020
+                                </span>
+                            </div>
+
+                            <div class="flex items-center gap-3 bg-surface-container px-3.5 py-2.5 rounded-xl border border-outline-variant/40">
+                                <span class="text-[11px] text-secondary font-bold shrink-0">1900</span>
+                                <input type="range" id="yearSlider" min="1900" max="2026" value="2020" step="1" oninput="onYearSliderInput(this.value)" class="w-full accent-primary cursor-pointer"/>
+                                <span class="text-[11px] text-secondary font-bold shrink-0">2026</span>
+                            </div>
+                            <div class="flex justify-between items-center text-[10px] text-secondary mt-1">
+                                <span>Kéo thanh trượt để chọn năm</span>
+                                <span>Đang chọn năm: <strong id="yearText" class="text-on-surface">2020</strong></span>
+                            </div>
+                        </div>
+
+                        <!-- 5. Giá bìa niêm yết gốc (Căn cứ dự toán) -->
+                        <div class="sm:col-span-2">
+                            <div class="flex items-center justify-between mb-1">
+                                <label class="text-xs font-bold uppercase tracking-wider text-secondary">
+                                    Giá Bìa Niêm Yết Gốc Của Sách (VND) *
+                                </label>
+                                <span class="text-[11px] text-primary font-bold">Căn cứ tính % thu mua</span>
+                            </div>
+                            <div class="relative">
+                                <input type="number" id="originalPriceInput" placeholder="Ví dụ: 85000" min="10000" step="5000" oninput="triggerAutoEstimate()" class="w-full pl-3.5 pr-12 py-2.5 rounded-xl bg-surface-container border border-outline-variant/40 text-sm font-extrabold text-primary focus:outline-none focus:ring-2 focus:ring-primary/40 focus:bg-white"/>
+                                <span class="absolute right-3.5 top-1/2 -translate-y-1/2 text-xs font-bold text-secondary pointer-events-none">₫</span>
+                            </div>
+                            <p class="text-[11px] text-secondary mt-1">Xem giá in ở bìa sau của sách (nếu không ghi rõ, ước lượng giá bìa ban đầu).</p>
+                        </div>
+                    </div>
+
+                    <!-- 6. Ảnh 6 mặt của quyển sách (Tải file hoặc Chụp ảnh trực tiếp) -->
+                    <div class="pt-4 border-t border-outline-variant/30">
+                        <div class="mb-3">
+                            <div>
+                                <h4 class="text-sm font-bold text-on-surface flex items-center gap-1.5">
+                                    <span class="material-symbols-outlined text-primary text-[18px]">photo_camera</span>
+                                    Ảnh 6 Mặt Của Quyển Sách (Tải file hoặc Chụp ảnh trực tiếp) *
+                                </h4>
+                                <p class="text-[11px] text-secondary mt-0.5">Khách hàng chụp hoặc tải lên đầy đủ 6 góc nhìn thực tế của sách để chuyên viên kiểm tra.</p>
+                            </div>
+                        </div>
+
+                        <!-- Grid 6 Dropzone Cards -->
+                        <div class="grid grid-cols-2 sm:grid-cols-3 gap-3.5">
+                            
+                            <!-- Mặt 1: Bìa trước -->
+                            <div class="flex flex-col">
+                                <span class="text-[11px] font-bold text-on-surface mb-1 flex items-center gap-1">
+                                    <span class="w-3.5 h-3.5 rounded-full bg-primary/20 text-primary text-[9px] flex items-center justify-center font-bold">1</span>
+                                    Mặt bìa trước *
+                                </span>
+                                <input type="file" id="fileCoverFront" accept="image/*" class="hidden" onchange="if(this.files[0]) uploadImageFile(this.files[0], 'imgCoverFront', 'prevCoverFront', 'phCoverFront', 'spCoverFront')"/>
+                                <input type="hidden" id="imgCoverFront"/>
+                                
+                                <div id="dzCoverFront" class="relative h-36 rounded-xl border-2 border-dashed border-outline-variant/70 hover:border-primary bg-surface-container-low transition-all flex flex-col items-center justify-center p-2 text-center overflow-hidden group">
+                                    <div id="phCoverFront" class="flex flex-col items-center">
+                                        <span class="material-symbols-outlined text-[20px] text-secondary mb-1">book</span>
+                                        <span class="text-[10px] font-bold text-on-surface">Mặt trước</span>
+                                        <div class="flex gap-1 mt-2">
+                                            <button type="button" onclick="document.getElementById('fileCoverFront').click()" class="px-2 py-0.5 bg-surface-container-high hover:bg-primary-container text-on-surface text-[10px] font-bold rounded shadow-sm">Tải file</button>
+                                            <button type="button" onclick="openWebcamCapture('imgCoverFront', 'prevCoverFront', 'phCoverFront', 'spCoverFront')" class="px-2 py-0.5 bg-primary text-on-primary text-[10px] font-bold rounded shadow-sm flex items-center gap-0.5"><span class="material-symbols-outlined text-[11px]">photo_camera</span>Chụp</button>
+                                        </div>
+                                    </div>
+                                    <div id="spCoverFront" class="hidden flex flex-col items-center"><span class="material-symbols-outlined animate-spin text-primary text-[20px]">progress_activity</span><span class="text-[10px] text-primary mt-1">Đang tải...</span></div>
+                                    <img id="prevCoverFront" src="" alt="Mặt trước" class="hidden absolute inset-0 w-full h-full object-cover rounded-xl"/>
+                                    <div class="actions-coverfront absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity hidden items-center justify-center gap-1.5">
+                                        <button type="button" onclick="document.getElementById('fileCoverFront').click()" class="px-2 py-1 bg-white text-xs font-bold rounded">Đổi</button>
+                                        <button type="button" onclick="clearImage('imgCoverFront', 'prevCoverFront', 'phCoverFront', 'fileCoverFront')" class="px-2 py-1 bg-red-600 text-white text-xs font-bold rounded">Xóa</button>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Mặt 2: Bìa sau -->
+                            <div class="flex flex-col">
+                                <span class="text-[11px] font-bold text-on-surface mb-1 flex items-center gap-1">
+                                    <span class="w-3.5 h-3.5 rounded-full bg-primary/20 text-primary text-[9px] flex items-center justify-center font-bold">2</span>
+                                    Mặt bìa sau *
+                                </span>
+                                <input type="file" id="fileCoverBack" accept="image/*" class="hidden" onchange="if(this.files[0]) uploadImageFile(this.files[0], 'imgCoverBack', 'prevCoverBack', 'phCoverBack', 'spCoverBack')"/>
+                                <input type="hidden" id="imgCoverBack"/>
+                                
+                                <div id="dzCoverBack" class="relative h-36 rounded-xl border-2 border-dashed border-outline-variant/70 hover:border-primary bg-surface-container-low transition-all flex flex-col items-center justify-center p-2 text-center overflow-hidden group">
+                                    <div id="phCoverBack" class="flex flex-col items-center">
+                                        <span class="material-symbols-outlined text-[20px] text-secondary mb-1">auto_stories</span>
+                                        <span class="text-[10px] font-bold text-on-surface">Mặt sau & mã vạch</span>
+                                        <div class="flex gap-1 mt-2">
+                                            <button type="button" onclick="document.getElementById('fileCoverBack').click()" class="px-2 py-0.5 bg-surface-container-high hover:bg-primary-container text-on-surface text-[10px] font-bold rounded shadow-sm">Tải file</button>
+                                            <button type="button" onclick="openWebcamCapture('imgCoverBack', 'prevCoverBack', 'phCoverBack', 'spCoverBack')" class="px-2 py-0.5 bg-primary text-on-primary text-[10px] font-bold rounded shadow-sm flex items-center gap-0.5"><span class="material-symbols-outlined text-[11px]">photo_camera</span>Chụp</button>
+                                        </div>
+                                    </div>
+                                    <div id="spCoverBack" class="hidden flex flex-col items-center"><span class="material-symbols-outlined animate-spin text-primary text-[20px]">progress_activity</span><span class="text-[10px] text-primary mt-1">Đang tải...</span></div>
+                                    <img id="prevCoverBack" src="" alt="Mặt sau" class="hidden absolute inset-0 w-full h-full object-cover rounded-xl"/>
+                                    <div class="actions-coverback absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity hidden items-center justify-center gap-1.5">
+                                        <button type="button" onclick="document.getElementById('fileCoverBack').click()" class="px-2 py-1 bg-white text-xs font-bold rounded">Đổi</button>
+                                        <button type="button" onclick="clearImage('imgCoverBack', 'prevCoverBack', 'phCoverBack', 'fileCoverBack')" class="px-2 py-1 bg-red-600 text-white text-xs font-bold rounded">Xóa</button>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Mặt 3: Gáy sách -->
+                            <div class="flex flex-col">
+                                <span class="text-[11px] font-bold text-on-surface mb-1 flex items-center gap-1">
+                                    <span class="w-3.5 h-3.5 rounded-full bg-primary/20 text-primary text-[9px] flex items-center justify-center font-bold">3</span>
+                                    Gáy sách *
+                                </span>
+                                <input type="file" id="fileSpine" accept="image/*" class="hidden" onchange="if(this.files[0]) uploadImageFile(this.files[0], 'imgSpine', 'prevSpine', 'phSpine', 'spSpine')"/>
+                                <input type="hidden" id="imgSpine"/>
+                                
+                                <div id="dzSpine" class="relative h-36 rounded-xl border-2 border-dashed border-outline-variant/70 hover:border-primary bg-surface-container-low transition-all flex flex-col items-center justify-center p-2 text-center overflow-hidden group">
+                                    <div id="phSpine" class="flex flex-col items-center">
+                                        <span class="material-symbols-outlined text-[20px] text-secondary mb-1">view_column</span>
+                                        <span class="text-[10px] font-bold text-on-surface">Đường keo gáy</span>
+                                        <div class="flex gap-1 mt-2">
+                                            <button type="button" onclick="document.getElementById('fileSpine').click()" class="px-2 py-0.5 bg-surface-container-high hover:bg-primary-container text-on-surface text-[10px] font-bold rounded shadow-sm">Tải file</button>
+                                            <button type="button" onclick="openWebcamCapture('imgSpine', 'prevSpine', 'phSpine', 'spSpine')" class="px-2 py-0.5 bg-primary text-on-primary text-[10px] font-bold rounded shadow-sm flex items-center gap-0.5"><span class="material-symbols-outlined text-[11px]">photo_camera</span>Chụp</button>
+                                        </div>
+                                    </div>
+                                    <div id="spSpine" class="hidden flex flex-col items-center"><span class="material-symbols-outlined animate-spin text-primary text-[20px]">progress_activity</span><span class="text-[10px] text-primary mt-1">Đang tải...</span></div>
+                                    <img id="prevSpine" src="" alt="Gáy sách" class="hidden absolute inset-0 w-full h-full object-cover rounded-xl"/>
+                                    <div class="actions-spine absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity hidden items-center justify-center gap-1.5">
+                                        <button type="button" onclick="document.getElementById('fileSpine').click()" class="px-2 py-1 bg-white text-xs font-bold rounded">Đổi</button>
+                                        <button type="button" onclick="clearImage('imgSpine', 'prevSpine', 'phSpine', 'fileSpine')" class="px-2 py-1 bg-red-600 text-white text-xs font-bold rounded">Xóa</button>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Mặt 4: Cạnh trên -->
+                            <div class="flex flex-col">
+                                <span class="text-[11px] font-bold text-on-surface mb-1 flex items-center gap-1">
+                                    <span class="w-3.5 h-3.5 rounded-full bg-primary/20 text-primary text-[9px] flex items-center justify-center font-bold">4</span>
+                                    Cạnh trên của sách *
+                                </span>
+                                <input type="file" id="fileTopEdge" accept="image/*" class="hidden" onchange="if(this.files[0]) uploadImageFile(this.files[0], 'imgTopEdge', 'prevTopEdge', 'phTopEdge', 'spTopEdge')"/>
+                                <input type="hidden" id="imgTopEdge"/>
+                                
+                                <div id="dzTopEdge" class="relative h-36 rounded-xl border-2 border-dashed border-outline-variant/70 hover:border-primary bg-surface-container-low transition-all flex flex-col items-center justify-center p-2 text-center overflow-hidden group">
+                                    <div id="phTopEdge" class="flex flex-col items-center">
+                                        <span class="material-symbols-outlined text-[20px] text-secondary mb-1">border_top</span>
+                                        <span class="text-[10px] font-bold text-on-surface">Đỉnh trang giấy</span>
+                                        <div class="flex gap-1 mt-2">
+                                            <button type="button" onclick="document.getElementById('fileTopEdge').click()" class="px-2 py-0.5 bg-surface-container-high hover:bg-primary-container text-on-surface text-[10px] font-bold rounded shadow-sm">Tải file</button>
+                                            <button type="button" onclick="openWebcamCapture('imgTopEdge', 'prevTopEdge', 'phTopEdge', 'spTopEdge')" class="px-2 py-0.5 bg-primary text-on-primary text-[10px] font-bold rounded shadow-sm flex items-center gap-0.5"><span class="material-symbols-outlined text-[11px]">photo_camera</span>Chụp</button>
+                                        </div>
+                                    </div>
+                                    <div id="spTopEdge" class="hidden flex flex-col items-center"><span class="material-symbols-outlined animate-spin text-primary text-[20px]">progress_activity</span><span class="text-[10px] text-primary mt-1">Đang tải...</span></div>
+                                    <img id="prevTopEdge" src="" alt="Cạnh trên" class="hidden absolute inset-0 w-full h-full object-cover rounded-xl"/>
+                                    <div class="actions-topedge absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity hidden items-center justify-center gap-1.5">
+                                        <button type="button" onclick="document.getElementById('fileTopEdge').click()" class="px-2 py-1 bg-white text-xs font-bold rounded">Đổi</button>
+                                        <button type="button" onclick="clearImage('imgTopEdge', 'prevTopEdge', 'phTopEdge', 'fileTopEdge')" class="px-2 py-1 bg-red-600 text-white text-xs font-bold rounded">Xóa</button>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Mặt 5: Cạnh dưới -->
+                            <div class="flex flex-col">
+                                <span class="text-[11px] font-bold text-on-surface mb-1 flex items-center gap-1">
+                                    <span class="w-3.5 h-3.5 rounded-full bg-primary/20 text-primary text-[9px] flex items-center justify-center font-bold">5</span>
+                                    Cạnh dưới của sách *
+                                </span>
+                                <input type="file" id="fileBottomEdge" accept="image/*" class="hidden" onchange="if(this.files[0]) uploadImageFile(this.files[0], 'imgBottomEdge', 'prevBottomEdge', 'phBottomEdge', 'spBottomEdge')"/>
+                                <input type="hidden" id="imgBottomEdge"/>
+                                
+                                <div id="dzBottomEdge" class="relative h-36 rounded-xl border-2 border-dashed border-outline-variant/70 hover:border-primary bg-surface-container-low transition-all flex flex-col items-center justify-center p-2 text-center overflow-hidden group">
+                                    <div id="phBottomEdge" class="flex flex-col items-center">
+                                        <span class="material-symbols-outlined text-[20px] text-secondary mb-1">border_bottom</span>
+                                        <span class="text-[10px] font-bold text-on-surface">Đáy cuốn sách</span>
+                                        <div class="flex gap-1 mt-2">
+                                            <button type="button" onclick="document.getElementById('fileBottomEdge').click()" class="px-2 py-0.5 bg-surface-container-high hover:bg-primary-container text-on-surface text-[10px] font-bold rounded shadow-sm">Tải file</button>
+                                            <button type="button" onclick="openWebcamCapture('imgBottomEdge', 'prevBottomEdge', 'phBottomEdge', 'spBottomEdge')" class="px-2 py-0.5 bg-primary text-on-primary text-[10px] font-bold rounded shadow-sm flex items-center gap-0.5"><span class="material-symbols-outlined text-[11px]">photo_camera</span>Chụp</button>
+                                        </div>
+                                    </div>
+                                    <div id="spBottomEdge" class="hidden flex flex-col items-center"><span class="material-symbols-outlined animate-spin text-primary text-[20px]">progress_activity</span><span class="text-[10px] text-primary mt-1">Đang tải...</span></div>
+                                    <img id="prevBottomEdge" src="" alt="Cạnh dưới" class="hidden absolute inset-0 w-full h-full object-cover rounded-xl"/>
+                                    <div class="actions-bottomedge absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity hidden items-center justify-center gap-1.5">
+                                        <button type="button" onclick="document.getElementById('fileBottomEdge').click()" class="px-2 py-1 bg-white text-xs font-bold rounded">Đổi</button>
+                                        <button type="button" onclick="clearImage('imgBottomEdge', 'prevBottomEdge', 'phBottomEdge', 'fileBottomEdge')" class="px-2 py-1 bg-red-600 text-white text-xs font-bold rounded">Xóa</button>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Mặt 6: Cạnh bên / Trang ruột -->
+                            <div class="flex flex-col">
+                                <span class="text-[11px] font-bold text-on-surface mb-1 flex items-center gap-1">
+                                    <span class="w-3.5 h-3.5 rounded-full bg-primary/20 text-primary text-[9px] flex items-center justify-center font-bold">6</span>
+                                    Cạnh bên / Trang ruột *
+                                </span>
+                                <input type="file" id="fileForeEdge" accept="image/*" class="hidden" onchange="if(this.files[0]) uploadImageFile(this.files[0], 'imgForeEdge', 'prevForeEdge', 'phForeEdge', 'spForeEdge')"/>
+                                <input type="hidden" id="imgForeEdge"/>
+                                
+                                <div id="dzForeEdge" class="relative h-36 rounded-xl border-2 border-dashed border-outline-variant/70 hover:border-primary bg-surface-container-low transition-all flex flex-col items-center justify-center p-2 text-center overflow-hidden group">
+                                    <div id="phForeEdge" class="flex flex-col items-center">
+                                        <span class="material-symbols-outlined text-[20px] text-secondary mb-1">menu_book</span>
+                                        <span class="text-[10px] font-bold text-on-surface">Cạnh mở & ruột</span>
+                                        <div class="flex gap-1 mt-2">
+                                            <button type="button" onclick="document.getElementById('fileForeEdge').click()" class="px-2 py-0.5 bg-surface-container-high hover:bg-primary-container text-on-surface text-[10px] font-bold rounded shadow-sm">Tải file</button>
+                                            <button type="button" onclick="openWebcamCapture('imgForeEdge', 'prevForeEdge', 'phForeEdge', 'spForeEdge')" class="px-2 py-0.5 bg-primary text-on-primary text-[10px] font-bold rounded shadow-sm flex items-center gap-0.5"><span class="material-symbols-outlined text-[11px]">photo_camera</span>Chụp</button>
+                                        </div>
+                                    </div>
+                                    <div id="spForeEdge" class="hidden flex flex-col items-center"><span class="material-symbols-outlined animate-spin text-primary text-[20px]">progress_activity</span><span class="text-[10px] text-primary mt-1">Đang tải...</span></div>
+                                    <img id="prevForeEdge" src="" alt="Cạnh bên" class="hidden absolute inset-0 w-full h-full object-cover rounded-xl"/>
+                                    <div class="actions-foreedge absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity hidden items-center justify-center gap-1.5">
+                                        <button type="button" onclick="document.getElementById('fileForeEdge').click()" class="px-2 py-1 bg-white text-xs font-bold rounded">Đổi</button>
+                                        <button type="button" onclick="clearImage('imgForeEdge', 'prevForeEdge', 'phForeEdge', 'fileForeEdge')" class="px-2 py-1 bg-red-600 text-white text-xs font-bold rounded">Xóa</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ========================================== -->
+                <!-- NHÓM 2: ĐÁNH GIÁ TÌNH TRẠNG SÁCH (10 TIÊU CHÍ) -->
+                <!-- ========================================== -->
+                <div class="bg-surface-container-lowest p-6 sm:p-7 rounded-2xl border border-outline-variant/30 shadow-sm">
+                    <div class="flex items-center justify-between pb-4 mb-5 border-b border-outline-variant/30">
+                        <div class="flex items-center gap-3">
+                            <span class="w-8 h-8 rounded-full bg-primary text-on-primary font-bold text-sm flex items-center justify-center shadow">2</span>
+                            <div>
+                                <h3 class="text-lg font-bold text-on-surface">Nhóm 2: Đánh Giá Tình Trạng & Bảng Khấu Trừ Thẩm Định</h3>
+                                <p class="text-xs text-secondary mt-0.5">Bảng kiểm tra gồm 10 tiêu chí (9 tiêu chí tick box và 1 tiêu chí text box kèm ảnh thực tế).</p>
+                            </div>
+                        </div>
+                        <span class="text-xs px-2.5 py-1 rounded-full bg-primary/10 text-primary font-bold">10 tiêu chí thẩm định</span>
+                    </div>
+
+                    <!-- Độ mới tổng quan -->
+                    <label class="block text-xs font-bold uppercase tracking-wider text-secondary mb-2">Độ Mới Tổng Quan Của Cuốn Sách *</label>
+                    <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-6">
+                        <label class="flex flex-col p-3 rounded-xl border border-outline-variant/40 cursor-pointer hover:bg-amber-50/50 transition-all has-[:checked]:border-primary has-[:checked]:bg-amber-50 shadow-sm">
+                            <input type="radio" name="conditionGrade" value="LIKE_NEW" checked onchange="triggerAutoEstimate()" class="accent-primary"/>
+                            <span class="text-xs font-bold text-on-surface mt-1.5">Như Mới (Like New)</span>
+                            <span class="text-[10px] text-primary font-semibold">Định mức 50% giá bìa</span>
+                        </label>
+                        <label class="flex flex-col p-3 rounded-xl border border-outline-variant/40 cursor-pointer hover:bg-amber-50/50 transition-all has-[:checked]:border-primary has-[:checked]:bg-amber-50 shadow-sm">
+                            <input type="radio" name="conditionGrade" value="VERY_GOOD" onchange="triggerAutoEstimate()" class="accent-primary"/>
+                            <span class="text-xs font-bold text-on-surface mt-1.5">Rất Tốt (Very Good)</span>
+                            <span class="text-[10px] text-primary font-semibold">Định mức 40% giá bìa</span>
+                        </label>
+                        <label class="flex flex-col p-3 rounded-xl border border-outline-variant/40 cursor-pointer hover:bg-amber-50/50 transition-all has-[:checked]:border-primary has-[:checked]:bg-amber-50 shadow-sm">
+                            <input type="radio" name="conditionGrade" value="GOOD" onchange="triggerAutoEstimate()" class="accent-primary"/>
+                            <span class="text-xs font-bold text-on-surface mt-1.5">Tốt (Good)</span>
+                            <span class="text-[10px] text-primary font-semibold">Định mức 30% giá bìa</span>
+                        </label>
+                        <label class="flex flex-col p-3 rounded-xl border border-outline-variant/40 cursor-pointer hover:bg-amber-50/50 transition-all has-[:checked]:border-primary has-[:checked]:bg-amber-50 shadow-sm">
+                            <input type="radio" name="conditionGrade" value="ACCEPTABLE" onchange="triggerAutoEstimate()" class="accent-primary"/>
+                            <span class="text-xs font-bold text-on-surface mt-1.5">Chấp Nhận Được</span>
+                            <span class="text-[10px] text-primary font-semibold">Định mức 20% giá bìa</span>
+                        </label>
+                    </div>
+
+                    <!-- Bảng kiểm tra 10 tiêu chí khấu trừ -->
+                    <label class="block text-xs font-bold uppercase tracking-wider text-secondary mb-2">
+                        Bảng Kiểm Tra 10 Tiêu Chí Khấu Trừ Thẩm Định Chi Tiết
+                    </label>
+                    
+                    <div class="space-y-2.5 bg-surface-container-low p-4 rounded-xl border border-outline-variant/30 text-xs">
+                        
+                        <!-- 9 TIÊU CHÍ DẠNG TICK BOX -->
+                        <div class="space-y-2">
+                            <!-- Tiêu chí 1 -->
+                            <label class="flex items-center justify-between cursor-pointer py-1.5 px-2 rounded-lg hover:bg-white transition-colors">
+                                <div class="flex items-center gap-2.5">
+                                    <input type="checkbox" id="crit1_coverTorn" onchange="triggerAutoEstimate()" class="accent-primary w-4 h-4 rounded"/>
+                                    <span class="font-medium text-on-surface">1. Bìa ngoài bị rách mép, trầy xước hoặc gấp nếp rõ</span>
+                                </div>
+                                <span class="font-bold text-error bg-red-50 px-2 py-0.5 rounded shrink-0">-5%</span>
+                            </label>
+
+                            <!-- Tiêu chí 2 -->
+                            <label class="flex items-center justify-between cursor-pointer py-1.5 px-2 rounded-lg hover:bg-white transition-colors border-t border-outline-variant/20 pt-2">
+                                <div class="flex items-center gap-2.5">
+                                    <input type="checkbox" id="crit2_coverPeeling" onchange="triggerAutoEstimate()" class="accent-primary w-4 h-4 rounded"/>
+                                    <span class="font-medium text-on-surface">2. Bìa sách bị mất màng bóng bảo vệ hoặc bong tróc mép</span>
+                                </div>
+                                <span class="font-bold text-error bg-red-50 px-2 py-0.5 rounded shrink-0">-5%</span>
+                            </label>
+
+                            <!-- Tiêu chí 3 -->
+                            <label class="flex items-center justify-between cursor-pointer py-1.5 px-2 rounded-lg hover:bg-white transition-colors border-t border-outline-variant/20 pt-2">
+                                <div class="flex items-center gap-2.5">
+                                    <input type="checkbox" id="crit3_spineLoose" onchange="triggerAutoEstimate()" class="accent-primary w-4 h-4 rounded"/>
+                                    <span class="font-medium text-on-surface">3. Gáy sách bị lỏng lẻo, rách hoặc nứt keo chỉ</span>
+                                </div>
+                                <span class="font-bold text-error bg-red-50 px-2 py-0.5 rounded shrink-0">-10%</span>
+                            </label>
+
+                            <!-- Tiêu chí 4 -->
+                            <label class="flex items-center justify-between cursor-pointer py-1.5 px-2 rounded-lg hover:bg-white transition-colors border-t border-outline-variant/20 pt-2">
+                                <div class="flex items-center gap-2.5">
+                                    <input type="checkbox" id="crit4_yellowPages" onchange="triggerAutoEstimate()" class="accent-primary w-4 h-4 rounded"/>
+                                    <span class="font-medium text-on-surface">4. Trang sách bị ố vàng, thâm kim hoặc ẩm nhẹ theo thời gian</span>
+                                </div>
+                                <span class="font-bold text-error bg-red-50 px-2 py-0.5 rounded shrink-0">-10%</span>
+                            </label>
+
+                            <!-- Tiêu chí 5 -->
+                            <label class="flex items-center justify-between cursor-pointer py-1.5 px-2 rounded-lg hover:bg-white transition-colors border-t border-outline-variant/20 pt-2">
+                                <div class="flex items-center gap-2.5">
+                                    <input type="checkbox" id="crit5_markings" onchange="triggerAutoEstimate()" class="accent-primary w-4 h-4 rounded"/>
+                                    <span class="font-medium text-on-surface">5. Sách có vết mực viết tay, ghi chú hoặc highlight bút dạ</span>
+                                </div>
+                                <span class="font-bold text-error bg-red-50 px-2 py-0.5 rounded shrink-0">-10%</span>
+                            </label>
+
+                            <!-- Tiêu chí 6 -->
+                            <label class="flex items-center justify-between cursor-pointer py-1.5 px-2 rounded-lg hover:bg-white transition-colors border-t border-outline-variant/20 pt-2">
+                                <div class="flex items-center gap-2.5">
+                                    <input type="checkbox" id="crit6_dogEared" onchange="triggerAutoEstimate()" class="accent-primary w-4 h-4 rounded"/>
+                                    <span class="font-medium text-on-surface">6. Trang sách bị quăn mép, gập nếp góc ("chó tai" - dog-eared)</span>
+                                </div>
+                                <span class="font-bold text-error bg-red-50 px-2 py-0.5 rounded shrink-0">-5%</span>
+                            </label>
+
+                            <!-- Tiêu chí 7 -->
+                            <label class="flex items-center justify-between cursor-pointer py-1.5 px-2 rounded-lg hover:bg-white transition-colors border-t border-outline-variant/20 pt-2">
+                                <div class="flex items-center gap-2.5">
+                                    <input type="checkbox" id="crit7_tornPages" onchange="triggerAutoEstimate()" class="accent-primary w-4 h-4 rounded"/>
+                                    <span class="font-medium text-on-surface">7. Có trang bị rách nhẹ hoặc có dấu hiệu dán băng keo phục chế</span>
+                                </div>
+                                <span class="font-bold text-error bg-red-50 px-2 py-0.5 rounded shrink-0">-10%</span>
+                            </label>
+
+                            <!-- Tiêu chí 8 -->
+                            <label class="flex items-center justify-between cursor-pointer py-1.5 px-2 rounded-lg hover:bg-white transition-colors border-t border-outline-variant/20 pt-2">
+                                <div class="flex items-center gap-2.5">
+                                    <input type="checkbox" id="crit8_missingAcc" onchange="triggerAutoEstimate()" class="accent-primary w-4 h-4 rounded"/>
+                                    <span class="font-medium text-on-surface">8. Thiếu bìa áo (jacket), đai sách (obi) hoặc bookmark gốc kèm theo</span>
+                                </div>
+                                <span class="font-bold text-error bg-red-50 px-2 py-0.5 rounded shrink-0">-5%</span>
+                            </label>
+
+                            <!-- Tiêu chí 9 -->
+                            <label class="flex items-center justify-between cursor-pointer py-1.5 px-2 rounded-lg hover:bg-white transition-colors border-t border-outline-variant/20 pt-2">
+                                <div class="flex items-center gap-2.5">
+                                    <input type="checkbox" id="crit9_moldySmell" onchange="triggerAutoEstimate()" class="accent-primary w-4 h-4 rounded"/>
+                                    <span class="font-medium text-on-surface">9. Sách có mùi ẩm mốc cũ hoặc bị phai màu chữ theo năm tháng</span>
+                                </div>
+                                <span class="font-bold text-error bg-red-50 px-2 py-0.5 rounded shrink-0">-5%</span>
+                            </label>
+                        </div>
+
+                        <!-- TIÊU CHÍ THỨ 10: TEXT BOX ĐIỀN TÌNH TRẠNG KHÁC KÈM ẢNH THỰC TẾ -->
+                        <div class="mt-4 pt-3 border-t-2 border-primary/20 bg-white p-3.5 rounded-xl shadow-sm">
+                            <label class="flex items-center justify-between cursor-pointer mb-2">
+                                <div class="flex items-center gap-2 font-bold text-primary">
+                                    <span class="material-symbols-outlined text-[18px]">edit_note</span>
+                                    <span>10. Tình trạng khác do khách hàng tự điền (Kèm ảnh thực tế minh chứng)</span>
+                                </div>
+                                <span class="font-bold text-error bg-red-50 px-2 py-0.5 rounded">-5%</span>
+                            </label>
+
+                            <!-- Text box tình trạng khác -->
+                            <textarea id="otherDefectDesc" rows="2" oninput="triggerAutoEstimate()" placeholder="Nhập chi tiết tình trạng khác của sách (VD: có dấu mộc thư viện cũ, rách mép trang phụ, vết ố cà phê ở trang 45...)" class="w-full px-3 py-2 rounded-lg bg-surface-container border border-outline-variant/40 text-xs font-medium focus:outline-none focus:ring-1 focus:ring-primary focus:bg-white mb-2"></textarea>
+
+                            <!-- Khung tải ảnh / chụp ảnh cho tiêu chí khác -->
+                            <div class="flex items-center gap-3">
+                                <input type="file" id="fileOtherDefect" accept="image/*" class="hidden" onchange="if(this.files[0]) uploadImageFile(this.files[0], 'imgOtherDefect', 'prevOtherDefect', 'phOtherDefect', 'spOtherDefect')"/>
+                                <input type="hidden" id="imgOtherDefect"/>
+
+                                <div id="dzOtherDefect" class="relative w-28 h-20 rounded-lg border-2 border-dashed border-outline-variant/60 bg-surface-container flex flex-col items-center justify-center text-center overflow-hidden shrink-0 group">
+                                    <div id="phOtherDefect" class="flex flex-col items-center">
+                                        <span class="material-symbols-outlined text-[16px] text-secondary">add_a_photo</span>
+                                        <span class="text-[9px] text-secondary">Ảnh lỗi khác</span>
+                                    </div>
+                                    <div id="spOtherDefect" class="hidden flex flex-col items-center"><span class="material-symbols-outlined animate-spin text-primary text-[16px]">progress_activity</span></div>
+                                    <img id="prevOtherDefect" src="" alt="Lỗi khác" class="hidden absolute inset-0 w-full h-full object-cover rounded-lg"/>
+                                    <div class="actions-otherdefect absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity hidden items-center justify-center gap-1">
+                                        <button type="button" onclick="document.getElementById('fileOtherDefect').click()" class="p-1 bg-white text-[10px] rounded font-bold">Đổi</button>
+                                        <button type="button" onclick="clearImage('imgOtherDefect', 'prevOtherDefect', 'phOtherDefect', 'fileOtherDefect')" class="p-1 bg-red-600 text-white text-[10px] rounded font-bold">Xóa</button>
+                                    </div>
+                                </div>
+
+                                <div class="flex flex-wrap gap-2 text-xs">
+                                    <button type="button" onclick="document.getElementById('fileOtherDefect').click()" class="px-2.5 py-1.5 rounded-lg bg-surface-container-high hover:bg-primary-container text-on-surface text-[11px] font-bold flex items-center gap-1 shadow-sm">
+                                        <span class="material-symbols-outlined text-[14px]">upload_file</span>
+                                        <span>Tải ảnh tỳ vết</span>
+                                    </button>
+                                    <button type="button" onclick="openWebcamCapture('imgOtherDefect', 'prevOtherDefect', 'phOtherDefect', 'spOtherDefect')" class="px-2.5 py-1.5 rounded-lg bg-primary text-on-primary text-[11px] font-bold flex items-center gap-1 shadow-sm">
+                                        <span class="material-symbols-outlined text-[14px]">photo_camera</span>
+                                        <span>Chụp trực tiếp</span>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ========================================== -->
+                <!-- NHÓM 3: BIÊN LAI BÁN SÁCH -->
+                <!-- ========================================== -->
+                <div class="receipt-card p-6 sm:p-7 rounded-2xl border-2 border-[#835500]/30 shadow-md relative overflow-hidden">
+                    <div class="flex items-center justify-between pb-4 mb-5 border-b border-dashed border-[#835500]/30">
+                        <div class="flex items-center gap-3">
+                            <span class="w-8 h-8 rounded-full bg-primary text-on-primary font-bold text-sm flex items-center justify-center shadow">3</span>
+                            <div>
+                                <h3 class="text-lg font-bold text-on-surface">Nhóm 3: Biên Lai Bán Sách & Lịch Hẹn Tại Cửa Hàng</h3>
+                                <p class="text-xs text-secondary mt-0.5">Xác nhận thông tin khách hàng, mã biên lai và thời gian trực tiếp đến quầy.</p>
+                            </div>
+                        </div>
+                        <div class="text-right">
+                            <span class="text-xs font-bold text-primary block">Mã Biên Lai Thu Mua</span>
+                            <span id="receiptCodeDisplay" class="font-mono text-sm font-extrabold text-on-surface bg-white px-2.5 py-0.5 rounded border border-[#835500]/30 shadow-sm">
+                                BL-20261016-8942
+                            </span>
+                        </div>
+                    </div>
+
+                    <!-- 4 Text box thông tin khách hàng -->
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-5">
+                        <div>
+                            <label class="block text-xs font-bold uppercase tracking-wider text-secondary mb-1">Họ Và Tên Khách Hàng *</label>
+                            <input type="text" id="custName" required th:value="${currentUser != null ? currentUser.fullName : ''}" placeholder="Nhập đầy đủ họ tên..." class="w-full px-3.5 py-2.5 rounded-xl bg-white border border-outline-variant/40 text-xs font-semibold focus:outline-none focus:ring-2 focus:ring-primary/40"/>
+                        </div>
+
+                        <div>
+                            <label class="block text-xs font-bold uppercase tracking-wider text-secondary mb-1">Số Điện Thoại Liên Hệ *</label>
+                            <input type="tel" id="custPhone" required th:value="${currentUser != null && currentUser.phone != null ? currentUser.phone : ''}" placeholder="Số điện thoại nhận tin nhắn..." class="w-full px-3.5 py-2.5 rounded-xl bg-white border border-outline-variant/40 text-xs font-semibold focus:outline-none focus:ring-2 focus:ring-primary/40"/>
+                        </div>
+
+                        <div>
+                            <label class="block text-xs font-bold uppercase tracking-wider text-secondary mb-1">Email Khách Hàng *</label>
+                            <input type="email" id="custEmail" required th:value="${currentUser != null ? currentUser.email : ''}" placeholder="Email nhận biên lai điện tử..." class="w-full px-3.5 py-2.5 rounded-xl bg-white border border-outline-variant/40 text-xs font-semibold focus:outline-none focus:ring-2 focus:ring-primary/40"/>
+                        </div>
+
+                        <div>
+                            <label class="block text-xs font-bold uppercase tracking-wider text-secondary mb-1">Địa Chỉ Khách Hàng *</label>
+                            <input type="text" id="custAddress" required th:value="${currentUser != null && currentUser.address != null ? currentUser.address : ''}" placeholder="Địa chỉ nơi ở của bạn..." class="w-full px-3.5 py-2.5 rounded-xl bg-white border border-outline-variant/40 text-xs font-semibold focus:outline-none focus:ring-2 focus:ring-primary/40"/>
+                        </div>
+                    </div>
+
+                    <!-- Xác nhận lại cửa hàng thu sách & Phương thức giao nhận duy nhất -->
+                    <div class="p-4 rounded-xl bg-white/90 border border-[#835500]/20 mb-5 space-y-3">
+                        <div class="flex items-start gap-3">
+                            <span class="material-symbols-outlined text-primary text-[22px] shrink-0 mt-0.5">verified</span>
+                            <div>
+                                <div class="text-xs font-extrabold uppercase tracking-wide text-primary">Cửa Hàng Tiếp Nhận Thu Sách Đã Chọn</div>
+                                <div id="receiptBranchDisplay" class="text-sm font-bold text-on-surface mt-0.5">Chi nhánh Book4Life (Vui lòng chọn ở thanh trên cùng)</div>
+                                <div id="receiptBranchAddress" class="text-xs text-secondary mt-0.5">Địa chỉ quầy sẽ hiển thị tại đây</div>
+                            </div>
+                        </div>
+
+                        <!-- Phương thức giao nhận duy nhất: Bán trực tiếp tại cửa hàng -->
+                        <div class="pt-3 border-t border-outline-variant/20 flex items-center justify-between text-xs">
+                            <div class="flex items-center gap-2">
+                                <span class="material-symbols-outlined text-green-700 text-[18px]">store</span>
+                                <span>Phương thức bàn giao: <strong class="text-green-800 font-extrabold bg-green-50 px-2 py-0.5 rounded border border-green-200">Chỉ bán trực tiếp tại cửa hàng</strong></span>
+                            </div>
+                            <span class="text-[11px] text-secondary font-medium">Nhận tiền mặt / chuyển khoản ngay sau thẩm định</span>
+                        </div>
+                    </div>
+
+                    <!-- Thời gian dự kiến đến cửa hàng -->
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 bg-white/70 p-4 rounded-xl border border-outline-variant/30">
+                        <div>
+                            <label class="block text-xs font-bold uppercase tracking-wider text-secondary mb-1">
+                                Ngày Dự Kiến Đến Cửa Hàng *
+                            </label>
+                            <input type="date" id="expectedDate" required class="w-full px-3.5 py-2 rounded-lg bg-surface border border-outline-variant/40 text-xs font-semibold focus:outline-none focus:ring-2 focus:ring-primary/40"/>
+                        </div>
+
+                        <div>
+                            <label class="block text-xs font-bold uppercase tracking-wider text-secondary mb-1">
+                                Khung Giờ Dự Kiến Đến Quầy *
+                            </label>
+                            <select id="expectedTimeSlot" required class="w-full px-3.5 py-2 rounded-lg bg-surface border border-outline-variant/40 text-xs font-semibold focus:outline-none focus:ring-2 focus:ring-primary/40">
+                                <option value="08:30 - 11:30 (Buổi Sáng)">08:30 - 11:30 (Buổi Sáng)</option>
+                                <option value="14:00 - 17:30 (Buổi Chiều)" selected>14:00 - 17:30 (Buổi Chiều)</option>
+                                <option value="18:00 - 20:30 (Buổi Tối)">18:00 - 20:30 (Buổi Tối)</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- RIGHT COLUMN: DỰ TOÁN GIÁ & NÚT GỬI (Col 9-12 Sticky) -->
+            <div class="lg:col-span-4">
+                <div class="sticky top-28 bg-surface-container-lowest p-6 rounded-2xl border-2 border-primary/30 shadow-xl space-y-5">
+                    
                     <div class="flex items-center justify-between pb-3 border-b border-outline-variant/30">
                         <span class="text-xs font-bold uppercase tracking-wider text-secondary">Dự Toán Giá Thu Mua</span>
                         <span class="px-2 py-0.5 rounded text-[10px] font-bold bg-green-100 text-green-800">Tự động (FR-TRD-03)</span>
                     </div>
 
-                    <div class="py-6 text-center">
+                    <div class="py-4 text-center bg-gradient-to-b from-amber-50/60 to-transparent rounded-xl border border-amber-100">
                         <div class="text-xs text-secondary font-medium">Giá thu mua ước tính dự kiến</div>
-                        <div id="estimatedPriceBox" class="text-3xl font-extrabold text-primary tracking-tight mt-1">
-                            0 ₫
+                        <div id="estimatedPriceBox" class="text-3xl sm:text-4xl font-extrabold text-primary tracking-tight mt-1">
+                            --- ₫
                         </div>
-                        <div id="estimateFormulaDesc" class="text-[11px] text-secondary mt-1 font-medium">
-                            Chọn sách để tính giá tự động
-                        </div>
-                    </div>
-
-                    <!-- Breakdown table -->
-                    <div class="space-y-2 bg-surface-container-low p-3.5 rounded-xl text-xs mb-6">
-                        <div class="flex justify-between text-secondary">
-                            <span>Giá niêm yết bìa gốc:</span>
-                            <span id="breakdownOriginal" class="font-bold text-on-surface">0 ₫</span>
-                        </div>
-                        <div class="flex justify-between text-secondary">
-                            <span>Tỉ lệ cơ bản theo tình trạng:</span>
-                            <span id="breakdownBaseRate" class="font-bold text-on-surface">50%</span>
-                        </div>
-                        <div class="flex justify-between text-secondary">
-                            <span>Tổng mức khấu trừ tỳ vết:</span>
-                            <span id="breakdownPenalty" class="font-bold text-error">0%</span>
+                        <div id="estimateFormulaDesc" class="text-[11px] text-secondary mt-1 font-medium px-2">
+                            Vui lòng nhập giá bìa sách ở Nhóm 1 để xem dự toán
                         </div>
                     </div>
 
-                    <button type="submit" id="submitBtn" class="w-full py-3.5 px-4 rounded-xl bg-primary text-on-primary font-bold text-sm hover:bg-amber-800 transition-all shadow-md hover:shadow-lg flex items-center justify-center gap-2">
-                        <span class="material-symbols-outlined text-[18px]">send</span>
-                        <span>Gửi Phiếu Thẩm Định Bán Sách</span>
+                    <!-- Breakdown chi tiết khấu trừ -->
+                    <div class="space-y-2 bg-surface-container-low p-3.5 rounded-xl text-xs">
+                        <div class="flex justify-between text-secondary">
+                            <span>Giá bìa niêm yết:</span>
+                            <span id="bdOriginalPrice" class="font-bold text-on-surface">Chưa nhập</span>
+                        </div>
+                        <div class="flex justify-between text-secondary">
+                            <span>Tỉ lệ cơ bản (Độ mới):</span>
+                            <span id="bdBaseRate" class="font-bold text-on-surface">50%</span>
+                        </div>
+                        <div class="flex justify-between text-secondary">
+                            <span>Tổng khấu trừ 10 tiêu chí:</span>
+                            <span id="bdPenalty" class="font-bold text-error">0%</span>
+                        </div>
+                    </div>
+
+                    <!-- Tóm tắt biên lai mini -->
+                    <div class="p-3 bg-amber-50/70 rounded-xl border border-amber-200 text-xs space-y-1.5">
+                        <div class="flex justify-between">
+                            <span class="text-secondary">Chi nhánh tiếp nhận:</span>
+                            <span id="sideBranchName" class="font-bold text-on-surface">Chưa chọn</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span class="text-secondary">Hình thức bàn giao:</span>
+                            <span class="font-bold text-green-700">Trực tiếp tại quầy</span>
+                        </div>
+                    </div>
+
+                    <!-- Nút Gửi Biên Lai -->
+                    <button type="submit" id="submitBtn" class="w-full py-4 px-4 rounded-xl bg-primary text-on-primary font-bold text-sm hover:bg-amber-800 transition-all shadow-md hover:shadow-lg flex items-center justify-center gap-2">
+                        <span class="material-symbols-outlined text-[20px]">receipt_long</span>
+                        <span>Xác Nhận & Gửi Biên Lai Bán Sách</span>
                     </button>
-                    <p class="text-[10px] text-center text-secondary mt-3">
-                        * Giá chính thức sẽ được chuyên viên Book4Life kiểm duyệt hình ảnh và gửi lại đề nghị trong vòng 24 giờ.
+
+                    <p class="text-[10px] text-center text-secondary leading-relaxed">
+                        * Sau khi gửi, biên lai sẽ được chuyển đến chuyên viên tại quầy. Bạn chỉ cần mang sách đến chi nhánh đã hẹn để nhận thanh toán.
                     </p>
                 </div>
             </div>
+
         </form>
     </main>
 
+    <!-- ========================================== -->
+    <!-- WEBCAM CAMERA MODAL (CHỤP ẢNH TRỰC TIẾP) -->
+    <!-- ========================================== -->
+    <div id="webcamModal" class="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm hidden items-center justify-center p-4">
+        <div class="bg-surface-container-lowest max-w-lg w-full rounded-2xl shadow-2xl overflow-hidden border border-outline-variant/30 flex flex-col">
+            <div class="p-4 bg-surface-container-low border-b border-outline-variant/30 flex items-center justify-between">
+                <div class="flex items-center gap-2 font-bold text-sm text-on-surface">
+                    <span class="material-symbols-outlined text-primary text-[20px]">photo_camera</span>
+                    <span>Chụp Ảnh Trực Tiếp Từ Camera Máy Tính / Điện Thoại</span>
+                </div>
+                <button type="button" onclick="closeWebcamModal()" class="w-8 h-8 rounded-full hover:bg-surface-container flex items-center justify-center text-secondary">
+                    <span class="material-symbols-outlined text-[18px]">close</span>
+                </button>
+            </div>
+
+            <!-- Khung xem video camera -->
+            <div class="relative bg-black flex items-center justify-center h-72 overflow-hidden">
+                <video id="webcamVideo" autoplay playsinline class="w-full h-full object-cover"></video>
+                <canvas id="webcamCanvas" class="hidden"></canvas>
+                <div class="absolute inset-0 pointer-events-none border-2 border-dashed border-white/40 m-6 rounded-xl flex items-center justify-center">
+                    <span class="text-[11px] text-white/70 bg-black/50 px-2 py-0.5 rounded">Căn chỉnh góc chụp của sách vào khung này</span>
+                </div>
+            </div>
+
+            <div class="p-4 bg-surface flex items-center justify-between gap-3">
+                <button type="button" onclick="closeWebcamModal()" class="px-4 py-2 rounded-xl bg-surface-container text-xs font-bold text-secondary hover:text-on-surface">Hủy bỏ</button>
+                <button type="button" onclick="captureWebcamFrame()" class="px-6 py-2.5 rounded-xl bg-primary text-on-primary text-xs font-bold shadow-md hover:bg-amber-800 flex items-center gap-2">
+                    <span class="material-symbols-outlined text-[18px]">camera</span>
+                    <span>Chụp & Áp Dụng Ảnh</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ========================================== -->
     <!-- FOOTER -->
-    <footer class="w-full bg-[#2C1E16] text-[#FAF9F6] border-t border-[#4A3B32] py-8">
+    <!-- ========================================== -->
+    <footer class="w-full bg-[#2C1E16] text-[#FAF9F6] border-t border-[#4A3B32] py-8 mt-12">
         <div class="max-w-7xl mx-auto px-6 text-center text-xs text-outline-variant font-medium">
             © 2025 Book4Life Inc. — Chương Trình Thu Mua & Tuần Hoàn Sách Cũ Tuyển Chọn.
         </div>
     </footer>
 
+    <!-- ========================================== -->
+    <!-- JAVASCRIPT LOGIC -->
+    <!-- ========================================== -->
     <script>
+        // Khởi tạo mã biên lai ngẫu nhiên ban đầu
+        const randomReceiptId = 'BL-' + new Date().toISOString().slice(0,10).replace(/-/g,'') + '-' + Math.floor(1000 + Math.random() * 9000);
+        document.getElementById('receiptCodeDisplay').innerText = randomReceiptId;
+
+        // Ngày hẹn mặc định: ngày mai
+        const tomorrow = new Date();
+        tomorrow.setDate(tomorrow.getDate() + 1);
+        document.getElementById('expectedDate').value = tomorrow.toISOString().split('T')[0];
+
+        // Webcam stream variable
+        let activeWebcamStream = null;
+        let currentTargetContext = null;
+
         function showToast(message, isError = false) {
             const toast = document.getElementById('toastNotification');
             const toastMsg = document.getElementById('toastMessage');
@@ -353,111 +872,365 @@
             }
         }
 
-        function onBookChanged() {
-            const bookSelect = document.getElementById('bookSelect');
-            const opt = bookSelect.options[bookSelect.selectedIndex];
-            const bookInfoBox = document.getElementById('bookInfoBox');
-
-            if (!bookSelect.value) {
-                bookInfoBox.classList.add('hidden');
-                document.getElementById('estimatedPriceBox').innerText = '0 ₫';
-                document.getElementById('breakdownOriginal').innerText = '0 ₫';
+        // Xử lý khi chọn chi nhánh ở thanh trên cùng
+        function onBranchChanged() {
+            const branchSelect = document.getElementById('branchSelect');
+            const opt = branchSelect.options[branchSelect.selectedIndex];
+            if (!branchSelect.value) {
+                document.getElementById('branchAddressDisplay').innerText = 'Vui lòng chọn chi nhánh ở trên';
+                document.getElementById('branchPhoneDisplay').innerText = '1900 6868';
+                document.getElementById('receiptBranchDisplay').innerText = 'Chưa chọn chi nhánh';
+                document.getElementById('receiptBranchAddress').innerText = 'Vui lòng chọn ở thanh trên cùng';
+                document.getElementById('sideBranchName').innerText = 'Chưa chọn';
                 return;
             }
 
-            const price = parseFloat(opt.getAttribute('data-price')) || 0;
-            const cover = opt.getAttribute('data-cover') || 'https://images.unsplash.com/photo-1544947950-fa07a98d237f?auto=format&fit=crop&w=300&q=80';
-            
-            document.getElementById('bookPreviewImg').src = cover;
-            document.getElementById('bookTitleDisplay').innerText = opt.text.split(' - ISBN')[0];
-            document.getElementById('originalPriceDisplay').innerText = new Intl.NumberFormat('vi-VN').format(price) + ' ₫';
-            document.getElementById('breakdownOriginal').innerText = new Intl.NumberFormat('vi-VN').format(price) + ' ₫';
-            bookInfoBox.classList.remove('hidden');
+            const name = opt.getAttribute('data-name') || opt.text;
+            const address = opt.getAttribute('data-address') || 'Tại quầy tiếp nhận chi nhánh';
+            const phone = opt.getAttribute('data-phone') || '1900 6868';
 
+            document.getElementById('branchAddressDisplay').innerText = address;
+            document.getElementById('branchPhoneDisplay').innerText = phone;
+            document.getElementById('receiptBranchDisplay').innerText = name;
+            document.getElementById('receiptBranchAddress').innerText = address + ' — Hotline: ' + phone;
+            document.getElementById('sideBranchName').innerText = name;
+        }
+
+        // Xử lý thanh cuộn Năm xuất bản
+        function onYearSliderInput(val) {
+            document.getElementById('yearDisplayBadge').innerText = val;
+            document.getElementById('yearText').innerText = val;
+        }
+
+        // Thay đổi tựa sách hoặc giá bìa
+        function onTitleOrPriceChanged() {
             triggerAutoEstimate();
         }
 
-        async function triggerAutoEstimate() {
-            const bookSelect = document.getElementById('bookSelect');
-            if (!bookSelect.value) return;
+        // Xử lý khi chọn Thể loại sách (Hiển thị ô text box khi chọn 'Khác')
+        function onCategorySelectChanged(sel) {
+            const otherBox = document.getElementById('otherCategoryBox');
+            const otherInput = document.getElementById('otherCategoryInput');
+            if (sel.value === 'Khác') {
+                otherBox.classList.remove('hidden');
+                otherInput.required = true;
+                otherInput.focus();
+            } else {
+                otherBox.classList.add('hidden');
+                otherInput.required = false;
+                otherInput.value = '';
+            }
+        }
 
-            const selectedGrade = document.querySelector('input[name="conditionGrade"]:checked')?.value || 'LIKE_NEW';
-            const payload = {
-                bookId: parseInt(bookSelect.value),
-                userConditionGrade: selectedGrade,
-                coverDamaged: document.getElementById('coverDamaged').checked,
-                spineDamaged: document.getElementById('spineDamaged').checked,
-                yellowPages: document.getElementById('yellowPages').checked,
-                markingsPresent: document.getElementById('markingsPresent').checked,
-                missingAccessory: document.getElementById('missingAccessory').checked
+        // Tính giá dự toán trực tiếp
+        async function triggerAutoEstimate() {
+            const price = parseFloat(document.getElementById('originalPriceInput').value) || 0;
+            const grade = document.querySelector('input[name="conditionGrade"]:checked')?.value || 'LIKE_NEW';
+
+            let baseRate = 0.50;
+            if (grade === 'VERY_GOOD') baseRate = 0.40;
+            else if (grade === 'GOOD') baseRate = 0.30;
+            else if (grade === 'ACCEPTABLE') baseRate = 0.20;
+
+            // 10 Tiêu chí
+            let penaltyPercent = 0;
+            let multiplier = 1.0;
+
+            const checkPenalty = (id, percent) => {
+                const el = document.getElementById(id);
+                if (el && el.checked) {
+                    penaltyPercent += percent;
+                    multiplier *= (1 - percent / 100);
+                }
             };
 
+            checkPenalty('crit1_coverTorn', 5);
+            checkPenalty('crit2_coverPeeling', 5);
+            checkPenalty('crit3_spineLoose', 10);
+            checkPenalty('crit4_yellowPages', 10);
+            checkPenalty('crit5_markings', 10);
+            checkPenalty('crit6_dogEared', 5);
+            checkPenalty('crit7_tornPages', 10);
+            checkPenalty('crit8_missingAcc', 5);
+            checkPenalty('crit9_moldySmell', 5);
+
+            const otherDesc = document.getElementById('otherDefectDesc').value.trim();
+            if (otherDesc) {
+                penaltyPercent += 5;
+                multiplier *= 0.95;
+            }
+
+            let estimated = 0;
+            if (price > 0) {
+                estimated = Math.round((price * baseRate * multiplier) / 1000) * 1000;
+                if (estimated < 10000) estimated = 10000;
+            }
+
+            // Cập nhật giao diện
+            document.getElementById('estimatedPriceBox').innerText = price > 0 ? (new Intl.NumberFormat('vi-VN').format(estimated) + ' ₫') : '--- ₫';
+            document.getElementById('bdOriginalPrice').innerText = price > 0 ? (new Intl.NumberFormat('vi-VN').format(price) + ' ₫') : 'Chưa nhập';
+            document.getElementById('bdBaseRate').innerText = (baseRate * 100).toFixed(0) + '%';
+            document.getElementById('bdPenalty').innerText = '-' + penaltyPercent + '%';
+            document.getElementById('estimateFormulaDesc').innerText = price > 0 
+                ? (new Intl.NumberFormat('vi-VN').format(price) + '₫ × ' + (baseRate * 100).toFixed(0) + '% - ' + penaltyPercent + '% khấu trừ')
+                : 'Vui lòng nhập giá bìa để dự toán';
+        }
+
+        // Tải ảnh lên máy chủ / Cloudinary
+        async function uploadImageFile(file, targetInputId, previewImgId, placeholderId, spinnerId) {
+            if (!file) return;
+            if (file.size > 10 * 1024 * 1024) {
+                showToast('Kích thước ảnh tối đa là 10MB!', true);
+                return;
+            }
+
+            const placeholder = document.getElementById(placeholderId);
+            const preview = document.getElementById(previewImgId);
+            const spinner = document.getElementById(spinnerId);
+            const inputHidden = document.getElementById(targetInputId);
+
+            placeholder.classList.add('hidden');
+            preview.classList.add('hidden');
+            spinner.classList.remove('hidden');
+
+            const formData = new FormData();
+            formData.append('file', file);
+
             try {
-                const res = await fetch('/api/trade-in/estimate', {
+                const res = await fetch('/api/trade-in/upload-image', {
                     method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(payload)
+                    body: formData
                 });
+
                 if (res.ok) {
                     const data = await res.json();
-                    document.getElementById('estimatedPriceBox').innerText = new Intl.NumberFormat('vi-VN').format(data.estimatedPrice) + ' ₫';
-                    document.getElementById('breakdownBaseRate').innerText = (data.baseRate * 100).toFixed(0) + '%';
-                    
-                    const penaltyPercent = Math.round((1 - data.finalFactor / data.baseRate) * 100);
-                    document.getElementById('breakdownPenalty').innerText = '-' + penaltyPercent + '%';
-                    document.getElementById('estimateFormulaDesc').innerText = 'Công thức: ' + data.calculationFormula;
+                    inputHidden.value = data.imageUrl;
+                    preview.src = data.imageUrl;
+                    preview.classList.remove('hidden');
+                    spinner.classList.add('hidden');
+
+                    const actionClass = '.actions-' + targetInputId.replace('img', '').toLowerCase();
+                    const actions = document.querySelector(actionClass);
+                    if (actions) {
+                        actions.classList.remove('hidden');
+                        actions.classList.add('flex');
+                    }
+                    showToast('Đã tải ảnh thành công!');
+                } else {
+                    const err = await res.text();
+                    showToast('Lỗi tải ảnh: ' + err, true);
+                    spinner.classList.add('hidden');
+                    placeholder.classList.remove('hidden');
                 }
             } catch (err) {
-                console.error('Lỗi tính dự toán:', err);
+                showToast('Lỗi upload: ' + err.message, true);
+                spinner.classList.add('hidden');
+                placeholder.classList.remove('hidden');
             }
         }
 
-        function fillSampleImages() {
-            document.getElementById('imgCover').value = 'https://images.unsplash.com/photo-1544947950-fa07a98d237f?auto=format&fit=crop&w=600&q=80';
-            document.getElementById('imgSpine').value = 'https://images.unsplash.com/photo-1512820790803-83ca734da794?auto=format&fit=crop&w=600&q=80';
-            document.getElementById('imgPages').value = 'https://images.unsplash.com/photo-1497633762265-9d179a990aa6?auto=format&fit=crop&w=600&q=80';
-            showToast('Đã điền ảnh mẫu kiểm tra!');
+        function clearImage(targetInputId, previewImgId, placeholderId, fileInputId) {
+            document.getElementById(targetInputId).value = '';
+            const preview = document.getElementById(previewImgId);
+            preview.src = '';
+            preview.classList.add('hidden');
+            document.getElementById(placeholderId).classList.remove('hidden');
+
+            const actionClass = '.actions-' + targetInputId.replace('img', '').toLowerCase();
+            const actions = document.querySelector(actionClass);
+            if (actions) {
+                actions.classList.add('hidden');
+                actions.classList.remove('flex');
+            }
+
+            if (fileInputId) {
+                const f = document.getElementById(fileInputId);
+                if (f) f.value = '';
+            }
+            showToast('Đã xóa ảnh.');
         }
 
+
+        // ==========================================
+        // WEBCAM CAMERA MODAL LOGIC
+        // ==========================================
+        async function openWebcamCapture(targetInputId, previewImgId, placeholderId, spinnerId) {
+            currentTargetContext = { targetInputId, previewImgId, placeholderId, spinnerId };
+            const modal = document.getElementById('webcamModal');
+            const video = document.getElementById('webcamVideo');
+
+            try {
+                if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+                    activeWebcamStream = await navigator.mediaDevices.getUserMedia({
+                        video: { facingMode: 'environment', width: { ideal: 1280 }, height: { ideal: 720 } }
+                    });
+                    video.srcObject = activeWebcamStream;
+                    modal.classList.remove('hidden');
+                    modal.classList.add('flex');
+                } else {
+                    // Fallback input file
+                    const fileInput = document.getElementById(targetInputId.replace('img', 'file'));
+                    if (fileInput) fileInput.click();
+                }
+            } catch (err) {
+                console.warn('Không thể mở webcam trực tiếp:', err);
+                showToast('Không thể mở Camera, chuyển sang chọn tệp...', true);
+                const fileInput = document.getElementById(targetInputId.replace('img', 'file'));
+                if (fileInput) fileInput.click();
+            }
+        }
+
+        function closeWebcamModal() {
+            const modal = document.getElementById('webcamModal');
+            modal.classList.add('hidden');
+            modal.classList.remove('flex');
+
+            if (activeWebcamStream) {
+                activeWebcamStream.getTracks().forEach(track => track.stop());
+                activeWebcamStream = null;
+            }
+        }
+
+        function captureWebcamFrame() {
+            if (!activeWebcamStream || !currentTargetContext) return;
+            const video = document.getElementById('webcamVideo');
+            const canvas = document.getElementById('webcamCanvas');
+            canvas.width = video.videoWidth || 640;
+            canvas.height = video.videoHeight || 480;
+
+            const ctx = canvas.getContext('2d');
+            ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+
+            canvas.toBlob(blob => {
+                if (blob) {
+                    const capturedFile = new File([blob], 'camera_capture_' + Date.now() + '.jpg', { type: 'image/jpeg' });
+                    closeWebcamModal();
+                    uploadImageFile(capturedFile, currentTargetContext.targetInputId, currentTargetContext.previewImgId, currentTargetContext.placeholderId, currentTargetContext.spinnerId);
+                }
+            }, 'image/jpeg', 0.85);
+        }
+
+        // ==========================================
+        // SUBMIT TRADE-IN REQUEST
+        // ==========================================
         async function submitTradeIn(e) {
             e.preventDefault();
-            const bookId = document.getElementById('bookSelect').value;
+
             const branchId = document.getElementById('branchSelect').value;
-            if (!bookId || !branchId) {
-                showToast('Vui lòng chọn tựa sách và chi nhánh tiếp nhận!', true);
+            if (!branchId) {
+                showToast('Vui lòng chọn Cửa Hàng Bán Sách Tiếp Nhận ở thanh trên cùng!', true);
+                document.getElementById('branchSelect').focus();
                 return;
             }
 
-            const imgCover = document.getElementById('imgCover').value.trim();
-            const imgSpine = document.getElementById('imgSpine').value.trim();
-            const imgPages = document.getElementById('imgPages').value.trim();
+            const title = document.getElementById('bookTitleInput').value.trim();
+            let category = document.getElementById('bookCategorySelect').value;
+            if (category === 'Khác') {
+                const customCat = document.getElementById('otherCategoryInput').value.trim();
+                if (!customCat) {
+                    showToast('Vui lòng nhập tên thể loại sách của bạn!', true);
+                    document.getElementById('otherCategoryInput').focus();
+                    return;
+                }
+                category = customCat;
+            }
 
-            if (!imgCover || !imgSpine || !imgPages) {
-                showToast('Vui lòng cung cấp đủ 3 ảnh chụp tình trạng sách!', true);
+            const publisher = document.getElementById('publisherInput').value.trim();
+            const year = parseInt(document.getElementById('yearSlider').value) || 2020;
+            const originalPrice = parseFloat(document.getElementById('originalPriceInput').value);
+
+            if (!title) {
+                showToast('Vui lòng nhập Tựa sách cần bán!', true);
+                document.getElementById('bookTitleInput').focus();
                 return;
+            }
+
+            if (!originalPrice || originalPrice <= 0) {
+                showToast('Vui lòng nhập Giá bìa niêm yết của sách!', true);
+                document.getElementById('originalPriceInput').focus();
+                return;
+            }
+
+            // Kiểm tra 6 ảnh bắt buộc
+            const imgFront = document.getElementById('imgCoverFront').value.trim();
+            const imgBack = document.getElementById('imgCoverBack').value.trim();
+            const imgSpine = document.getElementById('imgSpine').value.trim();
+            const imgTop = document.getElementById('imgTopEdge').value.trim();
+            const imgBottom = document.getElementById('imgBottomEdge').value.trim();
+            const imgFore = document.getElementById('imgForeEdge').value.trim();
+
+            if (!imgFront || !imgBack || !imgSpine || !imgTop || !imgBottom || !imgFore) {
+                showToast('Vui lòng cung cấp đủ ảnh 6 mặt của quyển sách!', true);
+                return;
+            }
+
+            const custName = document.getElementById('custName').value.trim();
+            const custPhone = document.getElementById('custPhone').value.trim();
+            const custEmail = document.getElementById('custEmail').value.trim();
+            const custAddress = document.getElementById('custAddress').value.trim();
+            const expectedDate = document.getElementById('expectedDate').value;
+            const expectedTimeSlot = document.getElementById('expectedTimeSlot').value;
+
+            if (!custName || !custPhone || !custEmail) {
+                showToast('Vui lòng điền đầy đủ thông tin khách hàng trên Biên lai!', true);
+                return;
+            }
+
+            const imagesList = [
+                { imageUrl: imgFront, cloudinaryPublicId: 'cov_front', imageType: 'COVER_FRONT' },
+                { imageUrl: imgBack, cloudinaryPublicId: 'cov_back', imageType: 'COVER_BACK' },
+                { imageUrl: imgSpine, cloudinaryPublicId: 'spine', imageType: 'SPINE' },
+                { imageUrl: imgTop, cloudinaryPublicId: 'top_edge', imageType: 'TOP_EDGE' },
+                { imageUrl: imgBottom, cloudinaryPublicId: 'bottom_edge', imageType: 'BOTTOM_EDGE' },
+                { imageUrl: imgFore, cloudinaryPublicId: 'fore_edge', imageType: 'FORE_EDGE' }
+            ];
+
+            const otherDefectImg = document.getElementById('imgOtherDefect').value.trim();
+            const otherDefectDesc = document.getElementById('otherDefectDesc').value.trim();
+            if (otherDefectImg) {
+                imagesList.push({ imageUrl: otherDefectImg, cloudinaryPublicId: 'other_defect', imageType: 'OTHER_DEFECT' });
             }
 
             const payload = {
-                bookId: parseInt(bookId),
+                bookId: null,
                 targetBranchId: parseInt(branchId),
                 userConditionGrade: document.querySelector('input[name="conditionGrade"]:checked').value,
-                deliveryMethod: document.querySelector('input[name="deliveryMethod"]:checked').value,
-                coverDamaged: document.getElementById('coverDamaged').checked,
-                spineDamaged: document.getElementById('spineDamaged').checked,
-                yellowPages: document.getElementById('yellowPages').checked,
-                markingsPresent: document.getElementById('markingsPresent').checked,
-                missingAccessory: document.getElementById('missingAccessory').checked,
-                userNote: document.getElementById('userNote').value,
-                images: [
-                    { imageUrl: imgCover, cloudinaryPublicId: 'cover_pub', imageType: 'COVER' },
-                    { imageUrl: imgSpine, cloudinaryPublicId: 'spine_pub', imageType: 'SPINE' },
-                    { imageUrl: imgPages, cloudinaryPublicId: 'pages_pub', imageType: 'PAGES' }
-                ]
+                deliveryMethod: 'BRING_TO_STORE',
+                
+                // Nhóm 1: Thông tin sách
+                bookTitle: title,
+                categoryName: category,
+                publisher: publisher,
+                publicationYear: year,
+                estimatedOriginalPrice: originalPrice,
+
+                // Nhóm 2: 10 tiêu chí khảo sát
+                coverTorn: document.getElementById('crit1_coverTorn').checked,
+                coverPeeling: document.getElementById('crit2_coverPeeling').checked,
+                spineLoose: document.getElementById('crit3_spineLoose').checked,
+                yellowPages: document.getElementById('crit4_yellowPages').checked,
+                markingsPresent: document.getElementById('crit5_markings').checked,
+                dogEared: document.getElementById('crit6_dogEared').checked,
+                tornPages: document.getElementById('crit7_tornPages').checked,
+                missingAccessory: document.getElementById('crit8_missingAcc').checked,
+                moldySmell: document.getElementById('crit9_moldySmell').checked,
+                otherDefectDescription: otherDefectDesc,
+                otherDefectImageUrl: otherDefectImg,
+
+                // Nhóm 3: Biên lai bán sách
+                receiptCode: document.getElementById('receiptCodeDisplay').innerText.trim(),
+                customerName: custName,
+                customerPhone: custPhone,
+                customerEmail: custEmail,
+                customerAddress: custAddress,
+                expectedArrivalTime: expectedDate + ' ' + expectedTimeSlot,
+
+                images: imagesList
             };
 
             const btn = document.getElementById('submitBtn');
             btn.disabled = true;
-            btn.innerHTML = '<span class="material-symbols-outlined animate-spin text-[18px]">progress_activity</span> Đang gửi yêu cầu...';
+            btn.innerHTML = '<span class="material-symbols-outlined animate-spin text-[18px]">progress_activity</span> Đang tạo biên lai thu mua...';
 
             try {
                 const res = await fetch('/api/trade-in/requests', {
@@ -468,22 +1241,28 @@
 
                 if (res.ok) {
                     const data = await res.json();
-                    showToast('Tạo phiếu thu mua ' + data.requestCode + ' thành công! Đang chuyển hướng...');
+                    showToast('Đã phát hành Biên lai ' + data.requestCode + ' thành công! Đang chuyển hướng...');
                     setTimeout(() => {
                         window.location.href = '/my-trade-in';
                     }, 1500);
                 } else {
-                    const errText = await res.text();
-                    showToast('Lỗi: ' + errText, true);
+                    const err = await res.text();
+                    showToast('Lỗi: ' + err, true);
                     btn.disabled = false;
-                    btn.innerHTML = '<span class="material-symbols-outlined text-[18px]">send</span> Gửi Phiếu Thẩm Định Bán Sách';
+                    btn.innerHTML = '<span class="material-symbols-outlined text-[20px]">receipt_long</span><span>Xác Nhận & Gửi Biên Lai Bán Sách</span>';
                 }
             } catch (err) {
                 showToast('Lỗi kết nối máy chủ: ' + err.message, true);
                 btn.disabled = false;
-                btn.innerHTML = '<span class="material-symbols-outlined text-[18px]">send</span> Gửi Phiếu Thẩm Định Bán Sách';
+                btn.innerHTML = '<span class="material-symbols-outlined text-[20px]">receipt_long</span><span>Xác Nhận & Gửi Biên Lai Bán Sách</span>';
             }
         }
+
+        // Tự động kích hoạt tính giá ban đầu
+        triggerAutoEstimate();
     </script>
+
+    <!-- Page Transition Script -->
+    <th:block th:replace="~{fragments/page-transition :: transitionScripts}"></th:block>
 </body>
 </html>

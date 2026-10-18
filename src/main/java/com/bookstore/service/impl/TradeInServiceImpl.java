@@ -5,6 +5,8 @@ import com.bookstore.entity.*;
 import com.bookstore.repository.*;
 import com.bookstore.service.TradeInService;
 import com.bookstore.service.WishlistService;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -45,67 +47,108 @@ public class TradeInServiceImpl implements TradeInService {
     @Override
     @Transactional(readOnly = true)
     public AutoEstimateResponseDto calculateAutoEstimate(AutoEstimateRequestDto request) {
-        Book book = bookRepository.findById(request.getBookId())
-                .orElseThrow(() -> new RuntimeException("Không tìm thấy tựa sách với ID: " + request.getBookId()));
+        BigDecimal originalPrice = BigDecimal.ZERO;
+        if (request.getCustomOriginalPrice() != null && request.getCustomOriginalPrice().compareTo(BigDecimal.ZERO) > 0) {
+            originalPrice = request.getCustomOriginalPrice();
+        } else if (request.getBookId() != null) {
+            Book book = bookRepository.findById(request.getBookId()).orElse(null);
+            if (book != null && book.getOriginalPrice() != null) {
+                originalPrice = book.getOriginalPrice();
+            }
+        }
 
-        BigDecimal originalPrice = book.getOriginalPrice();
-        if (originalPrice == null || originalPrice.compareTo(BigDecimal.ZERO) <= 0) {
-            originalPrice = new BigDecimal("100000"); // Giá mặc định nếu chưa cập nhật giá bìa
+        if (originalPrice.compareTo(BigDecimal.ZERO) <= 0) {
+            originalPrice = new BigDecimal("80000"); // Giá niêm yết mặc định
         }
 
         // Tỷ lệ sàn theo độ mới tự đánh giá (Base Rate)
-        String grade = request.getUserConditionGrade() != null ? request.getUserConditionGrade().toUpperCase() : "GOOD";
+        String grade = request.getUserConditionGrade() != null ? request.getUserConditionGrade().toUpperCase() : "LIKE_NEW";
         BigDecimal baseRate;
         switch (grade) {
             case "LIKE_NEW":
-                baseRate = new BigDecimal("0.45"); // 45%
+                baseRate = new BigDecimal("0.50"); // 50%
                 break;
             case "VERY_GOOD":
-                baseRate = new BigDecimal("0.35"); // 35%
+                baseRate = new BigDecimal("0.40"); // 40%
                 break;
             case "GOOD":
-                baseRate = new BigDecimal("0.25"); // 25%
+                baseRate = new BigDecimal("0.30"); // 30%
                 break;
             case "ACCEPTABLE":
-                baseRate = new BigDecimal("0.15"); // 15%
+                baseRate = new BigDecimal("0.20"); // 20%
                 break;
             default:
-                baseRate = new BigDecimal("0.20");
+                baseRate = new BigDecimal("0.30");
                 break;
         }
 
-        // Khấu trừ khuyết điểm từ khảo sát (Penalty)
+        // Khấu trừ khuyết điểm từ bảng kiểm tra 10 tiêu chí (Penalty)
         Map<String, BigDecimal> penaltyBreakdown = new LinkedHashMap<>();
         BigDecimal multiplier = BigDecimal.ONE;
         BigDecimal totalPenalty = BigDecimal.ZERO;
 
-        if (request.isCoverDamaged()) {
-            penaltyBreakdown.put("coverDamaged", new BigDecimal("0.05"));
+        // 1. Bìa ngoài rách mép / trầy xước / gấp nếp: -5%
+        if (request.isCoverTorn() || request.isCoverDamaged()) {
+            penaltyBreakdown.put("coverTorn", new BigDecimal("0.05"));
             multiplier = multiplier.multiply(new BigDecimal("0.95"));
             totalPenalty = totalPenalty.add(new BigDecimal("0.05"));
         }
-        if (request.isSpineDamaged()) {
-            penaltyBreakdown.put("spineDamaged", new BigDecimal("0.10"));
+        // 2. Mất màng bóng / bong tróc mép bìa: -5%
+        if (request.isCoverPeeling()) {
+            penaltyBreakdown.put("coverPeeling", new BigDecimal("0.05"));
+            multiplier = multiplier.multiply(new BigDecimal("0.95"));
+            totalPenalty = totalPenalty.add(new BigDecimal("0.05"));
+        }
+        // 3. Gáy lỏng / rách / nứt keo chỉ: -10%
+        if (request.isSpineLoose() || request.isSpineDamaged()) {
+            penaltyBreakdown.put("spineLoose", new BigDecimal("0.10"));
             multiplier = multiplier.multiply(new BigDecimal("0.90"));
             totalPenalty = totalPenalty.add(new BigDecimal("0.10"));
         }
+        // 4. Trang ố vàng / thâm kim / ẩm nhẹ: -10%
         if (request.isYellowPages()) {
             penaltyBreakdown.put("yellowPages", new BigDecimal("0.10"));
             multiplier = multiplier.multiply(new BigDecimal("0.90"));
             totalPenalty = totalPenalty.add(new BigDecimal("0.10"));
         }
+        // 5. Viết vẽ / Highlight bút dạ: -10%
         if (request.isMarkingsPresent()) {
             penaltyBreakdown.put("markingsPresent", new BigDecimal("0.10"));
             multiplier = multiplier.multiply(new BigDecimal("0.90"));
             totalPenalty = totalPenalty.add(new BigDecimal("0.10"));
         }
+        // 6. Quăn mép / gập góc ("chó tai"): -5%
+        if (request.isDogEared()) {
+            penaltyBreakdown.put("dogEared", new BigDecimal("0.05"));
+            multiplier = multiplier.multiply(new BigDecimal("0.95"));
+            totalPenalty = totalPenalty.add(new BigDecimal("0.05"));
+        }
+        // 7. Rách nhẹ / dán băng keo phục chế: -10%
+        if (request.isTornPages()) {
+            penaltyBreakdown.put("tornPages", new BigDecimal("0.10"));
+            multiplier = multiplier.multiply(new BigDecimal("0.90"));
+            totalPenalty = totalPenalty.add(new BigDecimal("0.10"));
+        }
+        // 8. Thiếu bìa áo / bookmark gốc: -5%
         if (request.isMissingAccessory()) {
             penaltyBreakdown.put("missingAccessory", new BigDecimal("0.05"));
             multiplier = multiplier.multiply(new BigDecimal("0.95"));
             totalPenalty = totalPenalty.add(new BigDecimal("0.05"));
         }
+        // 9. Mùi ẩm mốc / phai màu chữ: -5%
+        if (request.isMoldySmell()) {
+            penaltyBreakdown.put("moldySmell", new BigDecimal("0.05"));
+            multiplier = multiplier.multiply(new BigDecimal("0.95"));
+            totalPenalty = totalPenalty.add(new BigDecimal("0.05"));
+        }
+        // 10. Tiêu chí khác tự điền: -5%
+        if (request.getOtherDefectDescription() != null && !request.getOtherDefectDescription().isBlank()) {
+            penaltyBreakdown.put("otherDefect", new BigDecimal("0.05"));
+            multiplier = multiplier.multiply(new BigDecimal("0.95"));
+            totalPenalty = totalPenalty.add(new BigDecimal("0.05"));
+        }
 
-        // Auto Estimated Price = Original Price * Base Rate * Product(1 - Penalty)
+        // Auto Estimated Price = Original Price * Base Rate * Multiplier
         BigDecimal estimatedPrice = originalPrice.multiply(baseRate).multiply(multiplier);
         // Làm tròn đến hàng nghìn đồng
         estimatedPrice = estimatedPrice.divide(new BigDecimal("1000"), 0, RoundingMode.HALF_UP).multiply(new BigDecimal("1000"));
@@ -128,59 +171,131 @@ public class TradeInServiceImpl implements TradeInService {
             throw new RuntimeException("Vui lòng đăng nhập để gửi yêu cầu bán lại sách cũ!");
         }
 
-        Book book = bookRepository.findById(dto.getBookId())
-                .orElseThrow(() -> new RuntimeException("Không tìm thấy tựa sách với ID: " + dto.getBookId()));
+        Book book = null;
+        if (dto.getBookId() != null) {
+            book = bookRepository.findById(dto.getBookId()).orElse(null);
+        }
+        if (book == null && dto.getBookTitle() != null && !dto.getBookTitle().isBlank()) {
+            // Tìm theo tên sách nhập vào
+            try {
+                Page<Book> search = bookRepository.searchBooks(dto.getBookTitle().trim(), null, null, PageRequest.of(0, 1));
+                if (search.hasContent()) {
+                    book = search.getContent().get(0);
+                }
+            } catch (Exception ignored) {}
+        }
+        if (book == null) {
+            book = bookRepository.findAll().stream().findFirst()
+                    .orElseThrow(() -> new RuntimeException("Hệ thống chưa có đầu sách nào để tham chiếu!"));
+        }
 
         Branch branch = branchRepository.findById(dto.getTargetBranchId())
                 .orElseThrow(() -> new RuntimeException("Không tìm thấy chi nhánh với ID: " + dto.getTargetBranchId()));
 
         // Tính giá ước tính sơ bộ
         AutoEstimateRequestDto estReq = new AutoEstimateRequestDto();
-        estReq.setBookId(dto.getBookId());
+        estReq.setBookId(book.getId());
+        estReq.setCustomOriginalPrice(dto.getEstimatedOriginalPrice());
         estReq.setUserConditionGrade(dto.getUserConditionGrade());
-        estReq.setCoverDamaged(dto.isCoverDamaged());
-        estReq.setSpineDamaged(dto.isSpineDamaged());
+        estReq.setCoverTorn(dto.isCoverTorn());
+        estReq.setCoverPeeling(dto.isCoverPeeling());
+        estReq.setSpineLoose(dto.isSpineLoose());
         estReq.setYellowPages(dto.isYellowPages());
         estReq.setMarkingsPresent(dto.isMarkingsPresent());
+        estReq.setDogEared(dto.isDogEared());
+        estReq.setTornPages(dto.isTornPages());
         estReq.setMissingAccessory(dto.isMissingAccessory());
+        estReq.setMoldySmell(dto.isMoldySmell());
+        estReq.setOtherDefectDescription(dto.getOtherDefectDescription());
 
         AutoEstimateResponseDto estimate = calculateAutoEstimate(estReq);
 
-        // Chuỗi JSON lưu câu trả lời khảo sát
-        String surveyJson = String.format(
-                "{\"coverDamaged\":%b,\"spineDamaged\":%b,\"yellowPages\":%b,\"markingsPresent\":%b,\"missingAccessory\":%b,\"note\":\"%s\"}",
-                dto.isCoverDamaged(), dto.isSpineDamaged(), dto.isYellowPages(), dto.isMarkingsPresent(), dto.isMissingAccessory(),
-                dto.getUserNote() != null ? dto.getUserNote().replace("\"", "\\\"") : ""
-        );
+        // Tạo mã biên lai chính thức
+        String receiptCode = (dto.getReceiptCode() != null && !dto.getReceiptCode().isBlank())
+                ? dto.getReceiptCode().trim()
+                : "BL-" + LocalDateTime.now().format(java.time.format.DateTimeFormatter.ofPattern("yyyyMMdd")) + "-" + (System.currentTimeMillis() % 10000);
+
+        // Chuỗi JSON lưu toàn bộ thông tin 3 nhóm: Thông tin sách, 10 Tiêu chí khảo sát, Biên lai giao dịch
+        Map<String, Object> surveyData = new LinkedHashMap<>();
+        
+        // Nhóm 1: Thông tin sách
+        Map<String, Object> bookInfo = new LinkedHashMap<>();
+        bookInfo.put("title", dto.getBookTitle() != null && !dto.getBookTitle().isBlank() ? dto.getBookTitle() : book.getTitle());
+        bookInfo.put("category", dto.getCategoryName() != null ? dto.getCategoryName() : (book.getCategory() != null ? book.getCategory().getName() : ""));
+        bookInfo.put("publisher", dto.getPublisher() != null ? dto.getPublisher() : book.getPublisher());
+        bookInfo.put("publicationYear", dto.getPublicationYear() != null ? dto.getPublicationYear() : book.getPublicationYear());
+        bookInfo.put("originalPrice", dto.getEstimatedOriginalPrice() != null ? dto.getEstimatedOriginalPrice() : book.getOriginalPrice());
+        surveyData.put("bookInfo", bookInfo);
+
+        // Nhóm 2: Khảo sát 10 tiêu chí
+        Map<String, Object> conditionSurvey = new LinkedHashMap<>();
+        conditionSurvey.put("coverTorn", dto.isCoverTorn());
+        conditionSurvey.put("coverPeeling", dto.isCoverPeeling());
+        conditionSurvey.put("spineLoose", dto.isSpineLoose());
+        conditionSurvey.put("yellowPages", dto.isYellowPages());
+        conditionSurvey.put("markingsPresent", dto.isMarkingsPresent());
+        conditionSurvey.put("dogEared", dto.isDogEared());
+        conditionSurvey.put("tornPages", dto.isTornPages());
+        conditionSurvey.put("missingAccessory", dto.isMissingAccessory());
+        conditionSurvey.put("moldySmell", dto.isMoldySmell());
+        conditionSurvey.put("otherDefectDescription", dto.getOtherDefectDescription() != null ? dto.getOtherDefectDescription() : "");
+        conditionSurvey.put("otherDefectImageUrl", dto.getOtherDefectImageUrl() != null ? dto.getOtherDefectImageUrl() : "");
+        surveyData.put("conditionSurvey", conditionSurvey);
+
+        // Nhóm 3: Biên lai bán sách
+        Map<String, Object> receiptInfo = new LinkedHashMap<>();
+        receiptInfo.put("receiptCode", receiptCode);
+        receiptInfo.put("customerName", dto.getCustomerName() != null ? dto.getCustomerName() : user.getFullName());
+        receiptInfo.put("customerPhone", dto.getCustomerPhone() != null ? dto.getCustomerPhone() : user.getPhone());
+        receiptInfo.put("customerEmail", dto.getCustomerEmail() != null ? dto.getCustomerEmail() : user.getEmail());
+        receiptInfo.put("customerAddress", dto.getCustomerAddress() != null ? dto.getCustomerAddress() : "");
+        receiptInfo.put("targetBranchId", branch.getId());
+        receiptInfo.put("targetBranchName", branch.getBranchName());
+        receiptInfo.put("deliveryMethod", "BRING_TO_STORE");
+        receiptInfo.put("expectedArrivalTime", dto.getExpectedArrivalTime() != null ? dto.getExpectedArrivalTime() : "");
+        surveyData.put("receipt", receiptInfo);
+
+        // Chuyển sang chuỗi JSON chuẩn
+        String surveyJson = "{}";
+        try {
+            com.fasterxml.jackson.databind.ObjectMapper mapper = new com.fasterxml.jackson.databind.ObjectMapper();
+            surveyJson = mapper.writeValueAsString(surveyData);
+        } catch (Exception ex) {
+            surveyJson = String.format("{\"receiptCode\":\"%s\",\"note\":\"%s\"}", receiptCode, dto.getUserNote() != null ? dto.getUserNote() : "");
+        }
 
         TradeInRequest request = new TradeInRequest();
-        request.setRequestCode("TI-" + LocalDateTime.now().getYear() + "-" + System.currentTimeMillis() % 100000);
+        request.setRequestCode(receiptCode);
         request.setUser(user);
         request.setBook(book);
         request.setTargetBranch(branch);
-        request.setUserConditionGrade(dto.getUserConditionGrade() != null ? dto.getUserConditionGrade().toUpperCase() : "GOOD");
+        request.setUserConditionGrade(dto.getUserConditionGrade() != null ? dto.getUserConditionGrade().toUpperCase() : "LIKE_NEW");
         request.setSurveyAnswersJson(surveyJson);
         request.setAutoEstimatedPrice(estimate.getEstimatedPrice());
         request.setStatus("PENDING_REVIEW");
-        request.setDeliveryMethod(dto.getDeliveryMethod() != null ? dto.getDeliveryMethod() : "BRING_TO_STORE");
+        request.setDeliveryMethod("BRING_TO_STORE");
         request.setCreatedAt(LocalDateTime.now());
 
         TradeInRequest saved = tradeInRequestRepository.save(request);
 
-        // Lưu danh sách ảnh thẩm định
+        // Lưu danh sách ảnh thẩm định (6 mặt + ảnh lỗi khác)
         if (dto.getImages() != null && !dto.getImages().isEmpty()) {
             List<TradeInImage> imageEntities = new ArrayList<>();
             for (TradeInImageDto imgDto : dto.getImages()) {
-                TradeInImage img = new TradeInImage(
-                        saved,
-                        imgDto.getImageUrl(),
-                        imgDto.getCloudinaryPublicId(),
-                        imgDto.getImageType() != null ? imgDto.getImageType() : "COVER"
-                );
-                imageEntities.add(img);
+                if (imgDto.getImageUrl() != null && !imgDto.getImageUrl().isBlank()) {
+                    TradeInImage img = new TradeInImage(
+                            saved,
+                            imgDto.getImageUrl(),
+                            imgDto.getCloudinaryPublicId() != null ? imgDto.getCloudinaryPublicId() : "pub_" + System.currentTimeMillis(),
+                            imgDto.getImageType() != null ? imgDto.getImageType() : "COVER_FRONT"
+                    );
+                    imageEntities.add(img);
+                }
             }
-            tradeInImageRepository.saveAll(imageEntities);
-            saved.setImages(imageEntities);
+            if (!imageEntities.isEmpty()) {
+                tradeInImageRepository.saveAll(imageEntities);
+                saved.setImages(imageEntities);
+            }
         }
 
         return mapToDto(saved);

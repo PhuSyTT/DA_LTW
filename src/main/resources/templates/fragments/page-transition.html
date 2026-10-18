@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:fragment="transitionStyles">
+    <!-- Book4Life Page Transition Styles -->
+    <link th:href="@{/css/page-transition.css}" href="/css/page-transition.css" rel="stylesheet"/>
+</head>
+<body>
+
+<!-- Book4Life Transition Overlay Fragment -->
+<div th:fragment="transitionOverlay" id="page-transition-overlay" style="display: none;" class="fade-out" aria-hidden="true">
+    <div class="b4l-transition-backdrop"></div>
+    <div class="b4l-transition-container">
+        <!-- Vùng logo và hiệu ứng xoay hào quang -->
+        <div class="b4l-logo-wrapper">
+            <div class="b4l-pulse-aura"></div>
+            <div class="b4l-spinner-ring"></div>
+            <div class="b4l-spinner-inner"></div>
+            <div class="b4l-logo-badge">
+                <img th:src="@{/images/book4life-logo.png}"
+                     src="/images/book4life-logo.png"
+                     alt="Book4Life Logo"
+                     class="b4l-logo-img"/>
+            </div>
+        </div>
+
+        <!-- Tên thương hiệu và thông điệp mở trang -->
+        <div class="b4l-brand-info">
+            <h3 class="b4l-brand-name">Book4Life</h3>
+            <p class="b4l-brand-status">
+                <span>Đang lật mở trang sách</span>
+                <span class="b4l-dots">
+                    <span>.</span><span>.</span><span>.</span>
+                </span>
+            </p>
+        </div>
+
+        <!-- Thanh tiến trình khoảng 2 giây -->
+        <div class="b4l-progress-track">
+            <div class="b4l-progress-fill"></div>
+        </div>
+    </div>
+</div>
+
+<!-- Book4Life Transition Script Fragment -->
+<th:block th:fragment="transitionScripts">
+    <script th:src="@{/js/page-transition.js}" src="/js/page-transition.js"></script>
+</th:block>
+
+</body>
+</html>
+

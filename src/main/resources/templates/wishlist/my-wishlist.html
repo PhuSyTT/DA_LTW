@@ -46,8 +46,9 @@
         };
     </script>
     <style>
-        * { font-family: 'Plus Jakarta Sans', 'Inter', sans-serif !important; }
+        body, input, button, select, textarea, p, span, h1, h2, h3, h4, h5, h6, a, label, div { font-family: 'Plus Jakarta Sans', 'Inter', sans-serif; }
         .material-symbols-outlined { font-family: 'Material Symbols Outlined' !important; }
+        .fa, .fas, .far, .fab, .fa-solid, .fa-regular, .fa-brands, [class*="fa-"]::before { font-family: 'Font Awesome 6 Free' !important; }
         .toast-notification {
             position: fixed; bottom: 24px; right: 24px; background: #2C1E16; color: #FAF9F6;
             padding: 14px 22px; border-radius: 12px; box-shadow: 0 10px 30px rgba(0,0,0,0.25);
@@ -56,8 +57,12 @@
         }
         .toast-notification.show { transform: translateY(0); }
     </style>
+    <!-- Page Transition Styles -->
+    <th:block th:replace="~{fragments/page-transition :: transitionStyles}"></th:block>
 </head>
 <body class="bg-background font-sans text-on-surface antialiased min-h-screen flex flex-col justify-between">
+    <!-- Page Transition Overlay -->
+    <div th:replace="~{fragments/page-transition :: transitionOverlay}"></div>
 
     <div id="toastNotification" class="toast-notification">
         <span class="material-symbols-outlined text-primary-container" id="toastIcon">check_circle</span>
@@ -364,5 +369,7 @@
 
         document.addEventListener('DOMContentLoaded', loadMyWishlists);
     </script>
+    <!-- Page Transition Script -->
+    <th:block th:replace="~{fragments/page-transition :: transitionScripts}"></th:block>
 </body>
 </html>

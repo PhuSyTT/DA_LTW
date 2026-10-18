@@ -68,6 +68,10 @@ public class Branch {
         return branchName;
     }
 
+    public String getName() {
+        return branchName;
+    }
+
     public void setBranchName(String branchName) {
         this.branchName = branchName;
     }

@@ -17,10 +17,26 @@ public class TradeInApiController {
 
     private final TradeInService tradeInService;
     private final UserRepository userRepository;
+    private final com.bookstore.service.CloudinaryService cloudinaryService;
 
-    public TradeInApiController(TradeInService tradeInService, UserRepository userRepository) {
+    public TradeInApiController(TradeInService tradeInService, UserRepository userRepository, com.bookstore.service.CloudinaryService cloudinaryService) {
         this.tradeInService = tradeInService;
         this.userRepository = userRepository;
+        this.cloudinaryService = cloudinaryService;
+    }
+
+    // Tải ảnh thực tế của sách lên máy chủ / Cloudinary (FR-TRD-02)
+    @PostMapping(value = "/upload-image", consumes = org.springframework.http.MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<?> uploadTradeInImage(@RequestParam("file") org.springframework.web.multipart.MultipartFile file) {
+        try {
+            com.bookstore.service.CloudinaryService.UploadResult result = cloudinaryService.uploadImage(file, "trade-in");
+            return ResponseEntity.ok(java.util.Map.of(
+                    "imageUrl", result.imageUrl(),
+                    "publicId", result.publicId()
+            ));
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body("Lỗi tải ảnh: " + e.getMessage());
+        }
     }
 
     // Dự toán giá sơ bộ trực tiếp theo bảng khảo sát (FR-TRD-03)

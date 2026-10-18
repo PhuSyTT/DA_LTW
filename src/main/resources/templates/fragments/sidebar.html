@@ -40,9 +40,13 @@
             <i class="fas fa-heart"></i>
             <span>Săn Sách (Wishlist) <span class="badge bg-danger ms-auto" style="font-size: 0.65rem;">N6</span></span>
         </a>
-        <a href="javascript:void(0)" class="sidebar-link text-muted" title="Sắp phát triển ở Nhóm 5">
+        <a th:href="@{/admin/transfers}" class="sidebar-link" th:classappend="${activeMenu == 'transfers'} ? 'active' : ''">
             <i class="fas fa-dolly"></i>
-            <span>Luân Chuyển Kho <span class="badge bg-secondary ms-auto" style="font-size: 0.65rem;">N5</span></span>
+            <span>Luân Chuyển Kho <span class="badge bg-info text-dark ms-auto" style="font-size: 0.65rem;">N5</span></span>
+        </a>
+        <a th:href="@{/admin/coupons}" class="sidebar-link" th:classappend="${activeMenu == 'coupons'} ? 'active' : ''">
+            <i class="fas fa-ticket-simple"></i>
+            <span>Khuyến Mãi & Coupon <span class="badge bg-success ms-auto" style="font-size: 0.65rem;">N7</span></span>
         </a>
         <a th:href="@{/admin/trade-in}" class="sidebar-link" th:classappend="${activeMenu == 'tradeIn'} ? 'active' : ''">
             <i class="fas fa-hand-holding-dollar"></i>

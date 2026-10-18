@@ -47,6 +47,7 @@ public class SubOrder {
     protected void onUpdate() {
         updatedAt = java.time.LocalDateTime.now();
     }
+
 	public Long getId() {
 		return id;
 	}

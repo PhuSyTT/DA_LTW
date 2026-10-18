@@ -116,6 +116,10 @@ public class Book {
         return publishYear;
     }
 
+    public Integer getPublicationYear() {
+        return publishYear;
+    }
+
     public void setPublishYear(Integer publishYear) {
         this.publishYear = publishYear;
     }

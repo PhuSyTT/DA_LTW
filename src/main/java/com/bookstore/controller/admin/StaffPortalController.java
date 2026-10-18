@@ -12,10 +12,19 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestParam;
 
+import com.bookstore.security.CustomUserDetails;
+import com.bookstore.service.CategoryService;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+
+import com.bookstore.service.TransferService;
+import com.bookstore.repository.CouponRepository;
+
 /**
  * MVC Controller phục vụ render giao diện Thymeleaf cho:
  * - Nhóm 4: Xử lý đơn hàng đa chi nhánh (Order Fulfillment & Realtime Updates)
+ * - Nhóm 5: Luân chuyển kho liên chi nhánh (Internal Stock Transfer)
  * - Nhóm 6: Danh sách mong muốn Săn sách (Wishlist & Restock Alert)
+ * - Nhóm 7: Quản lý Khuyến mãi & Mã giảm giá đa điều kiện (Coupons & Discounts)
  * - Nhóm 8: Thu mua sách cũ từ người dùng (Trade-in / Buy-back Workflow)
  */
 @Controller
@@ -26,17 +35,26 @@ public class StaffPortalController {
     private final WishlistService wishlistService;
     private final BranchService branchService;
     private final MasterDataService masterDataService;
+    private final CategoryService categoryService;
+    private final TransferService transferService;
+    private final CouponRepository couponRepository;
 
     public StaffPortalController(OrderFulfillmentService fulfillmentService,
                                  TradeInService tradeInService,
                                  WishlistService wishlistService,
                                  BranchService branchService,
-                                 MasterDataService masterDataService) {
+                                 MasterDataService masterDataService,
+                                 CategoryService categoryService,
+                                 TransferService transferService,
+                                 CouponRepository couponRepository) {
         this.fulfillmentService = fulfillmentService;
         this.tradeInService = tradeInService;
         this.wishlistService = wishlistService;
         this.branchService = branchService;
         this.masterDataService = masterDataService;
+        this.categoryService = categoryService;
+        this.transferService = transferService;
+        this.couponRepository = couponRepository;
     }
 
     // =================================================================
@@ -177,12 +195,16 @@ public class StaffPortalController {
      * URL: /trade-in/new
      */
     @GetMapping("/trade-in/new")
-    public String newTradeInForm(Model model) {
+    public String newTradeInForm(Model model, @AuthenticationPrincipal CustomUserDetails userDetails) {
         try {
             model.addAttribute("branches", branchService.getAllActiveBranches());
+            model.addAttribute("categories", categoryService.getAllCategories());
             model.addAttribute("books", masterDataService.searchBooks(null, null, null, PageRequest.of(0, 200)).getContent());
+            if (userDetails != null && userDetails.getUser() != null) {
+                model.addAttribute("currentUser", userDetails.getUser());
+            }
         } catch (Exception ignored) {}
-        model.addAttribute("pageTitle", "Bán Lại Sách Cũ - Book4Life Trade-in");
+        model.addAttribute("pageTitle", "Đăng Ký Bán Sách Cũ - Book4Life Trade-in");
         return "trade-in/form";
     }
 
@@ -203,5 +225,44 @@ public class StaffPortalController {
         } catch (Exception ignored) {}
         model.addAttribute("pageTitle", "Danh Sách Săn Sách - Book4Life");
         return "wishlist/my-wishlist";
+    }
+
+    // =================================================================
+    // NHÓM 5: LUÂN CHUYỂN KHO LIÊN CHI NHÁNH (Internal Stock Transfer)
+    // =================================================================
+
+    /**
+     * Trang quản lý luân chuyển kho liên chi nhánh (FR-TRF-01, FR-TRF-03, FR-TRF-04)
+     * URL: /admin/transfers
+     */
+    @GetMapping("/admin/transfers")
+    public String transferList(Model model) {
+        try {
+            model.addAttribute("transfers", transferService.getAllTransfersForAdmin());
+            model.addAttribute("stats", transferService.getTransferStatistics());
+            model.addAttribute("branches", branchService.getAllActiveBranches());
+        } catch (Exception ignored) {}
+        model.addAttribute("activeMenu", "transfers");
+        model.addAttribute("pageTitle", "Luân Chuyển Kho Liên Chi Nhánh (Nhóm 5) - Book4Life");
+        return "admin/transfers/list";
+    }
+
+    // =================================================================
+    // NHÓM 7: QUẢN LÝ KHUYẾN MÃI & MÃ GIẢM GIÁ (Coupons & Discounts)
+    // =================================================================
+
+    /**
+     * Trang quản lý mã giảm giá đa điều kiện (FR-CPN-01, FR-CPN-02, FR-CPN-03)
+     * URL: /admin/coupons
+     */
+    @GetMapping("/admin/coupons")
+    public String couponList(Model model) {
+        try {
+            model.addAttribute("coupons", couponRepository.findAll());
+            model.addAttribute("branches", branchService.getAllActiveBranches());
+        } catch (Exception ignored) {}
+        model.addAttribute("activeMenu", "coupons");
+        model.addAttribute("pageTitle", "Quản Lý Khuyến Mãi & Mã Giảm Giá (Nhóm 7) - Book4Life");
+        return "admin/coupons/list";
     }
 }

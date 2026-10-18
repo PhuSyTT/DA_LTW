@@ -166,7 +166,7 @@
                             <img th:src="${item.primaryImageUrl} ?: (${item.bookCoverImageUrl} ?: 'https://images.unsplash.com/photo-1544716278-ca5e3f4abd8c?w=100&q=80')"
                                  class="book-cover-thumb rounded shadow-sm border"
                                  alt="Ảnh bìa"
-                                 style="cursor: pointer;"
+                                 style="width: 44px; height: 60px; object-fit: cover; border-radius: 6px; cursor: pointer; flex-shrink: 0;"
                                  th:data-primary="${item.primaryImageUrl} ?: ${item.bookCoverImageUrl}"
                                  th:data-title="${item.bookTitle}"
                                  onclick="previewImage(this)">

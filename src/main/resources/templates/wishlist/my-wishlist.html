@@ -110,10 +110,24 @@
         <!-- Title Banner -->
         <div class="mb-8">
             <span class="px-3 py-1 rounded-full text-xs font-bold bg-rose-100 text-rose-800 uppercase tracking-wider inline-flex items-center gap-1">
-                <span class="material-symbols-outlined text-sm">notifications_active</span> Chức năng Săn sách & Chuông báo Restock N6
+                <span class="material-symbols-outlined text-sm">favorite</span> Danh Sách Yêu Thích Theo Tài Khoản
             </span>
-            <h1 class="text-3xl sm:text-4xl font-extrabold text-on-surface mt-2 tracking-tight">Danh Sách Săn Sách Yêu Thích</h1>
-            <p class="text-secondary mt-1 text-sm sm:text-base">Đăng ký tựa sách bạn đang tìm kiếm. Ngay khi có cuốn sách phù hợp được nhập kho hoặc thu mua về, hệ thống sẽ lập tức gửi thông báo ưu tiên tới bạn.</p>
+            <h1 class="text-3xl sm:text-4xl font-extrabold text-on-surface mt-2 tracking-tight">Tủ Sách Yêu Thích Của Bạn</h1>
+            <p class="text-secondary mt-1 text-sm sm:text-base">Các tựa sách yêu thích được lưu tự động theo tài khoản khách hàng. Ngay khi có cuốn sách phù hợp về kho hoặc hạ giá, hệ thống sẽ gửi thông báo đến bạn.</p>
+        </div>
+
+        <!-- Banner cảnh báo chưa đăng nhập -->
+        <div th:unless="${isLoggedIn}" class="mb-8 p-4 sm:p-5 rounded-2xl bg-amber-50 border border-amber-200/80 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 shadow-sm">
+            <div class="flex items-center gap-3">
+                <span class="material-symbols-outlined text-amber-700 text-3xl">account_circle</span>
+                <div>
+                    <h4 class="font-bold text-sm text-amber-900">Bạn chưa đăng nhập tài khoản</h4>
+                    <p class="text-xs text-amber-800/90 mt-0.5">Vui lòng đăng nhập để đồng bộ và lưu giữ danh sách yêu thích vĩnh viễn theo tài khoản cá nhân của bạn.</p>
+                </div>
+            </div>
+            <a th:href="@{/login}" class="px-5 py-2.5 rounded-xl bg-amber-700 text-white font-bold text-xs hover:bg-amber-800 transition-all shadow-sm shrink-0">
+                Đăng nhập ngay
+            </a>
         </div>
 
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">

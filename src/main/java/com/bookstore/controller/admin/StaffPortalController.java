@@ -235,16 +235,27 @@ public class StaffPortalController {
      */
     @GetMapping("/my-wishlist")
     public String myWishlist(
+            @AuthenticationPrincipal CustomUserDetails userDetails,
             @RequestParam(name = "userId", required = false) Long userId,
             Model model) {
         try {
-            if (userId != null) {
-                model.addAttribute("wishlists", wishlistService.getUserWishlists(userId));
+            Long effectiveUserId = (userDetails != null && userDetails.getUser() != null)
+                    ? userDetails.getUser().getId()
+                    : userId;
+            boolean isLoggedIn = (userDetails != null && userDetails.getUser() != null);
+            model.addAttribute("isLoggedIn", isLoggedIn);
+            model.addAttribute("currentUser", isLoggedIn ? userDetails.getUser() : null);
+
+            if (effectiveUserId != null) {
+                model.addAttribute("wishlists", wishlistService.getUserWishlists(effectiveUserId));
+                model.addAttribute("currentUserId", effectiveUserId);
+            } else {
+                model.addAttribute("wishlists", java.util.Collections.emptyList());
             }
             model.addAttribute("branches", branchService.getAllActiveBranches());
             model.addAttribute("books", masterDataService.searchBooks(null, null, null, PageRequest.of(0, 200)).getContent());
         } catch (Exception ignored) {}
-        model.addAttribute("pageTitle", "Danh Sách Săn Sách - Book4Life");
+        model.addAttribute("pageTitle", "Danh Sách Yêu Thích - Book4Life");
         return "wishlist/my-wishlist";
     }
 

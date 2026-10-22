@@ -297,6 +297,16 @@
                             <span class="material-symbols-outlined text-[20px]">bolt</span>
                             <span>Mua Ngay</span>
                         </button>
+                        <!-- Nút Thêm vào Danh sách yêu thích theo tài khoản -->
+                        <button type="button" 
+                                id="btnWishlist"
+                                th:data-book-id="${book.id}"
+                                onclick="toggleWishlistDetail(this.dataset.bookId)"
+                                class="px-5 py-3 rounded-xl border border-rose-200 bg-rose-50/70 text-rose-700 hover:bg-rose-100 hover:scale-105 active:scale-95 transition-all flex items-center gap-2 font-bold text-sm shadow-sm"
+                                title="Lưu vào danh sách yêu thích">
+                            <span id="wishlistIcon" class="material-symbols-outlined text-[20px] text-rose-600">favorite_border</span>
+                            <span id="wishlistText">Yêu Thích</span>
+                        </button>
                         <a th:href="@{/books}" class="px-5 py-3 rounded-xl bg-surface-container-low border border-outline-variant/40 text-on-surface text-sm font-bold hover:bg-surface-container-high transition-colors">
                             Tiếp tục xem
                         </a>
@@ -458,7 +468,63 @@
             }
         }
 
-        document.addEventListener('DOMContentLoaded', fetchCartCount);
+        async function checkWishlistStatus() {
+            const btn = document.getElementById('btnWishlist');
+            if (!btn) return;
+            const bookId = btn.dataset.bookId;
+            try {
+                const res = await fetch(`/api/wishlists/status/${bookId}`);
+                if (res.ok) {
+                    const data = await res.json();
+                    updateWishlistButton(data.inWishlist);
+                }
+            } catch (e) {
+                console.error('Error checking wishlist status', e);
+            }
+        }
+
+        function updateWishlistButton(inWishlist) {
+            const icon = document.getElementById('wishlistIcon');
+            const text = document.getElementById('wishlistText');
+            const btn = document.getElementById('btnWishlist');
+            if (!icon || !btn) return;
+            if (inWishlist) {
+                icon.innerText = 'favorite';
+                icon.className = 'material-symbols-outlined text-[20px] text-white';
+                if (text) text.innerText = 'Đã Lưu Yêu Thích';
+                btn.className = 'px-5 py-3 rounded-xl bg-rose-600 text-white hover:bg-rose-700 hover:scale-105 active:scale-95 transition-all flex items-center gap-2 font-bold text-sm shadow-md';
+            } else {
+                icon.innerText = 'favorite_border';
+                icon.className = 'material-symbols-outlined text-[20px] text-rose-600';
+                if (text) text.innerText = 'Yêu Thích';
+                btn.className = 'px-5 py-3 rounded-xl border border-rose-200 bg-rose-50/70 text-rose-700 hover:bg-rose-100 hover:scale-105 active:scale-95 transition-all flex items-center gap-2 font-bold text-sm shadow-sm';
+            }
+        }
+
+        async function toggleWishlistDetail(bookId) {
+            try {
+                const res = await fetch(`/api/wishlists/toggle/${bookId}`, { method: 'POST' });
+                if (res.status === 401) {
+                    showToast('Vui lòng đăng nhập để lưu sách yêu thích!');
+                    setTimeout(() => window.location.href = '/login', 1500);
+                    return;
+                }
+                const data = await res.json();
+                if (data.success) {
+                    updateWishlistButton(data.inWishlist);
+                    showToast(data.message);
+                } else {
+                    showToast(data.message || 'Không thể cập nhật danh sách yêu thích.');
+                }
+            } catch (err) {
+                showToast('Lỗi kết nối khi cập nhật danh sách yêu thích.');
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            fetchCartCount();
+            checkWishlistStatus();
+        });
     </script>
     <!-- Chatbox AI Widget -->
     <div th:replace="~{fragments/chatbox :: chatboxWidget}"></div>

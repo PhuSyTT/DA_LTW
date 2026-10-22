@@ -1,14 +1,81 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
 <head th:fragment="transitionStyles">
-    <!-- Book4Life Modern Top Loading Bar -->
+    <!-- Book4Life Video Page Transition Styles -->
     <link th:href="@{/css/page-transition.css}" href="/css/page-transition.css" rel="stylesheet"/>
 </head>
 <body>
 
-<!-- Book4Life Top Loading Bar (Modern, Non-blocking, YouTube/GitHub style) -->
-<div th:fragment="transitionOverlay" id="page-transition-overlay" class="b4l-top-loader" aria-hidden="true">
-    <div class="b4l-top-loader-bar"></div>
+<!-- Book4Life Transition Overlay with Video, Logo and Progress -->
+<div th:fragment="transitionOverlay" id="page-transition-overlay" class="b4l-transition-screen" aria-hidden="true" style="display: none;">
+    <div class="b4l-transition-backdrop"></div>
+    <div class="b4l-transition-card">
+        <!-- 1. Phía trên: Logo shop -->
+        <div class="b4l-transition-header">
+            <div class="b4l-logo-badge">
+                <img th:src="@{/images/book4life-logo.png}"
+                     src="/images/book4life-logo.png"
+                     onerror="this.onerror=null; this.src='https://lh3.googleusercontent.com/aida/AEtjO1VFRXY_NxriMnSUoyOlnJkpi_znEOfbT5nqVF_bWOeMuQrL28jtA3tETNkUlNIEvXJm19CEHOkGmCwnVISoEMhl5cfEIGWneqFqQTEH2YVxCJT61G2j2-6D0aqTouvk9S4LMHzp7_D4BtPEKRDgZ-a42hUwlA9vSusc7zVTRfWF9HyMuFlJPcKDbdvyCu6om3wwYvn8--WJGC61Nv6WZJ_H2WA8IPtCQmf7qoGvV5cvAnQdgl-cs0nr3g';"
+                     alt="Book4Life Logo"
+                     class="b4l-logo-img"/>
+            </div>
+            <div class="b4l-brand-info">
+                <h3 class="b4l-brand-name">Book4Life</h3>
+                <span class="b4l-brand-tagline">Hiệu Sách Cũ Tri Thức</span>
+            </div>
+        </div>
+
+        <!-- 2. Ở giữa: Video lật mở những trang sách -->
+        <div class="b4l-video-wrapper">
+            <video id="b4l-loading-video" class="b4l-loading-video" autoplay loop muted playsinline preload="auto">
+                <source th:src="@{/videos/book-flip.mp4}" src="/videos/book-flip.mp4" type="video/mp4"/>
+            </video>
+            <!-- Hoạt cảnh 3D lật trang sách chân thực (CSS 3D Flip Book) -->
+            <div class="b4l-flipbook" id="b4l-flipbook-anim">
+                <div class="b4l-book-spine"></div>
+                <div class="b4l-book-page b4l-page-static-left">
+                    <div class="b4l-page-lines">
+                        <span></span><span></span><span></span><span></span>
+                    </div>
+                </div>
+                <div class="b4l-book-page b4l-page-flipping b4l-page-flipping-1">
+                    <div class="b4l-page-front">
+                        <div class="b4l-page-lines"><span></span><span></span><span></span></div>
+                    </div>
+                    <div class="b4l-page-back">
+                        <div class="b4l-page-lines"><span></span><span></span><span></span></div>
+                    </div>
+                </div>
+                <div class="b4l-book-page b4l-page-flipping b4l-page-flipping-2">
+                    <div class="b4l-page-front">
+                        <div class="b4l-page-lines"><span></span><span></span><span></span></div>
+                    </div>
+                    <div class="b4l-page-back">
+                        <div class="b4l-page-lines"><span></span><span></span><span></span></div>
+                    </div>
+                </div>
+                <div class="b4l-book-page b4l-page-static-right">
+                    <div class="b4l-page-lines">
+                        <span></span><span></span><span></span><span></span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 3. Phía dưới: Thanh tiến trình đang "lật mở những trang sách" -->
+        <div class="b4l-transition-footer">
+            <p class="b4l-status-message">
+                <i class="fas fa-book-open b4l-status-icon"></i>
+                <span class="b4l-status-title">Đang lật mở những trang sách</span>
+                <span class="b4l-dots">
+                    <span>.</span><span>.</span><span>.</span>
+                </span>
+            </p>
+            <div class="b4l-progress-track">
+                <div class="b4l-progress-fill"></div>
+            </div>
+        </div>
+    </div>
 </div>
 
 <!-- Book4Life Transition Script Fragment -->

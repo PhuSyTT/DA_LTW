@@ -1,84 +1,386 @@
 /* ==========================================================================
-   Book4Life - Modern Top Loading Bar & Smooth Page Load
-   Thay thế vòng xoay chờ toàn màn hình bằng thanh tiến trình siêu nhẹ (YouTube/GitHub style)
+   Book4Life - Literary Page Transition with Video & 3D Flipping Book
+   Phía trên: Logo shop
+   Ở giữa: Video / Hoạt cảnh 3D lật mở những trang sách
+   Phía dưới: Thanh tiến trình đang "lật mở những trang sách"
    ========================================================================== */
 
 #page-transition-overlay,
-.b4l-top-loader {
+.b4l-transition-screen {
     position: fixed;
     top: 0;
     left: 0;
-    width: 100%;
-    height: 3px;
+    width: 100vw;
+    height: 100vh;
     z-index: 99999999;
-    pointer-events: none;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
     opacity: 0;
     visibility: hidden;
-    background: transparent;
-    transition: opacity 0.2s ease, visibility 0.2s ease;
+    transition: opacity 0.25s cubic-bezier(0.4, 0, 0.2, 1),
+                visibility 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+    user-select: none;
+    -webkit-user-select: none;
+    pointer-events: all;
 }
 
 #page-transition-overlay.is-loading,
-.b4l-top-loader.is-loading {
+.b4l-transition-screen.is-loading {
     opacity: 1;
     visibility: visible;
 }
 
-/* Thanh tiến trình màu vàng hổ phách ấm áp đặc trưng của Book4Life */
-.b4l-top-loader-bar {
-    height: 100%;
-    width: 0%;
-    background: linear-gradient(90deg, #835500 0%, #d97706 40%, #f59e0b 75%, #fbbf24 100%);
-    box-shadow: 0 0 10px rgba(245, 158, 11, 0.75), 0 0 4px rgba(217, 119, 6, 0.4);
-    border-radius: 0 2px 2px 0;
-    transition: width 0.22s cubic-bezier(0.1, 0.8, 0.2, 1);
-    position: relative;
-    will-change: width;
+/* Nền mờ ấm áp phong cách giấy văn học cổ điển */
+.b4l-transition-backdrop {
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(circle at 50% 45%, rgba(255, 255, 255, 0.96) 0%, rgba(250, 248, 244, 0.94) 55%, rgba(244, 238, 226, 0.92) 100%);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
 }
 
-/* Hiệu ứng vầng sáng lướt ở đầu thanh tiến trình */
-.b4l-top-loader-bar::after {
+/* Thẻ trung tâm nổi bật */
+.b4l-transition-card {
+    position: relative;
+    z-index: 2;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding: 28px 36px;
+    max-width: 440px;
+    width: 90%;
+    border-radius: 24px;
+    background: rgba(255, 255, 255, 0.7);
+    border: 1px solid rgba(131, 85, 0, 0.12);
+    box-shadow: 0 20px 45px rgba(131, 85, 0, 0.08), 0 4px 12px rgba(0, 0, 0, 0.03);
+    animation: b4lCardEnter 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes b4lCardEnter {
+    from {
+        opacity: 0;
+        transform: scale(0.96) translateY(8px);
+    }
+    to {
+        opacity: 1;
+        transform: scale(1) translateY(0);
+    }
+}
+
+/* --------------------------------------------------------------------------
+   1. PHÍA TRÊN: LOGO SHOP
+   -------------------------------------------------------------------------- */
+.b4l-transition-header {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 12px;
+}
+
+.b4l-logo-badge {
+    width: 68px;
+    height: 68px;
+    border-radius: 50%;
+    background: #ffffff;
+    padding: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 2px solid rgba(245, 166, 35, 0.35);
+    box-shadow: 0 8px 20px rgba(131, 85, 0, 0.12), inset 0 1px 2px rgba(255, 255, 255, 0.9);
+    animation: b4lLogoBreath 2.2s ease-in-out infinite;
+}
+
+.b4l-logo-img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    filter: drop-shadow(0 2px 4px rgba(131, 85, 0, 0.15));
+}
+
+.b4l-brand-info {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.b4l-brand-name {
+    font-family: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
+    font-size: 1.3rem;
+    font-weight: 800;
+    color: #835500;
+    letter-spacing: -0.02em;
+    margin: 0;
+    line-height: 1.2;
+}
+
+.b4l-brand-tagline {
+    font-family: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
+    font-size: 0.72rem;
+    font-weight: 600;
+    color: #a89179;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+}
+
+@keyframes b4lLogoBreath {
+    0%, 100% { transform: scale(0.97); }
+    50% { transform: scale(1.03); }
+}
+
+/* --------------------------------------------------------------------------
+   2. Ở GIỮA: VÙNG VIDEO / HOẠT CẢNH LẬT MỞ TRANG SÁCH
+   -------------------------------------------------------------------------- */
+.b4l-video-wrapper {
+    position: relative;
+    width: 200px;
+    height: 120px;
+    margin: 8px 0 14px 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    perspective: 800px;
+    overflow: hidden;
+    border-radius: 14px;
+}
+
+/* Video element */
+.b4l-loading-video {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: 12px;
+    display: block;
+    box-shadow: 0 4px 14px rgba(131, 85, 0, 0.12);
+}
+
+/* Hoạt cảnh 3D Book Flip (Tự động hiển thị song song hoặc khi chưa nạp video) */
+.b4l-flipbook {
+    position: absolute;
+    width: 130px;
+    height: 90px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    perspective: 700px;
+    transform-style: preserve-3d;
+    pointer-events: none;
+}
+
+.b4l-book-spine {
+    position: absolute;
+    left: 50%;
+    top: 0;
+    bottom: 0;
+    width: 4px;
+    background: #603a00;
+    border-radius: 2px;
+    transform: translateX(-50%);
+    z-index: 10;
+    box-shadow: 0 0 6px rgba(0, 0, 0, 0.2);
+}
+
+.b4l-book-page {
+    position: absolute;
+    top: 4px;
+    bottom: 4px;
+    width: 58px;
+    background: #fdfbf7;
+    border: 1px solid rgba(131, 85, 0, 0.14);
+    box-shadow: 0 3px 6px rgba(0, 0, 0, 0.05);
+    overflow: hidden;
+}
+
+.b4l-page-static-left {
+    left: 6px;
+    border-radius: 4px 0 0 4px;
+    border-right: none;
+    background: linear-gradient(90deg, #f3ede2 0%, #fdfbf7 100%);
+}
+
+.b4l-page-static-right {
+    right: 6px;
+    border-radius: 0 4px 4px 0;
+    border-left: none;
+    background: linear-gradient(-90deg, #f3ede2 0%, #fdfbf7 100%);
+}
+
+.b4l-page-lines {
+    padding: 10px 8px;
+    display: flex;
+    flex-direction: column;
+    gap: 7px;
+}
+
+.b4l-page-lines span {
+    display: block;
+    height: 2px;
+    background: rgba(131, 85, 0, 0.15);
+    border-radius: 2px;
+}
+
+.b4l-page-lines span:nth-child(even) {
+    width: 80%;
+}
+
+.b4l-page-lines span:last-child {
+    width: 60%;
+}
+
+/* Các trang lật xoay 3D (3D Flipping Pages) */
+.b4l-page-flipping {
+    right: 6px;
+    border-radius: 0 4px 4px 0;
+    transform-origin: left center;
+    transform-style: preserve-3d;
+}
+
+.b4l-page-flipping-1 {
+    animation: b4lPageTurn 1.8s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+}
+
+.b4l-page-flipping-2 {
+    animation: b4lPageTurn 1.8s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+    animation-delay: 0.9s;
+}
+
+.b4l-page-front,
+.b4l-page-back {
+    position: absolute;
+    inset: 0;
+    background: #fdfbf7;
+    backface-visibility: hidden;
+    -webkit-backface-visibility: hidden;
+    border: 1px solid rgba(131, 85, 0, 0.14);
+}
+
+.b4l-page-back {
+    transform: rotateY(180deg);
+    border-radius: 4px 0 0 4px;
+    background: #f9f5ed;
+}
+
+@keyframes b4lPageTurn {
+    0% {
+        transform: rotateY(0deg);
+        box-shadow: 0 3px 6px rgba(0, 0, 0, 0.05);
+    }
+    45% {
+        box-shadow: -8px 8px 16px rgba(131, 85, 0, 0.15);
+    }
+    100% {
+        transform: rotateY(-180deg);
+        box-shadow: 0 3px 6px rgba(0, 0, 0, 0.05);
+    }
+}
+
+/* --------------------------------------------------------------------------
+   3. PHÍA DƯỚI: THANH TIẾN TRÌNH ĐANG "LẬT MỞ NHỮNG TRANG SÁCH"
+   -------------------------------------------------------------------------- */
+.b4l-transition-footer {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    width: 100%;
+}
+
+.b4l-status-message {
+    font-family: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
+    font-size: 0.85rem;
+    font-weight: 700;
+    color: #835500;
+    margin: 0;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.b4l-status-icon {
+    font-size: 0.9rem;
+    color: #d97706;
+    animation: b4lIconBounce 1.4s ease-in-out infinite;
+}
+
+@keyframes b4lIconBounce {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-2px); }
+}
+
+.b4l-status-title {
+    letter-spacing: -0.01em;
+}
+
+.b4l-dots span {
+    display: inline-block;
+    animation: b4lDotBlink 1.4s infinite;
+}
+.b4l-dots span:nth-child(2) { animation-delay: 0.25s; }
+.b4l-dots span:nth-child(3) { animation-delay: 0.5s; }
+
+@keyframes b4lDotBlink {
+    0%, 20% { opacity: 0.2; transform: translateY(0); }
+    50% { opacity: 1; transform: translateY(-1px); }
+    100% { opacity: 0.2; transform: translateY(0); }
+}
+
+/* Thanh tiến trình lướt nhịp nhàng */
+.b4l-progress-track {
+    width: 220px;
+    height: 5px;
+    background: rgba(131, 85, 0, 0.1);
+    border-radius: 9999px;
+    overflow: hidden;
+    position: relative;
+    box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.05);
+}
+
+.b4l-progress-fill {
+    width: 0%;
+    height: 100%;
+    background: linear-gradient(90deg, #835500 0%, #f5a623 55%, #ffd080 100%);
+    border-radius: 9999px;
+    box-shadow: 0 0 10px rgba(245, 166, 35, 0.7);
+    transition: width 0.25s cubic-bezier(0.1, 0.8, 0.2, 1);
+    will-change: width;
+    position: relative;
+}
+
+.b4l-progress-fill::after {
     content: '';
     position: absolute;
-    top: -2px;
+    top: 0;
     right: 0;
-    width: 70px;
-    height: 7px;
-    background: radial-gradient(circle, rgba(255, 255, 255, 0.95) 0%, rgba(245, 158, 11, 0.5) 60%, transparent 100%);
-    opacity: 0.9;
-    pointer-events: none;
-    animation: b4lGlowPulse 0.9s infinite alternate;
+    bottom: 0;
+    width: 30px;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.85), transparent);
+    border-radius: 9999px;
+    animation: b4lShimmer 1.2s ease-in-out infinite;
 }
 
-@keyframes b4lGlowPulse {
-    0% { transform: scale(0.9); opacity: 0.6; }
-    100% { transform: scale(1.15); opacity: 1; }
+@keyframes b4lShimmer {
+    0%, 100% { opacity: 0.3; }
+    50% { opacity: 1; }
 }
 
-/* Vô hiệu hóa và ẩn hoàn toàn toàn bộ overlay vòng xoay cũ nếu còn tồn tại */
-.b4l-transition-backdrop,
-.b4l-transition-container,
+/* Ẩn các class cũ nếu có */
 .b4l-spinner-ring,
 .b4l-spinner-inner,
-.b4l-pulse-aura,
-.b4l-logo-badge,
-.b4l-brand-info,
-.b4l-progress-track {
+.b4l-pulse-aura {
     display: none !important;
 }
 
-/* Hiệu ứng xuất hiện trang nhẹ nhàng, tinh tế (Fade in) */
-@keyframes b4lPageFadeIn {
-    0% {
-        opacity: 0.92;
-        transform: translateY(2px);
-    }
-    100% {
-        opacity: 1;
-        transform: translateY(0);
-    }
-}
-
+/* Hiệu ứng mờ dần nhẹ nhàng khi vào trang */
 body {
     animation: b4lPageFadeIn 0.2s cubic-bezier(0.2, 0, 0, 1);
+}
+
+@keyframes b4lPageFadeIn {
+    from { opacity: 0.94; transform: translateY(2px); }
+    to { opacity: 1; transform: translateY(0); }
 }

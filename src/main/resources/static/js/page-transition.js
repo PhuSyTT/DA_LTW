@@ -1,7 +1,8 @@
 /**
- * Book4Life - Modern Top Loading Bar & Instant Navigation
- * Thay thế màn hình chờ xoay bằng thanh tiến trình lướt trên cùng (YouTube/GitHub/NProgress style)
- * Hoàn toàn không chặn màn hình, thao tác ngay lập tức, siêu mượt mà.
+ * Book4Life - Literary Page Transition with Video & Progress Bar
+ * Phía trên: Logo shop
+ * Ở giữa: Video lật mở những trang sách
+ * Phía dưới: Thanh tiến trình đang "lật mở những trang sách"
  */
 
 (function () {
@@ -11,15 +12,22 @@
     let trickleTimer = null;
     let finishTimer = null;
     let safetyTimer = null;
+    let isTransitioning = false;
 
     function getOverlay() {
-        return document.getElementById('page-transition-overlay') || document.querySelector('.b4l-top-loader');
+        return document.getElementById('page-transition-overlay');
     }
 
     function getProgressBar() {
         const overlay = getOverlay();
         if (!overlay) return null;
-        return overlay.querySelector('.b4l-top-loader-bar') || overlay.querySelector('.b4l-progress-fill');
+        return overlay.querySelector('.b4l-progress-fill') || overlay.querySelector('.b4l-top-loader-bar');
+    }
+
+    function getVideo() {
+        const overlay = getOverlay();
+        if (!overlay) return null;
+        return overlay.querySelector('#b4l-loading-video');
     }
 
     function setProgress(percent) {
@@ -30,26 +38,36 @@
         }
     }
 
-    function showLoader(startPercent) {
+    function showOverlay(startPercent) {
         clearTimeout(finishTimer);
         clearTimeout(safetyTimer);
         stopTrickle();
 
         const overlay = getOverlay();
-        if (overlay) {
-            overlay.classList.add('is-loading');
-            overlay.style.opacity = '1';
-            overlay.style.visibility = 'visible';
-            overlay.setAttribute('aria-hidden', 'false');
+        if (!overlay) return;
+
+        isTransitioning = true;
+        overlay.style.display = 'flex';
+        overlay.setAttribute('aria-hidden', 'false');
+
+        // Bắt đầu phát video nếu có
+        const video = getVideo();
+        if (video) {
+            video.currentTime = 0;
+            video.play().catch(function () {
+                // Trình duyệt có thể chặn autoplay không tiếng hoặc video chưa sẵn sàng
+            });
         }
 
-        setProgress(startPercent !== undefined ? startPercent : 20);
+        requestAnimationFrame(function () {
+            overlay.classList.add('is-loading');
+        });
 
-        // Bắt đầu chạy tiến trình nhỏ giọt tự nhiên trong lúc đợi mạng
+        setProgress(startPercent !== undefined ? startPercent : 25);
         startTrickle();
 
-        // Tự động tắt sau 4s nếu trang bị kẹt mạng
-        safetyTimer = setTimeout(forceHide, 4000);
+        // An toàn: Tự động tắt sau 3.5 giây nếu trang bị nghẽn mạng
+        safetyTimer = setTimeout(forceHide, 3500);
     }
 
     function startTrickle() {
@@ -61,7 +79,7 @@
             } else {
                 stopTrickle();
             }
-        }, 80);
+        }, 90);
     }
 
     function stopTrickle() {
@@ -71,7 +89,7 @@
         }
     }
 
-    function finishLoader() {
+    function finishTransition() {
         stopTrickle();
         clearTimeout(safetyTimer);
         setProgress(100);
@@ -79,13 +97,15 @@
         finishTimer = setTimeout(function () {
             const overlay = getOverlay();
             if (overlay) {
-                overlay.style.opacity = '0';
                 overlay.classList.remove('is-loading');
                 setTimeout(function () {
-                    overlay.style.visibility = 'hidden';
+                    overlay.style.display = 'none';
                     overlay.setAttribute('aria-hidden', 'true');
+                    isTransitioning = false;
                     setProgress(0);
-                }, 200);
+                }, 220);
+            } else {
+                isTransitioning = false;
             }
         }, 120);
     }
@@ -96,44 +116,48 @@
         clearTimeout(safetyTimer);
         const overlay = getOverlay();
         if (overlay) {
-            overlay.style.opacity = '0';
             overlay.classList.remove('is-loading');
-            overlay.style.visibility = 'hidden';
+            overlay.style.display = 'none';
             overlay.setAttribute('aria-hidden', 'true');
-            setProgress(0);
         }
+        isTransitioning = false;
+        setProgress(0);
     }
 
-    // Xử lý khi trang vừa bắt đầu tải và khi nạp xong
     function handlePageLifecycle() {
-        // Khởi động nhẹ khi tài liệu đang nạp
         if (document.readyState === 'loading') {
-            showLoader(30);
-            document.addEventListener('DOMContentLoaded', finishLoader);
-            window.addEventListener('load', finishLoader);
+            showOverlay(35);
+            document.addEventListener('DOMContentLoaded', finishTransition);
+            window.addEventListener('load', finishTransition);
         } else {
-            // Trang đã sẵn sàng
-            finishLoader();
+            finishTransition();
         }
 
-        // Hỗ trợ bfcache (khi bấm nút Back / Forward trên trình duyệt)
+        // Hỗ trợ bfcache (khi bấm Back / Forward)
         window.addEventListener('pageshow', function (event) {
             forceHide();
         });
+
+        // Cho phép người dùng nhấp để đóng overlay nếu không muốn chờ
+        const overlay = getOverlay();
+        if (overlay) {
+            overlay.addEventListener('click', function (e) {
+                if (e.target === overlay || e.target.classList.contains('b4l-transition-backdrop')) {
+                    forceHide();
+                }
+            });
+        }
     }
 
-    // Bắt sự kiện nhấp link nội bộ để hiện thanh tải ngay lập tức
-    function setupLinkListeners() {
+    function setupNavigationListeners() {
         document.addEventListener('click', function (e) {
             const link = e.target.closest('a');
             if (!link) return;
 
-            // Bỏ qua nếu có phím bổ trợ (Ctrl/Cmd click để mở tab mới)
             if (e.defaultPrevented || e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) {
                 return;
             }
 
-            // Bỏ qua link mở tab mới hoặc tải file
             if (link.target === '_blank' || link.hasAttribute('download')) {
                 return;
             }
@@ -141,7 +165,6 @@
             const rawHref = link.getAttribute('href');
             if (!rawHref) return;
 
-            // Bỏ qua anchor nội bộ, javascript, mailto, tel
             if (rawHref.startsWith('#') ||
                 rawHref.startsWith('javascript:') ||
                 rawHref.startsWith('mailto:') ||
@@ -149,44 +172,36 @@
                 return;
             }
 
-            // Bỏ qua liên kết ra trang web ngoài
             if (link.origin && link.origin !== window.location.origin) {
                 return;
             }
 
-            // Bỏ qua nếu chỉ là anchor cùng trang
             if (link.pathname === window.location.pathname &&
                 link.search === window.location.search &&
                 link.hash) {
                 return;
             }
 
-            // Bỏ qua nếu nhấn lại chính link hiện tại
             if (link.href === window.location.href) {
                 return;
             }
 
-            // Hiển thị thanh tiến trình tức thì ngay khi nhấn
-            showLoader(25);
-            // Để trình duyệt tự nhiên chuyển trang (không dùng setTimeout delay)
+            showOverlay(30);
         });
 
-        // Bắt sự kiện submit form (tìm kiếm, lọc)
         document.addEventListener('submit', function (e) {
             const form = e.target;
             if (!form || form.target === '_blank') return;
-            showLoader(30);
+            showOverlay(30);
         });
     }
 
-    // Khởi tạo
     handlePageLifecycle();
-    setupLinkListeners();
+    setupNavigationListeners();
 
-    // Export API nếu các script khác cần gọi thủ công
     window.B4LLoader = {
-        start: showLoader,
-        finish: finishLoader,
+        show: showOverlay,
+        finish: finishTransition,
         hide: forceHide
     };
 })();

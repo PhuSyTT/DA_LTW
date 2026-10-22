@@ -324,14 +324,14 @@ public class DataInitializer implements CommandLineRunner {
     }
 
     private Role getOrCreateRole(String name, String description) {
-        return roleRepository.findByName(name)
+        return roleRepository.findByRoleName(name)
                 .orElseGet(() -> roleRepository.save(new Role(null, name, description)));
     }
 
     private User createOrUpdateUser(String email, String rawPassword, String fullName, String phone, Role role, Branch branch) {
         return userRepository.findByEmail(email)
                 .map(existingUser -> {
-                    existingUser.setPasswordHash(passwordEncoder.encode(rawPassword));
+                    existingUser.setPassword(passwordEncoder.encode(rawPassword));
                     existingUser.setFullName(fullName);
                     existingUser.setPhone(phone);
                     existingUser.setRole(role);
@@ -342,7 +342,7 @@ public class DataInitializer implements CommandLineRunner {
                 .orElseGet(() -> {
                     User newUser = new User();
                     newUser.setEmail(email);
-                    newUser.setPasswordHash(passwordEncoder.encode(rawPassword));
+                    newUser.setPassword(passwordEncoder.encode(rawPassword));
                     newUser.setFullName(fullName);
                     newUser.setPhone(phone);
                     newUser.setRole(role);

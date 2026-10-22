@@ -1,153 +1,134 @@
 /**
- * Book4Life - Literary Warmth Page Transition System
- * Sử dụng điều hướng chuẩn (full page load) với hiệu ứng overlay để tránh lỗi icon/CSS
+ * Book4Life - Modern Top Loading Bar & Instant Navigation
+ * Thay thế màn hình chờ xoay bằng thanh tiến trình lướt trên cùng (YouTube/GitHub/NProgress style)
+ * Hoàn toàn không chặn màn hình, thao tác ngay lập tức, siêu mượt mà.
  */
 
 (function () {
     'use strict';
 
-    const MIN_DISPLAY_TIME = 80;   // ms hiển thị tối thiểu
-    const FADE_OUT_DURATION = 150; // ms mờ dần
-    const SAFETY_TIMEOUT = 2000;   // ms tự động ẩn nếu trang tải quá lâu
-
-    let startTime = Date.now();
     let currentProgress = 0;
-    let trickleInterval = null;
+    let trickleTimer = null;
+    let finishTimer = null;
     let safetyTimer = null;
-    let isTransitioning = false;
 
     function getOverlay() {
-        return document.getElementById('page-transition-overlay');
+        return document.getElementById('page-transition-overlay') || document.querySelector('.b4l-top-loader');
     }
 
-    function getProgressFill() {
-        var overlay = getOverlay();
-        return overlay ? overlay.querySelector('.b4l-progress-fill') : null;
+    function getProgressBar() {
+        const overlay = getOverlay();
+        if (!overlay) return null;
+        return overlay.querySelector('.b4l-top-loader-bar') || overlay.querySelector('.b4l-progress-fill');
     }
 
     function setProgress(percent) {
         currentProgress = Math.min(100, Math.max(0, percent));
-        var fill = getProgressFill();
-        if (fill) {
-            fill.style.width = currentProgress + '%';
+        const bar = getProgressBar();
+        if (bar) {
+            bar.style.width = currentProgress + '%';
         }
     }
 
-    function startTrickle(startFrom, maxTarget, intervalMs) {
+    function showLoader(startPercent) {
+        clearTimeout(finishTimer);
+        clearTimeout(safetyTimer);
         stopTrickle();
-        setProgress(startFrom);
-        trickleInterval = setInterval(function () {
-            if (currentProgress < maxTarget) {
-                var remaining = maxTarget - currentProgress;
-                var increment = Math.max(0.5, remaining * 0.2);
-                setProgress(currentProgress + increment);
+
+        const overlay = getOverlay();
+        if (overlay) {
+            overlay.classList.add('is-loading');
+            overlay.style.opacity = '1';
+            overlay.style.visibility = 'visible';
+            overlay.setAttribute('aria-hidden', 'false');
+        }
+
+        setProgress(startPercent !== undefined ? startPercent : 20);
+
+        // Bắt đầu chạy tiến trình nhỏ giọt tự nhiên trong lúc đợi mạng
+        startTrickle();
+
+        // Tự động tắt sau 4s nếu trang bị kẹt mạng
+        safetyTimer = setTimeout(forceHide, 4000);
+    }
+
+    function startTrickle() {
+        stopTrickle();
+        trickleTimer = setInterval(function () {
+            if (currentProgress < 85) {
+                const diff = (85 - currentProgress) * 0.15;
+                setProgress(currentProgress + Math.max(0.4, diff));
             } else {
                 stopTrickle();
             }
-        }, intervalMs || 60);
+        }, 80);
     }
 
     function stopTrickle() {
-        if (trickleInterval) {
-            clearInterval(trickleInterval);
-            trickleInterval = null;
+        if (trickleTimer) {
+            clearInterval(trickleTimer);
+            trickleTimer = null;
         }
     }
 
-    // Hiển thị overlay
-    function showOverlay(initialPercent) {
-        var overlay = getOverlay();
-        if (!overlay) return;
-
-        isTransitioning = true;
-        startTime = Date.now();
-        overlay.style.display = 'flex';
-        overlay.setAttribute('aria-hidden', 'false');
-        overlay.classList.remove('fade-out');
-        setProgress(initialPercent || 30);
-    }
-
-    // Ẩn overlay mượt mà
-    function finishTransition(callback) {
-        stopTrickle();
-        setProgress(100);
-
-        var elapsed = Date.now() - startTime;
-        var remainingDelay = Math.max(0, MIN_DISPLAY_TIME - elapsed);
-
-        setTimeout(function () {
-            var overlay = getOverlay();
-            if (overlay) {
-                overlay.classList.add('fade-out');
-                setTimeout(function () {
-                    overlay.style.display = 'none';
-                    overlay.setAttribute('aria-hidden', 'true');
-                    isTransitioning = false;
-                    if (typeof callback === 'function') callback();
-                }, FADE_OUT_DURATION);
-            } else {
-                isTransitioning = false;
-                if (typeof callback === 'function') callback();
-            }
-        }, remainingDelay);
-    }
-
-    // Ẩn cưỡng bức (bfcache / timeout an toàn)
-    function forceDismiss() {
+    function finishLoader() {
         stopTrickle();
         clearTimeout(safetyTimer);
-        var overlay = getOverlay();
+        setProgress(100);
+
+        finishTimer = setTimeout(function () {
+            const overlay = getOverlay();
+            if (overlay) {
+                overlay.style.opacity = '0';
+                overlay.classList.remove('is-loading');
+                setTimeout(function () {
+                    overlay.style.visibility = 'hidden';
+                    overlay.setAttribute('aria-hidden', 'true');
+                    setProgress(0);
+                }, 200);
+            }
+        }, 120);
+    }
+
+    function forceHide() {
+        stopTrickle();
+        clearTimeout(finishTimer);
+        clearTimeout(safetyTimer);
+        const overlay = getOverlay();
         if (overlay) {
-            overlay.classList.add('fade-out');
-            overlay.style.display = 'none';
+            overlay.style.opacity = '0';
+            overlay.classList.remove('is-loading');
+            overlay.style.visibility = 'hidden';
             overlay.setAttribute('aria-hidden', 'true');
+            setProgress(0);
         }
-        isTransitioning = false;
     }
 
-    // Điều hướng chuẩn có overlay (LUÔN dùng full page load để tránh lỗi CSS/icon/script)
-    function standardNavigate(targetUrl) {
-        if (isTransitioning) return;
-        showOverlay(30);
-        startTrickle(30, 88, 60);
-        setTimeout(function () {
-            window.location.href = targetUrl;
-        }, 100);
-    }
-
-    // Xử lý trang tải lần đầu (Initial Page Load)
-    function handleInitialLoad() {
-        showOverlay(35);
-        startTrickle(35, 92, 40);
-
-        function onReady() {
-            finishTransition();
-        }
-
-        if (document.readyState === 'interactive' || document.readyState === 'complete') {
-            onReady();
+    // Xử lý khi trang vừa bắt đầu tải và khi nạp xong
+    function handlePageLifecycle() {
+        // Khởi động nhẹ khi tài liệu đang nạp
+        if (document.readyState === 'loading') {
+            showLoader(30);
+            document.addEventListener('DOMContentLoaded', finishLoader);
+            window.addEventListener('load', finishLoader);
         } else {
-            document.addEventListener('DOMContentLoaded', onReady);
-            window.addEventListener('load', onReady);
+            // Trang đã sẵn sàng
+            finishLoader();
         }
 
-        // Safety fallback: Tự động đóng overlay sau SAFETY_TIMEOUT
-        safetyTimer = setTimeout(forceDismiss, SAFETY_TIMEOUT);
-
-        // Cho phép click vào overlay để đóng
-        var overlay = getOverlay();
-        if (overlay) {
-            overlay.addEventListener('click', forceDismiss);
-        }
+        // Hỗ trợ bfcache (khi bấm nút Back / Forward trên trình duyệt)
+        window.addEventListener('pageshow', function (event) {
+            forceHide();
+        });
     }
 
-    // Thiết lập bắt các liên kết chuyển trang
-    function setupNavigationListeners() {
+    // Bắt sự kiện nhấp link nội bộ để hiện thanh tải ngay lập tức
+    function setupLinkListeners() {
         document.addEventListener('click', function (e) {
-            var link = e.target.closest('a');
+            const link = e.target.closest('a');
             if (!link) return;
 
-            // Bỏ qua nếu có phím bổ trợ
+            // Bỏ qua nếu có phím bổ trợ (Ctrl/Cmd click để mở tab mới)
             if (e.defaultPrevented || e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) {
                 return;
             }
@@ -157,7 +138,7 @@
                 return;
             }
 
-            var rawHref = link.getAttribute('href');
+            const rawHref = link.getAttribute('href');
             if (!rawHref) return;
 
             // Bỏ qua anchor nội bộ, javascript, mailto, tel
@@ -173,41 +154,39 @@
                 return;
             }
 
-            // Bỏ qua nếu chỉ là anchor nhảy vị trí trong cùng trang
+            // Bỏ qua nếu chỉ là anchor cùng trang
             if (link.pathname === window.location.pathname &&
                 link.search === window.location.search &&
                 link.hash) {
                 return;
             }
 
-            // Bỏ qua nếu đang ở cùng trang
+            // Bỏ qua nếu nhấn lại chính link hiện tại
             if (link.href === window.location.href) {
                 return;
             }
 
-            e.preventDefault();
-            standardNavigate(link.href);
+            // Hiển thị thanh tiến trình tức thì ngay khi nhấn
+            showLoader(25);
+            // Để trình duyệt tự nhiên chuyển trang (không dùng setTimeout delay)
         });
 
-        // Hỗ trợ bfcache (Back/Forward cache)
-        window.addEventListener('pageshow', function (event) {
-            if (event.persisted) {
-                forceDismiss();
-            }
-        });
-
-        // Bắt form submit tìm kiếm hoặc bộ lọc
+        // Bắt sự kiện submit form (tìm kiếm, lọc)
         document.addEventListener('submit', function (e) {
-            var form = e.target;
+            const form = e.target;
             if (!form || form.target === '_blank') return;
-            if (isTransitioning) return;
-            showOverlay(35);
-            startTrickle(35, 88, 60);
+            showLoader(30);
         });
     }
 
-    // Khởi chạy
-    handleInitialLoad();
-    setupNavigationListeners();
+    // Khởi tạo
+    handlePageLifecycle();
+    setupLinkListeners();
 
+    // Export API nếu các script khác cần gọi thủ công
+    window.B4LLoader = {
+        start: showLoader,
+        finish: finishLoader,
+        hide: forceHide
+    };
 })();

@@ -69,6 +69,17 @@ public class CartDto implements Serializable {
         return total.compareTo(BigDecimal.ZERO) > 0 ? total : BigDecimal.ZERO;
     }
 
+    public BigDecimal getTotalSavingsPotential() {
+        if (items == null || items.isEmpty()) return BigDecimal.ZERO;
+        return items.stream()
+                .map(CartItemDto::getPotentialSavings)
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
+    }
+
+    public boolean hasSavingsAvailable() {
+        return getTotalSavingsPotential().compareTo(BigDecimal.ZERO) > 0;
+    }
+
     public boolean isEmpty() {
         return items == null || items.isEmpty();
     }

@@ -166,6 +166,7 @@ public class BookDetailResponseDto {
     }
 
     public static class BranchStockDto {
+        private Long bookItemId;
         private Long branchId;
         private String branchName;
         private String skuBarcode;
@@ -174,12 +175,14 @@ public class BookDetailResponseDto {
         private Integer stockQuantity;
         private String shelfLocation;
         private String status;
+        private boolean isBestPrice;
 
         public BranchStockDto() {
         }
 
-        public BranchStockDto(Long branchId, String branchName, String skuBarcode, String conditionGrade,
-                              BigDecimal sellingPrice, Integer stockQuantity, String shelfLocation, String status) {
+        public BranchStockDto(Long bookItemId, Long branchId, String branchName, String skuBarcode, String conditionGrade,
+                              BigDecimal sellingPrice, Integer stockQuantity, String shelfLocation, String status, boolean isBestPrice) {
+            this.bookItemId = bookItemId;
             this.branchId = branchId;
             this.branchName = branchName;
             this.skuBarcode = skuBarcode;
@@ -188,6 +191,23 @@ public class BookDetailResponseDto {
             this.stockQuantity = stockQuantity;
             this.shelfLocation = shelfLocation;
             this.status = status;
+            this.isBestPrice = isBestPrice;
+        }
+
+        public Long getBookItemId() {
+            return bookItemId;
+        }
+
+        public void setBookItemId(Long bookItemId) {
+            this.bookItemId = bookItemId;
+        }
+
+        public boolean isBestPrice() {
+            return isBestPrice;
+        }
+
+        public void setBestPrice(boolean isBestPrice) {
+            this.isBestPrice = isBestPrice;
         }
 
         public Long getBranchId() {
@@ -259,6 +279,7 @@ public class BookDetailResponseDto {
         }
 
         public static class Builder {
+            private Long bookItemId;
             private Long branchId;
             private String branchName;
             private String skuBarcode;
@@ -267,6 +288,17 @@ public class BookDetailResponseDto {
             private Integer stockQuantity;
             private String shelfLocation;
             private String status;
+            private boolean isBestPrice;
+
+            public Builder bookItemId(Long bookItemId) {
+                this.bookItemId = bookItemId;
+                return this;
+            }
+
+            public Builder isBestPrice(boolean isBestPrice) {
+                this.isBestPrice = isBestPrice;
+                return this;
+            }
 
             public Builder branchId(Long branchId) {
                 this.branchId = branchId;
@@ -309,7 +341,7 @@ public class BookDetailResponseDto {
             }
 
             public BranchStockDto build() {
-                return new BranchStockDto(branchId, branchName, skuBarcode, conditionGrade, sellingPrice, stockQuantity, shelfLocation, status);
+                return new BranchStockDto(bookItemId, branchId, branchName, skuBarcode, conditionGrade, sellingPrice, stockQuantity, shelfLocation, status, isBestPrice);
             }
         }
     }

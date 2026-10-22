@@ -96,8 +96,15 @@ public class MasterDataServiceImpl implements MasterDataService {
                 .mapToLong(BookItem::getStockQuantity)
                 .sum();
 
+        java.math.BigDecimal minPrice = items.stream()
+                .filter(item -> "AVAILABLE".equalsIgnoreCase(item.getStatus()) && item.getStockQuantity() != null && item.getStockQuantity() > 0 && item.getSellingPrice() != null)
+                .map(BookItem::getSellingPrice)
+                .min(java.math.BigDecimal::compareTo)
+                .orElse(null);
+
         List<BookDetailResponseDto.BranchStockDto> branchStocks = items.stream()
                 .map(item -> BookDetailResponseDto.BranchStockDto.builder()
+                        .bookItemId(item.getId())
                         .branchId(item.getBranch().getId())
                         .branchName(item.getBranch().getBranchName())
                         .skuBarcode(item.getSkuBarcode())
@@ -106,6 +113,7 @@ public class MasterDataServiceImpl implements MasterDataService {
                         .stockQuantity(item.getStockQuantity())
                         .shelfLocation(item.getShelfLocation())
                         .status(item.getStatus())
+                        .isBestPrice(minPrice != null && item.getSellingPrice() != null && item.getSellingPrice().compareTo(minPrice) == 0 && "AVAILABLE".equalsIgnoreCase(item.getStatus()) && item.getStockQuantity() != null && item.getStockQuantity() > 0)
                         .build())
                 .collect(Collectors.toList());
 

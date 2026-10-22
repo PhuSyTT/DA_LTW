@@ -3,7 +3,11 @@ package com.bookstore.controller;
 import com.bookstore.dto.CartDto;
 import com.bookstore.dto.CartItemDto;
 import com.bookstore.dto.CheckoutRequestDto;
+import com.bookstore.entity.BookItem;
+import com.bookstore.entity.Branch;
 import com.bookstore.entity.MasterOrder;
+import com.bookstore.repository.BookItemRepository;
+import com.bookstore.service.BranchService;
 import com.bookstore.service.CartService;
 import com.bookstore.service.OrderService;
 import jakarta.servlet.http.HttpSession;
@@ -24,16 +28,22 @@ public class CartController {
 
     private final CartService cartService;
     private final OrderService orderService;
+    private final BranchService branchService;
+    private final BookItemRepository bookItemRepository;
 
-    public CartController(CartService cartService, OrderService orderService) {
+    public CartController(CartService cartService, OrderService orderService,
+                          BranchService branchService, BookItemRepository bookItemRepository) {
         this.cartService = cartService;
         this.orderService = orderService;
+        this.branchService = branchService;
+        this.bookItemRepository = bookItemRepository;
     }
 
     @GetMapping("/cart")
     public String viewCart(HttpSession session, Model model) {
         CartDto cart = cartService.getCart(session);
         model.addAttribute("cart", cart);
+        model.addAttribute("branches", branchService.getAllActiveBranches());
         model.addAttribute("pageTitle", "Giỏ Hàng Sách Cũ Của Bạn - Book4Life");
         return "cart";
     }
@@ -156,6 +166,69 @@ public class CartController {
         ));
     }
 
+    @PostMapping("/cart/switch-branch")
+    @ResponseBody
+    public ResponseEntity<?> switchBranch(
+            @RequestParam("bookId") Long bookId,
+            @RequestParam("targetBookItemId") Long targetBookItemId,
+            HttpSession session
+    ) {
+        CartDto cart = cartService.switchItemBranch(bookId, targetBookItemId, session);
+        return ResponseEntity.ok(Map.of(
+                "success", true,
+                "message", "Đã chuyển đổi chi nhánh và cập nhật giá mới thành công!",
+                "totalQuantity", cart.getTotalQuantity(),
+                "subtotal", cart.getSubtotal(),
+                "shippingFee", cart.getShippingFee(),
+                "discountAmount", cart.getDiscountAmount(),
+                "grandTotal", cart.getGrandTotal(),
+                "totalSavings", cart.getTotalSavingsPotential(),
+                "hasSavings", cart.hasSavingsAvailable()
+        ));
+    }
+
+    @PostMapping("/cart/optimize-best-price")
+    @ResponseBody
+    public ResponseEntity<?> optimizeBestPrice(HttpSession session) {
+        CartDto cart = cartService.optimizeCartForBestPrice(session);
+        return ResponseEntity.ok(Map.of(
+                "success", true,
+                "message", "Toàn bộ giỏ hàng đã được tự động tối ưu sang các chi nhánh có giá tốt nhất!",
+                "subtotal", cart.getSubtotal(),
+                "shippingFee", cart.getShippingFee(),
+                "discountAmount", cart.getDiscountAmount(),
+                "grandTotal", cart.getGrandTotal(),
+                "totalSavings", cart.getTotalSavingsPotential(),
+                "hasSavings", cart.hasSavingsAvailable()
+        ));
+    }
+
+    @GetMapping("/api/cart/book/{bookId}/branches")
+    @ResponseBody
+    public ResponseEntity<?> getAvailableBranchesForBook(@PathVariable("bookId") Long bookId) {
+        List<BookItem> items = bookItemRepository.findAvailableItemsByBookId(bookId);
+        BigDecimal minPrice = items.stream()
+                .filter(i -> i.getSellingPrice() != null && i.getStockQuantity() != null && i.getStockQuantity() > 0)
+                .map(BookItem::getSellingPrice)
+                .min(BigDecimal::compareTo)
+                .orElse(null);
+
+        List<Map<String, Object>> result = new ArrayList<>();
+        for (BookItem item : items) {
+            Map<String, Object> map = new HashMap<>();
+            map.put("bookItemId", item.getId());
+            map.put("branchId", item.getBranch().getId());
+            map.put("branchName", item.getBranch().getBranchName());
+            map.put("branchAddress", item.getBranch().getAddress());
+            map.put("sellingPrice", item.getSellingPrice());
+            map.put("conditionGrade", item.getConditionGrade());
+            map.put("stockQuantity", item.getStockQuantity());
+            map.put("isBestPrice", minPrice != null && item.getSellingPrice() != null && item.getSellingPrice().compareTo(minPrice) == 0);
+            result.add(map);
+        }
+        return ResponseEntity.ok(result);
+    }
+
     @PostMapping("/checkout/place-order")
     public String placeOrder(
             @RequestParam("receiverName") String receiverName,
@@ -163,6 +236,7 @@ public class CartController {
             @RequestParam("shippingAddress") String shippingAddress,
             @RequestParam(value = "paymentMethod", defaultValue = "COD") String paymentMethod,
             @RequestParam(value = "clickAndCollect", defaultValue = "false") boolean clickAndCollect,
+            @RequestParam(value = "preferredBranchId", required = false) Long preferredBranchId,
             @org.springframework.security.core.annotation.AuthenticationPrincipal com.bookstore.security.CustomUserDetails userDetails,
             HttpSession session,
             RedirectAttributes redirectAttributes
@@ -188,6 +262,7 @@ public class CartController {
             req.setShippingAddress(shippingAddress);
             req.setPaymentMethod(paymentMethod);
             req.setClickAndCollect(clickAndCollect);
+            req.setPreferredBranchId(preferredBranchId);
             req.setBookItemIds(bookItemIds);
 
             String orderCode = "DH-" + System.currentTimeMillis();

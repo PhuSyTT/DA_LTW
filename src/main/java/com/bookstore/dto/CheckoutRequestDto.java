@@ -8,6 +8,7 @@ public class CheckoutRequestDto {
     private String shippingAddress;
     private String paymentMethod;
     private boolean clickAndCollect; // Khách chọn giữ sách tại quầy (FR-ORD-04)
+    private Long preferredBranchId; // Chi nhánh khách chọn nhận sách hoặc ưu tiên xử lý
     private List<Long> bookItemIds; // Danh sách ID sách cũ khách muốn mua
 	public String getReceiverName() {
 		return receiverName;
@@ -38,6 +39,12 @@ public class CheckoutRequestDto {
 	}
 	public void setClickAndCollect(boolean clickAndCollect) {
 		this.clickAndCollect = clickAndCollect;
+	}
+	public Long getPreferredBranchId() {
+		return preferredBranchId;
+	}
+	public void setPreferredBranchId(Long preferredBranchId) {
+		this.preferredBranchId = preferredBranchId;
 	}
 	public List<Long> getBookItemIds() {
 		return bookItemIds;

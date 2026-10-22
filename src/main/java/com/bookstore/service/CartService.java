@@ -20,5 +20,9 @@ public interface CartService {
     CartDto applyCoupon(String code, HttpSession session);
 
     CartDto removeCoupon(HttpSession session);
+
+    CartDto switchItemBranch(Long bookId, Long targetBookItemId, HttpSession session);
+
+    CartDto optimizeCartForBestPrice(HttpSession session);
 }
 

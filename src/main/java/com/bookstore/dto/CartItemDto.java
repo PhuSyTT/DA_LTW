@@ -14,16 +14,23 @@ public class CartItemDto implements Serializable {
     private String categoryName;
     private String coverImageUrl;
     private String conditionGrade;
+    private Long branchId;
     private String branchName;
     private BigDecimal price;
     private int quantity;
+
+    // Best price recommendation fields
+    private BigDecimal bestPrice;
+    private String bestPriceBranchName;
+    private Long bestPriceBookItemId;
+    private BigDecimal savings = BigDecimal.ZERO;
 
     public CartItemDto() {
     }
 
     public CartItemDto(Long bookId, Long bookItemId, String title, String isbn,
                        String authorName, String categoryName, String coverImageUrl,
-                       String conditionGrade, String branchName, BigDecimal price, int quantity) {
+                       String conditionGrade, Long branchId, String branchName, BigDecimal price, int quantity) {
         this.bookId = bookId;
         this.bookItemId = bookItemId;
         this.title = title;
@@ -32,9 +39,16 @@ public class CartItemDto implements Serializable {
         this.categoryName = categoryName;
         this.coverImageUrl = coverImageUrl;
         this.conditionGrade = conditionGrade;
+        this.branchId = branchId;
         this.branchName = branchName;
         this.price = price != null ? price : BigDecimal.ZERO;
         this.quantity = Math.max(1, quantity);
+    }
+
+    public CartItemDto(Long bookId, Long bookItemId, String title, String isbn,
+                       String authorName, String categoryName, String coverImageUrl,
+                       String conditionGrade, String branchName, BigDecimal price, int quantity) {
+        this(bookId, bookItemId, title, isbn, authorName, categoryName, coverImageUrl, conditionGrade, null, branchName, price, quantity);
     }
 
     public BigDecimal getSubtotal() {
@@ -128,6 +142,57 @@ public class CartItemDto implements Serializable {
 
     public void setQuantity(int quantity) {
         this.quantity = Math.max(1, quantity);
+    }
+
+    public Long getBranchId() {
+        return branchId;
+    }
+
+    public void setBranchId(Long branchId) {
+        this.branchId = branchId;
+    }
+
+    public BigDecimal getBestPrice() {
+        return bestPrice;
+    }
+
+    public void setBestPrice(BigDecimal bestPrice) {
+        this.bestPrice = bestPrice;
+    }
+
+    public String getBestPriceBranchName() {
+        return bestPriceBranchName;
+    }
+
+    public void setBestPriceBranchName(String bestPriceBranchName) {
+        this.bestPriceBranchName = bestPriceBranchName;
+    }
+
+    public Long getBestPriceBookItemId() {
+        return bestPriceBookItemId;
+    }
+
+    public void setBestPriceBookItemId(Long bestPriceBookItemId) {
+        this.bestPriceBookItemId = bestPriceBookItemId;
+    }
+
+    public BigDecimal getSavings() {
+        return savings != null ? savings : BigDecimal.ZERO;
+    }
+
+    public void setSavings(BigDecimal savings) {
+        this.savings = savings;
+    }
+
+    public boolean hasBetterPrice() {
+        return bestPrice != null && price != null && bestPrice.compareTo(price) < 0;
+    }
+
+    public BigDecimal getPotentialSavings() {
+        if (hasBetterPrice()) {
+            return price.subtract(bestPrice).multiply(BigDecimal.valueOf(quantity));
+        }
+        return BigDecimal.ZERO;
     }
 }
 

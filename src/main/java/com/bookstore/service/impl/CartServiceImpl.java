@@ -44,6 +44,7 @@ public class CartServiceImpl implements CartService {
             cart = new CartDto();
             session.setAttribute(SESSION_CART_KEY, cart);
         }
+        refreshBestPriceRecommendations(cart);
         updateShippingAndTotals(cart);
         return cart;
     }
@@ -61,6 +62,7 @@ public class CartServiceImpl implements CartService {
         String categoryName = "Văn học";
         String coverImageUrl = "https://images.unsplash.com/photo-1544716278-ca5e3f4abd8c?w=350&q=80";
         String conditionGrade = "LIKE_NEW";
+        Long branchId = null;
         String branchName = "Kho Tổng TP.HCM";
         BigDecimal price = new BigDecimal("75000");
 
@@ -75,6 +77,7 @@ public class CartServiceImpl implements CartService {
                 categoryName = item.getBook().getCategory() != null ? item.getBook().getCategory().getName() : "";
                 coverImageUrl = item.getBook().getCoverImageUrl() != null ? item.getBook().getCoverImageUrl() : coverImageUrl;
                 conditionGrade = item.getConditionGrade();
+                branchId = item.getBranch() != null ? item.getBranch().getId() : null;
                 branchName = item.getBranch() != null ? item.getBranch().getBranchName() : "Kho Tổng";
                 price = item.getSellingPrice();
             }
@@ -88,14 +91,19 @@ public class CartServiceImpl implements CartService {
                 categoryName = b.getCategory() != null ? b.getCategory().getName() : "";
                 coverImageUrl = b.getCoverImageUrl() != null ? b.getCoverImageUrl() : coverImageUrl;
 
-                // Look for available physical item
+                // Look for available physical item - prioritize best price
                 List<BookItem> items = bookItemRepository.findAvailableItemsByBookId(effectiveBookId);
                 if (!items.isEmpty()) {
-                    BookItem firstItem = items.get(0);
-                    effectiveBookItemId = firstItem.getId();
-                    conditionGrade = firstItem.getConditionGrade();
-                    branchName = firstItem.getBranch() != null ? firstItem.getBranch().getBranchName() : branchName;
-                    price = firstItem.getSellingPrice() != null ? firstItem.getSellingPrice() : b.getOriginalPrice();
+                    BookItem bestItem = items.stream()
+                            .filter(i -> i.getSellingPrice() != null && i.getStockQuantity() != null && i.getStockQuantity() > 0)
+                            .min(java.util.Comparator.comparing(BookItem::getSellingPrice))
+                            .orElse(items.get(0));
+
+                    effectiveBookItemId = bestItem.getId();
+                    conditionGrade = bestItem.getConditionGrade();
+                    branchId = bestItem.getBranch() != null ? bestItem.getBranch().getId() : null;
+                    branchName = bestItem.getBranch() != null ? bestItem.getBranch().getBranchName() : branchName;
+                    price = bestItem.getSellingPrice() != null ? bestItem.getSellingPrice() : b.getOriginalPrice();
                 } else {
                     price = b.getOriginalPrice() != null ? b.getOriginalPrice() : price;
                 }
@@ -122,6 +130,7 @@ public class CartServiceImpl implements CartService {
                     categoryName,
                     coverImageUrl,
                     conditionGrade,
+                    branchId,
                     branchName,
                     price,
                     qtyToAdd
@@ -129,6 +138,7 @@ public class CartServiceImpl implements CartService {
             cart.getItems().add(newItem);
         }
 
+        refreshBestPriceRecommendations(cart);
         updateShippingAndTotals(cart);
         session.setAttribute(SESSION_CART_KEY, cart);
         return cart;
@@ -148,6 +158,7 @@ public class CartServiceImpl implements CartService {
             }
         }
 
+        refreshBestPriceRecommendations(cart);
         updateShippingAndTotals(cart);
         session.setAttribute(SESSION_CART_KEY, cart);
         return cart;
@@ -157,6 +168,7 @@ public class CartServiceImpl implements CartService {
     public CartDto removeFromCart(Long bookId, HttpSession session) {
         CartDto cart = getCart(session);
         cart.getItems().removeIf(item -> item.getBookId() != null && item.getBookId().equals(bookId));
+        refreshBestPriceRecommendations(cart);
         updateShippingAndTotals(cart);
         session.setAttribute(SESSION_CART_KEY, cart);
         return cart;
@@ -171,6 +183,100 @@ public class CartServiceImpl implements CartService {
     @Override
     public int getTotalQuantity(HttpSession session) {
         return getCart(session).getTotalQuantity();
+    }
+
+    @Override
+    public CartDto switchItemBranch(Long bookId, Long targetBookItemId, HttpSession session) {
+        CartDto cart = getCart(session);
+        if (bookId == null || targetBookItemId == null || cart.isEmpty()) {
+            return cart;
+        }
+
+        CartItemDto targetItem = cart.getItems().stream()
+                .filter(i -> bookId.equals(i.getBookId()))
+                .findFirst()
+                .orElse(null);
+
+        if (targetItem != null) {
+            Optional<BookItem> optBi = bookItemRepository.findById(targetBookItemId);
+            if (optBi.isPresent()) {
+                BookItem bi = optBi.get();
+                if ("AVAILABLE".equalsIgnoreCase(bi.getStatus()) && bi.getStockQuantity() != null && bi.getStockQuantity() > 0) {
+                    targetItem.setBookItemId(bi.getId());
+                    targetItem.setPrice(bi.getSellingPrice());
+                    targetItem.setConditionGrade(bi.getConditionGrade());
+                    targetItem.setBranchId(bi.getBranch() != null ? bi.getBranch().getId() : null);
+                    targetItem.setBranchName(bi.getBranch() != null ? bi.getBranch().getBranchName() : "Kho Chi Nhánh");
+                }
+            }
+        }
+
+        refreshBestPriceRecommendations(cart);
+        updateShippingAndTotals(cart);
+        session.setAttribute(SESSION_CART_KEY, cart);
+        return cart;
+    }
+
+    @Override
+    public CartDto optimizeCartForBestPrice(HttpSession session) {
+        CartDto cart = getCart(session);
+        if (cart.isEmpty()) {
+            return cart;
+        }
+
+        refreshBestPriceRecommendations(cart);
+        for (CartItemDto item : cart.getItems()) {
+            if (item.hasBetterPrice() && item.getBestPriceBookItemId() != null) {
+                Optional<BookItem> optBi = bookItemRepository.findById(item.getBestPriceBookItemId());
+                if (optBi.isPresent()) {
+                    BookItem bi = optBi.get();
+                    if ("AVAILABLE".equalsIgnoreCase(bi.getStatus()) && bi.getStockQuantity() != null && bi.getStockQuantity() > 0) {
+                        item.setBookItemId(bi.getId());
+                        item.setPrice(bi.getSellingPrice());
+                        item.setConditionGrade(bi.getConditionGrade());
+                        item.setBranchId(bi.getBranch() != null ? bi.getBranch().getId() : null);
+                        item.setBranchName(bi.getBranch() != null ? bi.getBranch().getBranchName() : "Kho Chi Nhánh");
+                    }
+                }
+            }
+        }
+
+        refreshBestPriceRecommendations(cart);
+        updateShippingAndTotals(cart);
+        session.setAttribute(SESSION_CART_KEY, cart);
+        return cart;
+    }
+
+    private void refreshBestPriceRecommendations(CartDto cart) {
+        if (cart == null || cart.isEmpty()) return;
+        for (CartItemDto item : cart.getItems()) {
+            if (item.getBookId() == null) continue;
+            List<BookItem> availableItems = bookItemRepository.findAvailableItemsByBookId(item.getBookId());
+            if (availableItems == null || availableItems.isEmpty()) {
+                item.setBestPrice(null);
+                item.setBestPriceBranchName(null);
+                item.setBestPriceBookItemId(null);
+                item.setSavings(BigDecimal.ZERO);
+                continue;
+            }
+            BookItem lowestItem = availableItems.stream()
+                    .filter(bi -> bi.getSellingPrice() != null && bi.getStockQuantity() != null && bi.getStockQuantity() > 0)
+                    .min(java.util.Comparator.comparing(BookItem::getSellingPrice))
+                    .orElse(null);
+
+            if (lowestItem != null && item.getPrice() != null && lowestItem.getSellingPrice().compareTo(item.getPrice()) < 0) {
+                item.setBestPrice(lowestItem.getSellingPrice());
+                item.setBestPriceBranchName(lowestItem.getBranch() != null ? lowestItem.getBranch().getBranchName() : "");
+                item.setBestPriceBookItemId(lowestItem.getId());
+                BigDecimal diff = item.getPrice().subtract(lowestItem.getSellingPrice());
+                item.setSavings(diff.multiply(BigDecimal.valueOf(item.getQuantity())));
+            } else {
+                item.setBestPrice(null);
+                item.setBestPriceBranchName(null);
+                item.setBestPriceBookItemId(null);
+                item.setSavings(BigDecimal.ZERO);
+            }
+        }
     }
 
     @Override

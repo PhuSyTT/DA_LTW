@@ -254,15 +254,30 @@
                         Hiện tại đầu sách này tạm thời hết hàng trên toàn chuỗi.
                     </div>
 
-                    <div th:each="bs : ${book.branchStocks}" class="p-4 rounded-xl bg-surface-container-low border border-outline-variant/30 flex items-center justify-between gap-4">
+                    <div th:each="bs, iter : ${book.branchStocks}"
+                         th:data-item-id="${bs.bookItemId}"
+                         th:data-is-best="${bs.isBestPrice}"
+                         th:data-price="${bs.sellingPrice}"
+                         th:onclick="'selectDetailBranchCopy(' + ${bs.bookItemId} + ')'"
+                         th:id="'branch-card-' + ${bs.bookItemId}"
+                         class="branch-stock-card p-4 rounded-2xl border transition-all cursor-pointer flex items-center justify-between gap-4 "
+                         th:classappend="${bs.isBestPrice ? 'border-amber-400 bg-amber-50/40' : 'border-outline-variant/30 bg-surface-container-low hover:border-primary/50'}">
                         <div>
-                            <div class="font-bold text-sm text-on-surface" th:text="${bs.branchName}">Chi nhánh Hoàn Kiếm, Hà Nội</div>
-                            <div class="text-xs text-on-surface-variant flex items-center gap-2 mt-0.5 font-medium">
+                            <div class="flex items-center gap-2">
+                                <span class="font-bold text-sm text-on-surface" th:text="${bs.branchName}">Chi nhánh Hoàn Kiếm, Hà Nội</span>
+                                <span th:if="${bs.isBestPrice}" class="px-2 py-0.5 rounded-full text-[10px] font-extrabold bg-amber-500 text-white shadow-xs">
+                                    GIÁ TỐT NHẤT ⭐
+                                </span>
+                                <span class="branch-select-badge hidden px-2 py-0.5 rounded-full text-[10px] font-bold bg-primary text-white">
+                                    ✓ Đang chọn
+                                </span>
+                            </div>
+                            <div class="text-xs text-on-surface-variant flex items-center gap-2 mt-1 font-medium">
                                 <span class="px-2 py-0.5 rounded bg-surface-container-highest font-bold text-[11px]" th:text="${bs.conditionGrade} ?: 'Rất Tốt 85%'">Rất Tốt 85%</span>
                                 <span>Vị trí: <strong th:text="${bs.shelfLocation} ?: 'Kệ A2'" class="text-on-surface">Kệ A2</strong></span>
                             </div>
                         </div>
-                        <div class="text-right">
+                        <div class="text-right shrink-0">
                             <div class="text-lg font-extrabold text-primary" th:text="${bs.sellingPrice != null ? #numbers.formatDecimal(bs.sellingPrice, 0, 'COMMA', 0, 'POINT') + ' ₫' : 'Liên hệ'}">65.000 ₫</div>
                             <span class="text-[11px] text-outline font-semibold" th:text="${bs.stockQuantity != null ? 'Còn ' + bs.stockQuantity + ' cuốn' : 'Sẵn sàng'}">Còn 2 cuốn</span>
                         </div>
@@ -412,6 +427,30 @@
             }
         }
 
+        let selectedBookItemId = null;
+
+        function selectDetailBranchCopy(itemId) {
+            selectedBookItemId = itemId;
+            document.querySelectorAll('.branch-stock-card').forEach(card => {
+                const badge = card.querySelector('.branch-select-badge');
+                if (card.dataset.itemId == itemId) {
+                    card.classList.add('ring-2', 'ring-primary', 'border-primary');
+                    if (badge) badge.classList.remove('hidden');
+                } else {
+                    card.classList.remove('ring-2', 'ring-primary', 'border-primary');
+                    if (badge) badge.classList.add('hidden');
+                }
+            });
+        }
+
+        // Auto pre-select best price branch card
+        document.addEventListener('DOMContentLoaded', () => {
+            const bestCard = document.querySelector('.branch-stock-card[data-is-best="true"]') || document.querySelector('.branch-stock-card');
+            if (bestCard && bestCard.dataset.itemId) {
+                selectDetailBranchCopy(bestCard.dataset.itemId);
+            }
+        });
+
         async function handleAddToCart(bookId, bookTitle) {
             const qtyInput = document.getElementById('detailQuantity');
             const qty = qtyInput ? parseInt(qtyInput.value) || 1 : 1;
@@ -419,6 +458,9 @@
                 const formData = new URLSearchParams();
                 formData.append('bookId', bookId);
                 formData.append('quantity', qty);
+                if (selectedBookItemId) {
+                    formData.append('bookItemId', selectedBookItemId);
+                }
 
                 const response = await fetch('/cart/add', {
                     method: 'POST',
@@ -450,6 +492,9 @@
                 const formData = new URLSearchParams();
                 formData.append('bookId', bookId);
                 formData.append('quantity', qty);
+                if (selectedBookItemId) {
+                    formData.append('bookItemId', selectedBookItemId);
+                }
 
                 const response = await fetch('/cart/add', {
                     method: 'POST',

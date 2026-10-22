@@ -62,10 +62,32 @@ public class HomeController {
             @RequestParam(name = "size", defaultValue = "12") int size,
             Model model
     ) {
-        Pageable pageable = PageRequest.of(page, size);
-        Page<BookDto> bookPage = masterDataService.searchBooks(keyword, categoryId, authorId, pageable);
         List<CategoryDto> categories = categoryService.getAllCategories();
         List<AuthorDto> authors = authorService.getAllAuthors();
+
+        // Tự động nhận diện thể loại nếu người dùng click từ khóa danh mục (VD: 'kinh dien', 'văn học', ...)
+        if (categoryId == null && keyword != null && !keyword.trim().isEmpty()) {
+            String cleanKw = keyword.trim().toLowerCase();
+            for (CategoryDto cat : categories) {
+                if (cat.getName() != null) {
+                    String catNameLower = cat.getName().toLowerCase();
+                    if (catNameLower.equals(cleanKw) || 
+                        (cleanKw.contains("kinh dien") && catNameLower.contains("kinh điển")) ||
+                        (cleanKw.contains("van hoc") && catNameLower.contains("văn học")) ||
+                        (cleanKw.contains("kinh te") && catNameLower.contains("kinh tế")) ||
+                        (cleanKw.contains("ky nang") && catNameLower.contains("kỹ năng")) ||
+                        (cleanKw.contains("lich su") && catNameLower.contains("lịch sử")) ||
+                        (cleanKw.contains("khoa hoc") && catNameLower.contains("khoa học"))) {
+                        categoryId = cat.getId();
+                        keyword = null;
+                        break;
+                    }
+                }
+            }
+        }
+
+        Pageable pageable = PageRequest.of(page, size);
+        Page<BookDto> bookPage = masterDataService.searchBooks(keyword, categoryId, authorId, pageable);
 
         model.addAttribute("pageTitle", "Kho Sách Cũ Tuyển Chọn - Book4Life");
         model.addAttribute("bookPage", bookPage);

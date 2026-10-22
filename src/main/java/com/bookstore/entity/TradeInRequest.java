@@ -32,7 +32,7 @@ public class TradeInRequest {
     @Column(name = "user_condition_grade", nullable = false, length = 30)
     private String userConditionGrade; // LIKE_NEW, VERY_GOOD, GOOD, ACCEPTABLE
 
-    @Column(name = "survey_answers_json", nullable = false, columnDefinition = "NVARCHAR(MAX)")
+    @Column(name = "survey_answers_json", nullable = false, columnDefinition = "TEXT")
     private String surveyAnswersJson;
 
     @Column(name = "auto_estimated_price", nullable = false, precision = 12, scale = 2)

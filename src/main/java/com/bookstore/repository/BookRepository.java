@@ -21,15 +21,30 @@ public interface BookRepository extends JpaRepository<Book, Long>, JpaSpecificat
 
     Optional<Book> findByIsbn(String isbn);
 
-    @Query("SELECT b FROM Book b " +
-           "JOIN FETCH b.author a " +
-           "JOIN FETCH b.category c " +
-           "WHERE (:keyword IS NULL OR :keyword = '' OR " +
-           "       LOWER(b.title) LIKE LOWER(CONCAT('%', :keyword, '%')) OR " +
-           "       LOWER(b.isbn) LIKE LOWER(CONCAT('%', :keyword, '%')) OR " +
-           "       LOWER(a.name) LIKE LOWER(CONCAT('%', :keyword, '%'))) " +
-           "AND (:categoryId IS NULL OR c.id = :categoryId OR c.parent.id = :categoryId) " +
-           "AND (:authorId IS NULL OR a.id = :authorId)")
+    @Query(
+        value = "SELECT b FROM Book b " +
+                "LEFT JOIN FETCH b.author a " +
+                "LEFT JOIN FETCH b.category c " +
+                "LEFT JOIN c.parent cp " +
+                "WHERE (:keyword IS NULL OR :keyword = '' OR " +
+                "       LOWER(b.title) LIKE LOWER(CONCAT('%', :keyword, '%')) OR " +
+                "       LOWER(b.isbn) LIKE LOWER(CONCAT('%', :keyword, '%')) OR " +
+                "       LOWER(a.name) LIKE LOWER(CONCAT('%', :keyword, '%')) OR " +
+                "       LOWER(c.name) LIKE LOWER(CONCAT('%', :keyword, '%'))) " +
+                "AND (:categoryId IS NULL OR c.id = :categoryId OR cp.id = :categoryId) " +
+                "AND (:authorId IS NULL OR a.id = :authorId)",
+        countQuery = "SELECT COUNT(b) FROM Book b " +
+                     "LEFT JOIN b.author a " +
+                     "LEFT JOIN b.category c " +
+                     "LEFT JOIN c.parent cp " +
+                     "WHERE (:keyword IS NULL OR :keyword = '' OR " +
+                     "       LOWER(b.title) LIKE LOWER(CONCAT('%', :keyword, '%')) OR " +
+                     "       LOWER(b.isbn) LIKE LOWER(CONCAT('%', :keyword, '%')) OR " +
+                     "       LOWER(a.name) LIKE LOWER(CONCAT('%', :keyword, '%')) OR " +
+                     "       LOWER(c.name) LIKE LOWER(CONCAT('%', :keyword, '%'))) " +
+                     "AND (:categoryId IS NULL OR c.id = :categoryId OR cp.id = :categoryId) " +
+                     "AND (:authorId IS NULL OR a.id = :authorId)"
+    )
     Page<Book> searchBooks(@Param("keyword") String keyword,
                            @Param("categoryId") Long categoryId,
                            @Param("authorId") Long authorId,

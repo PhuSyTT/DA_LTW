@@ -17,6 +17,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -41,7 +42,36 @@ public class MasterDataServiceImpl implements MasterDataService {
     @Override
     public Page<BookDto> searchBooks(String keyword, Long categoryId, Long authorId, Pageable pageable) {
         String cleanKeyword = (keyword != null && !keyword.trim().isEmpty()) ? keyword.trim() : null;
-        Page<Book> bookPage = bookRepository.searchBooks(cleanKeyword, categoryId, authorId, pageable);
+        Long targetCategoryId = categoryId;
+        if (cleanKeyword != null && targetCategoryId == null) {
+            String lower = cleanKeyword.toLowerCase().trim();
+            if (lower.equals("kinh dien") || lower.equals("kinh điển")) {
+                Optional<Category> catOpt = categoryRepository.findByNameIgnoreCase("Kinh Điển");
+                if (catOpt.isPresent()) {
+                    targetCategoryId = catOpt.get().getId();
+                    cleanKeyword = null;
+                }
+            } else if (lower.contains("van hoc") || lower.contains("văn học")) {
+                Optional<Category> catOpt = categoryRepository.findByNameIgnoreCase("Văn Học");
+                if (catOpt.isPresent()) {
+                    targetCategoryId = catOpt.get().getId();
+                    cleanKeyword = null;
+                }
+            } else if (lower.contains("kinh te") || lower.contains("kinh tế")) {
+                Optional<Category> catOpt = categoryRepository.findByNameIgnoreCase("Kinh Tế & Quản Trị");
+                if (catOpt.isPresent()) {
+                    targetCategoryId = catOpt.get().getId();
+                    cleanKeyword = null;
+                }
+            } else if (lower.contains("ky nang") || lower.contains("kỹ năng")) {
+                Optional<Category> catOpt = categoryRepository.findByNameIgnoreCase("Kỹ Năng Sống");
+                if (catOpt.isPresent()) {
+                    targetCategoryId = catOpt.get().getId();
+                    cleanKeyword = null;
+                }
+            }
+        }
+        Page<Book> bookPage = bookRepository.searchBooks(cleanKeyword, targetCategoryId, authorId, pageable);
         return bookPage.map(this::mapToDto);
     }
 

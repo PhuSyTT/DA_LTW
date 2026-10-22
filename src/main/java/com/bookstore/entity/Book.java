@@ -40,7 +40,7 @@ public class Book {
     @Column(name = "cover_image_url", length = 500)
     private String coverImageUrl;
 
-    @Column(columnDefinition = "NVARCHAR(MAX)")
+    @Column(columnDefinition = "TEXT")
     private String description;
 
     @OneToMany(mappedBy = "book", cascade = CascadeType.ALL, fetch = FetchType.LAZY)

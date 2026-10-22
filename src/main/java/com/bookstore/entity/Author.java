@@ -16,7 +16,7 @@ public class Author {
     @Column(nullable = false, length = 150)
     private String name;
 
-    @Column(columnDefinition = "NVARCHAR(MAX)")
+    @Column(columnDefinition = "TEXT")
     private String biography;
 
     @Column(name = "avatar_url", length = 500)

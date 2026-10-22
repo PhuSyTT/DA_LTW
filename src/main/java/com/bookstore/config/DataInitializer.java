@@ -1,11 +1,7 @@
 package com.bookstore.config;
 
-import com.bookstore.entity.Branch;
-import com.bookstore.entity.Role;
-import com.bookstore.entity.User;
-import com.bookstore.repository.BranchRepository;
-import com.bookstore.repository.RoleRepository;
-import com.bookstore.repository.UserRepository;
+import com.bookstore.entity.*;
+import com.bookstore.repository.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.CommandLineRunner;
@@ -13,6 +9,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 
 import javax.sql.DataSource;
+import java.math.BigDecimal;
 import java.sql.Connection;
 import java.sql.Statement;
 import java.time.LocalDateTime;
@@ -26,17 +23,29 @@ public class DataInitializer implements CommandLineRunner {
     private final RoleRepository roleRepository;
     private final UserRepository userRepository;
     private final BranchRepository branchRepository;
+    private final CategoryRepository categoryRepository;
+    private final AuthorRepository authorRepository;
+    private final BookRepository bookRepository;
+    private final BookItemRepository bookItemRepository;
     private final PasswordEncoder passwordEncoder;
     private final DataSource dataSource;
 
     public DataInitializer(RoleRepository roleRepository,
                            UserRepository userRepository,
                            BranchRepository branchRepository,
+                           CategoryRepository categoryRepository,
+                           AuthorRepository authorRepository,
+                           BookRepository bookRepository,
+                           BookItemRepository bookItemRepository,
                            PasswordEncoder passwordEncoder,
                            DataSource dataSource) {
         this.roleRepository = roleRepository;
         this.userRepository = userRepository;
         this.branchRepository = branchRepository;
+        this.categoryRepository = categoryRepository;
+        this.authorRepository = authorRepository;
+        this.bookRepository = bookRepository;
+        this.bookItemRepository = bookItemRepository;
         this.passwordEncoder = passwordEncoder;
         this.dataSource = dataSource;
     }
@@ -55,25 +64,107 @@ public class DataInitializer implements CommandLineRunner {
         Role roleCashier = getOrCreateRole("CASHIER", "Nhân viên bán hàng - Thu ngân tại quầy POS & xử lý đơn online");
         Role roleCustomer = getOrCreateRole("CUSTOMER", "Khách hàng độc giả - Tìm kiếm, đặt mua sách và quản lý tài khoản");
 
-        // 2. Fetch sample branches if available
+        // 2. Khởi tạo danh mục, tác giả, chi nhánh và sách nếu CSDL chưa có dữ liệu (Cloud Aiven/MySQL)
+        ensureMasterCatalogSeeded();
+
+        // 3. Fetch sample branches if available
         List<Branch> branches = branchRepository.findAll();
         Branch branch1 = branches.size() > 0 ? branches.get(0) : null;
         Branch branch2 = branches.size() > 1 ? branches.get(1) : branch1;
 
-        // 3. Initialize 5 Standard Accounts (Default Password: "1234@abc")
+        // 4. Initialize 5 Standard Accounts (Default Password: "1234@abc")
         User adminUser = createOrUpdateUser("admin.book4life@gmail.com", "1234@abc", "Nguyễn Văn Admin", "0901234567", roleAdmin, null);
         User managerUser = createOrUpdateUser("manage.book4life@gmail.com", "1234@abc", "Trần Thị Quản Lý (HN)", "0902345678", roleManager, branch1);
         User warehouseUser = createOrUpdateUser("warehouse.book4life@gmail.com", "1234@abc", "Lê Văn Thủ Kho", "0903456789", roleWarehouse, branch1);
         User cashierUser = createOrUpdateUser("cashier.book4life@gmail.com", "1234@abc", "Phạm Thu Ngân", "0904567890", roleCashier, branch2);
         User customerUser = createOrUpdateUser("user.book4life@gmail.com", "1234@abc", "Hoàng Độc Giả", "0905678901", roleCustomer, null);
 
-        // 4. Xóa bỏ tất cả các tài khoản ngoài 5 tài khoản được chỉ định
+        // 5. Xóa bỏ tất cả các tài khoản ngoài 5 tài khoản được chỉ định
         cleanUpExtraneousUsers(adminUser.getId(), managerUser.getId(), warehouseUser.getId(), cashierUser.getId(), customerUser.getId());
 
-        // 5. Đảm bảo ID của 5 tài khoản luôn cố định là 1..5
+        // 6. Đảm bảo ID của 5 tài khoản luôn cố định là 1..5
         ensureStandardUserIds();
 
-        logger.info("DataInitializer completed successfully. 5 Roles & default users are ready!");
+        logger.info("DataInitializer completed successfully. 5 Roles & default catalog are ready!");
+    }
+
+    private void ensureMasterCatalogSeeded() {
+        try {
+            // 1. Seed Branches if empty
+            if (branchRepository.count() == 0) {
+                logger.info("CSDL chưa có chi nhánh, đang tạo 3 chi nhánh mẫu...");
+                Branch b1 = new Branch(null, "Book4Life Quận 1", "123 Nguyễn Thị Minh Khai, P. Bến Thành, Q.1", "028.3912.8888", "TP. Hồ Chí Minh", new BigDecimal("10.7719"), new BigDecimal("106.6983"), true);
+                Branch b2 = new Branch(null, "Book4Life Thủ Đức", "456 Võ Văn Ngân, TP. Thủ Đức", "028.3896.7777", "TP. Hồ Chí Minh", new BigDecimal("10.8504"), new BigDecimal("106.7718"), true);
+                Branch b3 = new Branch(null, "Book4Life Hoàn Kiếm", "78 Tràng Tiền, Q. Hoàn Kiếm", "024.3934.6666", "Hà Nội", new BigDecimal("21.0285"), new BigDecimal("105.8542"), true);
+                branchRepository.saveAll(List.of(b1, b2, b3));
+            }
+
+            // 2. Seed Categories if empty
+            if (categoryRepository.count() == 0) {
+                logger.info("CSDL chưa có thể loại, đang tạo các danh mục sách tiêu chuẩn...");
+                Category cKinhDien = new Category(null, "Kinh Điển", null);
+                Category cVanHoc = new Category(null, "Văn Học", null);
+                Category cKinhTe = new Category(null, "Kinh Tế & Quản Trị", null);
+                Category cKyNang = new Category(null, "Kỹ Năng Sống", null);
+                Category cLichSu = new Category(null, "Lịch Sử & Văn Hóa", null);
+                Category cKhoaHoc = new Category(null, "Khoa Học & Triết Học", null);
+                categoryRepository.saveAll(List.of(cKinhDien, cVanHoc, cKinhTe, cKyNang, cLichSu, cKhoaHoc));
+            }
+
+            // 3. Seed Authors if empty
+            if (authorRepository.count() == 0) {
+                logger.info("CSDL chưa có tác giả, đang tạo các tác giả tiêu biểu...");
+                Author aNamCao = new Author(null, "Nam Cao", "Nhà văn hiện thực xuất sắc của văn học Việt Nam.", null);
+                Author aVuTrongPhung = new Author(null, "Vũ Trọng Phụng", "Ông vua phóng sự đất Bắc thời kỳ 1930 - 1945.", null);
+                Author aNguyenDu = new Author(null, "Nguyễn Du", "Đại thi hào dân tộc Việt Nam, danh nhân văn hóa thế giới.", null);
+                Author aToHoai = new Author(null, "Tô Hoài", "Cây đại thụ của nền văn học thiếu nhi hiện đại Việt Nam.", null);
+                Author aAntoine = new Author(null, "Antoine de Saint-Exupéry", "Nhà văn, phi công tiên phong người Pháp, tác giả Hoàng Tử Bé.", null);
+                Author aPaulo = new Author(null, "Paulo Coelho", "Tiểu thuyết gia người Brazil, tác giả kiệt tác Nhà Giả Kim.", null);
+                Author aDale = new Author(null, "Dale Carnegie", "Bậc thầy phát triển bản thân, tác giả Đắc Nhân Tâm.", null);
+                authorRepository.saveAll(List.of(aNamCao, aVuTrongPhung, aNguyenDu, aToHoai, aAntoine, aPaulo, aDale));
+            }
+
+            // 4. Seed Books & BookItems if empty
+            if (bookRepository.count() == 0) {
+                logger.info("CSDL chưa có sách, đang khởi tạo 7 đầu sách kinh điển mẫu...");
+                Category cKinhDien = categoryRepository.findByNameIgnoreCase("Kinh Điển").orElse(null);
+                Category cKyNang = categoryRepository.findByNameIgnoreCase("Kỹ Năng Sống").orElse(cKinhDien);
+                List<Author> authors = authorRepository.findAll();
+                Author aNamCao = authors.stream().filter(a -> a.getName().contains("Nam Cao")).findFirst().orElse(null);
+                Author aVuTrongPhung = authors.stream().filter(a -> a.getName().contains("Vũ Trọng Phụng")).findFirst().orElse(null);
+                Author aNguyenDu = authors.stream().filter(a -> a.getName().contains("Nguyễn Du")).findFirst().orElse(null);
+                Author aToHoai = authors.stream().filter(a -> a.getName().contains("Tô Hoài")).findFirst().orElse(null);
+                Author aAntoine = authors.stream().filter(a -> a.getName().contains("Antoine")).findFirst().orElse(null);
+                Author aPaulo = authors.stream().filter(a -> a.getName().contains("Paulo")).findFirst().orElse(null);
+                Author aDale = authors.stream().filter(a -> a.getName().contains("Dale")).findFirst().orElse(null);
+
+                List<Branch> allBranches = branchRepository.findAll();
+                Branch b1 = !allBranches.isEmpty() ? allBranches.get(0) : null;
+                Branch b2 = allBranches.size() > 1 ? allBranches.get(1) : b1;
+
+                if (cKinhDien != null && aNamCao != null && b1 != null) {
+                    Book bChiPheo = new Book(null, "Chí Phèo", "978-604-1-12345-1", aNamCao, cKinhDien, "NXB Văn Học", 1941, new BigDecimal("85000"), "/images/vintage-hero-books.png", "Tuyệt phẩm văn học hiện thực phê phán kinh điển của Nam Cao.");
+                    Book bSoDo = new Book(null, "Số Đỏ", "978-604-1-12345-2", aVuTrongPhung != null ? aVuTrongPhung : aNamCao, cKinhDien, "NXB Văn Học", 1936, new BigDecimal("95000"), "/images/vintage-hero-books.png", "Kiệt tác châm biếm kinh điển của văn học Việt Nam thời kỳ tiền chiến.");
+                    Book bKieu = new Book(null, "Truyện Kiều", "978-604-1-12345-3", aNguyenDu != null ? aNguyenDu : aNamCao, cKinhDien, "NXB Văn Học", 1820, new BigDecimal("120000"), "/images/vintage-hero-books.png", "Đỉnh cao thi ca văn học cổ điển Việt Nam.");
+                    Book bDeMen = new Book(null, "Dế Mèn Phiêu Lưu Ký", "978-604-1-12345-4", aToHoai != null ? aToHoai : aNamCao, cKinhDien, "NXB Kim Đồng", 1941, new BigDecimal("65000"), "/images/vintage-hero-books.png", "Tác phẩm thiếu nhi kinh điển gắn liền với tuổi thơ nhiều thế hệ.");
+                    Book bHoangTuBe = new Book(null, "Hoàng Tử Bé (The Little Prince)", "978-604-1-12345-5", aAntoine != null ? aAntoine : aNamCao, cKinhDien, "NXB Hội Nhà Văn", 1943, new BigDecimal("75000"), "/images/vintage-hero-books.png", "Cuốn sách kinh điển thế giới về tình bạn và triết lý sống.");
+                    Book bNhaGiaKim = new Book(null, "Nhà Giả Kim (The Alchemist)", "978-604-1-12345-6", aPaulo != null ? aPaulo : aNamCao, cKinhDien, "NXB Nhã Nam", 1988, new BigDecimal("89000"), "/images/vintage-hero-books.png", "Tác phẩm truyền cảm hứng kinh điển dịch ra hơn 80 thứ tiếng trên toàn thế giới.");
+                    Book bDacNhanTam = new Book(null, "Đắc Nhân Tâm", "978-604-1-12345-7", aDale != null ? aDale : aNamCao, cKyNang, "NXB First News", 1936, new BigDecimal("110000"), "/images/vintage-hero-books.png", "Cuốn sách kỹ năng kinh điển bán chạy nhất mọi thời đại.");
+
+                    List<Book> savedBooks = bookRepository.saveAll(List.of(bChiPheo, bSoDo, bKieu, bDeMen, bHoangTuBe, bNhaGiaKim, bDacNhanTam));
+
+                    for (int i = 0; i < savedBooks.size(); i++) {
+                        Book book = savedBooks.get(i);
+                        BookItem item1 = new BookItem(null, book, b1, "SKU-B1-" + (1000 + i), "LIKE_NEW", book.getOriginalPrice().multiply(new BigDecimal("0.65")), 5, "Kệ A1-0" + (i + 1), "Sách tuyển chọn 95%, giấy đẹp nguyên vẹn", LocalDateTime.now(), "AVAILABLE");
+                        BookItem item2 = new BookItem(null, book, b2, "SKU-B2-" + (2000 + i), "VERY_GOOD", book.getOriginalPrice().multiply(new BigDecimal("0.55")), 3, "Kệ B2-0" + (i + 1), "Sách còn tốt 85%, giấy ngả vàng tự nhiên", LocalDateTime.now(), "AVAILABLE");
+                        bookItemRepository.saveAll(List.of(item1, item2));
+                    }
+                    logger.info("Đã khởi tạo thành công 7 đầu sách kinh điển và dữ liệu tồn kho tại các chi nhánh!");
+                }
+            }
+        } catch (Exception e) {
+            logger.warn("ensureMasterCatalogSeeded caught exception: {}", e.getMessage());
+        }
     }
 
     private void ensureStandardUserIds() {
@@ -100,77 +191,60 @@ public class DataInitializer implements CommandLineRunner {
                 }
             }
 
-            logger.info("Renumbering standard user accounts to exact IDs 1..5...");
+            logger.info("Renumbering standard user accounts to exact IDs 1, 2, 3, 4, 5...");
 
-            String sql =
-                "BEGIN TRANSACTION;\n" +
-                "IF OBJECT_ID('fk_trade_in_user', 'F') IS NOT NULL ALTER TABLE trade_in_requests DROP CONSTRAINT fk_trade_in_user;\n" +
-                "IF OBJECT_ID('fk_trade_in_staff', 'F') IS NOT NULL ALTER TABLE trade_in_requests DROP CONSTRAINT fk_trade_in_staff;\n" +
-                "IF OBJECT_ID('fk_transfers_user', 'F') IS NOT NULL ALTER TABLE stock_transfers DROP CONSTRAINT fk_transfers_user;\n" +
-                "IF OBJECT_ID('fk_wishlists_user', 'F') IS NOT NULL ALTER TABLE wishlists DROP CONSTRAINT fk_wishlists_user;\n" +
-                "IF OBJECT_ID('fk_reviews_user', 'F') IS NOT NULL ALTER TABLE reviews DROP CONSTRAINT fk_reviews_user;\n" +
-                "IF OBJECT_ID('fk_chat_sender', 'F') IS NOT NULL ALTER TABLE chat_messages DROP CONSTRAINT fk_chat_sender;\n" +
-                "IF OBJECT_ID('fk_chat_receiver', 'F') IS NOT NULL ALTER TABLE chat_messages DROP CONSTRAINT fk_chat_receiver;\n" +
-                "IF OBJECT_ID('FK_osh_user', 'F') IS NOT NULL ALTER TABLE order_status_history DROP CONSTRAINT FK_osh_user;\n" +
-                "IF OBJECT_ID('fk_ai_chat_user', 'F') IS NOT NULL ALTER TABLE ai_chat_messages DROP CONSTRAINT fk_ai_chat_user;\n" +
-                "IF OBJECT_ID('fk_master_orders_user', 'F') IS NOT NULL ALTER TABLE master_orders DROP CONSTRAINT fk_master_orders_user;\n" +
-                "IF OBJECT_ID('fk_coupon_usages_user', 'F') IS NOT NULL ALTER TABLE coupon_usages DROP CONSTRAINT fk_coupon_usages_user;\n" +
-                "\n" +
-                "IF OBJECT_ID('master_orders', 'U') IS NOT NULL UPDATE master_orders SET user_id = 5 WHERE user_id NOT IN (1,2,3,4,5);\n" +
-                "IF OBJECT_ID('trade_in_requests', 'U') IS NOT NULL BEGIN UPDATE trade_in_requests SET user_id = 5 WHERE user_id NOT IN (1,2,3,4,5); UPDATE trade_in_requests SET reviewed_by_staff_id = 1 WHERE reviewed_by_staff_id IS NOT NULL AND reviewed_by_staff_id NOT IN (1,2,3,4,5); END\n" +
-                "IF OBJECT_ID('stock_transfers', 'U') IS NOT NULL UPDATE stock_transfers SET requested_by_user_id = 1 WHERE requested_by_user_id NOT IN (1,2,3,4,5);\n" +
-                "IF OBJECT_ID('wishlists', 'U') IS NOT NULL UPDATE wishlists SET user_id = 5 WHERE user_id NOT IN (1,2,3,4,5);\n" +
-                "IF OBJECT_ID('order_status_history', 'U') IS NOT NULL UPDATE order_status_history SET updated_by_user_id = 1 WHERE updated_by_user_id NOT IN (1,2,3,4,5);\n" +
-                "IF OBJECT_ID('ai_chat_messages', 'U') IS NOT NULL UPDATE ai_chat_messages SET user_id = 5 WHERE user_id IS NOT NULL AND user_id NOT IN (1,2,3,4,5);\n" +
-                "\n" +
-                "SELECT \n" +
-                "    CASE \n" +
-                "        WHEN email = 'admin.book4life@gmail.com' THEN 1\n" +
-                "        WHEN email = 'manage.book4life@gmail.com' THEN 2\n" +
-                "        WHEN email = 'warehouse.book4life@gmail.com' THEN 3\n" +
-                "        WHEN email = 'cashier.book4life@gmail.com' THEN 4\n" +
-                "        WHEN email = 'user.book4life@gmail.com' THEN 5\n" +
-                "    END AS new_id,\n" +
-                "    email, password, full_name, phone, avatar_url, role_id, branch_id, is_active, created_at\n" +
-                "INTO #temp_users_init\n" +
-                "FROM users\n" +
-                "WHERE email IN (\n" +
-                "    'admin.book4life@gmail.com',\n" +
-                "    'manage.book4life@gmail.com',\n" +
-                "    'warehouse.book4life@gmail.com',\n" +
-                "    'cashier.book4life@gmail.com',\n" +
-                "    'user.book4life@gmail.com'\n" +
-                ");\n" +
-                "\n" +
-                "DELETE FROM users;\n" +
-                "\n" +
-                "SET IDENTITY_INSERT users ON;\n" +
-                "\n" +
-                "INSERT INTO users (id, email, password, full_name, phone, avatar_url, role_id, branch_id, is_active, created_at)\n" +
-                "SELECT new_id, email, password, full_name, phone, avatar_url, role_id, branch_id, is_active, created_at\n" +
-                "FROM #temp_users_init\n" +
-                "ORDER BY new_id ASC;\n" +
-                "\n" +
-                "SET IDENTITY_INSERT users OFF;\n" +
-                "\n" +
-                "DROP TABLE #temp_users_init;\n" +
-                "\n" +
-                "DBCC CHECKIDENT ('users', RESEED, 5);\n" +
-                "\n" +
-                "IF OBJECT_ID('trade_in_requests', 'U') IS NOT NULL BEGIN ALTER TABLE trade_in_requests ADD CONSTRAINT fk_trade_in_user FOREIGN KEY (user_id) REFERENCES users(id); ALTER TABLE trade_in_requests ADD CONSTRAINT fk_trade_in_staff FOREIGN KEY (reviewed_by_staff_id) REFERENCES users(id); END\n" +
-                "IF OBJECT_ID('stock_transfers', 'U') IS NOT NULL ALTER TABLE stock_transfers ADD CONSTRAINT fk_transfers_user FOREIGN KEY (requested_by_user_id) REFERENCES users(id);\n" +
-                "IF OBJECT_ID('wishlists', 'U') IS NOT NULL ALTER TABLE wishlists ADD CONSTRAINT fk_wishlists_user FOREIGN KEY (user_id) REFERENCES users(id);\n" +
-                "IF OBJECT_ID('reviews', 'U') IS NOT NULL ALTER TABLE reviews ADD CONSTRAINT fk_reviews_user FOREIGN KEY (user_id) REFERENCES users(id);\n" +
-                "IF OBJECT_ID('chat_messages', 'U') IS NOT NULL BEGIN ALTER TABLE chat_messages ADD CONSTRAINT fk_chat_sender FOREIGN KEY (sender_id) REFERENCES users(id); ALTER TABLE chat_messages ADD CONSTRAINT fk_chat_receiver FOREIGN KEY (receiver_id) REFERENCES users(id); END\n" +
-                "IF OBJECT_ID('order_status_history', 'U') IS NOT NULL ALTER TABLE order_status_history ADD CONSTRAINT FK_osh_user FOREIGN KEY (updated_by_user_id) REFERENCES users(id);\n" +
-                "IF OBJECT_ID('ai_chat_messages', 'U') IS NOT NULL ALTER TABLE ai_chat_messages ADD CONSTRAINT fk_ai_chat_user FOREIGN KEY (user_id) REFERENCES users(id);\n" +
-                "IF OBJECT_ID('master_orders', 'U') IS NOT NULL ALTER TABLE master_orders ADD CONSTRAINT fk_master_orders_user FOREIGN KEY (user_id) REFERENCES users(id);\n" +
-                "IF OBJECT_ID('coupon_usages', 'U') IS NOT NULL ALTER TABLE coupon_usages ADD CONSTRAINT fk_coupon_usages_user FOREIGN KEY (user_id) REFERENCES users(id);\n" +
-                "\n" +
-                "COMMIT TRANSACTION;";
+            // Step A: Disable constraints & triggers, reassign FKs in dependent tables
+            stmt.execute("ALTER TABLE users NOCHECK CONSTRAINT ALL;");
 
-            stmt.execute(sql);
-            logger.info("Standard user accounts have been successfully verified/renumbered to IDs 1..5!");
+            stmt.execute("IF OBJECT_ID('master_orders', 'U') IS NOT NULL UPDATE master_orders SET user_id = 9005 WHERE user_id = (SELECT id FROM users WHERE email = 'user.book4life@gmail.com');");
+            stmt.execute("IF OBJECT_ID('ai_chat_messages', 'U') IS NOT NULL UPDATE ai_chat_messages SET user_id = 9005 WHERE user_id = (SELECT id FROM users WHERE email = 'user.book4life@gmail.com');");
+            stmt.execute("IF OBJECT_ID('wishlists', 'U') IS NOT NULL UPDATE wishlists SET user_id = 9005 WHERE user_id = (SELECT id FROM users WHERE email = 'user.book4life@gmail.com');");
+            stmt.execute("IF OBJECT_ID('trade_in_requests', 'U') IS NOT NULL UPDATE trade_in_requests SET user_id = 9005 WHERE user_id = (SELECT id FROM users WHERE email = 'user.book4life@gmail.com');");
+            stmt.execute("IF OBJECT_ID('trade_in_requests', 'U') IS NOT NULL UPDATE trade_in_requests SET reviewed_by_staff_id = 9001 WHERE reviewed_by_staff_id = (SELECT id FROM users WHERE email = 'admin.book4life@gmail.com');");
+            stmt.execute("IF OBJECT_ID('stock_transfers', 'U') IS NOT NULL UPDATE stock_transfers SET requested_by_user_id = 9001 WHERE requested_by_user_id = (SELECT id FROM users WHERE email = 'admin.book4life@gmail.com');");
+            stmt.execute("IF OBJECT_ID('order_status_history', 'U') IS NOT NULL UPDATE order_status_history SET updated_by_user_id = 9001 WHERE updated_by_user_id = (SELECT id FROM users WHERE email = 'admin.book4life@gmail.com');");
+            stmt.execute("IF OBJECT_ID('coupon_usages', 'U') IS NOT NULL UPDATE coupon_usages SET user_id = 9005 WHERE user_id = (SELECT id FROM users WHERE email = 'user.book4life@gmail.com');");
+
+            // Step B: Copy the 5 users to a temp table
+            stmt.execute("IF OBJECT_ID('tempdb..#TempStandardUsers') IS NOT NULL DROP TABLE #TempStandardUsers;");
+            stmt.execute("SELECT * INTO #TempStandardUsers FROM users WHERE email IN ('admin.book4life@gmail.com', 'manage.book4life@gmail.com', 'warehouse.book4life@gmail.com', 'cashier.book4life@gmail.com', 'user.book4life@gmail.com');");
+
+            // Step C: Delete all users
+            stmt.execute("DELETE FROM users;");
+
+            // Step D: Enable IDENTITY_INSERT and re-insert with exact IDs 1..5
+            stmt.execute("SET IDENTITY_INSERT users ON;");
+            stmt.execute("INSERT INTO users (id, email, password_hash, full_name, phone, role_id, branch_id, is_active, created_at) " +
+                    "SELECT 1, email, password_hash, full_name, phone, role_id, branch_id, is_active, created_at FROM #TempStandardUsers WHERE email = 'admin.book4life@gmail.com';");
+            stmt.execute("INSERT INTO users (id, email, password_hash, full_name, phone, role_id, branch_id, is_active, created_at) " +
+                    "SELECT 2, email, password_hash, full_name, phone, role_id, branch_id, is_active, created_at FROM #TempStandardUsers WHERE email = 'manage.book4life@gmail.com';");
+            stmt.execute("INSERT INTO users (id, email, password_hash, full_name, phone, role_id, branch_id, is_active, created_at) " +
+                    "SELECT 3, email, password_hash, full_name, phone, role_id, branch_id, is_active, created_at FROM #TempStandardUsers WHERE email = 'warehouse.book4life@gmail.com';");
+            stmt.execute("INSERT INTO users (id, email, password_hash, full_name, phone, role_id, branch_id, is_active, created_at) " +
+                    "SELECT 4, email, password_hash, full_name, phone, role_id, branch_id, is_active, created_at FROM #TempStandardUsers WHERE email = 'cashier.book4life@gmail.com';");
+            stmt.execute("INSERT INTO users (id, email, password_hash, full_name, phone, role_id, branch_id, is_active, created_at) " +
+                    "SELECT 5, email, password_hash, full_name, phone, role_id, branch_id, is_active, created_at FROM #TempStandardUsers WHERE email = 'user.book4life@gmail.com';");
+            stmt.execute("SET IDENTITY_INSERT users OFF;");
+
+            // Step E: Reseed identity to 5 so next auto-generated ID is 6
+            stmt.execute("DBCC CHECKIDENT ('users', RESEED, 5);");
+
+            // Step F: Restore FK references in dependent tables
+            stmt.execute("IF OBJECT_ID('master_orders', 'U') IS NOT NULL UPDATE master_orders SET user_id = 5 WHERE user_id = 9005;");
+            stmt.execute("IF OBJECT_ID('ai_chat_messages', 'U') IS NOT NULL UPDATE ai_chat_messages SET user_id = 5 WHERE user_id = 9005;");
+            stmt.execute("IF OBJECT_ID('wishlists', 'U') IS NOT NULL UPDATE wishlists SET user_id = 5 WHERE user_id = 9005;");
+            stmt.execute("IF OBJECT_ID('trade_in_requests', 'U') IS NOT NULL UPDATE trade_in_requests SET user_id = 5 WHERE user_id = 9005;");
+            stmt.execute("IF OBJECT_ID('trade_in_requests', 'U') IS NOT NULL UPDATE trade_in_requests SET reviewed_by_staff_id = 1 WHERE reviewed_by_staff_id = 9001;");
+            stmt.execute("IF OBJECT_ID('stock_transfers', 'U') IS NOT NULL UPDATE stock_transfers SET requested_by_user_id = 1 WHERE requested_by_user_id = 9001;");
+            stmt.execute("IF OBJECT_ID('order_status_history', 'U') IS NOT NULL UPDATE order_status_history SET updated_by_user_id = 1 WHERE updated_by_user_id = 9001;");
+            stmt.execute("IF OBJECT_ID('coupon_usages', 'U') IS NOT NULL UPDATE coupon_usages SET user_id = 5 WHERE user_id = 9005;");
+
+            // Step G: Re-enable constraints
+            stmt.execute("ALTER TABLE users CHECK CONSTRAINT ALL;");
+            stmt.execute("DROP TABLE #TempStandardUsers;");
+
+            logger.info("Standard user IDs renumbered successfully: 1=Admin, 2=Manager, 3=Warehouse, 4=Cashier, 5=Customer");
+
         } catch (Exception ex) {
             logger.warn("Could not renumber standard user IDs: {}", ex.getMessage());
         }
@@ -232,7 +306,6 @@ public class DataInitializer implements CommandLineRunner {
 
             String dbName = conn.getMetaData().getDatabaseProductName().toLowerCase();
             if (dbName.contains("sql server") || dbName.contains("microsoft")) {
-                // Reassign foreign keys if tables exist (MSSQL T-SQL syntax)
                 stmt.execute("IF OBJECT_ID('master_orders', 'U') IS NOT NULL UPDATE master_orders SET user_id = " + cid + " WHERE user_id NOT IN (" + idList + ")");
                 stmt.execute("IF OBJECT_ID('ai_chat_messages', 'U') IS NOT NULL UPDATE ai_chat_messages SET user_id = " + cid + " WHERE user_id NOT IN (" + idList + ")");
                 stmt.execute("IF OBJECT_ID('wishlists', 'U') IS NOT NULL UPDATE wishlists SET user_id = " + cid + " WHERE user_id NOT IN (" + idList + ")");
@@ -250,39 +323,33 @@ public class DataInitializer implements CommandLineRunner {
         }
     }
 
-    private Role getOrCreateRole(String roleName, String description) {
-        return roleRepository.findByRoleName(roleName).orElseGet(() -> {
-            Role role = Role.builder()
-                    .roleName(roleName)
-                    .description(description)
-                    .build();
-            return roleRepository.save(role);
-        });
+    private Role getOrCreateRole(String name, String description) {
+        return roleRepository.findByName(name)
+                .orElseGet(() -> roleRepository.save(new Role(null, name, description)));
     }
 
     private User createOrUpdateUser(String email, String rawPassword, String fullName, String phone, Role role, Branch branch) {
-        return userRepository.findByEmail(email).map(user -> {
-            user.setPassword(passwordEncoder.encode(rawPassword));
-            user.setFullName(fullName);
-            user.setPhone(phone);
-            user.setRole(role);
-            if (branch != null) {
-                user.setBranch(branch);
-            }
-            user.setIsActive(true);
-            return userRepository.save(user);
-        }).orElseGet(() -> {
-            User newUser = User.builder()
-                    .email(email)
-                    .password(passwordEncoder.encode(rawPassword))
-                    .fullName(fullName)
-                    .phone(phone)
-                    .role(role)
-                    .branch(branch)
-                    .isActive(true)
-                    .createdAt(LocalDateTime.now())
-                    .build();
-            return userRepository.save(newUser);
-        });
+        return userRepository.findByEmail(email)
+                .map(existingUser -> {
+                    existingUser.setPasswordHash(passwordEncoder.encode(rawPassword));
+                    existingUser.setFullName(fullName);
+                    existingUser.setPhone(phone);
+                    existingUser.setRole(role);
+                    existingUser.setBranch(branch);
+                    existingUser.setIsActive(true);
+                    return userRepository.save(existingUser);
+                })
+                .orElseGet(() -> {
+                    User newUser = new User();
+                    newUser.setEmail(email);
+                    newUser.setPasswordHash(passwordEncoder.encode(rawPassword));
+                    newUser.setFullName(fullName);
+                    newUser.setPhone(phone);
+                    newUser.setRole(role);
+                    newUser.setBranch(branch);
+                    newUser.setIsActive(true);
+                    newUser.setCreatedAt(LocalDateTime.now());
+                    return userRepository.save(newUser);
+                });
     }
 }

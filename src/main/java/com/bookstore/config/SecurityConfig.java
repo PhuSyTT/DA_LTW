@@ -68,6 +68,13 @@ public class SecurityConfig {
                     "/recycle", "/thu-mua-sach", "/trade-in/**", "/my-trade-in", "/my-wishlist", "/login", "/register", "/error", "/api/**"
                 ).permitAll()
                 .requestMatchers("/admin/users/**").hasAnyAuthority("ROLE_ADMIN", "ADMIN")
+                .requestMatchers("/admin/categories/**").hasAnyAuthority(
+                    "ROLE_ADMIN", "ADMIN",
+                    "ROLE_BRANCH_MANAGER", "BRANCH_MANAGER",
+                    "ROLE_WAREHOUSE_STAFF", "WAREHOUSE_STAFF",
+                    "ROLE_STAFF_GENERAL", "STAFF_GENERAL",
+                    "ROLE_STAFF_APPRAISER", "STAFF_APPRAISER"
+                )
                 .requestMatchers("/admin/**").hasAnyAuthority(
                     "ROLE_ADMIN", "ADMIN",
                     "ROLE_BRANCH_MANAGER", "BRANCH_MANAGER",

@@ -21,7 +21,7 @@ public class AiChatMessage {
     @Column(name = "sender_type", nullable = false, length = 20)
     private String senderType; // "USER", "ASSISTANT"
 
-    @Column(name = "content", nullable = false, columnDefinition = "NVARCHAR(MAX)")
+    @Column(name = "content", nullable = false, columnDefinition = "TEXT")
     private String content;
 
     @Column(name = "created_at", nullable = false)

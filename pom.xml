@@ -85,6 +85,12 @@
             <artifactId>spring-boot-starter-websocket</artifactId>
         </dependency>
         
+        <!-- Spring Boot Mail Starter (JavaMailSender) -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-mail</artifactId>
+        </dependency>
+        
         <!-- Cloudinary SDK -->
         <dependency>
             <groupId>com.cloudinary</groupId>

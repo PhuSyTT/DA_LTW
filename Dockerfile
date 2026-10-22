@@ -22,3 +22,4 @@ EXPOSE 8080
 
 # Chạy ứng dụng Spring Boot
 ENTRYPOINT ["java", "-Dserver.port=${PORT}", "-Xmx384m", "-jar", "app.jar"]
+

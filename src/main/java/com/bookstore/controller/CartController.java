@@ -163,6 +163,7 @@ public class CartController {
             @RequestParam("shippingAddress") String shippingAddress,
             @RequestParam(value = "paymentMethod", defaultValue = "COD") String paymentMethod,
             @RequestParam(value = "clickAndCollect", defaultValue = "false") boolean clickAndCollect,
+            @org.springframework.security.core.annotation.AuthenticationPrincipal com.bookstore.security.CustomUserDetails userDetails,
             HttpSession session,
             RedirectAttributes redirectAttributes
     ) {
@@ -192,7 +193,8 @@ public class CartController {
             String orderCode = "DH-" + System.currentTimeMillis();
             if (!bookItemIds.isEmpty()) {
                 try {
-                    MasterOrder masterOrder = orderService.processCheckout(req, null);
+                    com.bookstore.entity.User currentUser = (userDetails != null) ? userDetails.getUser() : null;
+                    MasterOrder masterOrder = orderService.processCheckout(req, currentUser);
                     orderCode = masterOrder.getMasterOrderCode();
                 } catch (Exception ex) {
                     // Fallback safe order simulation

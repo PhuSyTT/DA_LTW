@@ -27,16 +27,16 @@ public class CustomUserDetailsService implements UserDetailsService {
 
         // Support convenient test aliases
         String resolvedEmail = cleanInput;
-        if ("admin".equals(cleanInput)) {
-            resolvedEmail = "admin@oldbooks.vn";
-        } else if ("user1".equals(cleanInput) || "customer".equals(cleanInput) || "user".equals(cleanInput)) {
-            resolvedEmail = "customer@gmail.com";
-        } else if ("manager".equals(cleanInput)) {
-            resolvedEmail = "manager.hn@oldbooks.vn";
-        } else if ("warehouse".equals(cleanInput) || "appraiser".equals(cleanInput)) {
-            resolvedEmail = "warehouse@oldbooks.vn";
-        } else if ("cashier".equals(cleanInput) || "staff".equals(cleanInput)) {
-            resolvedEmail = "cashier@oldbooks.vn";
+        if ("admin".equals(cleanInput) || "admin@oldbooks.vn".equals(cleanInput)) {
+            resolvedEmail = "admin.book4life@gmail.com";
+        } else if ("user1".equals(cleanInput) || "customer".equals(cleanInput) || "user".equals(cleanInput) || "customer@gmail.com".equals(cleanInput)) {
+            resolvedEmail = "user.book4life@gmail.com";
+        } else if ("manager".equals(cleanInput) || "manage".equals(cleanInput) || "manager.hn@oldbooks.vn".equals(cleanInput)) {
+            resolvedEmail = "manage.book4life@gmail.com";
+        } else if ("warehouse".equals(cleanInput) || "appraiser".equals(cleanInput) || "warehouse@oldbooks.vn".equals(cleanInput)) {
+            resolvedEmail = "warehouse.book4life@gmail.com";
+        } else if ("cashier".equals(cleanInput) || "staff".equals(cleanInput) || "cashier@oldbooks.vn".equals(cleanInput)) {
+            resolvedEmail = "cashier.book4life@gmail.com";
         }
 
         final String finalEmail = resolvedEmail;

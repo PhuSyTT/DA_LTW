@@ -29,4 +29,6 @@ Thumbs.db
 *.bak
 468/
 uploads/
+.env
+Password.txt
 

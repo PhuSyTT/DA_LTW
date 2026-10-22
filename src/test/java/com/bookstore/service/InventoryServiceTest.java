@@ -40,6 +40,8 @@ class InventoryServiceTest {
 
     @Mock
     private CloudinaryService cloudinaryService;
+    @Mock
+    private WishlistService wishlistService;
 
     @InjectMocks
     private InventoryServiceImpl inventoryService;

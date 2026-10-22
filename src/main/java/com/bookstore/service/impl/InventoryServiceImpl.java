@@ -35,17 +35,20 @@ public class InventoryServiceImpl implements InventoryService {
     private final BookRepository bookRepository;
     private final BranchRepository branchRepository;
     private final CloudinaryService cloudinaryService;
+    private final com.bookstore.service.WishlistService wishlistService;
 
     public InventoryServiceImpl(BookItemRepository bookItemRepository,
                                 BookItemImageRepository bookItemImageRepository,
                                 BookRepository bookRepository,
                                 BranchRepository branchRepository,
-                                CloudinaryService cloudinaryService) {
+                                CloudinaryService cloudinaryService,
+                                com.bookstore.service.WishlistService wishlistService) {
         this.bookItemRepository = bookItemRepository;
         this.bookItemImageRepository = bookItemImageRepository;
         this.bookRepository = bookRepository;
         this.branchRepository = branchRepository;
         this.cloudinaryService = cloudinaryService;
+        this.wishlistService = wishlistService;
     }
 
     @Override
@@ -125,6 +128,13 @@ public class InventoryServiceImpl implements InventoryService {
                     }
                 }
             }
+        }
+
+        // Kích hoạt thông báo Wishlist săn sách tự động gửi Email tới khách hàng (FR-WSH-02)
+        try {
+            wishlistService.checkAndTriggerRestockAlerts(savedItem);
+        } catch (Exception e) {
+            log.warn("Không thể kích hoạt wishlist alert cho SKU {}: {}", savedItem.getSkuBarcode(), e.getMessage());
         }
 
         return mapToDto(savedItem);

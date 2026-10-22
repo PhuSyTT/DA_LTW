@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
       th:replace="~{layout/admin-layout :: html(
         pageTitle='Quản Lý Khuyến Mãi & Mã Giảm Giá (Nhóm 7)',
         pageSubtitle='Cấu hình mã giảm giá đa điều kiện (Độ cũ của sách, Chi nhánh, Đơn tối thiểu) - Coupons & Discounts',
@@ -7,17 +8,51 @@
       )}">
 <body>
 <section>
+    <!-- Thông báo hệ thống -->
+    <div th:if="${successMessage}" class="alert alert-success alert-dismissible fade show d-flex align-items-center shadow-sm mb-4" role="alert">
+        <i class="fas fa-circle-check fs-5 me-2"></i>
+        <div th:text="${successMessage}">Thao tác thành công!</div>
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+    <div th:if="${errorMessage}" class="alert alert-danger alert-dismissible fade show d-flex align-items-center shadow-sm mb-4" role="alert">
+        <i class="fas fa-circle-exclamation fs-5 me-2"></i>
+        <div th:text="${errorMessage}">Đã xảy ra lỗi!</div>
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+    <div th:if="${warningMessage}" class="alert alert-warning alert-dismissible fade show d-flex align-items-center shadow-sm mb-4" role="alert">
+        <i class="fas fa-triangle-exclamation fs-5 me-2"></i>
+        <div th:text="${warningMessage}">Cảnh báo!</div>
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+
+    <!-- Thông báo phạm vi quyền nếu là Branch Manager -->
+    <div th:if="${!isAdmin}" class="alert alert-info border-info border-opacity-25 bg-info bg-opacity-10 d-flex align-items-center mb-4">
+        <i class="fas fa-shield-halved fs-4 text-info me-3"></i>
+        <div>
+            <strong class="text-dark">Phân quyền: Quản Lý Chi Nhánh <span th:if="${userBranchName}" th:text="'(' + ${userBranchName} + ')'"></span></strong>
+            <div class="small text-muted">Bạn có quyền xem danh sách mã giảm giá áp dụng riêng cho chi nhánh của mình và mã áp dụng toàn chuỗi. Quyền tạo mới hoặc sửa đổi mã thuộc thẩm quyền của Tổng Quản Trị (ADMIN).</div>
+        </div>
+    </div>
+
     <!-- Bảng danh sách coupon -->
     <div class="content-card">
-        <div class="content-card-header d-flex justify-content-between align-items-center">
+        <div class="content-card-header d-flex justify-content-between align-items-center flex-wrap gap-2">
             <div class="d-flex align-items-center gap-2">
                 <h5 class="fw-bold mb-0 text-dark">
                     <i class="fas fa-ticket-simple text-success me-2"></i> Danh Sách Mã Khuyến Mãi Đa Điều Kiện
                 </h5>
+                <span class="badge bg-success bg-opacity-10 text-success fw-bold px-3 py-1.5 ms-2">
+                    FR-CPN-01 → FR-CPN-04
+                </span>
             </div>
-            <span class="badge bg-success bg-opacity-10 text-success fw-bold px-3 py-2">
-                FR-CPN-01, FR-CPN-02, FR-CPN-03, FR-CPN-04
-            </span>
+            
+            <div class="d-flex align-items-center gap-2">
+                <!-- Nút Tạo mã mới chỉ dành cho ADMIN -->
+                <button th:if="${isAdmin}" type="button" class="btn btn-primary d-flex align-items-center gap-2 shadow-sm" data-bs-toggle="modal" data-bs-target="#modalCreateCoupon">
+                    <i class="fas fa-plus-circle"></i>
+                    <span>Tạo Mã Giảm Giá Mới</span>
+                </button>
+            </div>
         </div>
 
         <div class="table-responsive">
@@ -29,18 +64,19 @@
                         <th>Mức Giảm</th>
                         <th>Đơn Tối Thiểu</th>
                         <th>Giảm Tối Đa</th>
-                        <th>Ràng Buộc Độ Cũ (FR-CPN-02)</th>
-                        <th>Chi Nhánh Áp Dụng (FR-CPN-03)</th>
+                        <th>Ràng Buộc Độ Cũ</th>
+                        <th>Chi Nhánh Áp Dụng</th>
                         <th>Lượt Dùng / Giới Hạn</th>
                         <th>Hiệu Lực</th>
-                        <th class="text-end pe-4">Trạng Thái</th>
+                        <th>Trạng Thái</th>
+                        <th th:if="${isAdmin}" class="text-end pe-4">Hành Động</th>
                     </tr>
                 </thead>
                 <tbody>
                     <tr th:if="${coupons == null or #lists.isEmpty(coupons)}">
-                        <td colspan="10" class="text-center py-5 text-muted">
+                        <td th:colspan="${isAdmin ? 11 : 10}" class="text-center py-5 text-muted">
                             <i class="fas fa-ticket-alt fa-3x mb-3 opacity-25"></i>
-                            <p class="fs-6">Chưa có mã giảm giá nào trong hệ thống.</p>
+                            <p class="fs-6">Chưa có mã giảm giá nào phù hợp với phạm vi quản lý.</p>
                         </td>
                     </tr>
                     <tr th:each="cpn : ${coupons}">
@@ -100,7 +136,7 @@
                                 01/01/2026 → 31/12/2026
                             </div>
                         </td>
-                        <td class="text-end pe-4">
+                        <td>
                             <span th:if="${cpn.isActive}" class="badge bg-success bg-opacity-10 text-success border border-success px-2.5 py-1">
                                 <i class="fas fa-circle-check me-1"></i> Hoạt động
                             </span>
@@ -108,12 +144,140 @@
                                 <i class="fas fa-lock me-1"></i> Đã khóa
                             </span>
                         </td>
+                        <!-- Cột thao tác cho ADMIN -->
+                        <td th:if="${isAdmin}" class="text-end pe-4">
+                            <div class="d-inline-flex gap-1">
+                                <!-- Bật/Tắt -->
+                                <form th:action="@{/admin/coupons/{id}/toggle(id=${cpn.id})}" method="post" class="d-inline">
+                                    <button type="submit" class="btn btn-sm" th:classappend="${cpn.isActive} ? 'btn-outline-warning' : 'btn-outline-success'"
+                                            th:title="${cpn.isActive} ? 'Khóa mã này' : 'Mở kích hoạt mã'">
+                                        <i class="fas" th:classappend="${cpn.isActive} ? 'fa-lock' : 'fa-lock-open'"></i>
+                                    </button>
+                                </form>
+                                <!-- Xóa -->
+                                <form th:action="@{/admin/coupons/{id}/delete(id=${cpn.id})}" method="post" class="d-inline"
+                                      onsubmit="return confirm('Bạn có chắc chắn muốn xóa mã giảm giá này?');">
+                                    <button type="submit" class="btn btn-sm btn-outline-danger" title="Xóa mã">
+                                        <i class="fas fa-trash-can"></i>
+                                    </button>
+                                </form>
+                            </div>
+                        </td>
                     </tr>
                 </tbody>
             </table>
         </div>
     </div>
+
+    <!-- Modal Tạo Mã Giảm Giá Mới (Chỉ ADMIN) -->
+    <div th:if="${isAdmin}" class="modal fade" id="modalCreateCoupon" tabindex="-1" aria-labelledby="modalCreateCouponLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg modal-dialog-centered">
+            <div class="modal-content border-0 shadow-lg">
+                <form th:action="@{/admin/coupons/create}" method="post">
+                    <div class="modal-header bg-primary text-white">
+                        <h5 class="modal-title fw-bold" id="modalCreateCouponLabel">
+                            <i class="fas fa-ticket-simple me-2"></i> Tạo Mã Khuyến Mãi Mới (Đa Điều Kiện)
+                        </h5>
+                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body p-4">
+                        <div class="row g-3">
+                            <!-- Mã code -->
+                            <div class="col-md-6">
+                                <label class="form-label fw-bold">Mã Khuyến Mãi (Coupon Code) <span class="text-danger">*</span></label>
+                                <div class="input-group">
+                                    <span class="input-group-text"><i class="fas fa-barcode"></i></span>
+                                    <input type="text" class="form-control text-uppercase font-monospace fw-bold" name="code" placeholder="VD: BOOK4LIFE20" required>
+                                </div>
+                                <div class="form-text">Mã viết liền không dấu, sẽ tự động chuyển thành chữ hoa.</div>
+                            </div>
+
+                            <!-- Loại giảm giá -->
+                            <div class="col-md-6">
+                                <label class="form-label fw-bold">Hình Thức Giảm Giá <span class="text-danger">*</span></label>
+                                <select class="form-select" name="discountType" required>
+                                    <option value="PERCENT">Giảm theo tỷ lệ phần trăm (%)</option>
+                                    <option value="FIXED_AMOUNT">Giảm theo số tiền cố định (VNĐ)</option>
+                                </select>
+                            </div>
+
+                            <!-- Giá trị giảm -->
+                            <div class="col-md-4">
+                                <label class="form-label fw-bold">Mức Giảm <span class="text-danger">*</span></label>
+                                <input type="number" class="form-control" name="discountValue" min="1" step="any" placeholder="VD: 20 hoặc 50000" required>
+                                <div class="form-text">Nhập số % (VD: 20) hoặc số tiền (VD: 50000).</div>
+                            </div>
+
+                            <!-- Đơn tối thiểu -->
+                            <div class="col-md-4">
+                                <label class="form-label fw-bold">Đơn Hàng Tối Thiểu (VNĐ)</label>
+                                <input type="number" class="form-control" name="minOrderAmount" min="0" step="1000" placeholder="0 nếu không yêu cầu">
+                            </div>
+
+                            <!-- Giảm tối đa -->
+                            <div class="col-md-4">
+                                <label class="form-label fw-bold">Giảm Tối Đa (VNĐ)</label>
+                                <input type="number" class="form-control" name="maxDiscountAmount" min="0" step="1000" placeholder="Chỉ áp dụng với giảm theo %">
+                            </div>
+
+                            <hr class="my-3">
+
+                            <!-- Ràng buộc độ cũ sách (FR-CPN-02) -->
+                            <div class="col-md-6">
+                                <label class="form-label fw-bold">
+                                    <i class="fas fa-filter text-warning me-1"></i> Ràng Buộc Độ Cũ (FR-CPN-02)
+                                </label>
+                                <select class="form-select" name="applicableConditionGrade">
+                                    <option value="ALL">Áp dụng cho mọi độ cũ của sách</option>
+                                    <option value="LIKE_NEW">Chỉ áp dụng cho sách Like New (Độ 1)</option>
+                                    <option value="VERY_GOOD">Chỉ áp dụng cho sách Rất Tốt (Very Good)</option>
+                                    <option value="GOOD">Chỉ áp dụng cho sách Tốt (Good)</option>
+                                    <option value="ACCEPTABLE">Chỉ áp dụng cho sách Chấp Nhận Được (Acceptable)</option>
+                                </select>
+                                <div class="form-text">Mã sẽ chỉ giảm trên các sách đạt chuẩn độ cũ này.</div>
+                            </div>
+
+                            <!-- Ràng buộc chi nhánh (FR-CPN-03) -->
+                            <div class="col-md-6">
+                                <label class="form-label fw-bold">
+                                    <i class="fas fa-store text-primary me-1"></i> Chi Nhánh Áp Dụng (FR-CPN-03)
+                                </label>
+                                <select class="form-select" name="applicableBranchId">
+                                    <option value="">Áp dụng Toàn Hệ Thống (Mọi chi nhánh)</option>
+                                    <option th:each="br : ${branches}" th:value="${br.id}" th:text="${br.branchName}">Chi nhánh Quận 1</option>
+                                </select>
+                                <div class="form-text">Áp dụng toàn chuỗi hoặc chỉ riêng 1 cơ sở cụ thể.</div>
+                            </div>
+
+                            <!-- Giới hạn lượt dùng -->
+                            <div class="col-md-4">
+                                <label class="form-label fw-bold">Số Lượt Dùng Tối Đa</label>
+                                <input type="number" class="form-control" name="usageLimit" value="100" min="1">
+                            </div>
+
+                            <!-- Ngày bắt đầu -->
+                            <div class="col-md-4">
+                                <label class="form-label fw-bold">Ngày Bắt Đầu</label>
+                                <input type="date" class="form-control" name="startDate">
+                            </div>
+
+                            <!-- Ngày kết thúc -->
+                            <div class="col-md-4">
+                                <label class="form-label fw-bold">Ngày Hết Hạn</label>
+                                <input type="date" class="form-control" name="endDate">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer bg-light">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Đóng</button>
+                        <button type="submit" class="btn btn-primary px-4 fw-bold">
+                            <i class="fas fa-check me-2"></i> Xác Nhận Tạo Mã
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
 </section>
 </body>
 </html>
-

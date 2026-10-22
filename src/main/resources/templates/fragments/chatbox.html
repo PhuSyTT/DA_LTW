@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:fragment="chatboxStyles">
+    <!-- Book4Life Chatbox AI Styles -->
+    <link th:href="@{/css/chatbox.css?v=2.0}" href="/css/chatbox.css?v=2.0" rel="stylesheet"/>
+</head>
+<body>
+
+<!-- ========================================================================
+     Book4Life Floating Chatbox AI Widget Fragment
+     ======================================================================== -->
+<div th:fragment="chatboxWidget" id="b4l-chat-widget-container" class="fixed bottom-6 right-6 z-50 select-none">
+
+    <!-- 1. CỬA SỔ CHAT (FLOATING CHAT WINDOW) -->
+    <div id="b4l-chat-window"
+         class="hidden fixed bottom-24 right-6 w-[380px] max-w-[calc(100vw-32px)] h-[560px] max-h-[calc(100vh-130px)] bg-white rounded-3xl shadow-2xl border border-[#e8e0d5] flex flex-col overflow-hidden z-50">
+
+        <!-- Chat Header -->
+        <div class="bg-gradient-to-r from-[#835500] via-[#946100] to-[#b07400] text-white px-5 py-4 flex items-center justify-between shadow-sm relative">
+            <div class="flex items-center gap-3">
+                <div class="relative">
+                    <div class="w-10 h-10 rounded-2xl bg-white/15 backdrop-blur-sm border border-white/30 flex items-center justify-center text-white text-lg shadow-inner">
+                        <i class="fas fa-robot"></i>
+                    </div>
+                    <!-- Online Status Dot -->
+                    <span class="absolute -bottom-0.5 -right-0.5 w-3.5 h-3.5 bg-emerald-400 border-2 border-[#835500] rounded-full"></span>
+                </div>
+                <div>
+                    <h4 class="font-bold text-sm tracking-wide leading-tight flex items-center gap-1.5">
+                        <span>Trợ Lý Ảo Book4Life</span>
+                        <span class="text-[10px] bg-white/20 text-white px-1.5 py-0.5 rounded-full font-medium">CSKH</span>
+                    </h4>
+                    <p class="text-[11px] text-amber-100/90 flex items-center gap-1.5 mt-0.5 font-normal">
+                        <span class="inline-block w-1.5 h-1.5 bg-emerald-400 rounded-full animate-ping"></span>
+                        <span>Luôn sẵn sàng hỗ trợ 24/7</span>
+                    </p>
+                </div>
+            </div>
+
+            <!-- Action Buttons on Header -->
+            <div class="flex items-center gap-1">
+                <!-- Nút Làm mới / Xóa lịch sử -->
+                <button type="button"
+                        id="b4l-chat-clear-btn"
+                        class="w-8 h-8 rounded-full hover:bg-white/15 active:scale-95 flex items-center justify-center text-amber-100 hover:text-white transition-colors"
+                        title="Làm mới cuộc trò chuyện">
+                    <i class="fas fa-rotate-left text-xs"></i>
+                </button>
+                <!-- Nút Đóng / Thu gọn -->
+                <button type="button"
+                        id="b4l-chat-close-btn"
+                        class="w-8 h-8 rounded-full hover:bg-white/15 active:scale-95 flex items-center justify-center text-amber-100 hover:text-white transition-colors"
+                        title="Thu nhỏ cửa sổ chat">
+                    <i class="fas fa-xmark text-sm"></i>
+                </button>
+            </div>
+        </div>
+
+        <!-- Chat Body (Messages Area) -->
+        <div id="b4l-chat-messages" class="flex-1 p-4 overflow-y-auto space-y-3.5 bg-[#FAF9F6]">
+
+            <!-- Lời Chào & Gợi Ý Mặc Định Khi Mở Chat -->
+            <div id="b4l-default-welcome" class="space-y-3">
+                <div class="flex items-start gap-2.5">
+                    <div class="w-7 h-7 rounded-full bg-gradient-to-tr from-[#835500] to-[#f5a623] text-white flex-shrink-0 flex items-center justify-center text-xs shadow-sm mt-0.5">
+                        <i class="fas fa-robot"></i>
+                    </div>
+                    <div class="bg-white border border-[#e8e0d5] text-[#2D261E] rounded-2xl rounded-tl-none p-3.5 shadow-sm text-sm leading-relaxed max-w-[88%]">
+                        <p class="font-semibold text-[#835500] mb-1">Dạ chào bạn! 👋</p>
+                        <p class="text-xs text-[#524534] mb-2.5">
+                            Em là <strong>Trợ lý ảo CSKH Book4Life</strong>. Em có thể giải đáp thông tin sách, hướng dẫn tra cứu tiến độ đơn hàng và quy trình đổi sách cũ.
+                        </p>
+                        <p class="text-[11px] text-[#6A5E52] font-medium uppercase tracking-wider mb-2">Bạn có thể hỏi nhanh:</p>
+                        <div class="flex flex-wrap gap-1.5">
+                            <button type="button" class="b4l-quick-chip bg-[#f4f3f1] hover:bg-[#ffddb4] text-[#835500] text-xs font-medium px-2.5 py-1.5 rounded-lg border border-[#e8e0d5] transition-colors text-left flex items-center gap-1.5"
+                                    data-prompt="Quy trình thu mua và đổi sách cũ như thế nào?">
+                                <span>♻️ Đổi sách cũ</span>
+                            </button>
+                            <button type="button" class="b4l-quick-chip bg-[#f4f3f1] hover:bg-[#ffddb4] text-[#835500] text-xs font-medium px-2.5 py-1.5 rounded-lg border border-[#e8e0d5] transition-colors text-left flex items-center gap-1.5"
+                                    data-prompt="Làm sao để tôi theo dõi tiến độ đơn hàng đã đặt?">
+                                <span>📦 Tra cứu đơn hàng</span>
+                            </button>
+                            <button type="button" class="b4l-quick-chip bg-[#f4f3f1] hover:bg-[#ffddb4] text-[#835500] text-xs font-medium px-2.5 py-1.5 rounded-lg border border-[#e8e0d5] transition-colors text-left flex items-center gap-1.5"
+                                    data-prompt="Nhà sách có những chi nhánh nào ở TP.HCM?">
+                                <span>📍 Hệ thống chi nhánh</span>
+                            </button>
+                            <button type="button" class="b4l-quick-chip bg-[#f4f3f1] hover:bg-[#ffddb4] text-[#835500] text-xs font-medium px-2.5 py-1.5 rounded-lg border border-[#e8e0d5] transition-colors text-left flex items-center gap-1.5"
+                                    data-prompt="Tư vấn cho tôi các tác phẩm văn học Việt Nam hay nên đọc">
+                                <span>📚 Gợi ý sách hay</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Typing Indicator (Ẩn mặc định) -->
+            <div id="b4l-chat-typing" class="hidden flex items-end gap-2 justify-start">
+                <div class="w-7 h-7 rounded-full bg-gradient-to-tr from-[#835500] to-[#f5a623] text-white flex-shrink-0 flex items-center justify-center text-xs shadow-sm">
+                    <i class="fas fa-robot"></i>
+                </div>
+                <div class="bg-white border border-[#e8e0d5] rounded-2xl rounded-bl-none px-4 py-2.5 shadow-sm">
+                    <div class="b4l-typing-indicator">
+                        <span class="b4l-typing-dot"></span>
+                        <span class="b4l-typing-dot"></span>
+                        <span class="b4l-typing-dot"></span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Chat Footer & Input Form -->
+        <div class="p-3 bg-white border-t border-[#e8e0d5] relative">
+
+            <!-- Menu Pop-up Gợi Ý Câu Hỏi Thường Gặp (FAQ List) -->
+            <div id="b4l-faq-popup"
+                 class="hidden absolute bottom-[calc(100%+8px)] left-3 right-3 bg-white/95 backdrop-blur-md rounded-2xl shadow-2xl border border-[#d7c3ae] overflow-hidden z-30 transition-all duration-200"
+                 style="box-shadow: 0 -8px 25px rgba(131, 85, 0, 0.15);">
+                <div class="bg-gradient-to-r from-[#FAF7F2] via-[#FDFBF7] to-[#F5EFE6] px-3.5 py-2.5 border-b border-[#e8e0d5] flex items-center justify-between">
+                    <div class="flex items-center gap-2">
+                        <span class="w-5 h-5 rounded-full bg-[#835500]/10 text-[#835500] flex items-center justify-center text-xs">
+                            <i class="fas fa-lightbulb text-amber-500"></i>
+                        </span>
+                        <span class="text-xs font-bold text-[#835500]">Câu hỏi thường gặp (Click để hỏi nhanh)</span>
+                    </div>
+                    <button type="button"
+                            id="b4l-faq-popup-close"
+                            class="w-6 h-6 rounded-full hover:bg-gray-200/70 text-gray-400 hover:text-gray-600 flex items-center justify-center text-xs transition-colors"
+                            title="Đóng gợi ý">
+                        <i class="fas fa-xmark"></i>
+                    </button>
+                </div>
+                <div id="b4l-faq-popup-list" class="max-h-[220px] overflow-y-auto p-2 space-y-1 b4l-custom-scrollbar">
+                    <!-- Danh sách các câu hỏi thường gặp FAQ -->
+                </div>
+            </div>
+
+            <form id="b4l-chat-form" class="flex items-center gap-2">
+                <div class="relative flex-1">
+                    <input type="text"
+                           id="b4l-chat-input"
+                           placeholder="Hỏi trợ lý ảo Book4Life..."
+                           autocomplete="off"
+                           maxlength="500"
+                           class="w-full pl-3.5 pr-3 py-2.5 text-sm bg-[#FAF9F6] border border-[#d7c3ae] rounded-2xl focus:outline-none focus:border-[#835500] focus:ring-2 focus:ring-[#835500]/20 transition-all placeholder:text-gray-400 text-gray-800"/>
+                </div>
+                <button type="submit"
+                        id="b4l-chat-send-btn"
+                        class="w-10 h-10 rounded-2xl bg-[#835500] hover:bg-[#9e6700] active:scale-95 text-white flex items-center justify-center shadow-md transition-all flex-shrink-0 disabled:opacity-50 disabled:cursor-not-allowed"
+                        title="Gửi tin nhắn (Enter)">
+                    <i class="fas fa-paper-plane text-sm"></i>
+                </button>
+            </form>
+            <div class="flex items-center justify-between mt-2 px-1 text-[10px] text-gray-400">
+                <span class="flex items-center gap-1">
+                    <i class="fas fa-shield-halved text-[9px]"></i>
+                    <span>Bảo mật &amp; Thông tin an toàn</span>
+                </span>
+                <span class="font-medium text-amber-800/70">Trợ lý ảo CSKH • Book4Life</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- 2. NÚT NỔI BẬT/TẮT CHATBOX (FLOATING TRIGGER BUTTON) -->
+    <div class="relative">
+        <div class="b4l-chat-pulse"></div>
+        <button type="button"
+                id="b4l-chat-toggle-btn"
+                class="w-14 h-14 rounded-full bg-gradient-to-tr from-[#835500] to-[#f5a623] hover:from-[#946100] hover:to-[#ffa200] text-white flex items-center justify-center shadow-xl hover:scale-105 active:scale-95 transition-all duration-300 relative group cursor-pointer border-2 border-white/40"
+                title="Trò chuyện cùng Trợ lý ảo CSKH">
+            <i class="fas fa-comments text-2xl group-hover:rotate-6 transition-transform"></i>
+            <!-- Notification Badge -->
+            <span class="absolute -top-1 -right-1 flex h-4 w-4">
+                <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                <span class="relative inline-flex rounded-full h-4 w-4 bg-emerald-500 border-2 border-white"></span>
+            </span>
+        </button>
+    </div>
+</div>
+
+<!-- Book4Life Chatbox Script Fragment -->
+<th:block th:fragment="chatboxScripts">
+    <script th:src="@{/js/chatbox.js?v=2.0}" src="/js/chatbox.js?v=2.0"></script>
+</th:block>
+
+</body>
+</html>
+

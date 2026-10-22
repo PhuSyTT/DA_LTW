@@ -10,6 +10,7 @@ import com.bookstore.entity.Wishlist;
 import com.bookstore.repository.BookRepository;
 import com.bookstore.repository.BranchRepository;
 import com.bookstore.repository.WishlistRepository;
+import com.bookstore.service.EmailService;
 import com.bookstore.service.WishlistService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -28,13 +29,16 @@ public class WishlistServiceImpl implements WishlistService {
     private final WishlistRepository wishlistRepository;
     private final BookRepository bookRepository;
     private final BranchRepository branchRepository;
+    private final EmailService emailService;
 
     public WishlistServiceImpl(WishlistRepository wishlistRepository,
                                BookRepository bookRepository,
-                               BranchRepository branchRepository) {
+                               BranchRepository branchRepository,
+                               EmailService emailService) {
         this.wishlistRepository = wishlistRepository;
         this.bookRepository = bookRepository;
         this.branchRepository = branchRepository;
+        this.emailService = emailService;
     }
 
     // Nghiệp vụ FR-WSH-01: Đăng ký "Săn sách" khi hết hàng
@@ -129,6 +133,28 @@ public class WishlistServiceImpl implements WishlistService {
             wishlist.setNotifiedAt(now);
             wishlistRepository.save(wishlist);
             notifiedCount++;
+
+            // 4. Gửi Email thông báo thực tế cho khách hàng (FR-WSH-02)
+            try {
+                String customerEmail = wishlist.getUser().getEmail();
+                String customerName = (wishlist.getUser().getFullName() != null) ? wishlist.getUser().getFullName() : "Quý khách";
+                String bookTitle = newItem.getBook().getTitle();
+                String authorName = (newItem.getBook().getAuthor() != null) ? newItem.getBook().getAuthor().getName() : "Đang cập nhật";
+                String branchName = (newItem.getBranch() != null) ? newItem.getBranch().getBranchName() : "Toàn chuỗi Book4Life";
+
+                emailService.sendRestockAlertEmail(
+                        customerEmail,
+                        customerName,
+                        bookTitle,
+                        authorName,
+                        branchName,
+                        newItem.getSellingPrice(),
+                        newItem.getConditionGrade(),
+                        bookId
+                );
+            } catch (Exception ex) {
+                logger.error("Lỗi khi gửi email thông báo săn sách tới user {}: {}", wishlist.getUser().getEmail(), ex.getMessage());
+            }
 
             logger.info("Restock Alert kích hoạt: Gửi thông báo tới User [{}] cho cuốn sách [{}] tại chi nhánh [{}]",
                     wishlist.getUser().getEmail(),

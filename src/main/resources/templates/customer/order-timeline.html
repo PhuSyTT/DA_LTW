@@ -1,0 +1,442 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title th:text="${pageTitle} ?: 'Tiến Độ Đơn Hàng - Book4Life'">Tiến Độ Đơn Hàng - Book4Life</title>
+
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts: Plus Jakarta Sans -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Playfair+Display:ital,wght@0,600;0,700;1,400&display=swap" rel="stylesheet">
+    <!-- FontAwesome 6 -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" rel="stylesheet">
+
+    <!-- Chatbox AI Styles -->
+    <th:block th:replace="~{fragments/chatbox :: chatboxStyles}"></th:block>
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: "#835500",
+                        "primary-hover": "#9e6700",
+                        "primary-container": "#ffddb4",
+                        "on-primary-container": "#291800",
+                        surface: "#FAF8F5",
+                        "surface-container": "#F0EAE1",
+                        "surface-container-high": "#E8E0D5",
+                        "on-surface": "#2D261E",
+                        "on-surface-variant": "#6A5E52",
+                        outline: "#9B8E80",
+                    },
+                    fontFamily: {
+                        sans: ['"Plus Jakarta Sans"', 'sans-serif'],
+                        serif: ['"Playfair Display"', 'serif'],
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="bg-surface text-on-surface font-sans min-h-screen flex flex-col">
+
+    <!-- Header Navigation -->
+    <header class="bg-surface/90 backdrop-blur sticky top-0 z-40 border-b border-surface-container-high">
+        <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+            <div class="flex items-center gap-3">
+                <a th:href="@{/}" href="/" class="flex items-center gap-2 group">
+                    <div class="w-10 h-10 rounded-xl bg-primary flex items-center justify-center text-white shadow-sm group-hover:scale-105 transition-transform">
+                        <i class="fas fa-book-open"></i>
+                    </div>
+                    <div>
+                        <span class="font-serif font-bold text-xl text-primary tracking-tight">Book4Life</span>
+                        <span class="block text-[10px] text-on-surface-variant uppercase tracking-widest font-semibold">Tủ Sách Tri Thức</span>
+                    </div>
+                </a>
+            </div>
+
+            <!-- Right Actions -->
+            <div class="flex items-center gap-3">
+                <a th:href="@{/my-orders}" href="/my-orders" class="text-xs sm:text-sm font-semibold text-on-surface hover:text-primary transition-colors flex items-center gap-1.5 px-3 py-2 rounded-lg hover:bg-surface-container">
+                    <i class="fas fa-arrow-left"></i>
+                    <span>Danh sách đơn hàng</span>
+                </a>
+                <a th:href="@{/cart}" href="/cart" class="text-xs sm:text-sm font-semibold text-on-surface hover:text-primary transition-colors flex items-center gap-1.5 px-3 py-2 rounded-lg hover:bg-surface-container">
+                    <i class="fas fa-shopping-bag"></i>
+                    <span>Giỏ hàng</span>
+                </a>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Container -->
+    <main class="flex-1 max-w-5xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8">
+
+        <!-- Flash Messages -->
+        <div th:if="${successMessage}" class="mb-6 p-4 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-800 flex items-center gap-3 shadow-sm">
+            <i class="fas fa-circle-check text-emerald-600 text-lg"></i>
+            <span class="text-sm font-semibold" th:text="${successMessage}">Thao tác thành công!</span>
+        </div>
+        <div th:if="${errorMessage}" class="mb-6 p-4 rounded-xl bg-red-50 border border-red-200 text-red-800 flex items-center gap-3 shadow-sm">
+            <i class="fas fa-circle-exclamation text-red-600 text-lg"></i>
+            <span class="text-sm font-semibold" th:text="${errorMessage}">Đã xảy ra lỗi!</span>
+        </div>
+
+        <!-- Order Header Card -->
+        <div class="bg-white rounded-2xl border border-surface-container-high p-6 shadow-sm mb-6">
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-surface-container">
+                <div>
+                    <div class="flex items-center gap-2 mb-1">
+                        <span class="text-xs text-on-surface-variant">Mã kiện hàng chi nhánh:</span>
+                        <span class="font-mono font-bold text-base text-primary" th:text="${tracking.subOrderCode}">SUB-1-17100000</span>
+                    </div>
+                    <div class="text-xs text-on-surface-variant flex items-center gap-3 flex-wrap">
+                        <span th:if="${tracking.masterOrderCode}">Mã đơn tổng: <strong class="text-on-surface" th:text="${tracking.masterOrderCode}">MO-1234</strong></span>
+                        <span>•</span>
+                        <span>Ngày đặt: <strong class="text-on-surface" th:text="${#temporals.format(tracking.createdAt, 'HH:mm dd/MM/yyyy')}">14:30 18/10/2026</strong></span>
+                    </div>
+                </div>
+
+                <!-- Status Badge & Cancel Button -->
+                <div class="flex items-center gap-3 flex-wrap">
+                    <span th:class="'inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs font-bold ' + ${tracking.statusBadgeClass}">
+                        <i class="fas fa-circle-dot animate-pulse"></i>
+                        <span th:text="${tracking.statusLabel}">Chờ xác nhận</span>
+                    </span>
+
+                    <!-- Cancel button if eligible -->
+                    <button th:if="${tracking.canCancel}" onclick="openCancelModal()" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-rose-300 text-rose-700 hover:bg-rose-50 text-xs font-bold transition-all shadow-sm">
+                        <i class="fas fa-times-circle"></i>
+                        <span>Hủy Đơn Hàng</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Cancelled Notice if cancelled -->
+            <div th:if="${tracking.currentStatus == 'CANCELLED'}" class="mt-4 p-4 rounded-xl bg-rose-50 border border-rose-200 text-rose-900 flex items-start gap-3">
+                <i class="fas fa-circle-xmark text-rose-600 text-lg mt-0.5"></i>
+                <div class="text-xs">
+                    <div class="font-bold text-sm">Đơn hàng này đã bị hủy</div>
+                    <div class="mt-1" th:if="${tracking.cancelReason}">Lý do: <span class="font-semibold" th:text="${tracking.cancelReason}">Khách yêu cầu</span></div>
+                    <div class="text-rose-700/80 mt-1" th:if="${tracking.cancelledAt}">Thời gian hủy: <span th:text="${#temporals.format(tracking.cancelledAt, 'HH:mm dd/MM/yyyy')}">15:00</span></div>
+                    <div class="text-emerald-700 font-semibold mt-1">Hệ thống đã tự động hoàn trả số lượng tồn kho sách trở lại chi nhánh.</div>
+                </div>
+            </div>
+
+            <!-- 5-Step Visual Timeline Progress Bar -->
+            <div class="mt-8 pt-4">
+                <h3 class="text-xs font-bold uppercase tracking-wider text-on-surface-variant mb-6 flex items-center gap-2">
+                    <i class="fas fa-route text-primary"></i>
+                    <span>Hành Trình Đơn Hàng Trực Quan</span>
+                </h3>
+
+                <!-- Desktop Timeline Steps -->
+                <div class="hidden sm:grid sm:grid-cols-5 gap-2 relative">
+                    <!-- Progress Bar Background Line -->
+                    <div class="absolute top-5 left-8 right-8 h-1 bg-surface-container-high -z-0"></div>
+
+                    <div th:each="step, iter : ${tracking.timelineSteps}" class="relative z-10 flex flex-col items-center text-center px-1">
+                        <!-- Icon Circle -->
+                        <div th:class="${step.cancelled} ? 'w-11 h-11 rounded-full bg-rose-600 text-white flex items-center justify-center shadow ring-4 ring-rose-100 transition-all' :
+                                      (${step.current} ? 'w-11 h-11 rounded-full bg-primary text-white flex items-center justify-center shadow-md ring-4 ring-primary-container scale-110 transition-all animate-bounce' :
+                                      (${step.completed} ? 'w-11 h-11 rounded-full bg-emerald-600 text-white flex items-center justify-center shadow transition-all' :
+                                      'w-11 h-11 rounded-full bg-surface-container text-outline flex items-center justify-center border-2 border-surface-container-high'))">
+                            <i th:class="'fas ' + ${step.icon} + ' text-sm'"></i>
+                        </div>
+
+                        <!-- Step Title -->
+                        <div class="mt-3 text-xs font-bold"
+                             th:classappend="${step.cancelled} ? 'text-rose-700 font-extrabold' : (${step.current} ? 'text-primary font-extrabold' : (${step.completed} ? 'text-on-surface' : 'text-outline'))"
+                             th:text="${step.title}">
+                            Chờ xác nhận
+                        </div>
+
+                        <!-- Step Timestamp -->
+                        <div th:if="${step.formattedTime}" class="text-[11px] text-on-surface-variant mt-0.5 font-mono" th:text="${step.formattedTime}">
+                            14:30 18/10
+                        </div>
+                        <div th:unless="${step.formattedTime}" class="text-[10px] text-outline mt-0.5 italic">
+                            Chờ xử lý
+                        </div>
+
+                        <!-- Step Description -->
+                        <div class="text-[10px] text-on-surface-variant/80 mt-1 line-clamp-2 px-1" th:text="${step.description}">
+                            Đơn hàng đã được ghi nhận
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Mobile Vertical Timeline -->
+                <div class="sm:hidden space-y-4 relative pl-6 before:content-[''] before:absolute before:left-3 before:top-2 before:bottom-2 before:w-0.5 before:bg-surface-container-high">
+                    <div th:each="step : ${tracking.timelineSteps}" class="relative flex items-start gap-3">
+                        <div th:class="${step.cancelled} ? 'w-7 h-7 rounded-full bg-rose-600 text-white flex items-center justify-center text-xs -ml-6 shadow' :
+                                      (${step.current} ? 'w-7 h-7 rounded-full bg-primary text-white flex items-center justify-center text-xs -ml-6 shadow ring-2 ring-primary-container' :
+                                      (${step.completed} ? 'w-7 h-7 rounded-full bg-emerald-600 text-white flex items-center justify-center text-xs -ml-6 shadow' :
+                                      'w-7 h-7 rounded-full bg-surface-container text-outline flex items-center justify-center text-xs -ml-6 border border-surface-container-high'))">
+                            <i th:class="'fas ' + ${step.icon}"></i>
+                        </div>
+                        <div class="flex-1 pb-2">
+                            <div class="text-xs font-bold"
+                                 th:classappend="${step.cancelled} ? 'text-rose-700' : (${step.current} ? 'text-primary' : (${step.completed} ? 'text-on-surface' : 'text-outline'))"
+                                 th:text="${step.title}">Chờ xác nhận</div>
+                            <div th:if="${step.formattedTime}" class="text-[11px] text-on-surface-variant font-mono" th:text="${step.formattedTime}">14:30 18/10</div>
+                            <div class="text-[11px] text-on-surface-variant mt-0.5" th:text="${step.description}">Mô tả tiến trình</div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+        <!-- 2 Columns Layout: Left = Books & Costs; Right = Branch & Shipping Info -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+
+            <!-- Left Col (2 cols): Ordered Books List -->
+            <div class="md:col-span-2 space-y-6">
+                <div class="bg-white rounded-2xl border border-surface-container-high p-6 shadow-sm">
+                    <h3 class="font-bold text-sm text-on-surface mb-4 flex items-center gap-2">
+                        <i class="fas fa-book-bookmark text-primary"></i>
+                        <span>Sách Trong Kiện Hàng Này</span>
+                    </h3>
+
+                    <div class="divide-y divide-surface-container">
+                        <div th:each="item : ${tracking.items}" class="py-3.5 first:pt-0 last:pb-0 flex items-center justify-between gap-4">
+                            <div class="flex items-center gap-3.5">
+                                <div class="w-14 h-20 rounded-lg bg-surface-container flex-shrink-0 overflow-hidden border border-surface-container-high flex items-center justify-center">
+                                    <img th:if="${item.bookCoverImage}" th:src="${item.bookCoverImage}" th:alt="${item.bookTitle}" class="w-full h-full object-cover"/>
+                                    <i th:unless="${item.bookCoverImage}" class="fas fa-book text-outline text-xl"></i>
+                                </div>
+                                <div>
+                                    <h4 class="font-bold text-sm text-on-surface" th:text="${item.bookTitle} ?: 'Sách cũ chọn lọc'">Tựa sách</h4>
+                                    <div class="text-xs text-on-surface-variant mt-1 flex items-center gap-2 flex-wrap">
+                                        <span th:if="${item.authorName}" th:text="${item.authorName}">Tác giả</span>
+                                        <span>•</span>
+                                        <span class="px-2 py-0.5 rounded bg-surface-container text-[11px] font-semibold text-primary" th:text="${item.conditionGrade}">LIKE_NEW</span>
+                                        <span th:if="${item.skuBarcode}" class="font-mono text-outline text-[11px]" th:text="'#' + ${item.skuBarcode}">#SKU</span>
+                                    </div>
+                                    <div th:if="${item.shelfLocation}" class="text-[11px] text-amber-800 bg-amber-50 px-2 py-0.5 rounded inline-block mt-1 border border-amber-200">
+                                        Vị trí kệ sách tại chi nhánh: <strong th:text="${item.shelfLocation}">K1-A01</strong>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="text-right flex-shrink-0">
+                                <div class="text-xs text-on-surface-variant" th:text="'Số lượng: x' + ${item.quantity}">SL: x1</div>
+                                <div class="font-bold text-sm text-primary mt-1" th:text="${#numbers.formatDecimal(item.subtotal, 0, 'COMMA', 0, 'POINT')} + ' đ'">120,000 đ</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Payment & Totals Summary -->
+                    <div class="mt-6 pt-4 border-t border-surface-container space-y-2 text-xs">
+                        <div class="flex justify-between text-on-surface-variant">
+                            <span>Tiền sách:</span>
+                            <span class="font-semibold text-on-surface" th:text="${#numbers.formatDecimal(tracking.branchSubtotal, 0, 'COMMA', 0, 'POINT')} + ' đ'">120,000 đ</span>
+                        </div>
+                        <div class="flex justify-between text-on-surface-variant">
+                            <span>Phí vận chuyển:</span>
+                            <span class="font-semibold text-on-surface" th:text="${#numbers.formatDecimal(tracking.branchShippingFee, 0, 'COMMA', 0, 'POINT')} + ' đ'">0 đ</span>
+                        </div>
+                        <div class="flex justify-between text-sm pt-2 border-t border-surface-container font-bold">
+                            <span class="text-on-surface">Tổng thanh toán kiện hàng:</span>
+                            <span class="text-primary text-base" th:text="${#numbers.formatDecimal(tracking.totalAmount, 0, 'COMMA', 0, 'POINT')} + ' đ'">120,000 đ</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Status Update Audit History Log -->
+                <div class="bg-white rounded-2xl border border-surface-container-high p-6 shadow-sm">
+                    <h3 class="font-bold text-sm text-on-surface mb-4 flex items-center gap-2">
+                        <i class="fas fa-clipboard-list text-primary"></i>
+                        <span>Chi Tiết Nhật Ký Tiến Độ (Event Log)</span>
+                    </h3>
+
+                    <div class="space-y-3">
+                        <div th:each="log : ${tracking.historyLogs}" class="p-3 rounded-xl bg-surface-container/40 border border-surface-container flex items-start justify-between gap-3 text-xs">
+                            <div class="flex items-start gap-2.5">
+                                <div class="w-6 h-6 rounded-full bg-primary/10 text-primary flex items-center justify-center flex-shrink-0 mt-0.5">
+                                    <i class="fas fa-check text-[10px]"></i>
+                                </div>
+                                <div>
+                                    <div class="font-bold text-on-surface">
+                                        <span th:text="${log.toStatusLabel}">Đã xác nhận</span>
+                                        <span th:if="${log.actionType == 'BRANCH_REASSIGN'}" class="ml-1.5 px-2 py-0.5 rounded-full bg-purple-100 text-purple-800 text-[10px] font-bold">Điều phối chi nhánh</span>
+                                    </div>
+                                    <div class="text-on-surface-variant mt-0.5" th:text="${log.note}">Ghi chú cập nhật</div>
+                                    <div th:if="${log.updatedByUserName}" class="text-[11px] text-outline mt-0.5">
+                                        Người thực hiện: <span class="font-semibold" th:text="${log.updatedByUserName}">Thủ kho</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="font-mono text-[11px] text-outline text-right flex-shrink-0" th:text="${#temporals.format(log.createdAt, 'HH:mm dd/MM/yyyy')}">
+                                14:30 18/10
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right Col (1 col): Branch & Delivery Info -->
+            <div class="space-y-6">
+                <!-- Branch Card -->
+                <div class="bg-white rounded-2xl border border-surface-container-high p-6 shadow-sm">
+                    <h3 class="font-bold text-sm text-on-surface mb-3 flex items-center gap-2">
+                        <i class="fas fa-store text-primary"></i>
+                        <span>Chi Nhánh Xử Lý Đơn</span>
+                    </h3>
+                    <div class="text-xs space-y-2">
+                        <div class="font-bold text-sm text-primary" th:text="${tracking.branchName} ?: 'Chi Nhánh Book4Life'">Chi Nhánh Quận 1</div>
+                        <div class="text-on-surface-variant flex items-start gap-2">
+                            <i class="fas fa-location-dot text-outline mt-0.5"></i>
+                            <span th:text="${tracking.branchAddress} ?: 'Địa chỉ chi nhánh'">123 Nguyễn Thị Minh Khai, Q1</span>
+                        </div>
+                        <div th:if="${tracking.branchPhone}" class="text-on-surface-variant flex items-center gap-2">
+                            <i class="fas fa-phone text-outline"></i>
+                            <span th:text="${tracking.branchPhone}">028 3822 0000</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Delivery & Tracking Card -->
+                <div class="bg-white rounded-2xl border border-surface-container-high p-6 shadow-sm">
+                    <h3 class="font-bold text-sm text-on-surface mb-3 flex items-center gap-2">
+                        <i class="fas fa-truck-ramp-box text-primary"></i>
+                        <span>Thông Tin Giao Nhận</span>
+                    </h3>
+                    <div class="text-xs space-y-3">
+                        <div>
+                            <span class="text-on-surface-variant block text-[11px]">Người nhận:</span>
+                            <strong class="text-on-surface" th:text="${tracking.receiverName} ?: 'Khách hàng'">Nguyễn Văn A</strong>
+                        </div>
+                        <div>
+                            <span class="text-on-surface-variant block text-[11px]">Số điện thoại:</span>
+                            <strong class="text-on-surface font-mono" th:text="${tracking.receiverPhone} ?: '0900000000'">0912 345 678</strong>
+                        </div>
+                        <div>
+                            <span class="text-on-surface-variant block text-[11px]">Địa chỉ giao hàng:</span>
+                            <p class="text-on-surface leading-relaxed mt-0.5" th:text="${tracking.shippingAddress} ?: 'Nhận tại cửa hàng'">123 Phố Cổ, Hà Nội</p>
+                        </div>
+                        <div th:if="${tracking.trackingNumber}" class="pt-2 border-t border-surface-container">
+                            <span class="text-on-surface-variant block text-[11px]">Mã vận đơn đối tác:</span>
+                            <div class="flex items-center justify-between gap-2 mt-1 p-2 rounded-lg bg-indigo-50 border border-indigo-200">
+                                <span class="font-mono font-bold text-indigo-900" id="trackingCodeText" th:text="${tracking.trackingNumber}">VNPOST-12345</span>
+                                <button onclick="copyTrackingCode()" class="text-indigo-600 hover:text-indigo-800 text-xs px-2 py-1 rounded bg-white border border-indigo-200 shadow-xs" title="Sao chép">
+                                    <i class="far fa-copy"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Customer Support Hotline -->
+                <div class="bg-amber-50/60 rounded-2xl border border-amber-200/80 p-5 text-xs text-amber-900 space-y-2">
+                    <div class="font-bold text-sm flex items-center gap-2 text-primary">
+                        <i class="fas fa-headset"></i>
+                        <span>Cần Hỗ Trợ Đơn Hàng?</span>
+                    </div>
+                    <p class="text-on-surface-variant leading-relaxed text-[11px]">
+                        Nếu bạn cần điều chỉnh thông tin hoặc hỗ trợ gấp về đơn hàng, vui lòng liên hệ hotline chi nhánh hoặc tổng đài Book4Life <strong>1900 6868</strong> (8:00 - 21:00).
+                    </p>
+                </div>
+            </div>
+
+        </div>
+
+    </main>
+
+    <!-- Modal Cancel Order -->
+    <div id="cancelModal" class="fixed inset-0 z-50 bg-black/50 backdrop-blur-xs flex items-center justify-center p-4 hidden">
+        <div class="bg-white rounded-2xl max-w-md w-full p-6 shadow-xl border border-surface-container-high animate-in fade-in duration-200">
+            <div class="flex items-center justify-between pb-3 border-b border-surface-container">
+                <h3 class="font-bold text-base text-rose-700 flex items-center gap-2">
+                    <i class="fas fa-triangle-exclamation"></i>
+                    <span>Xác Nhận Hủy Đơn Hàng</span>
+                </h3>
+                <button onclick="closeCancelModal()" class="text-outline hover:text-on-surface p-1">
+                    <i class="fas fa-times text-base"></i>
+                </button>
+            </div>
+
+            <form th:action="@{'/orders/' + ${tracking.subOrderId} + '/cancel'}" method="post" class="mt-4 space-y-4">
+                <p class="text-xs text-on-surface-variant">
+                    Đơn hàng <strong>#<span th:text="${tracking.subOrderCode}">SUB-1</span></strong> đang ở trạng thái <em>Chờ xác nhận</em>. Bạn có chắc chắn muốn hủy đơn hàng này không?
+                </p>
+
+                <div>
+                    <label class="block text-xs font-bold text-on-surface mb-1">Lý do hủy đơn:</label>
+                    <select id="cancelReasonPreset" class="w-full text-xs p-2.5 rounded-xl border border-surface-container-high focus:outline-primary bg-surface mb-2" onchange="onReasonSelectChange(this)">
+                        <option value="Tôi muốn thay đổi địa chỉ giao hàng">Tôi muốn thay đổi địa chỉ giao hàng</option>
+                        <option value="Tôi muốn mua thêm sách khác">Tôi muốn mua thêm sách khác</option>
+                        <option value="Thời gian giao hàng không phù hợp">Thời gian giao hàng không phù hợp</option>
+                        <option value="Tôi đổi ý không muốn mua nữa">Tôi đổi ý không muốn mua nữa</option>
+                        <option value="Khác">Lý do khác...</option>
+                    </select>
+                    <textarea name="cancelReason" id="cancelReasonInput" rows="2" class="w-full text-xs p-2.5 rounded-xl border border-surface-container-high focus:outline-primary bg-surface" placeholder="Chi tiết lý do hủy đơn..."></textarea>
+                </div>
+
+                <div class="p-3 rounded-xl bg-amber-50 border border-amber-200 text-amber-900 text-[11px] leading-relaxed">
+                    <i class="fas fa-info-circle mr-1 text-primary"></i>
+                    Khi hủy đơn, các cuốn sách trong đơn sẽ ngay lập tức được hoàn trả về kệ tồn kho chi nhánh để phục vụ các độc giả khác.
+                </div>
+
+                <div class="flex items-center justify-end gap-3 pt-2">
+                    <button type="button" onclick="closeCancelModal()" class="px-4 py-2 rounded-xl border border-surface-container-high text-xs font-bold text-on-surface hover:bg-surface-container">
+                        Đóng lại
+                    </button>
+                    <button type="submit" class="px-4 py-2 rounded-xl bg-rose-600 text-white text-xs font-bold hover:bg-rose-700 shadow-sm transition-all">
+                        Đồng Ý Hủy Đơn
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="bg-surface-container/60 border-t border-surface-container-high py-6 mt-12 text-center text-xs text-on-surface-variant">
+        <p>© 2026 Book4Life - Hệ thống Quản lý Chuỗi Cửa Hàng Sách Cũ Toàn Quốc. Trao tri thức - Lan tỏa văn hóa đọc.</p>
+    </footer>
+
+    <script>
+        function openCancelModal() {
+            document.getElementById('cancelModal').classList.remove('hidden');
+        }
+        function closeCancelModal() {
+            document.getElementById('cancelModal').classList.add('hidden');
+        }
+        function onReasonSelectChange(sel) {
+            const input = document.getElementById('cancelReasonInput');
+            if (sel.value !== 'Khác') {
+                input.value = sel.value;
+            } else {
+                input.value = '';
+                input.focus();
+            }
+        }
+        function copyTrackingCode() {
+            const text = document.getElementById('trackingCodeText').innerText;
+            navigator.clipboard.writeText(text).then(() => {
+                alert('Đã sao chép mã vận đơn: ' + text);
+            });
+        }
+        // Auto initialize reason
+        document.addEventListener('DOMContentLoaded', () => {
+            const sel = document.getElementById('cancelReasonPreset');
+            if (sel) onReasonSelectChange(sel);
+
+            // Open cancel modal if URL has hash #cancel
+            if (window.location.hash === '#cancel') {
+                openCancelModal();
+            }
+        });
+    </script>
+
+    <!-- Chatbox AI Widget -->
+    <div th:replace="~{fragments/chatbox :: chatboxWidget}"></div>
+    <th:block th:replace="~{fragments/chatbox :: chatboxScripts}"></th:block>
+</body>
+</html>
+

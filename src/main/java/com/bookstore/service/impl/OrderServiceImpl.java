@@ -10,6 +10,7 @@ import com.bookstore.entity.User;
 import com.bookstore.repository.BookItemRepository;
 import com.bookstore.repository.MasterOrderRepository;
 import com.bookstore.service.OrderService;
+import org.springframework.messaging.simp.SimpMessageSendingOperations;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -24,10 +25,17 @@ public class OrderServiceImpl implements OrderService {
 
     private final BookItemRepository bookItemRepository;
     private final MasterOrderRepository masterOrderRepository;
+    private final com.bookstore.repository.OrderStatusHistoryRepository orderStatusHistoryRepository;
+    private final SimpMessageSendingOperations messagingTemplate;
 
-    public OrderServiceImpl(BookItemRepository bookItemRepository, MasterOrderRepository masterOrderRepository) {
+    public OrderServiceImpl(BookItemRepository bookItemRepository,
+                            MasterOrderRepository masterOrderRepository,
+                            com.bookstore.repository.OrderStatusHistoryRepository orderStatusHistoryRepository,
+                            SimpMessageSendingOperations messagingTemplate) {
         this.bookItemRepository = bookItemRepository;
         this.masterOrderRepository = masterOrderRepository;
+        this.orderStatusHistoryRepository = orderStatusHistoryRepository;
+        this.messagingTemplate = messagingTemplate;
     }
 
     // Đảm bảo tính toàn vẹn dữ liệu khi trừ kho
@@ -55,6 +63,10 @@ public class OrderServiceImpl implements OrderService {
         masterOrder.setMasterOrderCode("MO-" + System.currentTimeMillis());
         masterOrder.setUser(user);
         masterOrder.setPaymentStatus("PENDING");
+        masterOrder.setPaymentMethod(request.getPaymentMethod() != null ? request.getPaymentMethod() : "COD");
+        masterOrder.setReceiverName(request.getReceiverName() != null ? request.getReceiverName() : (user != null ? user.getFullName() : "Khách Hàng"));
+        masterOrder.setReceiverPhone(request.getReceiverPhone() != null ? request.getReceiverPhone() : (user != null ? user.getPhone() : ""));
+        masterOrder.setShippingAddress(request.getShippingAddress() != null ? request.getShippingAddress() : "Nhận tại quầy");
         
         List<SubOrder> subOrders = new ArrayList<>();
         BigDecimal totalAmount = BigDecimal.ZERO;
@@ -100,8 +112,49 @@ public class OrderServiceImpl implements OrderService {
 
         masterOrder.setSubOrders(subOrders);
         masterOrder.setTotalItemsAmount(totalAmount);
+        masterOrder.setFinalAmount(totalAmount);
 
         // Lưu MasterOrder sẽ kéo theo lưu SubOrder và SubOrderItem nhờ CascadeType.ALL
-        return masterOrderRepository.save(masterOrder);
+        MasterOrder savedMaster = masterOrderRepository.save(masterOrder);
+
+        // 4. Khởi tạo nhật ký lịch sử tiến độ cho từng đơn hàng con
+        if (savedMaster.getSubOrders() != null) {
+            for (SubOrder sub : savedMaster.getSubOrders()) {
+                com.bookstore.entity.OrderStatusHistory history = new com.bookstore.entity.OrderStatusHistory(
+                        sub,
+                        savedMaster,
+                        null,
+                        "PENDING",
+                        "Khách hàng đã đặt đơn thành công qua hệ thống",
+                        user,
+                        null,
+                        sub.getBranch(),
+                        "STATUS_CHANGE"
+                );
+                orderStatusHistoryRepository.save(history);
+
+                // FR-FUL-01: Bắn chuông thông báo đơn hàng mới qua WebSocket cho Chi nhánh và Quản trị HQ
+                try {
+                    java.util.Map<String, Object> wsPayload = new java.util.HashMap<>();
+                    wsPayload.put("type", "NEW_ORDER");
+                    wsPayload.put("subOrderId", sub.getId());
+                    wsPayload.put("subOrderCode", sub.getSubOrderCode());
+                    wsPayload.put("branchId", sub.getBranch() != null ? sub.getBranch().getId() : null);
+                    wsPayload.put("branchName", sub.getBranch() != null ? sub.getBranch().getBranchName() : "Toàn chuỗi");
+                    wsPayload.put("totalAmount", sub.getBranchSubtotal());
+                    wsPayload.put("customerName", savedMaster.getReceiverName());
+                    wsPayload.put("message", "Đơn hàng mới #" + sub.getSubOrderCode() + " cần xử lý đóng gói!");
+
+                    if (sub.getBranch() != null) {
+                        messagingTemplate.convertAndSend("/topic/branch/" + sub.getBranch().getId() + "/orders", wsPayload);
+                    }
+                    messagingTemplate.convertAndSend("/topic/admin/orders", wsPayload);
+                } catch (Exception wsEx) {
+                    // Không để lỗi đẩy WebSocket làm rollback đơn hàng
+                }
+            }
+        }
+
+        return savedMaster;
     }
 }

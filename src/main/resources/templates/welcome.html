@@ -15,6 +15,12 @@
     <!-- FontAwesome 6 -->
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" rel="stylesheet">
 
+    <!-- Landing Page Vintage Styles (Blurred Backgrounds & Gradients) -->
+    <link rel="stylesheet" th:href="@{/css/landing-page.css}">
+
+    <!-- Chatbox AI Styles -->
+    <th:block th:replace="~{fragments/chatbox :: chatboxStyles}"></th:block>
+
     <!-- Tailwind CSS with Book4Life Literary Warmth Tokens (Pure Sans-Serif) -->
     <script src="https://cdn.tailwindcss.com"></script>
     <script id="tailwind-config">
@@ -211,6 +217,9 @@
                         <a th:href="@{/my-wishlist}" href="/my-wishlist" aria-label="Săn Sách Yêu Thích" class="relative p-2 rounded-full hover:bg-surface-container-high text-on-surface-variant hover:text-primary transition-all">
                             <span class="material-symbols-outlined text-[22px]">favorite</span>
                             <span class="absolute top-1 right-1 flex items-center justify-center min-w-[16px] h-4 px-1 rounded-full bg-secondary text-on-secondary text-[10px] font-bold">★</span>
+                        </a>
+                        <a th:href="@{/my-orders}" href="/my-orders" aria-label="Đơn hàng của tôi" title="Theo dõi tiến độ đơn hàng" class="relative p-2 rounded-full hover:bg-surface-container-high text-on-surface-variant hover:text-primary transition-all">
+                            <span class="material-symbols-outlined text-[22px]">local_shipping</span>
                         </a>
                         <a href="/cart" aria-label="Giỏ hàng" class="relative p-2 rounded-full hover:bg-surface-container-high text-on-surface-variant hover:text-primary transition-all">
                             <span class="material-symbols-outlined text-[22px]">shopping_bag</span>
@@ -900,12 +909,12 @@
             <!-- SECTION 5: THU MUA & TRAO ĐỔI SÁCH CŨ PROCESS BANNER -->
             <section id="thu-mua-sach" class="w-full py-16 bg-surface-container-low border-t border-b border-outline-variant/30">
                 <div class="max-w-7xl mx-auto px-6">
-                    <div class="rounded-3xl bg-surface border border-outline-variant/30 p-8 md:p-12 lg:p-16 shadow-lg relative overflow-hidden">
+                    <div class="rounded-3xl vintage-blurred-bg border border-white/60 p-8 md:p-12 lg:p-16 shadow-xl relative overflow-hidden">
                         <!-- Subtle Pattern / Accent circle -->
                         <div class="absolute -top-24 -right-24 w-80 h-80 bg-primary-container/15 rounded-full blur-3xl pointer-events-none"></div>
                         
                         <div class="max-w-3xl mb-12">
-                            <div class="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-secondary-container text-on-secondary-container text-xs font-bold mb-3">
+                            <div class="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-secondary-container text-on-secondary-container text-xs font-bold mb-3 shadow-xs">
                                 <span class="material-symbols-outlined text-[16px]">cycle</span>
                                 <span>Quy Trình Thu Gom Đơn Giản • Minh Bạch</span>
                             </div>
@@ -920,7 +929,7 @@
                         <!-- 4 Process Steps -->
                         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 relative">
                             <!-- Step 1 -->
-                            <div class="p-6 rounded-2xl bg-surface-container-low border border-outline-variant/20 flex flex-col justify-between shadow-sm relative group hover:bg-surface-container transition-colors">
+                            <div class="p-6 rounded-2xl vintage-blurred-card flex flex-col justify-between shadow-sm relative group hover:bg-white/90 transition-all">
                                 <div class="flex items-center justify-between mb-4">
                                     <span class="w-10 h-10 rounded-full bg-primary-container text-on-primary-container text-lg font-bold flex items-center justify-center shadow-sm">
                                         1
@@ -934,7 +943,7 @@
                             </div>
 
                             <!-- Step 2 -->
-                            <div class="p-6 rounded-2xl bg-surface-container-low border border-outline-variant/20 flex flex-col justify-between shadow-sm relative group hover:bg-surface-container transition-colors">
+                            <div class="p-6 rounded-2xl vintage-blurred-card flex flex-col justify-between shadow-sm relative group hover:bg-white/90 transition-all">
                                 <div class="flex items-center justify-between mb-4">
                                     <span class="w-10 h-10 rounded-full bg-primary-container text-on-primary-container text-lg font-bold flex items-center justify-center shadow-sm">
                                         2
@@ -948,7 +957,7 @@
                             </div>
 
                             <!-- Step 3 -->
-                            <div class="p-6 rounded-2xl bg-surface-container-low border border-outline-variant/20 flex flex-col justify-between shadow-sm relative group hover:bg-surface-container transition-colors">
+                            <div class="p-6 rounded-2xl vintage-blurred-card flex flex-col justify-between shadow-sm relative group hover:bg-white/90 transition-all">
                                 <div class="flex items-center justify-between mb-4">
                                     <span class="w-10 h-10 rounded-full bg-primary-container text-on-primary-container text-lg font-bold flex items-center justify-center shadow-sm">
                                         3
@@ -962,7 +971,7 @@
                             </div>
 
                             <!-- Step 4 -->
-                            <div class="p-6 rounded-2xl bg-surface-container-low border border-outline-variant/20 flex flex-col justify-between shadow-sm relative group hover:bg-surface-container transition-colors">
+                            <div class="p-6 rounded-2xl vintage-blurred-card flex flex-col justify-between shadow-sm relative group hover:bg-white/90 transition-all">
                                 <div class="flex items-center justify-between mb-4">
                                     <span class="w-10 h-10 rounded-full bg-primary-container text-on-primary-container text-lg font-bold flex items-center justify-center shadow-sm">
                                         4
@@ -1166,7 +1175,7 @@
             <!-- SECTION 8: FINAL SUSTAINABILITY COMMITMENT STRIP -->
             <section class="w-full py-12 bg-surface">
                 <div class="max-w-7xl mx-auto px-6">
-                    <div class="p-8 rounded-2xl bg-surface-container border border-outline-variant/30 flex flex-col md:flex-row items-center justify-between gap-6 shadow-sm">
+                    <div class="p-8 rounded-2xl vintage-blurred-bg border border-white/60 flex flex-col md:flex-row items-center justify-between gap-6 shadow-md">
                         <div class="flex items-center gap-4">
                             <div class="w-14 h-14 rounded-2xl bg-primary-container text-on-primary-container flex items-center justify-center shrink-0 shadow-sm">
                                 <span class="material-symbols-outlined text-[32px]">park</span>
@@ -1178,7 +1187,7 @@
                         </div>
                         <div class="shrink-0 flex items-center gap-3">
                             <span class="text-xs font-bold text-primary">Đã trồng 3.420 cây xanh năm 2025</span>
-                            <a href="#ve-chung-toi" class="px-5 py-2.5 rounded-xl bg-surface border border-outline-variant/30 text-on-surface text-xs font-bold hover:bg-surface-container-highest shadow-sm transition-colors">
+                            <a href="#ve-chung-toi" class="px-5 py-2.5 rounded-xl bg-white/80 border border-white/60 text-on-surface text-xs font-bold hover:bg-white shadow-sm transition-all">
                                 Chi Tiết →
                             </a>
                         </div>
@@ -1347,6 +1356,10 @@
 
         document.addEventListener('DOMContentLoaded', fetchCartCount);
     </script>
+    <!-- Chatbox AI Widget -->
+    <div th:replace="~{fragments/chatbox :: chatboxWidget}"></div>
+    <th:block th:replace="~{fragments/chatbox :: chatboxScripts}"></th:block>
+
     <!-- Page Transition Script -->
     <th:block th:replace="~{fragments/page-transition :: transitionScripts}"></th:block>
 </body>

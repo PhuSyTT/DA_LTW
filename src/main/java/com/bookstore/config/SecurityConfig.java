@@ -57,12 +57,14 @@ public class SecurityConfig {
                 .dispatcherTypeMatchers(DispatcherType.FORWARD, DispatcherType.ERROR).permitAll()
                 .requestMatchers(PathRequest.toStaticResources().atCommonLocations()).permitAll()
                 .requestMatchers(
-                    "/css/**", "/js/**", "/images/**", "/uploads/**", "/webjars/**", "/favicon.ico"
+                    "/css/**", "/js/**", "/images/**", "/uploads/**", "/webjars/**", "/favicon.ico",
+                    "/ws-bookstore/**"
                 ).permitAll()
                 .requestMatchers(
                     "/", "/home", "/books", "/books/**", "/authors", "/authors/**", 
                     "/blog", "/blog/**", "/about", "/contact", "/categories", "/categories/**",
                     "/cart", "/cart/**", "/checkout", "/checkout/**",
+                    "/orders", "/orders/**", "/my-orders",
                     "/recycle", "/thu-mua-sach", "/trade-in/**", "/my-trade-in", "/my-wishlist", "/login", "/register", "/error", "/api/**"
                 ).permitAll()
                 .requestMatchers("/admin/users/**").hasAnyAuthority("ROLE_ADMIN", "ADMIN")

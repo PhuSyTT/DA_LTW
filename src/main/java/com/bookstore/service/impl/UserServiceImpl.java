@@ -14,6 +14,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -40,6 +41,7 @@ public class UserServiceImpl implements UserService {
     @Transactional(readOnly = true)
     public List<UserDto> getAllUsers() {
         return userRepository.findAll().stream()
+                .sorted(Comparator.comparing(User::getId))
                 .map(this::mapToDto)
                 .collect(Collectors.toList());
     }
@@ -76,7 +78,7 @@ public class UserServiceImpl implements UserService {
 
         String rawPassword = (userDto.getPassword() != null && !userDto.getPassword().trim().isEmpty())
                 ? userDto.getPassword().trim()
-                : "123456";
+                : "1234@abc";
 
         User user = User.builder()
                 .email(userDto.getEmail().trim())

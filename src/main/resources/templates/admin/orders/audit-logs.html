@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{layout/admin-layout :: html(
+        pageTitle='Nhật Ký Lịch Sử Đơn Hàng (Audit Trail)',
+        pageSubtitle='Theo dõi minh bạch toàn bộ các thao tác thay đổi trạng thái, điều phối chi nhánh và người thực hiện',
+        content=~{::section}
+      )}">
+<body>
+<section>
+
+    <div class="content-card">
+        <div class="content-card-header d-flex justify-content-between align-items-center flex-wrap gap-2">
+            <div class="d-flex align-items-center gap-2">
+                <h5 class="fw-bold mb-0 text-dark">
+                    <i class="fas fa-clock-rotate-left text-primary me-2"></i>
+                    Nhật Ký Kiểm Toán Tiến Độ &amp; Điều Phối
+                </h5>
+                <span th:if="${filteredSubOrderId}" class="badge bg-warning text-dark">
+                    Đang lọc đơn #<span th:text="${filteredSubOrderId}">1</span>
+                </span>
+            </div>
+
+            <div class="d-flex align-items-center gap-2">
+                <a th:if="${filteredSubOrderId}" th:href="@{/admin/orders/audit-logs}" class="btn btn-sm btn-outline-secondary">
+                    <i class="fas fa-filter-circle-xmark me-1"></i> Xem Toàn Bộ Logs
+                </a>
+                <a th:href="@{/admin/orders/monitoring}" class="btn btn-sm btn-outline-primary">
+                    <i class="fas fa-chart-line me-1"></i> Quay Lại Giám Sát
+                </a>
+            </div>
+        </div>
+
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+                <thead class="table-light">
+                    <tr>
+                        <th style="width: 140px;">Thời Gian</th>
+                        <th>Mã Đơn Con</th>
+                        <th>Loại Thao Tác</th>
+                        <th>Tiến Trình Chuyển</th>
+                        <th>Người Thực Hiện</th>
+                        <th>Chi Nhánh Liên Quan</th>
+                        <th>Ghi Chú Chi Tiết</th>
+                        <th class="text-center">Timeline</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr th:each="log : ${logs}">
+                        <td>
+                            <small class="font-monospace text-muted"
+                                   th:text="${#temporals.format(log.createdAt, 'dd/MM/yyyy HH:mm:ss')}">18/10/2026 14:30:00</small>
+                        </td>
+                        <td>
+                            <strong class="font-monospace text-primary" th:text="${log.subOrderCode} ?: '—'">SUB-001</strong>
+                            <div th:if="${log.masterOrderCode}" class="small text-muted font-monospace">Đơn: <span th:text="${log.masterOrderCode}">MO-001</span></div>
+                        </td>
+                        <td>
+                            <span th:switch="${log.actionType}">
+                                <span th:case="'BRANCH_REASSIGN'" class="badge bg-purple-100 text-purple-800 border" style="background-color: #f3e8ff; color: #6b21a8;">
+                                    <i class="fas fa-shuffle me-1"></i> Điều Phối
+                                </span>
+                                <span th:case="'ORDER_CANCELLED'" class="badge bg-danger-subtle text-danger border">
+                                    <i class="fas fa-ban me-1"></i> Hủy Đơn
+                                </span>
+                                <span th:case="*" class="badge bg-primary-subtle text-primary border">
+                                    <i class="fas fa-sync-alt me-1"></i> Đổi Trạng Thái
+                                </span>
+                            </span>
+                        </td>
+                        <td>
+                            <div class="d-flex align-items-center gap-1.5 small font-monospace">
+                                <span th:if="${log.fromStatus}" class="badge bg-light text-dark border" th:text="${log.fromStatus}">PENDING</span>
+                                <span th:unless="${log.fromStatus}" class="text-muted">Mới tạo</span>
+                                <i class="fas fa-arrow-right text-muted" style="font-size: 0.7rem;"></i>
+                                <span class="badge bg-success-subtle text-success border fw-bold" th:text="${log.toStatus}">CONFIRMED</span>
+                            </div>
+                        </td>
+                        <td>
+                            <div class="fw-semibold small" th:text="${log.updatedByUserName} ?: 'Hệ thống tự động'">Nguyễn Văn Admin</div>
+                            <span th:if="${log.updatedByUserRole}" class="badge bg-light text-secondary border text-xs" style="font-size: 0.65rem;"
+                                  th:text="${log.updatedByUserRole}">ROLE_ADMIN</span>
+                        </td>
+                        <td>
+                            <div class="small">
+                                <span th:if="${log.fromBranchName != null and log.toBranchName != null and log.fromBranchName != log.toBranchName}">
+                                    <span class="text-muted" th:text="${log.fromBranchName}">CN Q1</span>
+                                    <i class="fas fa-arrow-right text-primary mx-1" style="font-size: 0.65rem;"></i>
+                                    <strong class="text-primary" th:text="${log.toBranchName}">CN Thủ Đức</strong>
+                                </span>
+                                <span th:if="${log.toBranchName != null and (log.fromBranchName == null or log.fromBranchName == log.toBranchName)}">
+                                    <span class="badge bg-light text-dark border" th:text="${log.toBranchName}">Chi nhánh Q1</span>
+                                </span>
+                                <span th:if="${log.toBranchName == null}" class="text-muted">—</span>
+                            </div>
+                        </td>
+                        <td>
+                            <p class="mb-0 small text-dark" style="max-width: 320px;" th:text="${log.note}">Chi tiết thao tác</p>
+                        </td>
+                        <td class="text-center">
+                            <a th:href="@{'/orders/' + ${log.subOrderId} + '/timeline'}" target="_blank"
+                               class="btn btn-sm btn-outline-primary" title="Xem Timeline Đơn">
+                                <i class="fas fa-route"></i>
+                            </a>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <div th:if="${logs == null or #lists.isEmpty(logs)}" class="text-center py-5 text-muted">
+                <i class="fas fa-inbox fa-3x mb-3 opacity-25"></i>
+                <p class="fs-6">Chưa có nhật ký ghi nhận nào.</p>
+            </div>
+        </div>
+    </div>
+
+</section>
+</body>
+</html>
+

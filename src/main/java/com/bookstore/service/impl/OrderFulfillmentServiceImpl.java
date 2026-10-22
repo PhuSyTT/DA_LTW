@@ -7,6 +7,7 @@ import com.bookstore.dto.UpdateSubOrderStatusDto;
 import com.bookstore.entity.*;
 import com.bookstore.repository.BookItemRepository;
 import com.bookstore.repository.BranchRepository;
+import com.bookstore.repository.OrderStatusHistoryRepository;
 import com.bookstore.repository.SubOrderRepository;
 import com.bookstore.service.OrderFulfillmentService;
 import org.springframework.stereotype.Service;
@@ -24,13 +25,16 @@ public class OrderFulfillmentServiceImpl implements OrderFulfillmentService {
     private final SubOrderRepository subOrderRepository;
     private final BookItemRepository bookItemRepository;
     private final BranchRepository branchRepository;
+    private final OrderStatusHistoryRepository orderStatusHistoryRepository;
 
     public OrderFulfillmentServiceImpl(SubOrderRepository subOrderRepository,
                                       BookItemRepository bookItemRepository,
-                                      BranchRepository branchRepository) {
+                                      BranchRepository branchRepository,
+                                      OrderStatusHistoryRepository orderStatusHistoryRepository) {
         this.subOrderRepository = subOrderRepository;
         this.bookItemRepository = bookItemRepository;
         this.branchRepository = branchRepository;
+        this.orderStatusHistoryRepository = orderStatusHistoryRepository;
     }
 
     @Override
@@ -76,10 +80,20 @@ public class OrderFulfillmentServiceImpl implements OrderFulfillmentService {
             throw new RuntimeException("Đơn hàng đã ở trạng thái kết thúc (" + currentStatus + "), không thể thay đổi!");
         }
 
+        LocalDateTime now = LocalDateTime.now();
+
         switch (targetStatus) {
+            case "CONFIRMED":
+                subOrder.setStatus("CONFIRMED");
+                subOrder.setConfirmedAt(now);
+                break;
+
             case "PACKING":
                 // Nhân viên bắt đầu nhặt sách trên kệ và đóng gói
                 subOrder.setStatus("PACKING");
+                if (subOrder.getConfirmedAt() == null) {
+                    subOrder.setConfirmedAt(now);
+                }
                 break;
 
             case "SHIPPED":
@@ -90,18 +104,35 @@ public class OrderFulfillmentServiceImpl implements OrderFulfillmentService {
                     subOrder.setTrackingNumber("VNPOST-" + System.currentTimeMillis());
                 }
                 subOrder.setStatus("SHIPPED");
+                subOrder.setShippedAt(now);
                 break;
 
             case "COMPLETED":
                 subOrder.setStatus("COMPLETED");
+                subOrder.setCompletedAt(now);
                 break;
 
             default:
                 throw new RuntimeException("Trạng thái không hợp lệ: " + targetStatus);
         }
 
-        subOrder.setUpdatedAt(LocalDateTime.now());
+        subOrder.setUpdatedAt(now);
         SubOrder saved = subOrderRepository.save(subOrder);
+
+        // Ghi log lịch sử thay đổi trạng thái
+        OrderStatusHistory history = new OrderStatusHistory(
+                saved,
+                saved.getMasterOrder(),
+                currentStatus,
+                targetStatus,
+                dto.getNote() != null ? dto.getNote() : ("Chuyển trạng thái sang " + targetStatus),
+                staff,
+                saved.getBranch(),
+                saved.getBranch(),
+                "STATUS_CHANGE"
+        );
+        orderStatusHistoryRepository.save(history);
+
         return mapToDto(saved);
     }
 
@@ -120,6 +151,9 @@ public class OrderFulfillmentServiceImpl implements OrderFulfillmentService {
             throw new RuntimeException("Đơn hàng đã hoàn thành, không thể hủy đơn!");
         }
 
+        String oldStatus = subOrder.getStatus();
+        LocalDateTime now = LocalDateTime.now();
+
         // Hoàn lại số lượng tồn kho cho từng mặt hàng trong đơn
         if (subOrder.getItems() != null) {
             for (SubOrderItem item : subOrder.getItems()) {
@@ -134,8 +168,24 @@ public class OrderFulfillmentServiceImpl implements OrderFulfillmentService {
         }
 
         subOrder.setStatus("CANCELLED");
-        subOrder.setUpdatedAt(LocalDateTime.now());
-        subOrderRepository.save(subOrder);
+        subOrder.setCancelledAt(now);
+        subOrder.setCancelReason(reason != null ? reason : "Nhân viên chi nhánh hủy đơn");
+        subOrder.setUpdatedAt(now);
+        SubOrder saved = subOrderRepository.save(subOrder);
+
+        // Ghi log lịch sử hủy đơn
+        OrderStatusHistory history = new OrderStatusHistory(
+                saved,
+                saved.getMasterOrder(),
+                oldStatus,
+                "CANCELLED",
+                "Hủy đơn: " + (reason != null ? reason : "Hủy đơn và hoàn tồn kho"),
+                staff,
+                saved.getBranch(),
+                saved.getBranch(),
+                "ORDER_CANCELLED"
+        );
+        orderStatusHistoryRepository.save(history);
     }
 
     @Override

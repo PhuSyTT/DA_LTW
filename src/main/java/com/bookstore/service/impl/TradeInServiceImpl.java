@@ -26,6 +26,7 @@ public class TradeInServiceImpl implements TradeInService {
     private final BookItemRepository bookItemRepository;
     private final BookItemImageRepository bookItemImageRepository;
     private final WishlistService wishlistService;
+    private final org.springframework.messaging.simp.SimpMessageSendingOperations messagingTemplate;
 
     public TradeInServiceImpl(TradeInRequestRepository tradeInRequestRepository,
                               TradeInImageRepository tradeInImageRepository,
@@ -33,7 +34,8 @@ public class TradeInServiceImpl implements TradeInService {
                               BranchRepository branchRepository,
                               BookItemRepository bookItemRepository,
                               BookItemImageRepository bookItemImageRepository,
-                              WishlistService wishlistService) {
+                              WishlistService wishlistService,
+                              org.springframework.messaging.simp.SimpMessageSendingOperations messagingTemplate) {
         this.tradeInRequestRepository = tradeInRequestRepository;
         this.tradeInImageRepository = tradeInImageRepository;
         this.bookRepository = bookRepository;
@@ -41,6 +43,7 @@ public class TradeInServiceImpl implements TradeInService {
         this.bookItemRepository = bookItemRepository;
         this.bookItemImageRepository = bookItemImageRepository;
         this.wishlistService = wishlistService;
+        this.messagingTemplate = messagingTemplate;
     }
 
     // Nghiệp vụ FR-TRD-03 & Mục 3.2: Thuật toán tự động định giá sơ bộ thu mua
@@ -298,6 +301,27 @@ public class TradeInServiceImpl implements TradeInService {
             }
         }
 
+        // FR-TRD-05: Bắn chuông thông báo hồ sơ thẩm định Trade-in mới qua WebSocket cho Staff Appraiser & Chi nhánh
+        try {
+            java.util.Map<String, Object> wsPayload = new java.util.HashMap<>();
+            wsPayload.put("type", "NEW_APPRAISAL");
+            wsPayload.put("tradeInId", saved.getId());
+            wsPayload.put("requestCode", saved.getRequestCode());
+            wsPayload.put("bookTitle", saved.getBook() != null ? saved.getBook().getTitle() : "Sách thẩm định");
+            wsPayload.put("customerName", saved.getUser() != null ? saved.getUser().getFullName() : "Khách hàng");
+            wsPayload.put("branchId", saved.getTargetBranch() != null ? saved.getTargetBranch().getId() : null);
+            wsPayload.put("branchName", saved.getTargetBranch() != null ? saved.getTargetBranch().getBranchName() : "Toàn chuỗi");
+            wsPayload.put("estimatedPrice", saved.getAutoEstimatedPrice());
+            wsPayload.put("message", "Hồ sơ thu mua mới #" + saved.getRequestCode() + " cần thẩm định!");
+
+            if (saved.getTargetBranch() != null) {
+                messagingTemplate.convertAndSend("/topic/branch/" + saved.getTargetBranch().getId() + "/appraisals", wsPayload);
+            }
+            messagingTemplate.convertAndSend("/topic/admin/appraisals", wsPayload);
+        } catch (Exception wsEx) {
+            // Không làm gián đoạn việc lưu hồ sơ thu mua
+        }
+
         return mapToDto(saved);
     }
 
@@ -328,6 +352,27 @@ public class TradeInServiceImpl implements TradeInService {
         request.setStatus("OFFERED"); // Chuyển trạng thái để gửi báo giá tới khách hàng
 
         TradeInRequest saved = tradeInRequestRepository.save(request);
+        // FR-TRD-05: Bắn chuông thông báo hồ sơ thẩm định Trade-in mới qua WebSocket cho Staff Appraiser & Chi nhánh
+        try {
+            java.util.Map<String, Object> wsPayload = new java.util.HashMap<>();
+            wsPayload.put("type", "NEW_APPRAISAL");
+            wsPayload.put("tradeInId", saved.getId());
+            wsPayload.put("requestCode", saved.getRequestCode());
+            wsPayload.put("bookTitle", saved.getBook() != null ? saved.getBook().getTitle() : "Sách thẩm định");
+            wsPayload.put("customerName", saved.getUser() != null ? saved.getUser().getFullName() : "Khách hàng");
+            wsPayload.put("branchId", saved.getTargetBranch() != null ? saved.getTargetBranch().getId() : null);
+            wsPayload.put("branchName", saved.getTargetBranch() != null ? saved.getTargetBranch().getBranchName() : "Toàn chuỗi");
+            wsPayload.put("estimatedPrice", saved.getAutoEstimatedPrice());
+            wsPayload.put("message", "Hồ sơ thu mua mới #" + saved.getRequestCode() + " cần thẩm định!");
+
+            if (saved.getTargetBranch() != null) {
+                messagingTemplate.convertAndSend("/topic/branch/" + saved.getTargetBranch().getId() + "/appraisals", wsPayload);
+            }
+            messagingTemplate.convertAndSend("/topic/admin/appraisals", wsPayload);
+        } catch (Exception wsEx) {
+            // Không làm gián đoạn việc lưu hồ sơ thu mua
+        }
+
         return mapToDto(saved);
     }
 
@@ -354,6 +399,27 @@ public class TradeInServiceImpl implements TradeInService {
         }
 
         TradeInRequest saved = tradeInRequestRepository.save(request);
+        // FR-TRD-05: Bắn chuông thông báo hồ sơ thẩm định Trade-in mới qua WebSocket cho Staff Appraiser & Chi nhánh
+        try {
+            java.util.Map<String, Object> wsPayload = new java.util.HashMap<>();
+            wsPayload.put("type", "NEW_APPRAISAL");
+            wsPayload.put("tradeInId", saved.getId());
+            wsPayload.put("requestCode", saved.getRequestCode());
+            wsPayload.put("bookTitle", saved.getBook() != null ? saved.getBook().getTitle() : "Sách thẩm định");
+            wsPayload.put("customerName", saved.getUser() != null ? saved.getUser().getFullName() : "Khách hàng");
+            wsPayload.put("branchId", saved.getTargetBranch() != null ? saved.getTargetBranch().getId() : null);
+            wsPayload.put("branchName", saved.getTargetBranch() != null ? saved.getTargetBranch().getBranchName() : "Toàn chuỗi");
+            wsPayload.put("estimatedPrice", saved.getAutoEstimatedPrice());
+            wsPayload.put("message", "Hồ sơ thu mua mới #" + saved.getRequestCode() + " cần thẩm định!");
+
+            if (saved.getTargetBranch() != null) {
+                messagingTemplate.convertAndSend("/topic/branch/" + saved.getTargetBranch().getId() + "/appraisals", wsPayload);
+            }
+            messagingTemplate.convertAndSend("/topic/admin/appraisals", wsPayload);
+        } catch (Exception wsEx) {
+            // Không làm gián đoạn việc lưu hồ sơ thu mua
+        }
+
         return mapToDto(saved);
     }
 

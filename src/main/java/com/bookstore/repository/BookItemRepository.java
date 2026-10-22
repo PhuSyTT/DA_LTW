@@ -55,4 +55,10 @@ public interface BookItemRepository extends JpaRepository<BookItem, Long> {
     @Lock(LockModeType.PESSIMISTIC_WRITE)
     @Query("SELECT bi FROM BookItem bi WHERE bi.id = :id")
     Optional<BookItem> findByIdWithLock(@Param("id") Long id);
+
+    @Query("SELECT COUNT(b) FROM BookItem b WHERE (:branchId IS NULL OR b.branch.id = :branchId) AND b.status = 'AVAILABLE'")
+    long countAvailableItems(@Param("branchId") Long branchId);
+
+    @Query("SELECT COUNT(b) FROM BookItem b WHERE (:branchId IS NULL OR b.branch.id = :branchId) AND b.conditionGrade = :grade AND b.status = 'AVAILABLE'")
+    long countAvailableByGrade(@Param("branchId") Long branchId, @Param("grade") String grade);
 }

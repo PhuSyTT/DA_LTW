@@ -16,6 +16,12 @@
     <link href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.5.1/css/all.min.css" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet">
 
+    <!-- Landing Page Vintage Styles (Blurred Backgrounds & Gradients) -->
+    <link rel="stylesheet" th:href="@{/css/landing-page.css}">
+
+    <!-- Chatbox AI Styles -->
+    <th:block th:replace="~{fragments/chatbox :: chatboxStyles}"></th:block>
+
     <script>
         tailwind.config = {
             theme: {
@@ -76,6 +82,7 @@
                 <a href="/authors" class="hover:text-primary transition-colors">Tác Giả</a>
                 <a href="/blog" class="hover:text-primary transition-colors">Blog</a>
                 <a href="/trade-in" class="hover:text-primary transition-colors">Thu Mua Sách</a>
+                <a href="/my-orders" class="hover:text-primary transition-colors">Đơn Hàng Của Tôi</a>
             </nav>
 
             <!-- Actions -->
@@ -111,6 +118,12 @@
                 <p class="text-xs text-emerald-700 mt-1" th:if="${orderCode}">
                     Mã đơn hàng: <strong class="font-mono text-emerald-900" th:text="${orderCode}">DH-123</strong>. Chúng tôi sẽ liên hệ qua số điện thoại để xác nhận đơn và giao sách tới bạn.
                 </p>
+                <div class="mt-3 flex items-center gap-2">
+                    <a th:href="@{/my-orders}" href="/my-orders" class="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-emerald-700 text-white text-xs font-bold hover:bg-emerald-800 shadow-sm transition-all">
+                        <i class="fas fa-route"></i>
+                        <span>Xem &amp; Theo Dõi Tiến Độ Đơn Hàng (Timeline)</span>
+                    </a>
+                </div>
             </div>
         </div>
 
@@ -128,7 +141,7 @@
         </h1>
 
         <!-- EMPTY STATE -->
-        <div id="cartEmptyState" th:class="${cart.isEmpty()} ? 'text-center py-16 bg-white rounded-3xl border border-outline/30 shadow-sm' : 'hidden text-center py-16 bg-white rounded-3xl border border-outline/30 shadow-sm'">
+        <div id="cartEmptyState" th:class="${cart.isEmpty()} ? 'text-center py-16 vintage-blurred-bg rounded-3xl border border-white/60 shadow-lg' : 'hidden text-center py-16 vintage-blurred-bg rounded-3xl border border-white/60 shadow-lg'">
             <div class="w-24 h-24 mx-auto mb-4 rounded-full bg-primary-container/60 flex items-center justify-center text-primary text-4xl">
                 <i class="fas fa-book-open"></i>
             </div>
@@ -230,8 +243,8 @@
             <!-- RIGHT COLUMN: ORDER SUMMARY & CHECKOUT (4 cols) -->
             <div class="lg:col-span-4 flex flex-col gap-6 sticky top-28">
                 
-                <!-- Summary Card -->
-                <div class="bg-white rounded-3xl border border-outline/30 p-6 shadow-sm">
+                <!-- Summary Card with Vintage Blurred Background -->
+                <div class="vintage-blurred-bg rounded-3xl border border-white/60 p-6 shadow-md">
                     <h3 class="font-bold text-base text-on-surface mb-4 flex items-center gap-2">
                         <i class="fas fa-receipt text-primary"></i> Tóm Tắt Đơn Hàng
                     </h3>
@@ -538,6 +551,10 @@
             if (modal) modal.classList.add('hidden');
         }
     </script>
+
+    <!-- Chatbox AI Widget -->
+    <div th:replace="~{fragments/chatbox :: chatboxWidget}"></div>
+    <th:block th:replace="~{fragments/chatbox :: chatboxScripts}"></th:block>
 </body>
 </html>
 

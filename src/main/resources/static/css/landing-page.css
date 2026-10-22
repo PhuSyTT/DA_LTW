@@ -1583,3 +1583,63 @@ button {
     grid-template-columns: 1fr;
   }
 }
+
+/* =================================================================
+   VINTAGE BLURRED BACKGROUND UTILITY SYSTEM (OLD BOOKS AESTHETIC)
+   - Background image: Vintage bookshelf / pages
+   - Blurred backdrop (filter: blur(14px) brightness(0.96))
+   - Overlay Gradient: Parchment (#EAE5C9) to Teal (#6CC6CB)
+   - 100% sharp text & foreground content (via isolation & z-index)
+   ================================================================= */
+.vintage-blurred-bg {
+    position: relative !important;
+    overflow: hidden !important;
+    isolation: isolate !important;
+    background: transparent !important;
+}
+
+.vintage-blurred-bg::before {
+    content: '' !important;
+    position: absolute !important;
+    inset: -25px !important;
+    z-index: -2 !important;
+    background-image: 
+        linear-gradient(135deg, rgba(234, 229, 201, 0.86) 0%, rgba(108, 198, 203, 0.82) 100%),
+        url('/images/hero-vintage-books.jpg') !important;
+    background-size: cover !important;
+    background-position: center !important;
+    background-repeat: no-repeat !important;
+    filter: blur(14px) brightness(0.96) !important;
+    -webkit-filter: blur(14px) brightness(0.96) !important;
+    transform: scale(1.05) !important;
+    pointer-events: none !important;
+}
+
+.vintage-blurred-bg::after {
+    content: '' !important;
+    position: absolute !important;
+    inset: 0 !important;
+    z-index: -1 !important;
+    background: rgba(255, 255, 255, 0.40) !important;
+    backdrop-filter: blur(8px) !important;
+    -webkit-backdrop-filter: blur(8px) !important;
+    pointer-events: none !important;
+}
+
+.vintage-blurred-bg > * {
+    position: relative !important;
+    z-index: 1 !important;
+}
+
+/* Biến thể Glass Card nhẹ nhàng cho các card / box nhỏ */
+.vintage-blurred-card {
+    position: relative !important;
+    overflow: hidden !important;
+    isolation: isolate !important;
+    background: rgba(255, 255, 255, 0.75) !important;
+    backdrop-filter: blur(12px) saturate(160%) !important;
+    -webkit-backdrop-filter: blur(12px) saturate(160%) !important;
+    border: 1px solid rgba(255, 255, 255, 0.55) !important;
+    box-shadow: 0 12px 30px -8px rgba(44, 62, 80, 0.12), inset 0 1px 1px 0 rgba(255, 255, 255, 0.8) !important;
+}
+

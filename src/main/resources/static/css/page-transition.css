@@ -1,8 +1,6 @@
 /* ==========================================================================
    Book4Life - Literary Page Transition with Video & 3D Flipping Book
-   Phía trên: Logo shop
-   Ở giữa: Video / Hoạt cảnh 3D lật mở những trang sách
-   Phía dưới: Thanh tiến trình đang "lật mở những trang sách"
+   Smooth Cinema-Grade Fade (Loại bỏ 100% chớp tắt)
    ========================================================================== */
 
 #page-transition-overlay,
@@ -19,11 +17,13 @@
     flex-direction: column;
     opacity: 0;
     visibility: hidden;
-    transition: opacity 0.25s cubic-bezier(0.4, 0, 0.2, 1),
-                visibility 0.25s cubic-bezier(0.4, 0, 0.2, 1);
     user-select: none;
     -webkit-user-select: none;
     pointer-events: all;
+    will-change: opacity, transform;
+    transform: translateZ(0);
+    transition: opacity 0.35s cubic-bezier(0.2, 0.8, 0.2, 1),
+                visibility 0.35s cubic-bezier(0.2, 0.8, 0.2, 1);
 }
 
 #page-transition-overlay.is-loading,
@@ -32,13 +32,29 @@
     visibility: visible;
 }
 
+/* Hiệu ứng tan mờ êm ái khi kết thúc tải (Không chớp tắt) */
+#page-transition-overlay.is-leaving,
+.b4l-transition-screen.is-leaving {
+    opacity: 0 !important;
+    pointer-events: none !important;
+    transition: opacity 0.35s cubic-bezier(0.4, 0, 0.2, 1) !important;
+}
+
+#page-transition-overlay.is-leaving .b4l-transition-card {
+    opacity: 0 !important;
+    transform: translateY(-8px) scale(0.98) !important;
+    transition: opacity 0.3s cubic-bezier(0.4, 0, 0.2, 1),
+                transform 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+}
+
 /* Nền mờ ấm áp phong cách giấy văn học cổ điển */
 .b4l-transition-backdrop {
     position: absolute;
     inset: 0;
-    background: radial-gradient(circle at 50% 45%, rgba(255, 255, 255, 0.96) 0%, rgba(250, 248, 244, 0.94) 55%, rgba(244, 238, 226, 0.92) 100%);
-    backdrop-filter: blur(10px);
-    -webkit-backdrop-filter: blur(10px);
+    background: radial-gradient(circle at 50% 45%, rgba(255, 255, 255, 0.97) 0%, rgba(250, 248, 244, 0.95) 55%, rgba(244, 238, 226, 0.93) 100%);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    will-change: opacity;
 }
 
 /* Thẻ trung tâm nổi bật */
@@ -54,26 +70,15 @@
     max-width: 440px;
     width: 90%;
     border-radius: 24px;
-    background: rgba(255, 255, 255, 0.7);
+    background: rgba(255, 255, 255, 0.85);
     border: 1px solid rgba(131, 85, 0, 0.12);
     box-shadow: 0 20px 45px rgba(131, 85, 0, 0.08), 0 4px 12px rgba(0, 0, 0, 0.03);
-    animation: b4lCardEnter 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    will-change: opacity, transform;
+    transform: translateZ(0);
+    transition: opacity 0.25s ease, transform 0.25s ease;
 }
 
-@keyframes b4lCardEnter {
-    from {
-        opacity: 0;
-        transform: scale(0.96) translateY(8px);
-    }
-    to {
-        opacity: 1;
-        transform: scale(1) translateY(0);
-    }
-}
-
-/* --------------------------------------------------------------------------
-   1. PHÍA TRÊN: LOGO SHOP
-   -------------------------------------------------------------------------- */
+/* 1. Phía trên: Logo shop */
 .b4l-transition-header {
     display: flex;
     flex-direction: column;
@@ -133,9 +138,7 @@
     50% { transform: scale(1.03); }
 }
 
-/* --------------------------------------------------------------------------
-   2. Ở GIỮA: VÙNG VIDEO / HOẠT CẢNH LẬT MỞ TRANG SÁCH
-   -------------------------------------------------------------------------- */
+/* 2. Ở giữa: Vùng Video / Hoạt cảnh lật mở trang sách */
 .b4l-video-wrapper {
     position: relative;
     width: 200px;
@@ -147,19 +150,19 @@
     perspective: 800px;
     overflow: hidden;
     border-radius: 14px;
+    background: #faf7f2;
 }
 
-/* Video element */
 .b4l-loading-video {
     width: 100%;
     height: 100%;
     object-fit: cover;
     border-radius: 12px;
     display: block;
-    box-shadow: 0 4px 14px rgba(131, 85, 0, 0.12);
+    background: transparent;
 }
 
-/* Hoạt cảnh 3D Book Flip (Tự động hiển thị song song hoặc khi chưa nạp video) */
+/* Hoạt cảnh 3D Book Flip */
 .b4l-flipbook {
     position: absolute;
     width: 130px;
@@ -224,15 +227,9 @@
     border-radius: 2px;
 }
 
-.b4l-page-lines span:nth-child(even) {
-    width: 80%;
-}
+.b4l-page-lines span:nth-child(even) { width: 80%; }
+.b4l-page-lines span:last-child { width: 60%; }
 
-.b4l-page-lines span:last-child {
-    width: 60%;
-}
-
-/* Các trang lật xoay 3D (3D Flipping Pages) */
 .b4l-page-flipping {
     right: 6px;
     border-radius: 0 4px 4px 0;
@@ -279,9 +276,7 @@
     }
 }
 
-/* --------------------------------------------------------------------------
-   3. PHÍA DƯỚI: THANH TIẾN TRÌNH ĐANG "LẬT MỞ NHỮNG TRANG SÁCH"
-   -------------------------------------------------------------------------- */
+/* 3. Phía dưới: Thanh tiến trình đang "lật mở những trang sách" */
 .b4l-transition-footer {
     display: flex;
     flex-direction: column;
@@ -346,7 +341,7 @@
     background: linear-gradient(90deg, #835500 0%, #f5a623 55%, #ffd080 100%);
     border-radius: 9999px;
     box-shadow: 0 0 10px rgba(245, 166, 35, 0.7);
-    transition: width 0.25s cubic-bezier(0.1, 0.8, 0.2, 1);
+    transition: width 0.2s cubic-bezier(0.1, 0.8, 0.2, 1);
     will-change: width;
     position: relative;
 }
@@ -368,19 +363,9 @@
     50% { opacity: 1; }
 }
 
-/* Ẩn các class cũ nếu có */
+/* Ẩn hoàn toàn các class spinner cũ */
 .b4l-spinner-ring,
 .b4l-spinner-inner,
 .b4l-pulse-aura {
     display: none !important;
-}
-
-/* Hiệu ứng mờ dần nhẹ nhàng khi vào trang */
-body {
-    animation: b4lPageFadeIn 0.2s cubic-bezier(0.2, 0, 0, 1);
-}
-
-@keyframes b4lPageFadeIn {
-    from { opacity: 0.94; transform: translateY(2px); }
-    to { opacity: 1; transform: translateY(0); }
 }

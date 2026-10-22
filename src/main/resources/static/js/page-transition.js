@@ -1,8 +1,6 @@
 /**
  * Book4Life - Literary Page Transition with Video & Progress Bar
- * Phía trên: Logo shop
- * Ở giữa: Video lật mở những trang sách
- * Phía dưới: Thanh tiến trình đang "lật mở những trang sách"
+ * Chuyển cảnh êm ái, mượt mà chuẩn 60fps (Khắc phục triệt để hiện tượng chớp tắt)
  */
 
 (function () {
@@ -13,6 +11,7 @@
     let finishTimer = null;
     let safetyTimer = null;
     let isTransitioning = false;
+    let hasFinished = false;
 
     function getOverlay() {
         return document.getElementById('page-transition-overlay');
@@ -42,32 +41,35 @@
         clearTimeout(finishTimer);
         clearTimeout(safetyTimer);
         stopTrickle();
+        hasFinished = false;
 
         const overlay = getOverlay();
         if (!overlay) return;
 
         isTransitioning = true;
+        overlay.classList.remove('is-leaving');
         overlay.style.display = 'flex';
         overlay.setAttribute('aria-hidden', 'false');
 
         // Bắt đầu phát video nếu có
         const video = getVideo();
         if (video) {
-            video.currentTime = 0;
-            video.play().catch(function () {
-                // Trình duyệt có thể chặn autoplay không tiếng hoặc video chưa sẵn sàng
-            });
+            try {
+                video.currentTime = 0;
+                video.play().catch(function () {});
+            } catch (e) {}
         }
 
+        // Kích hoạt hiển thị mượt mà bằng requestAnimationFrame
         requestAnimationFrame(function () {
             overlay.classList.add('is-loading');
         });
 
-        setProgress(startPercent !== undefined ? startPercent : 25);
+        setProgress(startPercent !== undefined ? startPercent : 30);
         startTrickle();
 
-        // An toàn: Tự động tắt sau 3.5 giây nếu trang bị nghẽn mạng
-        safetyTimer = setTimeout(forceHide, 3500);
+        // An toàn: Tự động tắt sau 4s nếu trang bị nghẽn mạng
+        safetyTimer = setTimeout(forceHide, 4000);
     }
 
     function startTrickle() {
@@ -79,7 +81,7 @@
             } else {
                 stopTrickle();
             }
-        }, 90);
+        }, 80);
     }
 
     function stopTrickle() {
@@ -89,56 +91,83 @@
         }
     }
 
+    // Kết thúc chuyển cảnh êm ái: Không chớp tắt, tan mờ nhẹ nhàng
     function finishTransition() {
+        if (hasFinished) return;
+        hasFinished = true;
+
         stopTrickle();
         clearTimeout(safetyTimer);
         setProgress(100);
 
         finishTimer = setTimeout(function () {
             const overlay = getOverlay();
-            if (overlay) {
+            if (overlay && isTransitioning) {
+                // Thêm class tan mờ nhẹ nhàng (is-leaving)
+                overlay.classList.add('is-leaving');
                 overlay.classList.remove('is-loading');
+
                 setTimeout(function () {
                     overlay.style.display = 'none';
+                    overlay.classList.remove('is-leaving');
                     overlay.setAttribute('aria-hidden', 'true');
                     isTransitioning = false;
                     setProgress(0);
-                }, 220);
+                }, 350); // Đợi 350ms đúng bằng thời gian transition CSS kết thúc
             } else {
                 isTransitioning = false;
             }
-        }, 120);
+        }, 150); // Dừng lại 150ms để mắt kịp cảm nhận thanh tiến trình chạm 100%
     }
 
     function forceHide() {
+        hasFinished = true;
         stopTrickle();
         clearTimeout(finishTimer);
         clearTimeout(safetyTimer);
         const overlay = getOverlay();
         if (overlay) {
             overlay.classList.remove('is-loading');
+            overlay.classList.remove('is-leaving');
             overlay.style.display = 'none';
             overlay.setAttribute('aria-hidden', 'true');
         }
         isTransitioning = false;
         setProgress(0);
+        try {
+            sessionStorage.removeItem('b4l_navigating');
+        } catch (e) {}
     }
 
     function handlePageLifecycle() {
-        if (document.readyState === 'loading') {
-            showOverlay(35);
-            document.addEventListener('DOMContentLoaded', finishTransition);
-            window.addEventListener('load', finishTransition);
+        // Kiểm tra xem trang có được nạp từ một cú nhấp chuyển trang nội bộ không
+        let wasNavigating = false;
+        try {
+            wasNavigating = (sessionStorage.getItem('b4l_navigating') === '1');
+            sessionStorage.removeItem('b4l_navigating');
+        } catch (e) {}
+
+        if (wasNavigating) {
+            // Hiển thị tiếp overlay mượt mà từ 75% lên 100%
+            showOverlay(75);
+            if (document.readyState === 'complete') {
+                finishTransition();
+            } else {
+                window.addEventListener('load', finishTransition, { once: true });
+                document.addEventListener('DOMContentLoaded', finishTransition, { once: true });
+            }
         } else {
-            finishTransition();
+            // Nếu người dùng chỉ F5 tải lại hoặc mở trực tiếp tab mới:
+            // Không chớp màn hình overlay, đảm bảo giao diện hiển thị tức thì
+            forceHide();
         }
 
-        // Hỗ trợ bfcache (khi bấm Back / Forward)
+        // Hỗ trợ bfcache (khi bấm Back / Forward trên trình duyệt)
         window.addEventListener('pageshow', function (event) {
             forceHide();
         });
 
-        // Cho phép người dùng nhấp để đóng overlay nếu không muốn chờ
+        // Cho phép nhấp ra ngoài để đóng nếu cần
         const overlay = getOverlay();
         if (overlay) {
             overlay.addEventListener('click', function (e) {
@@ -154,10 +183,12 @@
             const link = e.target.closest('a');
             if (!link) return;
 
+            // Bỏ qua nếu có phím bổ trợ (Ctrl/Cmd click mở tab mới)
             if (e.defaultPrevented || e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) {
                 return;
             }
 
+            // Bỏ qua link mở tab mới hoặc tải file
             if (link.target === '_blank' || link.hasAttribute('download')) {
                 return;
             }
@@ -165,6 +196,7 @@
             const rawHref = link.getAttribute('href');
             if (!rawHref) return;
 
+            // Bỏ qua anchor nội bộ, javascript, mailto, tel
             if (rawHref.startsWith('#') ||
                 rawHref.startsWith('javascript:') ||
                 rawHref.startsWith('mailto:') ||
@@ -172,19 +204,27 @@
                 return;
             }
 
+            // Bỏ qua liên kết ra trang web ngoài
             if (link.origin && link.origin !== window.location.origin) {
                 return;
             }
 
+            // Bỏ qua nếu chỉ là anchor cùng trang
             if (link.pathname === window.location.pathname &&
                 link.search === window.location.search &&
                 link.hash) {
                 return;
             }
 
+            // Bỏ qua nếu nhấn lại chính link hiện tại
             if (link.href === window.location.href) {
                 return;
             }
+
+            // Đánh dấu chuyển trang trong session để trang kế tiếp đón nhận mượt mà
+            try {
+                sessionStorage.setItem('b4l_navigating', '1');
+            } catch (err) {}
 
             showOverlay(30);
         });
@@ -192,6 +232,9 @@
         document.addEventListener('submit', function (e) {
             const form = e.target;
             if (!form || form.target === '_blank') return;
+            try {
+                sessionStorage.setItem('b4l_navigating', '1');
+            } catch (err) {}
             showOverlay(30);
         });
     }

@@ -1,6 +1,6 @@
 /* ==========================================================================
    Book4Life - Literary Page Transition with Video & 3D Flipping Book
-   Smooth Cinema-Grade Fade (Loại bỏ 100% chớp tắt)
+   Hiệu ứng xuất hiện khi bắt đầu load trang, tắt sạch khi load xong (0% giựt)
    ========================================================================== */
 
 #page-transition-overlay,
@@ -19,32 +19,19 @@
     visibility: hidden;
     user-select: none;
     -webkit-user-select: none;
-    pointer-events: all;
-    will-change: opacity, transform;
+    pointer-events: none;
+    will-change: opacity;
     transform: translateZ(0);
-    transition: opacity 0.35s cubic-bezier(0.2, 0.8, 0.2, 1),
-                visibility 0.35s cubic-bezier(0.2, 0.8, 0.2, 1);
 }
 
+/* Chỉ hiển thị khi đang trong quá trình bắt đầu chuyển trang */
 #page-transition-overlay.is-loading,
 .b4l-transition-screen.is-loading {
-    opacity: 1;
-    visibility: visible;
-}
-
-/* Hiệu ứng tan mờ êm ái khi kết thúc tải (Không chớp tắt) */
-#page-transition-overlay.is-leaving,
-.b4l-transition-screen.is-leaving {
-    opacity: 0 !important;
-    pointer-events: none !important;
-    transition: opacity 0.35s cubic-bezier(0.4, 0, 0.2, 1) !important;
-}
-
-#page-transition-overlay.is-leaving .b4l-transition-card {
-    opacity: 0 !important;
-    transform: translateY(-8px) scale(0.98) !important;
-    transition: opacity 0.3s cubic-bezier(0.4, 0, 0.2, 1),
-                transform 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+    display: flex !important;
+    opacity: 1 !important;
+    visibility: visible !important;
+    pointer-events: all !important;
+    transition: opacity 0.2s cubic-bezier(0.2, 0.8, 0.2, 1);
 }
 
 /* Nền mờ ấm áp phong cách giấy văn học cổ điển */
@@ -54,7 +41,6 @@
     background: radial-gradient(circle at 50% 45%, rgba(255, 255, 255, 0.97) 0%, rgba(250, 248, 244, 0.95) 55%, rgba(244, 238, 226, 0.93) 100%);
     backdrop-filter: blur(8px);
     -webkit-backdrop-filter: blur(8px);
-    will-change: opacity;
 }
 
 /* Thẻ trung tâm nổi bật */
@@ -73,9 +59,8 @@
     background: rgba(255, 255, 255, 0.85);
     border: 1px solid rgba(131, 85, 0, 0.12);
     box-shadow: 0 20px 45px rgba(131, 85, 0, 0.08), 0 4px 12px rgba(0, 0, 0, 0.03);
-    will-change: opacity, transform;
+    will-change: transform;
     transform: translateZ(0);
-    transition: opacity 0.25s ease, transform 0.25s ease;
 }
 
 /* 1. Phía trên: Logo shop */

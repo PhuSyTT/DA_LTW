@@ -1,6 +1,7 @@
 /**
  * Book4Life - Literary Page Transition with Video & Progress Bar
- * Chuyển cảnh êm ái, mượt mà chuẩn 60fps (Khắc phục triệt để hiện tượng chớp tắt)
+ * Hiệu ứng CHỈ xuất hiện khi bạn bắt đầu chuyển trang.
+ * Khi trang mới load xong sẽ hoàn toàn KHÔNG có hiệu ứng để tránh cảm giác bị giựt.
  */
 
 (function () {
@@ -8,10 +9,7 @@
 
     let currentProgress = 0;
     let trickleTimer = null;
-    let finishTimer = null;
     let safetyTimer = null;
-    let isTransitioning = false;
-    let hasFinished = false;
 
     function getOverlay() {
         return document.getElementById('page-transition-overlay');
@@ -37,21 +35,17 @@
         }
     }
 
-    function showOverlay(startPercent) {
-        clearTimeout(finishTimer);
-        clearTimeout(safetyTimer);
-        stopTrickle();
-        hasFinished = false;
-
+    // 1. CHỈ KÍCH HOẠT KHI NGƯỜI DÙNG BẮT ĐẦU CHUYỂN TRANG (Click link / Submit form)
+    function startLoadingEffect() {
         const overlay = getOverlay();
         if (!overlay) return;
 
-        isTransitioning = true;
-        overlay.classList.remove('is-leaving');
+        clearTimeout(safetyTimer);
+        stopTrickle();
+
         overlay.style.display = 'flex';
         overlay.setAttribute('aria-hidden', 'false');
 
-        // Bắt đầu phát video nếu có
         const video = getVideo();
         if (video) {
             try {
@@ -60,23 +54,22 @@
             } catch (e) {}
         }
 
-        // Kích hoạt hiển thị mượt mà bằng requestAnimationFrame
         requestAnimationFrame(function () {
             overlay.classList.add('is-loading');
         });
 
-        setProgress(startPercent !== undefined ? startPercent : 30);
+        setProgress(30);
         startTrickle();
 
-        // An toàn: Tự động tắt sau 4s nếu trang bị nghẽn mạng
-        safetyTimer = setTimeout(forceHide, 4000);
+        // An toàn: Tự động tắt sau 6s nếu mạng bị gián đoạn
+        safetyTimer = setTimeout(forceHide, 6000);
     }
 
     function startTrickle() {
         stopTrickle();
         trickleTimer = setInterval(function () {
-            if (currentProgress < 85) {
-                const diff = (85 - currentProgress) * 0.15;
+            if (currentProgress < 90) {
+                const diff = (90 - currentProgress) * 0.15;
                 setProgress(currentProgress + Math.max(0.4, diff));
             } else {
                 stopTrickle();
@@ -91,83 +84,29 @@
         }
     }
 
-    // Kết thúc chuyển cảnh êm ái: Không chớp tắt, tan mờ nhẹ nhàng
-    function finishTransition() {
-        if (hasFinished) return;
-        hasFinished = true;
-
-        stopTrickle();
-        clearTimeout(safetyTimer);
-        setProgress(100);
-
-        finishTimer = setTimeout(function () {
-            const overlay = getOverlay();
-            if (overlay && isTransitioning) {
-                // Thêm class tan mờ nhẹ nhàng (is-leaving)
-                overlay.classList.add('is-leaving');
-                overlay.classList.remove('is-loading');
-
-                setTimeout(function () {
-                    overlay.style.display = 'none';
-                    overlay.classList.remove('is-leaving');
-                    overlay.setAttribute('aria-hidden', 'true');
-                    isTransitioning = false;
-                    setProgress(0);
-                }, 350); // Đợi 350ms đúng bằng thời gian transition CSS kết thúc
-            } else {
-                isTransitioning = false;
-            }
-        }, 150); // Dừng lại 150ms để mắt kịp cảm nhận thanh tiến trình chạm 100%
-    }
-
+    // 2. KHI TRANG MỚI LOAD XONG: ẨN TỨC THÌ, TUYỆT ĐỐI KHÔNG CHẠY HIỆU ỨNG THỪA ĐỂ TRÁNH GIỰT
     function forceHide() {
-        hasFinished = true;
         stopTrickle();
-        clearTimeout(finishTimer);
         clearTimeout(safetyTimer);
         const overlay = getOverlay();
         if (overlay) {
             overlay.classList.remove('is-loading');
-            overlay.classList.remove('is-leaving');
             overlay.style.display = 'none';
             overlay.setAttribute('aria-hidden', 'true');
         }
-        isTransitioning = false;
         setProgress(0);
-        try {
-            sessionStorage.removeItem('b4l_navigating');
-        } catch (e) {}
     }
 
-    function handlePageLifecycle() {
-        // Kiểm tra xem trang có được nạp từ một cú nhấp chuyển trang nội bộ không
-        let wasNavigating = false;
-        try {
-            wasNavigating = (sessionStorage.getItem('b4l_navigating') === '1');
-            sessionStorage.removeItem('b4l_navigating');
-        } catch (e) {}
+    function handlePageLoaded() {
+        // Trang mới đã sẵn sàng -> Không hiện bất kỳ hiệu ứng nào
+        forceHide();
 
-        if (wasNavigating) {
-            // Hiển thị tiếp overlay mượt mà từ 75% lên 100%
-            showOverlay(75);
-            if (document.readyState === 'complete') {
-                finishTransition();
-            } else {
-                window.addEventListener('load', finishTransition, { once: true });
-                document.addEventListener('DOMContentLoaded', finishTransition, { once: true });
-            }
-        } else {
-            // Nếu người dùng chỉ F5 tải lại hoặc mở trực tiếp tab mới:
-            // Không chớp màn hình overlay, đảm bảo giao diện hiển thị tức thì
-            forceHide();
-        }
-
-        // Hỗ trợ bfcache (khi bấm Back / Forward trên trình duyệt)
+        // Xử lý khi người dùng nhấn nút Back / Forward của trình duyệt (bfcache)
         window.addEventListener('pageshow', function (event) {
             forceHide();
         });
 
-        // Cho phép nhấp ra ngoài để đóng nếu cần
+        // Cho phép nhấp ra ngoài để hủy nếu cần
         const overlay = getOverlay();
         if (overlay) {
             overlay.addEventListener('click', function (e) {
@@ -178,17 +117,18 @@
         }
     }
 
+    // 3. LẮNG NGHE SỰ KIỆN ĐỂ BẮT ĐẦU LOAD TRANG
     function setupNavigationListeners() {
         document.addEventListener('click', function (e) {
             const link = e.target.closest('a');
             if (!link) return;
 
-            // Bỏ qua nếu có phím bổ trợ (Ctrl/Cmd click mở tab mới)
+            // Bỏ qua nếu có phím bổ trợ (mở tab mới Ctrl/Cmd click)
             if (e.defaultPrevented || e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) {
                 return;
             }
 
-            // Bỏ qua link mở tab mới hoặc tải file
+            // Bỏ qua link target blank hoặc download
             if (link.target === '_blank' || link.hasAttribute('download')) {
                 return;
             }
@@ -204,7 +144,7 @@
                 return;
             }
 
-            // Bỏ qua liên kết ra trang web ngoài
+            // Bỏ qua liên kết ra ngoài website
             if (link.origin && link.origin !== window.location.origin) {
                 return;
             }
@@ -216,35 +156,28 @@
                 return;
             }
 
-            // Bỏ qua nếu nhấn lại chính link hiện tại
+            // Bỏ qua nếu bấm chính trang hiện tại
             if (link.href === window.location.href) {
                 return;
             }
 
-            // Đánh dấu chuyển trang trong session để trang kế tiếp đón nhận mượt mà
-            try {
-                sessionStorage.setItem('b4l_navigating', '1');
-            } catch (err) {}
-
-            showOverlay(30);
+            // Bắt đầu hiệu ứng trên trang hiện tại trong lúc đợi trang mới nạp
+            startLoadingEffect();
         });
 
+        // Bắt sự kiện submit form (tìm kiếm, chuyển trang)
         document.addEventListener('submit', function (e) {
             const form = e.target;
             if (!form || form.target === '_blank') return;
-            try {
-                sessionStorage.setItem('b4l_navigating', '1');
-            } catch (err) {}
-            showOverlay(30);
+            startLoadingEffect();
         });
     }
 
-    handlePageLifecycle();
+    handlePageLoaded();
     setupNavigationListeners();
 
     window.B4LLoader = {
-        show: showOverlay,
-        finish: finishTransition,
+        start: startLoadingEffect,
         hide: forceHide
     };
 })();

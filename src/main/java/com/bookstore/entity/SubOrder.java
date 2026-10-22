@@ -2,6 +2,8 @@ package com.bookstore.entity;
 
 import jakarta.persistence.*;
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 
 @Entity
@@ -14,125 +16,192 @@ public class SubOrder {
     @Column(unique = true)
     private String subOrderCode;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "master_order_id")
     private MasterOrder masterOrder;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "branch_id")
     private Branch branch;
 
     private BigDecimal branchSubtotal;
     private BigDecimal branchShippingFee;
     private String trackingNumber;
-    private String status = "PENDING";
+    private String status = "PENDING"; // PENDING, CONFIRMED, PACKING, SHIPPED, COMPLETED, CANCELLED
+
+    @Column(name = "cancel_reason", length = 500)
+    private String cancelReason;
+
+    @Column(name = "confirmed_at")
+    private LocalDateTime confirmedAt;
+
+    @Column(name = "shipped_at")
+    private LocalDateTime shippedAt;
+
+    @Column(name = "completed_at")
+    private LocalDateTime completedAt;
+
+    @Column(name = "cancelled_at")
+    private LocalDateTime cancelledAt;
 
     @Column(name = "created_at")
-    private java.time.LocalDateTime createdAt;
+    private LocalDateTime createdAt;
 
     @Column(name = "updated_at")
-    private java.time.LocalDateTime updatedAt;
+    private LocalDateTime updatedAt;
 
     @OneToMany(mappedBy = "subOrder", cascade = CascadeType.ALL)
-    private List<SubOrderItem> items;
+    private List<SubOrderItem> items = new ArrayList<>();
+
+    @OneToMany(mappedBy = "subOrder", cascade = CascadeType.ALL)
+    @OrderBy("createdAt ASC")
+    private List<OrderStatusHistory> statusHistories = new ArrayList<>();
 
     @PrePersist
     protected void onCreate() {
         if (createdAt == null) {
-            createdAt = java.time.LocalDateTime.now();
+            createdAt = LocalDateTime.now();
         }
     }
 
     @PreUpdate
     protected void onUpdate() {
-        updatedAt = java.time.LocalDateTime.now();
+        updatedAt = LocalDateTime.now();
     }
 
-	public Long getId() {
-		return id;
-	}
+    public Long getId() {
+        return id;
+    }
 
-	public void setId(Long id) {
-		this.id = id;
-	}
+    public void setId(Long id) {
+        this.id = id;
+    }
 
-	public String getSubOrderCode() {
-		return subOrderCode;
-	}
+    public String getSubOrderCode() {
+        return subOrderCode;
+    }
 
-	public void setSubOrderCode(String subOrderCode) {
-		this.subOrderCode = subOrderCode;
-	}
+    public void setSubOrderCode(String subOrderCode) {
+        this.subOrderCode = subOrderCode;
+    }
 
-	public MasterOrder getMasterOrder() {
-		return masterOrder;
-	}
+    public MasterOrder getMasterOrder() {
+        return masterOrder;
+    }
 
-	public void setMasterOrder(MasterOrder masterOrder) {
-		this.masterOrder = masterOrder;
-	}
+    public void setMasterOrder(MasterOrder masterOrder) {
+        this.masterOrder = masterOrder;
+    }
 
-	public Branch getBranch() {
-		return branch;
-	}
+    public Branch getBranch() {
+        return branch;
+    }
 
-	public void setBranch(Branch branch) {
-		this.branch = branch;
-	}
+    public void setBranch(Branch branch) {
+        this.branch = branch;
+    }
 
-	public BigDecimal getBranchSubtotal() {
-		return branchSubtotal;
-	}
+    public BigDecimal getBranchSubtotal() {
+        return branchSubtotal;
+    }
 
-	public void setBranchSubtotal(BigDecimal branchSubtotal) {
-		this.branchSubtotal = branchSubtotal;
-	}
+    public void setBranchSubtotal(BigDecimal branchSubtotal) {
+        this.branchSubtotal = branchSubtotal;
+    }
 
-	public BigDecimal getBranchShippingFee() {
-		return branchShippingFee;
-	}
+    public BigDecimal getBranchShippingFee() {
+        return branchShippingFee;
+    }
 
-	public void setBranchShippingFee(BigDecimal branchShippingFee) {
-		this.branchShippingFee = branchShippingFee;
-	}
+    public void setBranchShippingFee(BigDecimal branchShippingFee) {
+        this.branchShippingFee = branchShippingFee;
+    }
 
-	public String getTrackingNumber() {
-		return trackingNumber;
-	}
+    public String getTrackingNumber() {
+        return trackingNumber;
+    }
 
-	public void setTrackingNumber(String trackingNumber) {
-		this.trackingNumber = trackingNumber;
-	}
+    public void setTrackingNumber(String trackingNumber) {
+        this.trackingNumber = trackingNumber;
+    }
 
-	public String getStatus() {
-		return status;
-	}
+    public String getStatus() {
+        return status;
+    }
 
-	public void setStatus(String status) {
-		this.status = status;
-	}
+    public void setStatus(String status) {
+        this.status = status;
+    }
 
-	public List<SubOrderItem> getItems() {
-		return items;
-	}
+    public String getCancelReason() {
+        return cancelReason;
+    }
 
-	public void setItems(List<SubOrderItem> items) {
-		this.items = items;
-	}
+    public void setCancelReason(String cancelReason) {
+        this.cancelReason = cancelReason;
+    }
 
-	public java.time.LocalDateTime getCreatedAt() {
-		return createdAt;
-	}
+    public LocalDateTime getConfirmedAt() {
+        return confirmedAt;
+    }
 
-	public void setCreatedAt(java.time.LocalDateTime createdAt) {
-		this.createdAt = createdAt;
-	}
+    public void setConfirmedAt(LocalDateTime confirmedAt) {
+        this.confirmedAt = confirmedAt;
+    }
 
-	public java.time.LocalDateTime getUpdatedAt() {
-		return updatedAt;
-	}
+    public LocalDateTime getShippedAt() {
+        return shippedAt;
+    }
 
-	public void setUpdatedAt(java.time.LocalDateTime updatedAt) {
-		this.updatedAt = updatedAt;
-	}
+    public void setShippedAt(LocalDateTime shippedAt) {
+        this.shippedAt = shippedAt;
+    }
+
+    public LocalDateTime getCompletedAt() {
+        return completedAt;
+    }
+
+    public void setCompletedAt(LocalDateTime completedAt) {
+        this.completedAt = completedAt;
+    }
+
+    public LocalDateTime getCancelledAt() {
+        return cancelledAt;
+    }
+
+    public void setCancelledAt(LocalDateTime cancelledAt) {
+        this.cancelledAt = cancelledAt;
+    }
+
+    public List<SubOrderItem> getItems() {
+        return items;
+    }
+
+    public void setItems(List<SubOrderItem> items) {
+        this.items = items;
+    }
+
+    public List<OrderStatusHistory> getStatusHistories() {
+        return statusHistories;
+    }
+
+    public void setStatusHistories(List<OrderStatusHistory> statusHistories) {
+        this.statusHistories = statusHistories;
+    }
+
+    public LocalDateTime getCreatedAt() {
+        return createdAt;
+    }
+
+    public void setCreatedAt(LocalDateTime createdAt) {
+        this.createdAt = createdAt;
+    }
+
+    public LocalDateTime getUpdatedAt() {
+        return updatedAt;
+    }
+
+    public void setUpdatedAt(LocalDateTime updatedAt) {
+        this.updatedAt = updatedAt;
+    }
 }

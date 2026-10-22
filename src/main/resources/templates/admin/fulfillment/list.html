@@ -17,7 +17,7 @@
                 </div>
                 <div class="stat-info">
                     <h3 th:text="${stats.pendingCount}">0</h3>
-                    <p>Chờ Xử Lý</p>
+                    <p>Chờ Tiếp Nhận</p>
                 </div>
             </div>
         </div>
@@ -39,7 +39,7 @@
                 </div>
                 <div class="stat-info">
                     <h3 th:text="${stats.shippedCount}">0</h3>
-                    <p>Đã Giao Vận</p>
+                    <p>Đang Giao Vận</p>
                 </div>
             </div>
         </div>
@@ -61,7 +61,7 @@
                 </div>
                 <div class="stat-info">
                     <h3 th:text="${stats.cancelledCount}">0</h3>
-                    <p>Đã Hủy</p>
+                    <p>Đã Hủy Đơn</p>
                 </div>
             </div>
         </div>
@@ -72,7 +72,7 @@
                 </div>
                 <div class="stat-info">
                     <h3 th:text="${stats.totalCount}">0</h3>
-                    <p>Tổng Đơn</p>
+                    <p>Tổng Đơn Hàng</p>
                 </div>
             </div>
         </div>
@@ -81,17 +81,20 @@
     <!-- Filter + Main Table -->
     <div class="content-card">
         <div class="content-card-header">
-            <div class="d-flex align-items-center gap-2">
+            <div class="d-flex align-items-center justify-content-between w-100 flex-wrap gap-2">
                 <h5 class="fw-bold mb-0 text-dark">
-                    <i class="fas fa-truck-ramp-box text-primary me-2"></i> Danh Sách Đơn Hàng Chi Nhánh
+                    <i class="fas fa-truck-ramp-box text-primary me-2"></i> Danh Sách Đơn Hàng Phân Bổ Chi Nhánh
                 </h5>
+                <a th:href="@{/admin/orders/monitoring}" class="btn btn-sm btn-outline-danger">
+                    <i class="fas fa-chart-line me-1"></i> Xem Dashboard Giám Sát Toàn Chuỗi
+                </a>
             </div>
         </div>
 
-        <!-- Filter Form -->
+        <!-- Filter Form: Date range, Status, Keyword, Branch -->
         <div class="p-3 border-bottom bg-light">
-            <form th:action="@{/admin/fulfillment}" method="get" class="row g-2 align-items-center">
-                <div class="col-md-4">
+            <form th:action="@{/admin/fulfillment}" method="get" class="row g-2 align-items-end">
+                <div class="col-md-3">
                     <label class="form-label small fw-semibold text-muted mb-1">Chi Nhánh</label>
                     <select name="branchId" id="branchId" class="form-select form-select-sm" onchange="this.form.submit()">
                         <option value="">-- Chọn chi nhánh --</option>
@@ -102,16 +105,34 @@
                         </option>
                     </select>
                 </div>
-                <div class="col-md-3">
+                <div class="col-md-2">
                     <label class="form-label small fw-semibold text-muted mb-1">Trạng Thái</label>
-                    <select name="status" class="form-select form-select-sm" onchange="this.form.submit()">
+                    <select name="status" class="form-select form-select-sm">
                         <option value="ALL" th:selected="${selectedStatus == 'ALL'}">Tất cả trạng thái</option>
                         <option value="PENDING" th:selected="${selectedStatus == 'PENDING'}">⏳ Chờ xử lý (PENDING)</option>
+                        <option value="CONFIRMED" th:selected="${selectedStatus == 'CONFIRMED'}">📋 Đã xác nhận (CONFIRMED)</option>
                         <option value="PACKING" th:selected="${selectedStatus == 'PACKING'}">📦 Đang đóng gói (PACKING)</option>
-                        <option value="SHIPPED" th:selected="${selectedStatus == 'SHIPPED'}">🚚 Đã giao vận (SHIPPED)</option>
+                        <option value="SHIPPED" th:selected="${selectedStatus == 'SHIPPED'}">🚚 Đang giao hàng (SHIPPED)</option>
                         <option value="COMPLETED" th:selected="${selectedStatus == 'COMPLETED'}">✅ Hoàn thành (COMPLETED)</option>
                         <option value="CANCELLED" th:selected="${selectedStatus == 'CANCELLED'}">❌ Đã hủy (CANCELLED)</option>
                     </select>
+                </div>
+                <div class="col-md-2">
+                    <label class="form-label small fw-semibold text-muted mb-1">Từ Ngày</label>
+                    <input type="date" name="fromDate" class="form-control form-control-sm" th:value="${fromDate}">
+                </div>
+                <div class="col-md-2">
+                    <label class="form-label small fw-semibold text-muted mb-1">Đến Ngày</label>
+                    <input type="date" name="toDate" class="form-control form-control-sm" th:value="${toDate}">
+                </div>
+                <div class="col-md-2">
+                    <label class="form-label small fw-semibold text-muted mb-1">Tìm Kiếm</label>
+                    <input type="text" name="keyword" class="form-control form-control-sm" placeholder="Mã đơn, Tên, SĐT..." th:value="${keyword}">
+                </div>
+                <div class="col-md-1">
+                    <button type="submit" class="btn btn-sm btn-primary w-100">
+                        <i class="fas fa-filter"></i> Lọc
+                    </button>
                 </div>
             </form>
         </div>
@@ -134,8 +155,8 @@
                 <thead class="table-light">
                     <tr>
                         <th>Mã Đơn Con</th>
-                        <th>Khách Hàng</th>
-                        <th>Số Mặt Hàng</th>
+                        <th>Khách Hàng / SĐT</th>
+                        <th>Số Sách</th>
                         <th>Tổng Tiền</th>
                         <th>Mã Vận Đơn</th>
                         <th>Trạng Thái</th>
@@ -146,30 +167,33 @@
                 <tbody>
                     <tr th:each="order : ${orders}">
                         <td>
-                            <span class="fw-semibold text-primary" th:text="${order.subOrderCode}">SUB-Q1-001</span>
+                            <span class="fw-bold font-monospace text-primary" th:text="${order.subOrderCode}">SUB-Q1-001</span>
+                            <div th:if="${order.masterOrderCode}" class="small text-muted font-monospace">Đơn mẹ: <span th:text="${order.masterOrderCode}">MO-001</span></div>
                         </td>
                         <td>
-                            <div th:text="${order.customerName}">Nguyễn Văn A</div>
-                            <small class="text-muted" th:text="${order.customerPhone}">0900000001</small>
+                            <div class="fw-semibold" th:text="${order.customerName} ?: 'Khách hàng'">Nguyễn Văn A</div>
+                            <small class="text-muted font-monospace" th:text="${order.customerPhone} ?: 'N/A'">0900000001</small>
                         </td>
                         <td>
                             <span class="badge bg-secondary-subtle text-secondary border"
-                                  th:text="${order.items != null ? #lists.size(order.items) : 0} + ' sách'">0 sách</span>
+                                  th:text="${order.items != null ? #lists.size(order.items) : 0} + ' cuốn'">0 cuốn</span>
                         </td>
                         <td>
-                            <span class="fw-semibold text-success"
-                                  th:text="${#numbers.formatDecimal(order.totalAmount, 0, 'COMMA', 0, 'POINT')} + 'đ'">0đ</span>
+                            <span class="fw-bold text-success"
+                                  th:text="${#numbers.formatDecimal(order.totalAmount, 0, 'COMMA', 0, 'POINT')} + ' đ'">0 đ</span>
                         </td>
                         <td>
-                            <code th:text="${order.trackingNumber != null ? order.trackingNumber : '—'}">—</code>
+                            <span th:if="${order.trackingNumber}" class="badge bg-light text-dark font-monospace border" th:text="${order.trackingNumber}">VNPOST-001</span>
+                            <span th:unless="${order.trackingNumber}" class="text-muted small">—</span>
                         </td>
                         <td>
                             <span th:switch="${order.status}">
-                                <span th:case="'PENDING'" class="badge bg-warning text-dark">⏳ Chờ xử lý</span>
-                                <span th:case="'PACKING'" class="badge bg-info text-white">📦 Đóng gói</span>
-                                <span th:case="'SHIPPED'" class="badge bg-primary text-white">🚚 Giao vận</span>
-                                <span th:case="'COMPLETED'" class="badge bg-success text-white">✅ Hoàn thành</span>
-                                <span th:case="'CANCELLED'" class="badge bg-danger text-white">❌ Đã hủy</span>
+                                <span th:case="'PENDING'" class="badge bg-warning text-dark"><i class="fas fa-clock me-1"></i>Chờ xác nhận</span>
+                                <span th:case="'CONFIRMED'" class="badge bg-primary text-white"><i class="fas fa-clipboard-check me-1"></i>Đã xác nhận</span>
+                                <span th:case="'PACKING'" class="badge bg-info text-dark"><i class="fas fa-boxes-packing me-1"></i>Đang đóng gói</span>
+                                <span th:case="'SHIPPED'" class="badge bg-primary text-white"><i class="fas fa-truck-fast me-1"></i>Đang giao hàng</span>
+                                <span th:case="'COMPLETED'" class="badge bg-success text-white"><i class="fas fa-circle-check me-1"></i>Hoàn thành</span>
+                                <span th:case="'CANCELLED'" class="badge bg-danger text-white"><i class="fas fa-ban me-1"></i>Đã hủy</span>
                                 <span th:case="*" class="badge bg-secondary" th:text="${order.status}">N/A</span>
                             </span>
                         </td>
@@ -178,62 +202,22 @@
                                    th:text="${#temporals.format(order.createdAt, 'dd/MM/yyyy HH:mm')}">01/01/2026</small>
                         </td>
                         <td class="text-center">
-                            <a th:href="@{/admin/fulfillment/orders/{id}(id=${order.id})}"
-                               class="btn btn-sm btn-outline-primary" title="Xem chi tiết & Xử lý">
-                                <i class="fas fa-eye me-1"></i> Xử Lý
-                            </a>
+                            <div class="btn-group btn-group-sm">
+                                <a th:href="@{/admin/fulfillment/orders/{id}(id=${order.id})}"
+                                   class="btn btn-outline-primary" title="Xem chi tiết & Soạn sách">
+                                    <i class="fas fa-boxes-stacked me-1"></i> Soạn Sách
+                                </a>
+                                <a th:href="@{/orders/{id}/timeline(id=${order.id})}" target="_blank"
+                                   class="btn btn-outline-secondary" title="Xem Timeline Tiến Trình">
+                                    <i class="fas fa-route"></i>
+                                </a>
+                            </div>
                         </td>
                     </tr>
                 </tbody>
             </table>
         </div>
     </div>
-
-    <!-- Hủy đơn Modal (FR-FUL-04) -->
-    <div class="modal fade" id="cancelOrderModal" tabindex="-1" aria-hidden="true">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title text-danger"><i class="fas fa-ban me-2"></i>Hủy Đơn Hàng & Hoàn Kho</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-                </div>
-                <div class="modal-body">
-                    <p class="text-muted">Đơn hàng sẽ bị hủy và tồn kho sẽ được hoàn trả tự động. Hành động này không thể hoàn tác!</p>
-                    <div class="mb-3">
-                        <label class="form-label fw-semibold">Lý Do Hủy Đơn</label>
-                        <textarea id="cancelReason" class="form-control" rows="3"
-                                  placeholder="VD: Khách hàng đổi ý / Sách bị hư hỏng khi đóng gói..."></textarea>
-                    </div>
-                    <input type="hidden" id="cancelOrderId">
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Đóng</button>
-                    <button type="button" class="btn btn-danger" id="confirmCancelBtn">
-                        <i class="fas fa-trash me-1"></i> Xác Nhận Hủy & Hoàn Kho
-                    </button>
-                </div>
-            </div>
-        </div>
-    </div>
 </section>
-
-<script th:inline="javascript">
-    function openCancelModal(orderId) {
-        document.getElementById('cancelOrderId').value = orderId;
-        new bootstrap.Modal(document.getElementById('cancelOrderModal')).show();
-    }
-
-    document.getElementById('confirmCancelBtn').addEventListener('click', function() {
-        const orderId = document.getElementById('cancelOrderId').value;
-        const reason = document.getElementById('cancelReason').value.trim() || 'Khách hàng yêu cầu hủy đơn';
-
-        fetch(`/api/fulfillment/orders/${orderId}/cancel?reason=${encodeURIComponent(reason)}`, {
-            method: 'POST', headers: {'Content-Type': 'application/json'}
-        })
-        .then(r => r.text())
-        .then(msg => { alert(msg); window.location.reload(); })
-        .catch(err => alert('Lỗi: ' + err.message));
-    });
-</script>
 </body>
 </html>

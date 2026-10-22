@@ -1,0 +1,355 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
+      th:replace="~{layout/admin-layout :: html(
+        pageTitle='Báo Cáo Thống Kê & Phân Tích Chuỗi (Analytics)',
+        pageSubtitle='Dashboard chỉ số tài chính, doanh thu chi nhánh, phân bổ chất lượng sách cũ và chi phí thu mua Trade-in',
+        content=~{::section}
+      )}">
+<body>
+<section>
+    <!-- Chart.js CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+
+    <style>
+        .kpi-card {
+            border-radius: 14px;
+            border: 1px solid rgba(0, 0, 0, 0.05);
+            background: #ffffff;
+            transition: all 0.25s ease;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.03);
+        }
+        .kpi-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.07);
+        }
+        .kpi-icon-box {
+            width: 52px;
+            height: 52px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.4rem;
+        }
+        .chart-card {
+            border-radius: 14px;
+            border: 1px solid rgba(0, 0, 0, 0.05);
+            background: #ffffff;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.03);
+        }
+    </style>
+
+    <!-- Header bar bộ lọc chi nhánh -->
+    <div class="card border-0 shadow-sm p-3 mb-4">
+        <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
+            <div class="d-flex align-items-center gap-2">
+                <i class="fas fa-chart-pie fs-4 text-primary"></i>
+                <div>
+                    <h5 class="fw-bold mb-0 text-dark">Báo Cáo Thống Kê Hoạt Động & Doanh Thu</h5>
+                    <small class="text-muted">Cập nhật dữ liệu thời gian thực từ cơ sở dữ liệu chuỗi Book4Life</small>
+                </div>
+            </div>
+
+            <!-- Bộ lọc phạm vi chi nhánh -->
+            <div class="d-flex align-items-center gap-2">
+                <div th:if="${isAdmin}" class="d-flex align-items-center gap-2">
+                    <span class="small fw-bold text-muted">Phạm vi xem:</span>
+                    <form th:action="@{/admin/analytics}" method="get" class="d-inline">
+                        <select name="branchId" class="form-select form-select-sm fw-bold border-primary shadow-sm" onchange="this.form.submit()">
+                            <option value="" th:selected="${effectiveBranchId == null}">🌐 Toàn Bộ Hệ Thống (Chuỗi)</option>
+                            <option th:each="br : ${branches}"
+                                    th:value="${br.id}"
+                                    th:text="${br.branchName}"
+                                    th:selected="${effectiveBranchId != null and effectiveBranchId == br.id}">
+                                Chi nhánh Quận 1
+                            </option>
+                        </select>
+                    </form>
+                </div>
+                <div th:if="${!isAdmin}">
+                    <span class="badge bg-info bg-opacity-10 text-info border border-info px-3 py-2 fs-6">
+                        <i class="fas fa-store me-1"></i>
+                        <span th:text="${currentBranch != null ? currentBranch.branchName : 'Chi nhánh trực thuộc'}"></span>
+                    </span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 4 KPI Cards -->
+    <div class="row g-3 mb-4">
+        <!-- Doanh thu bán hàng -->
+        <div class="col-sm-6 col-xl-3">
+            <div class="kpi-card p-3">
+                <div class="d-flex align-items-center justify-content-between">
+                    <div>
+                        <div class="text-muted small fw-semibold text-uppercase mb-1">Doanh Thu Bán Hàng</div>
+                        <h4 class="fw-bolder text-success mb-0"
+                            th:text="${#numbers.formatDecimal(totalRevenue, 0, 'COMMA', 0, 'POINT') + ' ₫'}">
+                            0 ₫
+                        </h4>
+                    </div>
+                    <div class="kpi-icon-box bg-success bg-opacity-10 text-success">
+                        <i class="fas fa-wallet"></i>
+                    </div>
+                </div>
+                <div class="small text-muted mt-2 border-top pt-2">
+                    <i class="fas fa-circle-check text-success me-1"></i> Tính từ các đơn đã giao & hoàn tất
+                </div>
+            </div>
+        </div>
+
+        <!-- Đơn hàng hoàn tất -->
+        <div class="col-sm-6 col-xl-3">
+            <div class="kpi-card p-3">
+                <div class="d-flex align-items-center justify-content-between">
+                    <div>
+                        <div class="text-muted small fw-semibold text-uppercase mb-1">Đơn Hàng Hoàn Tất</div>
+                        <h4 class="fw-bolder text-primary mb-0" th:text="${completedOrders + ' đơn'}">
+                            0 đơn
+                        </h4>
+                    </div>
+                    <div class="kpi-icon-box bg-primary bg-opacity-10 text-primary">
+                        <i class="fas fa-bag-shopping"></i>
+                    </div>
+                </div>
+                <div class="small text-muted mt-2 border-top pt-2">
+                    <i class="fas fa-truck-fast text-primary me-1"></i> Đơn online và bán tại quầy POS
+                </div>
+            </div>
+        </div>
+
+        <!-- Tồn kho sách cũ -->
+        <div class="col-sm-6 col-xl-3">
+            <div class="kpi-card p-3">
+                <div class="d-flex align-items-center justify-content-between">
+                    <div>
+                        <div class="text-muted small fw-semibold text-uppercase mb-1">Sách Sẵn Sàng Bán</div>
+                        <h4 class="fw-bolder text-dark mb-0" th:text="${totalInventory + ' cuốn'}">
+                            0 cuốn
+                        </h4>
+                    </div>
+                    <div class="kpi-icon-box bg-warning bg-opacity-10 text-warning">
+                        <i class="fas fa-boxes-stacked"></i>
+                    </div>
+                </div>
+                <div class="small text-muted mt-2 border-top pt-2">
+                    <i class="fas fa-warehouse text-warning me-1"></i> Trạng thái AVAILABLE trên kệ
+                </div>
+            </div>
+        </div>
+
+        <!-- Chi phí thu mua Trade-in -->
+        <div class="col-sm-6 col-xl-3">
+            <div class="kpi-card p-3">
+                <div class="d-flex align-items-center justify-content-between">
+                    <div>
+                        <div class="text-muted small fw-semibold text-uppercase mb-1">Chi Phí Thu Mua Sách</div>
+                        <h4 class="fw-bolder text-danger mb-0"
+                            th:text="${#numbers.formatDecimal(tradeInSpending, 0, 'COMMA', 0, 'POINT') + ' ₫'}">
+                            0 ₫
+                        </h4>
+                    </div>
+                    <div class="kpi-icon-box bg-danger bg-opacity-10 text-danger">
+                        <i class="fas fa-hand-holding-dollar"></i>
+                    </div>
+                </div>
+                <div class="small text-muted mt-2 border-top pt-2">
+                    <i class="fas fa-recycle text-danger me-1"></i> Hồ sơ Trade-in đã duyệt & nhập kho
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- KHỐI BIỂU ĐỒ CHART.JS -->
+    <div class="row g-3 mb-4">
+        <!-- Biểu đồ 1: Cơ cấu tồn kho theo độ cũ sách -->
+        <div class="col-lg-5">
+            <div class="chart-card p-4 h-100">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <h6 class="fw-bold mb-0 text-dark">
+                        <i class="fas fa-chart-pie text-primary me-2"></i> Phân Bổ Tồn Kho Theo Độ Cũ (Grade)
+                    </h6>
+                    <span class="badge bg-secondary">FR-INV-02</span>
+                </div>
+                <div style="height: 280px; position: relative;">
+                    <canvas id="gradeDoughnutChart"></canvas>
+                </div>
+                <div class="row g-2 text-center mt-3 pt-2 border-top">
+                    <div class="col-3">
+                        <small class="text-muted d-block">Like New</small>
+                        <strong class="text-success" th:text="${countLikeNew}">0</strong>
+                    </div>
+                    <div class="col-3">
+                        <small class="text-muted d-block">Rất Tốt</small>
+                        <strong class="text-primary" th:text="${countVeryGood}">0</strong>
+                    </div>
+                    <div class="col-3">
+                        <small class="text-muted d-block">Tốt</small>
+                        <strong class="text-warning" th:text="${countGood}">0</strong>
+                    </div>
+                    <div class="col-3">
+                        <small class="text-muted d-block">Chấp Nhận</small>
+                        <strong class="text-secondary" th:text="${countAcceptable}">0</strong>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Biểu đồ 2: Cân đối Doanh thu vs Chi phí Thu mua Trade-in -->
+        <div class="col-lg-7">
+            <div class="chart-card p-4 h-100">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <h6 class="fw-bold mb-0 text-dark">
+                        <i class="fas fa-scale-balanced text-success me-2"></i> Cân Đối Tài Chính: Doanh Thu & Chi Phí Thu Mua
+                    </h6>
+                    <span class="badge bg-success bg-opacity-10 text-success">Hiệu Quả Kinh Doanh</span>
+                </div>
+                <div style="height: 280px; position: relative;">
+                    <canvas id="financeBarChart"></canvas>
+                </div>
+                <div class="d-flex justify-content-between align-items-center mt-3 pt-2 border-top small text-muted">
+                    <span>Lợi nhuận gộp ước tính (Doanh thu - Chi phí mua):</span>
+                    <strong class="text-primary fs-6"
+                            th:text="${#numbers.formatDecimal(totalRevenue.subtract(tradeInSpending), 0, 'COMMA', 0, 'POINT') + ' ₫'}">
+                        0 ₫
+                    </strong>
+                </div>
+            </div>
+        </div>
+
+        <!-- Biểu đồ 3: So sánh Doanh thu giữa các Chi nhánh (Dành cho Admin khi xem Toàn chuỗi) -->
+        <div th:if="${isAdmin and effectiveBranchId == null}" class="col-12">
+            <div class="chart-card p-4">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <h6 class="fw-bold mb-0 text-dark">
+                        <i class="fas fa-store text-info me-2"></i> So Sánh Doanh Thu Giữa Các Chi Nhánh Trong Chuỗi
+                    </h6>
+                    <span class="badge bg-primary">Phạm Vi Toàn Chuỗi</span>
+                </div>
+                <div style="height: 300px; position: relative;">
+                    <canvas id="branchComparisonChart"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- KHỞI TẠO BIỂU ĐỒ BẰNG JAVASCRIPT -->
+    <script th:inline="javascript">
+        /*<![CDATA[*/
+        const countLikeNew = /*[[${countLikeNew}]]*/ 0;
+        const countVeryGood = /*[[${countVeryGood}]]*/ 0;
+        const countGood = /*[[${countGood}]]*/ 0;
+        const countAcceptable = /*[[${countAcceptable}]]*/ 0;
+
+        const totalRevenueVal = /*[[${totalRevenue}]]*/ 0;
+        const tradeInSpendingVal = /*[[${tradeInSpending}]]*/ 0;
+
+        const branchNames = /*[[${branchNames}]]*/ [];
+        const branchRevenues = /*[[${branchRevenues}]]*/ [];
+        /*]]>*/
+
+        document.addEventListener('DOMContentLoaded', () => {
+            // 1. Biểu đồ tròn Grade Donut
+            const ctxGrade = document.getElementById('gradeDoughnutChart');
+            if (ctxGrade) {
+                new Chart(ctxGrade, {
+                    type: 'doughnut',
+                    data: {
+                        labels: ['Như mới (Like New)', 'Rất tốt (Very Good)', 'Tốt (Good)', 'Chấp nhận được'],
+                        datasets: [{
+                            data: [countLikeNew, countVeryGood, countGood, countAcceptable],
+                            backgroundColor: ['#28a745', '#17a2b8', '#ffc107', '#6c757d'],
+                            borderWidth: 2,
+                            borderColor: '#ffffff'
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: {
+                                position: 'bottom',
+                                labels: { boxWidth: 12, font: { size: 11 } }
+                            }
+                        },
+                        cutout: '65%'
+                    }
+                });
+            }
+
+            // 2. Biểu đồ Cân đối Tài chính Bar Chart
+            const ctxFinance = document.getElementById('financeBarChart');
+            if (ctxFinance) {
+                new Chart(ctxFinance, {
+                    type: 'bar',
+                    data: {
+                        labels: ['Doanh Thu Bán Hàng', 'Chi Phí Thu Mua Sách (Trade-in)'],
+                        datasets: [{
+                            label: 'Số tiền (VNĐ)',
+                            data: [totalRevenueVal, tradeInSpendingVal],
+                            backgroundColor: ['rgba(40, 167, 69, 0.75)', 'rgba(220, 53, 69, 0.75)'],
+                            borderColor: ['#28a745', '#dc3545'],
+                            borderWidth: 1.5,
+                            borderRadius: 8
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: { display: false }
+                        },
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                                ticks: {
+                                    callback: function(val) {
+                                        return new Intl.NumberFormat('vi-VN').format(val) + ' ₫';
+                                    }
+                                }
+                            }
+                        }
+                    }
+                });
+            }
+
+            // 3. Biểu đồ So sánh Chi nhánh (Dành cho Admin)
+            const ctxBranch = document.getElementById('branchComparisonChart');
+            if (ctxBranch && branchNames && branchNames.length > 0) {
+                new Chart(ctxBranch, {
+                    type: 'bar',
+                    data: {
+                        labels: branchNames,
+                        datasets: [{
+                            label: 'Doanh Thu (VNĐ)',
+                            data: branchRevenues,
+                            backgroundColor: 'rgba(13, 110, 253, 0.7)',
+                            borderColor: '#0d6efd',
+                            borderWidth: 1.5,
+                            borderRadius: 6
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                                ticks: {
+                                    callback: function(val) {
+                                        return new Intl.NumberFormat('vi-VN').format(val) + ' ₫';
+                                    }
+                                }
+                            }
+                        }
+                    }
+                });
+            }
+        });
+    </script>
+</section>
+</body>
+</html>
+

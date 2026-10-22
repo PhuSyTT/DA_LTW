@@ -189,7 +189,12 @@ CREATE TABLE sub_orders (
     branch_subtotal DECIMAL(12,2) NOT NULL,
     branch_shipping_fee DECIMAL(12,2) NOT NULL DEFAULT 0,
     tracking_number VARCHAR(100) NULL,
-    status VARCHAR(30) NOT NULL DEFAULT 'PENDING', -- PENDING, PACKING, SHIPPED, COMPLETED, CANCELLED
+    status VARCHAR(30) NOT NULL DEFAULT 'PENDING', -- PENDING, CONFIRMED, PACKING, SHIPPED, COMPLETED, CANCELLED
+    cancel_reason NVARCHAR(500) NULL,
+    confirmed_at DATETIME NULL,
+    shipped_at DATETIME NULL,
+    completed_at DATETIME NULL,
+    cancelled_at DATETIME NULL,
     created_at DATETIME NOT NULL DEFAULT GETDATE(),
     updated_at DATETIME NULL,
     CONSTRAINT fk_sub_orders_master FOREIGN KEY (master_order_id) REFERENCES master_orders(id),
@@ -207,6 +212,27 @@ CREATE TABLE sub_order_items (
     subtotal DECIMAL(12,2) NOT NULL,
     CONSTRAINT fk_sub_order_items_sub FOREIGN KEY (sub_order_id) REFERENCES sub_orders(id),
     CONSTRAINT fk_sub_order_items_item FOREIGN KEY (book_item_id) REFERENCES book_items(id)
+);
+GO
+
+-- Bảng 13b: order_status_history (Nhật ký theo dõi tiến độ & điều phối đơn hàng)
+CREATE TABLE order_status_history (
+    id BIGINT IDENTITY(1,1) PRIMARY KEY,
+    sub_order_id BIGINT NOT NULL,
+    master_order_id BIGINT NOT NULL,
+    from_status VARCHAR(50) NULL,
+    to_status VARCHAR(50) NOT NULL,
+    note NVARCHAR(500) NULL,
+    updated_by_user_id BIGINT NULL,
+    from_branch_id BIGINT NULL,
+    to_branch_id BIGINT NULL,
+    action_type VARCHAR(50) NOT NULL, -- STATUS_CHANGE, BRANCH_REASSIGN, ORDER_CANCELLED
+    created_at DATETIME DEFAULT GETDATE(),
+    CONSTRAINT fk_osh_sub_order FOREIGN KEY (sub_order_id) REFERENCES sub_orders(id),
+    CONSTRAINT fk_osh_master_order FOREIGN KEY (master_order_id) REFERENCES master_orders(id),
+    CONSTRAINT fk_osh_user FOREIGN KEY (updated_by_user_id) REFERENCES users(id),
+    CONSTRAINT fk_osh_from_branch FOREIGN KEY (from_branch_id) REFERENCES branches(id),
+    CONSTRAINT fk_osh_to_branch FOREIGN KEY (to_branch_id) REFERENCES branches(id)
 );
 GO
 
@@ -315,6 +341,18 @@ CREATE TABLE chat_messages (
     CONSTRAINT fk_chat_sender FOREIGN KEY (sender_id) REFERENCES users(id),
     CONSTRAINT fk_chat_receiver FOREIGN KEY (receiver_id) REFERENCES users(id),
     CONSTRAINT fk_chat_branch FOREIGN KEY (branch_id) REFERENCES branches(id)
+);
+GO
+
+-- Bảng 20b: ai_chat_messages (Lịch sử hội thoại Trợ lý ảo CSKH AI)
+CREATE TABLE ai_chat_messages (
+    id BIGINT IDENTITY(1,1) PRIMARY KEY,
+    user_id BIGINT NULL,
+    session_id VARCHAR(100) NOT NULL,
+    sender_type VARCHAR(20) NOT NULL, -- 'USER', 'ASSISTANT'
+    content NVARCHAR(MAX) NOT NULL,
+    created_at DATETIME DEFAULT GETDATE(),
+    CONSTRAINT fk_ai_chat_user FOREIGN KEY (user_id) REFERENCES users(id)
 );
 GO
 
@@ -841,3 +879,26 @@ PRINT N'========================================================================
 PRINT N'ĐÃ TẠO DATABASE VÀ CHÈN DỮ LIỆU THÀNH CÔNG CHO BookstoreChainDB!';
 PRINT N'========================================================================';
 GO
+
+-- ============================================================================
+-- B?NG X�C TH?C M� OTP �ANG K� T�I KHO?N QUA EMAIL (5 PH�T H?T H?N)
+-- ============================================================================
+IF NOT EXISTS (SELECT * FROM sys.tables WHERE name = 'otp_verifications')
+BEGIN
+    CREATE TABLE otp_verifications (
+        id BIGINT IDENTITY(1,1) PRIMARY KEY,
+        email NVARCHAR(255) NOT NULL,
+        otp_code VARCHAR(10) NOT NULL,
+        password_hash NVARCHAR(255) NOT NULL,
+        full_name NVARCHAR(255) NULL,
+        phone VARCHAR(20) NULL,
+        attempts INT NOT NULL DEFAULT 0,
+        is_used BIT NOT NULL DEFAULT 0,
+        created_at DATETIME NOT NULL DEFAULT GETDATE(),
+        expires_at DATETIME NOT NULL,
+        cooldown_until DATETIME NOT NULL
+    );
+    CREATE INDEX idx_otp_email ON otp_verifications(email);
+    CREATE INDEX idx_otp_expires ON otp_verifications(expires_at);
+END;
+

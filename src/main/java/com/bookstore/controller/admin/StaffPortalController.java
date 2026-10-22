@@ -31,6 +31,7 @@ import com.bookstore.repository.CouponRepository;
 public class StaffPortalController {
 
     private final OrderFulfillmentService fulfillmentService;
+    private final com.bookstore.service.OrderTrackingService orderTrackingService;
     private final TradeInService tradeInService;
     private final WishlistService wishlistService;
     private final BranchService branchService;
@@ -40,6 +41,7 @@ public class StaffPortalController {
     private final CouponRepository couponRepository;
 
     public StaffPortalController(OrderFulfillmentService fulfillmentService,
+                                 com.bookstore.service.OrderTrackingService orderTrackingService,
                                  TradeInService tradeInService,
                                  WishlistService wishlistService,
                                  BranchService branchService,
@@ -48,6 +50,7 @@ public class StaffPortalController {
                                  TransferService transferService,
                                  CouponRepository couponRepository) {
         this.fulfillmentService = fulfillmentService;
+        this.orderTrackingService = orderTrackingService;
         this.tradeInService = tradeInService;
         this.wishlistService = wishlistService;
         this.branchService = branchService;
@@ -69,15 +72,28 @@ public class StaffPortalController {
     public String fulfillmentList(
             @RequestParam(name = "branchId", required = false) Long branchId,
             @RequestParam(name = "status", required = false) String status,
+            @RequestParam(name = "keyword", required = false) String keyword,
+            @RequestParam(name = "fromDate", required = false) String fromDate,
+            @RequestParam(name = "toDate", required = false) String toDate,
+            @AuthenticationPrincipal CustomUserDetails userDetails,
             Model model) {
         try {
             model.addAttribute("branches", branchService.getAllActiveBranches());
+
+            // Tự động gán chi nhánh nếu là quản lý/nhân viên chi nhánh mà chưa chọn
+            if (branchId == null && userDetails != null && userDetails.getBranchId() != null) {
+                branchId = userDetails.getBranchId();
+            }
+
             model.addAttribute("selectedBranchId", branchId);
             model.addAttribute("selectedStatus", status != null ? status : "ALL");
+            model.addAttribute("keyword", keyword);
+            model.addAttribute("fromDate", fromDate);
+            model.addAttribute("toDate", toDate);
 
             if (branchId != null) {
-                model.addAttribute("orders", fulfillmentService.getOrdersByBranch(branchId, status));
-                model.addAttribute("stats", fulfillmentService.getBranchFulfillmentStats(branchId));
+                model.addAttribute("orders", orderTrackingService.getBranchSubOrders(branchId, status, keyword, fromDate, toDate));
+                model.addAttribute("stats", orderTrackingService.getBranchDailyStats(branchId));
             }
         } catch (Exception ignored) {}
 
@@ -91,9 +107,14 @@ public class StaffPortalController {
      * URL: /admin/fulfillment/orders/{id}
      */
     @GetMapping("/admin/fulfillment/orders/{id}")
-    public String fulfillmentDetail(@PathVariable("id") Long subOrderId, Model model) {
+    public String fulfillmentDetail(
+            @PathVariable("id") Long subOrderId,
+            @AuthenticationPrincipal CustomUserDetails userDetails,
+            Model model) {
         try {
             model.addAttribute("order", fulfillmentService.getSubOrderDetail(subOrderId));
+            Long userId = userDetails != null ? userDetails.getId() : null;
+            model.addAttribute("tracking", orderTrackingService.getSubOrderTimeline(subOrderId, userId, true));
         } catch (Exception e) {
             model.addAttribute("errorMessage", e.getMessage());
         }
@@ -255,8 +276,8 @@ public class StaffPortalController {
      * Trang quản lý mã giảm giá đa điều kiện (FR-CPN-01, FR-CPN-02, FR-CPN-03)
      * URL: /admin/coupons
      */
-    @GetMapping("/admin/coupons")
-    public String couponList(Model model) {
+    // @GetMapping("/admin/coupons") handled by AdminCouponController
+    public String unusedCouponList(Model model) {
         try {
             model.addAttribute("coupons", couponRepository.findAll());
             model.addAttribute("branches", branchService.getAllActiveBranches());

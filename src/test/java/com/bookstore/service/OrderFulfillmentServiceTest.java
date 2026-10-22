@@ -37,6 +37,9 @@ class OrderFulfillmentServiceTest {
     @Mock
     private BranchRepository branchRepository;
 
+    @Mock
+    private com.bookstore.repository.OrderStatusHistoryRepository orderStatusHistoryRepository;
+
     @InjectMocks
     private OrderFulfillmentServiceImpl fulfillmentService;
 

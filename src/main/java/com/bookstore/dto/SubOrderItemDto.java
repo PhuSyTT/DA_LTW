@@ -8,6 +8,7 @@ public class SubOrderItemDto {
     private String skuBarcode;
     private String bookTitle;
     private String authorName;
+    private String bookCoverImage;
     private String conditionGrade;
     private String shelfLocation;
     private Integer quantity;
@@ -55,6 +56,14 @@ public class SubOrderItemDto {
 
     public void setAuthorName(String authorName) {
         this.authorName = authorName;
+    }
+
+    public String getBookCoverImage() {
+        return bookCoverImage;
+    }
+
+    public void setBookCoverImage(String bookCoverImage) {
+        this.bookCoverImage = bookCoverImage;
     }
 
     public String getConditionGrade() {

@@ -48,6 +48,8 @@ class TradeInServiceTest {
 
     @Mock
     private WishlistService wishlistService;
+    @Mock
+    private org.springframework.messaging.simp.SimpMessageSendingOperations messagingTemplate;
 
     @InjectMocks
     private TradeInServiceImpl tradeInService;

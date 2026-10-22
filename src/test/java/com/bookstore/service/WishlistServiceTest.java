@@ -39,6 +39,8 @@ class WishlistServiceTest {
 
     @Mock
     private BranchRepository branchRepository;
+    @Mock
+    private EmailService emailService;
 
     @InjectMocks
     private WishlistServiceImpl wishlistService;

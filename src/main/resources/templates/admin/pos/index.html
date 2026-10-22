@@ -1,0 +1,668 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
+      th:replace="~{layout/admin-layout :: html(
+        pageTitle='Bán Hàng Tại Quầy POS (Nhóm 3 & FR-ORD-01)',
+        pageSubtitle='Giao diện thanh toán nhanh tại quầy - Quét mã vạch SKU, áp mã giảm giá, in hóa đơn bán lẻ',
+        content=~{::section}
+      )}">
+<body>
+<section>
+    <style>
+        .pos-container {
+            min-height: calc(100vh - 180px);
+        }
+        .pos-product-card {
+            cursor: pointer;
+            transition: all 0.2s ease;
+            border: 1px solid #EAE3D2;
+            background: #ffffff;
+            border-radius: 10px;
+        }
+        .pos-product-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 15px rgba(0,0,0,0.08);
+            border-color: #835500;
+        }
+        .pos-cart-panel {
+            background: #ffffff;
+            border-radius: 14px;
+            border: 1px solid #EAE3D2;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.04);
+            display: flex;
+            flex-direction: column;
+            height: calc(100vh - 190px);
+            position: sticky;
+            top: 90px;
+        }
+        .pos-cart-items {
+            flex-grow: 1;
+            overflow-y: auto;
+            max-height: 38vh;
+        }
+        .quick-cash-chip {
+            cursor: pointer;
+            font-size: 0.8rem;
+            padding: 4px 8px;
+            border-radius: 6px;
+            border: 1px solid #ddd;
+            background: #f8f9fa;
+        }
+        .quick-cash-chip:hover {
+            background: #e9ecef;
+            border-color: #835500;
+        }
+
+        /* Khổ in nhiệt hóa đơn bán lẻ (Thermal 80mm) */
+        @media print {
+            body * {
+                visibility: hidden;
+            }
+            #printableReceipt, #printableReceipt * {
+                visibility: visible;
+            }
+            #printableReceipt {
+                position: absolute;
+                left: 0;
+                top: 0;
+                width: 80mm;
+                padding: 5mm;
+                font-family: 'Courier New', monospace;
+                font-size: 11px;
+                line-height: 1.4;
+                color: #000;
+                background: #fff;
+            }
+            .no-print {
+                display: none !important;
+            }
+        }
+    </style>
+
+    <div class="row g-3 pos-container">
+        <!-- CỘT TRÁI: Tìm kiếm, quét Barcode và Danh mục sách tại quầy -->
+        <div class="col-lg-7 d-flex flex-column gap-3">
+            <!-- Header bar chọn chi nhánh & thông tin thu ngân -->
+            <div class="card border-0 shadow-sm p-3">
+                <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
+                    <div class="d-flex align-items-center gap-2">
+                        <i class="fas fa-cash-register fs-4 text-primary"></i>
+                        <div>
+                            <h6 class="fw-bold mb-0 text-dark">Quầy Thu Ngân Bán Lẻ</h6>
+                            <small class="text-muted">
+                                Nhân viên: <strong class="text-primary" th:text="${cashierName}">Nguyễn Văn A</strong>
+                                (<span th:text="${cashierRole}">CASHIER</span>)
+                            </small>
+                        </div>
+                    </div>
+
+                    <!-- Lựa chọn chi nhánh (Nếu là ADMIN) hoặc hiển thị cố định -->
+                    <div class="d-flex align-items-center gap-2">
+                        <span class="badge bg-secondary">Cơ sở:</span>
+                        <div th:if="${isAdmin}">
+                            <select id="branchSelect" class="form-select form-select-sm fw-bold border-primary" onchange="changePosBranch(this.value)">
+                                <option th:each="br : ${branches}"
+                                        th:value="${br.id}"
+                                        th:text="${br.branchName}"
+                                        th:selected="${currentBranch != null and currentBranch.id == br.id}">
+                                    Chi nhánh Quận 1
+                                </option>
+                            </select>
+                        </div>
+                        <div th:if="${!isAdmin}">
+                            <span class="badge bg-primary fs-6 px-3 py-1.5" th:text="${currentBranch != null ? currentBranch.branchName : 'Chưa gán chi nhánh'}">
+                                Chi nhánh Quận 1
+                            </span>
+                        </div>
+                    </div>
+                </div>
+
+                <hr class="my-2">
+
+                <!-- Ô nhập / Quét Barcode Scanner và Tìm kiếm nhanh -->
+                <div class="row g-2 mt-1">
+                    <div class="col-md-7">
+                        <div class="input-group">
+                            <span class="input-group-text bg-success text-white"><i class="fas fa-barcode"></i></span>
+                            <input type="text" id="barcodeInput" class="form-control font-monospace fw-bold"
+                                   placeholder="Quét mã SKU Barcode (VD: Q1-DNT-90-001)..." autofocus
+                                   onkeydown="if(event.key === 'Enter') handleBarcodeEnter()">
+                            <button class="btn btn-success" type="button" onclick="handleBarcodeEnter()">
+                                <i class="fas fa-plus"></i> Thêm
+                            </button>
+                        </div>
+                    </div>
+                    <div class="col-md-5">
+                        <div class="input-group">
+                            <span class="input-group-text"><i class="fas fa-search"></i></span>
+                            <input type="text" id="keywordSearchInput" class="form-control"
+                                   placeholder="Tìm tên sách / tác giả..."
+                                   oninput="debounceSearch()">
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Danh sách các sách cũ sẵn sàng bán tại chi nhánh -->
+            <div class="card border-0 shadow-sm p-3 flex-grow-1">
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                    <span class="fw-bold text-dark small text-uppercase">
+                        <i class="fas fa-boxes-stacked text-primary me-1"></i> Sách sẵn có trên kệ (<span id="itemCountDisplay">0</span> cuốn)
+                    </span>
+                    <span class="small text-muted">Nhấn vào cuốn sách để thêm vào giỏ thanh toán</span>
+                </div>
+
+                <div id="posProductGrid" class="row g-2 overflow-auto" style="max-height: 55vh;">
+                    <div class="col-12 text-center py-5 text-muted">
+                        <div class="spinner-border text-primary spinner-border-sm me-2" role="status"></div>
+                        Đang tải danh mục sách chi nhánh...
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- CỘT PHẢI: Giỏ hàng quầy POS, Mã giảm giá, Thanh toán & In Bill -->
+        <div class="col-lg-5">
+            <div class="pos-cart-panel p-3">
+                <!-- Header giỏ hàng -->
+                <div class="d-flex justify-content-between align-items-center pb-2 border-bottom">
+                    <div>
+                        <h6 class="fw-bold mb-0 text-dark">
+                            <i class="fas fa-receipt text-success me-1"></i> Hóa Đơn Bán Lẻ
+                        </h6>
+                        <small class="text-muted" id="posClock">22/10/2026 10:00:00</small>
+                    </div>
+                    <button class="btn btn-sm btn-outline-danger" onclick="clearPosCart()" title="Xóa toàn bộ giỏ">
+                        <i class="fas fa-trash-can"></i> Xóa
+                    </button>
+                </div>
+
+                <!-- Thông tin khách hàng tùy chọn -->
+                <div class="row g-1 my-2">
+                    <div class="col-6">
+                        <input type="text" id="customerNameInput" class="form-control form-control-sm" placeholder="Tên khách lẻ...">
+                    </div>
+                    <div class="col-6">
+                        <input type="text" id="customerPhoneInput" class="form-control form-control-sm" placeholder="SĐT khách hàng...">
+                    </div>
+                </div>
+
+                <!-- Danh sách mặt hàng trong giỏ -->
+                <div class="pos-cart-items my-2 border-top border-bottom py-2" id="posCartItemList">
+                    <div class="text-center py-5 text-muted small">
+                        <i class="fas fa-basket-shopping fa-2x mb-2 opacity-25"></i>
+                        <p class="mb-0">Chưa có sản phẩm nào trong giỏ.<br>Hãy quét mã SKU hoặc bấm chọn sách bên trái.</p>
+                    </div>
+                </div>
+
+                <!-- Khối tính tiền và khuyến mãi -->
+                <div class="mt-auto pt-2">
+                    <!-- Nhập mã giảm giá -->
+                    <div class="input-group input-group-sm mb-2">
+                        <span class="input-group-text"><i class="fas fa-ticket-simple text-warning"></i></span>
+                        <input type="text" id="couponCodeInput" class="form-control text-uppercase font-monospace" placeholder="Mã giảm giá (VD: XACHO50)">
+                        <button class="btn btn-dark" type="button" onclick="applyCouponCode()">Áp Dụng</button>
+                    </div>
+
+                    <!-- Chi tiết số tiền -->
+                    <div class="d-flex justify-content-between small text-muted mb-1">
+                        <span>Tạm tính (<span id="cartCount">0</span> món):</span>
+                        <strong class="text-dark" id="subtotalDisplay">0 ₫</strong>
+                    </div>
+                    <div class="d-flex justify-content-between small text-success mb-1" id="discountRow" style="display: none !important;">
+                        <span>Giảm giá coupon:</span>
+                        <strong id="discountDisplay">-0 ₫</strong>
+                    </div>
+                    <div class="d-flex justify-content-between align-items-center my-2 p-2 bg-light rounded border">
+                        <span class="fw-bold text-dark fs-6">TỔNG THANH TOÁN:</span>
+                        <span class="fw-bolder text-danger fs-4" id="finalTotalDisplay">0 ₫</span>
+                    </div>
+
+                    <!-- Phương thức thanh toán -->
+                    <div class="row g-2 mb-2">
+                        <div class="col-6">
+                            <button type="button" class="btn btn-sm w-100 fw-bold btn-outline-success active" id="btnPayCash" onclick="setPaymentMethod('CASH')">
+                                <i class="fas fa-money-bill-wave me-1"></i> Tiền Mặt
+                            </button>
+                        </div>
+                        <div class="col-6">
+                            <button type="button" class="btn btn-sm w-100 fw-bold btn-outline-primary" id="btnPayBank" onclick="setPaymentMethod('BANK_TRANSFER')">
+                                <i class="fas fa-qrcode me-1"></i> Chuyển Khoản QR
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Tiền khách đưa & Tiền thối lại (Khi dùng tiền mặt) -->
+                    <div id="cashCalcSection" class="p-2 border rounded bg-white mb-2">
+                        <div class="d-flex justify-content-between align-items-center mb-1">
+                            <small class="text-muted fw-bold">Khách đưa:</small>
+                            <input type="number" id="amountGivenInput" class="form-control form-control-sm text-end fw-bold text-primary w-50"
+                                   placeholder="0" oninput="calculateChange()">
+                        </div>
+                        <div class="d-flex gap-1 flex-wrap mb-1 justify-content-end">
+                            <span class="quick-cash-chip" onclick="setQuickCash(50000)">50k</span>
+                            <span class="quick-cash-chip" onclick="setQuickCash(100000)">100k</span>
+                            <span class="quick-cash-chip" onclick="setQuickCash(200000)">200k</span>
+                            <span class="quick-cash-chip" onclick="setQuickCash(500000)">500k</span>
+                            <span class="quick-cash-chip fw-bold text-success" onclick="setExactCash()">Đủ tiền</span>
+                        </div>
+                        <div class="d-flex justify-content-between small">
+                            <span class="text-muted">Tiền thối lại:</span>
+                            <strong class="text-success fs-6" id="changeDisplay">0 ₫</strong>
+                        </div>
+                    </div>
+
+                    <!-- Nút xác nhận thanh toán -->
+                    <button type="button" id="btnCheckout" class="btn btn-primary w-100 py-2.5 fw-bold fs-6 shadow-sm d-flex justify-content-center align-items-center gap-2"
+                            onclick="submitPosCheckout()">
+                        <i class="fas fa-print"></i>
+                        <span>THANH TOÁN & IN BIÊN LAI</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL HÓA ĐƠN BIÊN LAI IN NHIỆT (Thermal Receipt Printable Modal) -->
+    <div class="modal fade" id="receiptModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered" style="max-width: 420px;">
+            <div class="modal-content border-0 shadow-lg">
+                <div class="modal-header bg-dark text-white py-2">
+                    <h6 class="modal-title fw-bold"><i class="fas fa-receipt me-2"></i> Biên Lai Bán Hàng</h6>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body p-3 bg-light">
+                    <!-- Khung in giấy nhiệt 80mm -->
+                    <div id="printableReceipt" class="bg-white p-3 border rounded shadow-sm">
+                        <div class="text-center pb-2 border-bottom">
+                            <h5 class="fw-bold mb-0">BOOK4LIFE</h5>
+                            <small class="text-muted d-block" id="rcBranchName">Chi nhánh Quận 1</small>
+                            <small class="text-muted d-block" id="rcBranchAddress">123 Nguyễn Thị Minh Khai, Q1</small>
+                            <small class="text-muted d-block">Hotline: <span id="rcBranchPhone">1900 6868</span></small>
+                        </div>
+
+                        <div class="my-2 small">
+                            <div>Mã đơn: <strong id="rcOrderCode">POS-12345</strong></div>
+                            <div>Thời gian: <span id="rcDateTime">22/10/2026 10:15:00</span></div>
+                            <div>Thu ngân: <span id="rcCashier">Thu Ngân</span></div>
+                            <div>Khách hàng: <span id="rcCustomer">Khách lẻ tại quầy</span></div>
+                        </div>
+
+                        <table class="table table-sm table-borderless small border-top border-bottom my-2">
+                            <thead>
+                                <tr class="border-bottom">
+                                    <th>Sách / SKU</th>
+                                    <th class="text-end">Đơn Giá</th>
+                                </tr>
+                            </thead>
+                            <tbody id="rcItemsList">
+                                <!-- Điền động -->
+                            </tbody>
+                        </table>
+
+                        <div class="small">
+                            <div class="d-flex justify-content-between">
+                                <span>Tạm tính:</span>
+                                <span id="rcSubtotal">0 ₫</span>
+                            </div>
+                            <div class="d-flex justify-content-between text-success" id="rcDiscountRow">
+                                <span>Giảm giá (<span id="rcCouponCode"></span>):</span>
+                                <span id="rcDiscount">0 ₫</span>
+                            </div>
+                            <div class="d-flex justify-content-between fw-bold fs-6 mt-1 pt-1 border-top">
+                                <span>TỔNG CỘNG:</span>
+                                <span class="text-danger" id="rcFinalTotal">0 ₫</span>
+                            </div>
+                            <div class="d-flex justify-content-between text-muted mt-1">
+                                <span>Phương thức:</span>
+                                <span id="rcPayMethod">Tiền Mặt</span>
+                            </div>
+                            <div class="d-flex justify-content-between text-muted">
+                                <span>Khách đưa:</span>
+                                <span id="rcAmountGiven">0 ₫</span>
+                            </div>
+                            <div class="d-flex justify-content-between fw-bold text-success">
+                                <span>Tiền thối lại:</span>
+                                <span id="rcChange">0 ₫</span>
+                            </div>
+                        </div>
+
+                        <div class="text-center pt-3 border-top mt-2 small text-muted">
+                            <p class="mb-1">Cảm ơn Quý Khách đã ghé thăm Book4Life!</p>
+                            <p class="mb-0" style="font-size: 10px;">Chính sách: Đổi trả trong 03 ngày với sách giữ nguyên hiện trạng.</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer py-2 d-flex justify-content-between">
+                    <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Đóng</button>
+                    <button type="button" class="btn btn-primary btn-sm fw-bold px-3" onclick="window.print()">
+                        <i class="fas fa-print me-1"></i> In Hóa Đơn (Print)
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- JAVASCRIPT XỬ LÝ POS -->
+    <script th:inline="javascript">
+        /*<![CDATA[*/
+        const currentBranchId = /*[[${currentBranch != null ? currentBranch.id : 1}]]*/ 1;
+        /*]]>*/
+
+        let posCart = [];
+        let loadedItems = [];
+        let currentPaymentMethod = 'CASH';
+        let currentCouponCode = null;
+        let discountAmount = 0;
+
+        // Đồng hồ thời gian thực
+        setInterval(() => {
+            const clockEl = document.getElementById('posClock');
+            if (clockEl) {
+                const now = new Date();
+                clockEl.textContent = now.toLocaleDateString('vi-VN') + ' ' + now.toLocaleTimeString('vi-VN');
+            }
+        }, 1000);
+
+        // Chuyển chi nhánh (Dành cho Admin)
+        function changePosBranch(branchId) {
+            window.location.href = '/admin/pos?branchId=' + branchId;
+        }
+
+        // Tải danh sách mặt hàng tại chi nhánh
+        async function loadBranchItems(keyword = '') {
+            const grid = document.getElementById('posProductGrid');
+            try {
+                const url = '/api/pos/search?branchId=' + currentBranchId + (keyword ? '&keyword=' + encodeURIComponent(keyword) : '');
+                const res = await fetch(url);
+                const data = await res.json();
+                loadedItems = data;
+                document.getElementById('itemCountDisplay').textContent = data.length;
+
+                if (!data || data.length === 0) {
+                    grid.innerHTML = '<div class="col-12 text-center py-5 text-muted small"><i class="fas fa-box-open fa-2x mb-2 opacity-25"></i><br>Không có sách nào khớp với từ khóa.</div>';
+                    return;
+                }
+
+                grid.innerHTML = data.map(item => `
+                    <div class="col-md-6 col-xl-4">
+                        <div class="pos-product-card p-2 d-flex gap-2 h-100 align-items-center" onclick="addToCartById(${item.id})">
+                            <img src="${item.coverImage || '/images/default-book.png'}" alt="cover" class="rounded object-fit-cover" style="width: 50px; height: 65px;">
+                            <div class="flex-grow-1 overflow-hidden">
+                                <div class="fw-bold small text-truncate text-dark" title="${item.title}">${item.title}</div>
+                                <div class="font-monospace text-muted" style="font-size: 0.72rem;">${item.skuBarcode}</div>
+                                <div class="d-flex justify-content-between align-items-center mt-1">
+                                    <span class="badge bg-warning bg-opacity-10 text-dark border border-warning" style="font-size: 0.65rem;">${item.conditionGrade}</span>
+                                    <strong class="text-danger small">${new Intl.NumberFormat('vi-VN').format(item.price)} ₫</strong>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `).join('');
+            } catch (err) {
+                grid.innerHTML = '<div class="col-12 text-danger small text-center py-3">Lỗi tải danh mục sách: ' + err.message + '</div>';
+            }
+        }
+
+        let searchTimeout = null;
+        function debounceSearch() {
+            clearTimeout(searchTimeout);
+            searchTimeout = setTimeout(() => {
+                const kw = document.getElementById('keywordSearchInput').value.trim();
+                loadBranchItems(kw);
+            }, 300);
+        }
+
+        // Thêm sách vào giỏ
+        function addToCartById(itemId) {
+            const item = loadedItems.find(i => i.id === itemId);
+            if (!item) return;
+
+            if (posCart.some(c => c.id === itemId)) {
+                alert('Mỗi cuốn sách cũ là độc bản (SKU duy nhất), cuốn sách này đã có trong giỏ!');
+                return;
+            }
+
+            posCart.push(item);
+            renderCart();
+        }
+
+        // Quét barcode nhanh bằng phím Enter
+        function handleBarcodeEnter() {
+            const input = document.getElementById('barcodeInput');
+            const barcode = input.value.trim().toUpperCase();
+            if (!barcode) return;
+
+            const found = loadedItems.find(i => i.skuBarcode.toUpperCase() === barcode);
+            if (found) {
+                addToCartById(found.id);
+                input.value = '';
+            } else {
+                // Thử tìm kiếm trực tiếp
+                fetch('/api/pos/search?branchId=' + currentBranchId + '&keyword=' + encodeURIComponent(barcode))
+                    .then(res => res.json())
+                    .then(data => {
+                        if (data && data.length > 0) {
+                            const exact = data.find(i => i.skuBarcode.toUpperCase() === barcode) || data[0];
+                            addToCartById(exact.id);
+                            input.value = '';
+                        } else {
+                            alert('Không tìm thấy mã vạch SKU [' + barcode + '] tại chi nhánh này!');
+                            input.select();
+                        }
+                    });
+            }
+        }
+
+        // Xóa một món khỏi giỏ
+        function removeFromCart(itemId) {
+            posCart = posCart.filter(i => i.id !== itemId);
+            renderCart();
+        }
+
+        // Xóa sạch giỏ
+        function clearPosCart() {
+            posCart = [];
+            currentCouponCode = null;
+            discountAmount = 0;
+            document.getElementById('couponCodeInput').value = '';
+            renderCart();
+        }
+
+        // Render giao diện giỏ hàng
+        function renderCart() {
+            const listEl = document.getElementById('posCartItemList');
+            document.getElementById('cartCount').textContent = posCart.length;
+
+            if (posCart.length === 0) {
+                listEl.innerHTML = `
+                    <div class="text-center py-5 text-muted small">
+                        <i class="fas fa-basket-shopping fa-2x mb-2 opacity-25"></i>
+                        <p class="mb-0">Chưa có sản phẩm nào trong giỏ.<br>Hãy quét mã SKU hoặc bấm chọn sách bên trái.</p>
+                    </div>`;
+                document.getElementById('subtotalDisplay').textContent = '0 ₫';
+                document.getElementById('finalTotalDisplay').textContent = '0 ₫';
+                document.getElementById('discountRow').style.setProperty('display', 'none', 'important');
+                calculateChange();
+                return;
+            }
+
+            let subtotal = 0;
+            listEl.innerHTML = posCart.map((item, idx) => {
+                subtotal += item.price;
+                return `
+                    <div class="d-flex justify-content-between align-items-center py-1.5 px-2 mb-1 bg-light rounded small">
+                        <div class="d-flex align-items-center gap-2 overflow-hidden me-2">
+                            <span class="badge bg-secondary font-monospace">${idx + 1}</span>
+                            <div class="text-truncate">
+                                <div class="fw-bold text-dark text-truncate" style="max-width: 170px;">${item.title}</div>
+                                <div class="text-muted" style="font-size: 0.72rem;">${item.skuBarcode} • ${item.conditionGrade}</div>
+                            </div>
+                        </div>
+                        <div class="d-flex align-items-center gap-2 flex-shrink-0">
+                            <strong class="text-danger">${new Intl.NumberFormat('vi-VN').format(item.price)} ₫</strong>
+                            <button class="btn btn-sm text-danger p-0 ms-1" onclick="removeFromCart(${item.id})">
+                                <i class="fas fa-xmark"></i>
+                            </button>
+                        </div>
+                    </div>`;
+            }).join('');
+
+            document.getElementById('subtotalDisplay').textContent = new Intl.NumberFormat('vi-VN').format(subtotal) + ' ₫';
+            
+            let finalTotal = subtotal - discountAmount;
+            if (finalTotal < 0) finalTotal = 0;
+            document.getElementById('finalTotalDisplay').textContent = new Intl.NumberFormat('vi-VN').format(finalTotal) + ' ₫';
+
+            if (discountAmount > 0) {
+                document.getElementById('discountRow').style.setProperty('display', 'flex', 'important');
+                document.getElementById('discountDisplay').textContent = '-' + new Intl.NumberFormat('vi-VN').format(discountAmount) + ' ₫';
+            } else {
+                document.getElementById('discountRow').style.setProperty('display', 'none', 'important');
+            }
+
+            calculateChange();
+        }
+
+        // Chọn phương thức thanh toán
+        function setPaymentMethod(method) {
+            currentPaymentMethod = method;
+            document.getElementById('btnPayCash').classList.toggle('active', method === 'CASH');
+            document.getElementById('btnPayBank').classList.toggle('active', method === 'BANK_TRANSFER');
+            document.getElementById('cashCalcSection').style.display = (method === 'CASH') ? 'block' : 'none';
+        }
+
+        // Áp dụng mã giảm giá
+        function applyCouponCode() {
+            const code = document.getElementById('couponCodeInput').value.trim().toUpperCase();
+            if (!code) {
+                discountAmount = 0;
+                currentCouponCode = null;
+                renderCart();
+                return;
+            }
+            currentCouponCode = code;
+            // Áp dụng tạm giả lập hoặc re-render, khi checkout backend sẽ tính chính xác
+            renderCart();
+            alert('Đã ghi nhận mã giảm giá [' + code + ']. Hệ thống sẽ đối soát điều kiện khi hoàn tất thanh toán!');
+        }
+
+        // Tính tiền thối
+        function calculateChange() {
+            let subtotal = posCart.reduce((sum, item) => sum + item.price, 0);
+            let finalTotal = Math.max(0, subtotal - discountAmount);
+
+            const amountGivenInput = document.getElementById('amountGivenInput');
+            let given = parseFloat(amountGivenInput.value) || 0;
+            let change = Math.max(0, given - finalTotal);
+
+            document.getElementById('changeDisplay').textContent = new Intl.NumberFormat('vi-VN').format(change) + ' ₫';
+        }
+
+        function setQuickCash(amount) {
+            document.getElementById('amountGivenInput').value = amount;
+            calculateChange();
+        }
+
+        function setExactCash() {
+            let subtotal = posCart.reduce((sum, item) => sum + item.price, 0);
+            let finalTotal = Math.max(0, subtotal - discountAmount);
+            document.getElementById('amountGivenInput').value = finalTotal;
+            calculateChange();
+        }
+
+        // Gửi lệnh thanh toán POS tới Server
+        async function submitPosCheckout() {
+            if (posCart.length === 0) {
+                alert('Giỏ hàng chưa có sản phẩm nào!');
+                return;
+            }
+
+            const btn = document.getElementById('btnCheckout');
+            btn.disabled = true;
+            btn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span> Đang xử lý thanh toán...';
+
+            let subtotal = posCart.reduce((sum, item) => sum + item.price, 0);
+            let finalTotal = Math.max(0, subtotal - discountAmount);
+            let amountGiven = parseFloat(document.getElementById('amountGivenInput').value) || finalTotal;
+
+            const payload = {
+                branchId: currentBranchId,
+                bookItemIds: posCart.map(i => i.id),
+                customerName: document.getElementById('customerNameInput').value.trim(),
+                customerPhone: document.getElementById('customerPhoneInput').value.trim(),
+                couponCode: currentCouponCode,
+                paymentMethod: currentPaymentMethod,
+                amountGiven: amountGiven
+            };
+
+            try {
+                const res = await fetch('/api/pos/checkout', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+
+                const data = await res.json();
+                if (!res.ok) {
+                    throw new Error(data.error || 'Thanh toán thất bại');
+                }
+
+                // Hiển thị dữ liệu lên biên lai
+                document.getElementById('rcBranchName').textContent = data.branchName;
+                document.getElementById('rcBranchAddress').textContent = data.branchAddress;
+                document.getElementById('rcBranchPhone').textContent = data.branchPhone;
+                document.getElementById('rcOrderCode').textContent = data.orderCode;
+                document.getElementById('rcDateTime').textContent = data.dateTime;
+                document.getElementById('rcCashier').textContent = data.cashierName;
+                document.getElementById('rcCustomer').textContent = data.customerName + (data.customerPhone ? ' (' + data.customerPhone + ')' : '');
+
+                document.getElementById('rcItemsList').innerHTML = data.items.map(it => `
+                    <tr>
+                        <td>
+                            <div class="fw-bold">${it.bookTitle}</div>
+                            <div class="text-muted" style="font-size: 10px;">${it.skuBarcode} • ${it.conditionGrade}</div>
+                        </td>
+                        <td class="text-end fw-bold">${new Intl.NumberFormat('vi-VN').format(it.price)} ₫</td>
+                    </tr>
+                `).join('');
+
+                document.getElementById('rcSubtotal').textContent = new Intl.NumberFormat('vi-VN').format(data.subtotal) + ' ₫';
+                if (data.discountAmount > 0) {
+                    document.getElementById('rcDiscountRow').style.display = 'flex';
+                    document.getElementById('rcCouponCode').textContent = data.couponCode || 'Voucher';
+                    document.getElementById('rcDiscount').textContent = '-' + new Intl.NumberFormat('vi-VN').format(data.discountAmount) + ' ₫';
+                } else {
+                    document.getElementById('rcDiscountRow').style.display = 'none';
+                }
+
+                document.getElementById('rcFinalTotal').textContent = new Intl.NumberFormat('vi-VN').format(data.finalTotal) + ' ₫';
+                document.getElementById('rcPayMethod').textContent = data.paymentMethod;
+                document.getElementById('rcAmountGiven').textContent = new Intl.NumberFormat('vi-VN').format(data.amountGiven) + ' ₫';
+                document.getElementById('rcChange').textContent = new Intl.NumberFormat('vi-VN').format(data.changeAmount) + ' ₫';
+
+                // Mở modal in biên lai
+                const modal = new bootstrap.Modal(document.getElementById('receiptModal'));
+                modal.show();
+
+                // Dọn sạch giỏ hàng & tải lại sách tại quầy
+                clearPosCart();
+                loadBranchItems();
+
+            } catch (err) {
+                alert('Lỗi: ' + err.message);
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = '<i class="fas fa-print"></i> <span>THANH TOÁN & IN BIÊN LAI</span>';
+            }
+        }
+
+        // Tải ban đầu khi mở trang
+        document.addEventListener('DOMContentLoaded', () => {
+            loadBranchItems();
+        });
+    </script>
+</section>
+</body>
+</html>
+

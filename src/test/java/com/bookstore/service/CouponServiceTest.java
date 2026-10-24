@@ -169,7 +169,7 @@ class CouponServiceTest {
         CouponValidateResponseDto response = couponService.applyCoupon(request);
 
         assertFalse(response.isValid());
-        assertTrue(response.getMessage().contains("Chưa đạt giá trị đơn hàng tối thiểu"));
+        assertTrue(response.getMessage().contains("Chưa đạt điều kiện: Đơn hàng cần tối thiểu"));
     }
 
     @Test

@@ -22,8 +22,10 @@ import java.util.Optional;
 public class CartServiceImpl implements CartService {
 
     public static final String SESSION_CART_KEY = "BOOKSTORE_SESSION_CART";
-    private static final BigDecimal FREE_SHIPPING_THRESHOLD = new BigDecimal("200000");
-    private static final BigDecimal STANDARD_SHIPPING_FEE = new BigDecimal("25000");
+    public static final BigDecimal FREE_SHIPPING_THRESHOLD = new BigDecimal("200000"); // >= 200k: Freeship 100%
+    public static final BigDecimal DISCOUNT_SHIPPING_THRESHOLD = new BigDecimal("100000"); // 100k - 199k: Giảm 40% phí ship (còn 15k)
+    public static final BigDecimal STANDARD_SHIPPING_FEE = new BigDecimal("25000"); // < 100k: Phí chuẩn 25k
+    public static final BigDecimal TIER2_SHIPPING_FEE = new BigDecimal("15000"); // Phí ưu đãi 15k
 
     private final BookRepository bookRepository;
     private final BookItemRepository bookItemRepository;
@@ -283,8 +285,8 @@ public class CartServiceImpl implements CartService {
     public CartDto applyCoupon(String code, HttpSession session) {
         CartDto cart = getCart(session);
         if (code == null || code.trim().isEmpty() || cart.isEmpty()) {
-            cart.setCouponCode(null);
-            cart.setDiscountAmount(BigDecimal.ZERO);
+            cart.setLastCouponSuccess(false);
+            cart.setLastCouponMessage("Vui lòng nhập mã ưu đãi hợp lệ!");
             updateShippingAndTotals(cart);
             return cart;
         }
@@ -304,15 +306,27 @@ public class CartServiceImpl implements CartService {
 
             CouponValidateResponseDto res = couponService.applyCoupon(request);
             if (res.isValid()) {
-                cart.setCouponCode(code.trim().toUpperCase());
-                cart.setDiscountAmount(res.getDiscountAmount());
+                cart.setLastCouponSuccess(true);
+                cart.setLastCouponMessage(res.getMessage());
+
+                if (res.isShippingCoupon()) {
+                    // Áp dụng vào slot Mã Vận Chuyển
+                    cart.setShippingCouponCode(res.getCode());
+                    cart.setShippingCouponType(res.getDiscountType());
+                    cart.setShippingDiscountAmount(res.getShippingDiscountAmount());
+                } else {
+                    // Áp dụng vào slot Mã Giảm Giá Đơn Hàng
+                    cart.setOrderCouponCode(res.getCode());
+                    cart.setOrderCouponType(res.getDiscountType());
+                    cart.setDiscountAmount(res.getDiscountAmount());
+                }
             } else {
-                cart.setCouponCode(null);
-                cart.setDiscountAmount(BigDecimal.ZERO);
+                cart.setLastCouponSuccess(false);
+                cart.setLastCouponMessage(res.getMessage());
             }
         } catch (Exception e) {
-            cart.setCouponCode(null);
-            cart.setDiscountAmount(BigDecimal.ZERO);
+            cart.setLastCouponSuccess(false);
+            cart.setLastCouponMessage("Không thể áp dụng mã: " + e.getMessage());
         }
 
         updateShippingAndTotals(cart);
@@ -323,8 +337,41 @@ public class CartServiceImpl implements CartService {
     @Override
     public CartDto removeCoupon(HttpSession session) {
         CartDto cart = getCart(session);
-        cart.setCouponCode(null);
+        cart.setOrderCouponCode(null);
+        cart.setOrderCouponType(null);
         cart.setDiscountAmount(BigDecimal.ZERO);
+        cart.setShippingCouponCode(null);
+        cart.setShippingCouponType(null);
+        cart.setShippingDiscountAmount(BigDecimal.ZERO);
+        cart.setShippingPromoMessage(null);
+        cart.setLastCouponMessage("Đã gỡ bỏ toàn bộ mã ưu đãi.");
+        cart.setLastCouponSuccess(true);
+        updateShippingAndTotals(cart);
+        session.setAttribute(SESSION_CART_KEY, cart);
+        return cart;
+    }
+
+    @Override
+    public CartDto removeShippingCoupon(HttpSession session) {
+        CartDto cart = getCart(session);
+        cart.setShippingCouponCode(null);
+        cart.setShippingCouponType(null);
+        cart.setShippingDiscountAmount(BigDecimal.ZERO);
+        cart.setLastCouponMessage("Đã gỡ mã vận chuyển.");
+        cart.setLastCouponSuccess(true);
+        updateShippingAndTotals(cart);
+        session.setAttribute(SESSION_CART_KEY, cart);
+        return cart;
+    }
+
+    @Override
+    public CartDto removeOrderCoupon(HttpSession session) {
+        CartDto cart = getCart(session);
+        cart.setOrderCouponCode(null);
+        cart.setOrderCouponType(null);
+        cart.setDiscountAmount(BigDecimal.ZERO);
+        cart.setLastCouponMessage("Đã gỡ mã giảm giá đơn hàng.");
+        cart.setLastCouponSuccess(true);
         updateShippingAndTotals(cart);
         session.setAttribute(SESSION_CART_KEY, cart);
         return cart;
@@ -333,16 +380,69 @@ public class CartServiceImpl implements CartService {
     private void updateShippingAndTotals(CartDto cart) {
         if (cart.isEmpty()) {
             cart.setShippingFee(BigDecimal.ZERO);
+            cart.setBaseShippingFee(BigDecimal.ZERO);
+            cart.setShippingDiscountAmount(BigDecimal.ZERO);
             cart.setDiscountAmount(BigDecimal.ZERO);
-            cart.setCouponCode(null);
+            cart.setOrderCouponCode(null);
+            cart.setOrderCouponType(null);
+            cart.setShippingCouponCode(null);
+            cart.setShippingCouponType(null);
+            cart.setShippingPromoMessage(null);
             return;
         }
 
         BigDecimal subtotal = cart.getSubtotal();
+        BigDecimal baseShipping;
+        String promoMsg;
+
+        // Công thức tính phí ưu đãi bậc thang (Tiered Shipping Formula)
         if (subtotal.compareTo(FREE_SHIPPING_THRESHOLD) >= 0) {
-            cart.setShippingFee(BigDecimal.ZERO);
+            baseShipping = BigDecimal.ZERO;
+            promoMsg = "Đơn từ 200.000₫: Bạn được MIỄN PHÍ VẬN CHUYỂN 100% toàn chuỗi! 🎉";
+        } else if (subtotal.compareTo(DISCOUNT_SHIPPING_THRESHOLD) >= 0) {
+            baseShipping = TIER2_SHIPPING_FEE; // 15.000₫
+            BigDecimal remaining = FREE_SHIPPING_THRESHOLD.subtract(subtotal);
+            promoMsg = "Đơn từ 100.000₫: Ưu đãi GIẢM 40% phí ship (còn 15.000₫)! Mua thêm " + formatVnd(remaining) + " để nhận Freeship 100%.";
         } else {
-            cart.setShippingFee(STANDARD_SHIPPING_FEE);
+            baseShipping = STANDARD_SHIPPING_FEE; // 25.000₫
+            BigDecimal remaining = DISCOUNT_SHIPPING_THRESHOLD.subtract(subtotal);
+            promoMsg = "Phí giao hàng tiêu chuẩn 25.000₫. Mua thêm " + formatVnd(remaining) + " để được giảm phí ship còn 15.000₫!";
         }
+
+        cart.setBaseShippingFee(baseShipping);
+
+        // Áp dụng Mã Freeship / Giảm ship nếu có
+        if (cart.hasShippingCoupon()) {
+            BigDecimal couponShipDiscount = cart.getShippingDiscountAmount();
+            if (couponShipDiscount == null || couponShipDiscount.compareTo(BigDecimal.ZERO) <= 0) {
+                couponShipDiscount = STANDARD_SHIPPING_FEE;
+            }
+
+            if (baseShipping.compareTo(BigDecimal.ZERO) > 0) {
+                BigDecimal effectiveDiscount = baseShipping.min(couponShipDiscount);
+                cart.setShippingDiscountAmount(effectiveDiscount);
+                cart.setShippingFee(baseShipping.subtract(effectiveDiscount).max(BigDecimal.ZERO));
+                promoMsg = "Đã áp dụng mã Freeship [" + cart.getShippingCouponCode() + "]: Giảm " + formatVnd(effectiveDiscount) + " phí vận chuyển! 🚀";
+            } else {
+                cart.setShippingFee(BigDecimal.ZERO);
+                cart.setShippingDiscountAmount(BigDecimal.ZERO);
+                promoMsg = "Đơn hàng đã được Freeship 100% tự động theo chính sách đơn từ 200.000₫! 🎉";
+            }
+        } else {
+            cart.setShippingDiscountAmount(BigDecimal.ZERO);
+            cart.setShippingFee(baseShipping);
+        }
+
+        // Đảm bảo mức giảm giá đơn hàng không vượt quá tổng tiền hàng
+        if (cart.getDiscountAmount().compareTo(subtotal) > 0) {
+            cart.setDiscountAmount(subtotal);
+        }
+
+        cart.setShippingPromoMessage(promoMsg);
+    }
+
+    private String formatVnd(BigDecimal amount) {
+        if (amount == null) return "0₫";
+        return String.format("%,d₫", amount.longValue()).replace(',', '.');
     }
 }

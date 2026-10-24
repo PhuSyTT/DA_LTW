@@ -142,13 +142,23 @@ public class CartController {
             HttpSession session
     ) {
         CartDto cart = cartService.applyCoupon(code, session);
-        boolean applied = cart.getCouponCode() != null && !cart.getCouponCode().isEmpty();
+        boolean applied = Boolean.TRUE.equals(cart.getLastCouponSuccess());
+        String msg = cart.getLastCouponMessage() != null ? cart.getLastCouponMessage() :
+                (applied ? "Áp dụng mã giảm giá thành công!" : "Mã không hợp lệ hoặc chưa đủ điều kiện!");
 
         Map<String, Object> resp = new HashMap<>();
         resp.put("success", applied);
-        resp.put("message", applied ? "Áp dụng mã giảm giá thành công!" : "Mã giảm giá không hợp lệ hoặc không đủ điều kiện đơn hàng!");
+        resp.put("message", msg);
         resp.put("couponCode", cart.getCouponCode());
+        resp.put("orderCouponCode", cart.getOrderCouponCode());
+        resp.put("orderCouponType", cart.getOrderCouponType());
+        resp.put("shippingCouponCode", cart.getShippingCouponCode());
+        resp.put("shippingCouponType", cart.getShippingCouponType());
+        resp.put("couponType", cart.getCouponType());
         resp.put("discountAmount", cart.getDiscountAmount());
+        resp.put("shippingDiscountAmount", cart.getShippingDiscountAmount());
+        resp.put("shippingPromoMessage", cart.getShippingPromoMessage());
+        resp.put("baseShippingFee", cart.getBaseShippingFee());
         resp.put("subtotal", cart.getSubtotal());
         resp.put("shippingFee", cart.getShippingFee());
         resp.put("grandTotal", cart.getGrandTotal());
@@ -157,11 +167,27 @@ public class CartController {
 
     @PostMapping("/cart/remove-coupon")
     @ResponseBody
-    public ResponseEntity<?> removeCoupon(HttpSession session) {
-        CartDto cart = cartService.removeCoupon(session);
+    public ResponseEntity<?> removeCoupon(
+            @RequestParam(value = "type", required = false) String type,
+            HttpSession session
+    ) {
+        CartDto cart;
+        if ("shipping".equalsIgnoreCase(type)) {
+            cart = cartService.removeShippingCoupon(session);
+        } else if ("order".equalsIgnoreCase(type)) {
+            cart = cartService.removeOrderCoupon(session);
+        } else {
+            cart = cartService.removeCoupon(session);
+        }
+
         return ResponseEntity.ok(Map.of(
                 "success", true,
+                "message", cart.getLastCouponMessage() != null ? cart.getLastCouponMessage() : "Đã gỡ mã giảm giá",
                 "discountAmount", cart.getDiscountAmount(),
+                "shippingDiscountAmount", cart.getShippingDiscountAmount(),
+                "shippingFee", cart.getShippingFee(),
+                "orderCouponCode", cart.getOrderCouponCode() != null ? cart.getOrderCouponCode() : "",
+                "shippingCouponCode", cart.getShippingCouponCode() != null ? cart.getShippingCouponCode() : "",
                 "grandTotal", cart.getGrandTotal()
         ));
     }

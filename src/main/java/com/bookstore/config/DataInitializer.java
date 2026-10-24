@@ -29,6 +29,8 @@ public class DataInitializer implements CommandLineRunner {
     private final BookItemRepository bookItemRepository;
     private final PasswordEncoder passwordEncoder;
     private final DataSource dataSource;
+    private final DriverRepository driverRepository;
+    private final CouponRepository couponRepository;
 
     public DataInitializer(RoleRepository roleRepository,
                            UserRepository userRepository,
@@ -38,7 +40,9 @@ public class DataInitializer implements CommandLineRunner {
                            BookRepository bookRepository,
                            BookItemRepository bookItemRepository,
                            PasswordEncoder passwordEncoder,
-                           DataSource dataSource) {
+                           DataSource dataSource,
+                           DriverRepository driverRepository,
+                           CouponRepository couponRepository) {
         this.roleRepository = roleRepository;
         this.userRepository = userRepository;
         this.branchRepository = branchRepository;
@@ -48,6 +52,8 @@ public class DataInitializer implements CommandLineRunner {
         this.bookItemRepository = bookItemRepository;
         this.passwordEncoder = passwordEncoder;
         this.dataSource = dataSource;
+        this.driverRepository = driverRepository;
+        this.couponRepository = couponRepository;
     }
 
     @Override
@@ -84,6 +90,9 @@ public class DataInitializer implements CommandLineRunner {
 
         // 6. Đảm bảo ID của 5 tài khoản luôn cố định là 1..5
         ensureStandardUserIds();
+
+        // 7. Khởi tạo danh sách Tài xế (Drivers) và Mã Freeship / Ưu đãi giao hàng
+        ensureDriversAndCouponsSeeded(branches);
 
         logger.info("DataInitializer completed successfully. 5 Roles & default catalog are ready!");
     }
@@ -351,5 +360,109 @@ public class DataInitializer implements CommandLineRunner {
                     newUser.setCreatedAt(LocalDateTime.now());
                     return userRepository.save(newUser);
                 });
+    }
+
+    private void ensureDriversAndCouponsSeeded(List<Branch> branches) {
+        try {
+            // Seed Drivers
+            if (driverRepository.count() == 0 && branches != null && !branches.isEmpty()) {
+                logger.info("CSDL chưa có danh sách tài xế, đang tạo đội tài xế Book4Life...");
+                Branch bHanoi = branches.stream().filter(b -> b.getBranchName().contains("Hoàn Kiếm") || b.getCity().contains("Hà Nội")).findFirst().orElse(branches.get(0));
+                Branch bQ1 = branches.stream().filter(b -> b.getBranchName().contains("Quận 1")).findFirst().orElse(branches.get(0));
+                Branch bThuDuc = branches.stream().filter(b -> b.getBranchName().contains("Thủ Đức")).findFirst().orElse(branches.size() > 1 ? branches.get(1) : branches.get(0));
+
+                Driver d1 = new Driver(null, "Nguyễn Văn Tuấn", "0987.111.222", "29B1-686.88", "MOTORBIKE", "Đội xe Book4Life HN", bHanoi, "AVAILABLE");
+                d1.setRating(4.9);
+                Driver d2 = new Driver(null, "Trần Quốc Bảo", "0903.222.333", "59P2-777.99", "MOTORBIKE", "Đội xe Book4Life Q1", bQ1, "AVAILABLE");
+                d2.setRating(5.0);
+                Driver d3 = new Driver(null, "Lê Hữu Thắng", "0912.333.444", "59X3-555.22", "MOTORBIKE", "Đội xe Book4Life Thủ Đức", bThuDuc, "AVAILABLE");
+                d3.setRating(4.8);
+                Driver d4 = new Driver(null, "Bùi Minh Quân (Xe Tải)", "0938.444.555", "51D-888.33", "TRUCK", "Book4Life Fast Truck", bQ1, "AVAILABLE");
+                d4.setRating(5.0);
+                Driver d5 = new Driver(null, "Shipper Đối Tác GHTK", "1900.6092", "GHTK-EXPRESS", "MOTORBIKE", "Giao Hàng Tiết Kiệm", null, "AVAILABLE");
+                d5.setRating(4.7);
+                Driver d6 = new Driver(null, "Shipper Đối Tác GHN", "1900.636677", "GHN-FAST", "MOTORBIKE", "Giao Hàng Nhanh", null, "AVAILABLE");
+                d6.setRating(4.8);
+
+                driverRepository.saveAll(List.of(d1, d2, d3, d4, d5, d6));
+                logger.info("Đã tạo thành công 6 tài xế mẫu phục vụ giao hàng chuỗi Book4Life.");
+            }
+
+            // Seed Freeship & Discount Coupons
+            if (couponRepository.count() == 0) {
+                logger.info("CSDL chưa có mã giảm giá, đang tạo các mã Freeship và ưu đãi...");
+                LocalDateTime now = LocalDateTime.now();
+
+                Coupon cFreeship = new Coupon();
+                cFreeship.setCode("FREESHIP");
+                cFreeship.setCouponCategory("SHIPPING");
+                cFreeship.setDiscountType("FREESHIP");
+                cFreeship.setDiscountValue(new BigDecimal("25000"));
+                cFreeship.setMinOrderAmount(BigDecimal.ZERO);
+                cFreeship.setMaxDiscountAmount(new BigDecimal("25000"));
+                cFreeship.setUsageLimit(500);
+                cFreeship.setUsedCount(0);
+                cFreeship.setStartDate(now.minusDays(1));
+                cFreeship.setEndDate(now.plusMonths(6));
+                cFreeship.setIsActive(true);
+
+                Coupon cFreeshipMax = new Coupon();
+                cFreeshipMax.setCode("FREESHIPMAX");
+                cFreeshipMax.setCouponCategory("SHIPPING");
+                cFreeshipMax.setDiscountType("FREESHIP");
+                cFreeshipMax.setDiscountValue(new BigDecimal("25000"));
+                cFreeshipMax.setMinOrderAmount(new BigDecimal("50000"));
+                cFreeshipMax.setMaxDiscountAmount(new BigDecimal("25000"));
+                cFreeshipMax.setUsageLimit(1000);
+                cFreeshipMax.setUsedCount(0);
+                cFreeshipMax.setStartDate(now.minusDays(1));
+                cFreeshipMax.setEndDate(now.plusMonths(6));
+                cFreeshipMax.setIsActive(true);
+
+                Coupon cShip10k = new Coupon();
+                cShip10k.setCode("SHIP10K");
+                cShip10k.setCouponCategory("SHIPPING");
+                cShip10k.setDiscountType("SHIP_DISCOUNT");
+                cShip10k.setDiscountValue(new BigDecimal("10000"));
+                cShip10k.setMinOrderAmount(new BigDecimal("50000"));
+                cShip10k.setMaxDiscountAmount(new BigDecimal("10000"));
+                cShip10k.setUsageLimit(1000);
+                cShip10k.setUsedCount(0);
+                cShip10k.setStartDate(now.minusDays(1));
+                cShip10k.setEndDate(now.plusMonths(6));
+                cShip10k.setIsActive(true);
+
+                Coupon cBook10 = new Coupon();
+                cBook10.setCode("BOOK10");
+                cBook10.setCouponCategory("ORDER_DISCOUNT");
+                cBook10.setDiscountType("PERCENT");
+                cBook10.setDiscountValue(new BigDecimal("10"));
+                cBook10.setMinOrderAmount(new BigDecimal("100000"));
+                cBook10.setMaxDiscountAmount(new BigDecimal("50000"));
+                cBook10.setUsageLimit(500);
+                cBook10.setUsedCount(0);
+                cBook10.setStartDate(now.minusDays(1));
+                cBook10.setEndDate(now.plusMonths(6));
+                cBook10.setIsActive(true);
+
+                Coupon cTietKiem = new Coupon();
+                cTietKiem.setCode("TIETKIEM");
+                cTietKiem.setCouponCategory("ORDER_DISCOUNT");
+                cTietKiem.setDiscountType("FIXED_AMOUNT");
+                cTietKiem.setDiscountValue(new BigDecimal("20000"));
+                cTietKiem.setMinOrderAmount(new BigDecimal("150000"));
+                cTietKiem.setMaxDiscountAmount(new BigDecimal("20000"));
+                cTietKiem.setUsageLimit(500);
+                cTietKiem.setUsedCount(0);
+                cTietKiem.setStartDate(now.minusDays(1));
+                cTietKiem.setEndDate(now.plusMonths(6));
+                cTietKiem.setIsActive(true);
+
+                couponRepository.saveAll(List.of(cFreeship, cFreeshipMax, cShip10k, cBook10, cTietKiem));
+                logger.info("Đã tạo thành công các mã Freeship & Khuyến mãi (FREESHIP, FREESHIPMAX, SHIP10K, BOOK10, TIETKIEM).");
+            }
+        } catch (Exception ex) {
+            logger.warn("Lỗi khởi tạo drivers/coupons: {}", ex.getMessage());
+        }
     }
 }

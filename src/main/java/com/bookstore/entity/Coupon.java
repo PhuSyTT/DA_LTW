@@ -14,8 +14,11 @@ public class Coupon {
     @Column(unique = true, nullable = false, length = 50)
     private String code;
 
+    @Column(name = "coupon_category", length = 30)
+    private String couponCategory = "ORDER_DISCOUNT"; // SHIPPING hoặc ORDER_DISCOUNT
+
     @Column(name = "discount_type", nullable = false, length = 20)
-    private String discountType; // PERCENT hoặc FIXED_AMOUNT
+    private String discountType; // PERCENT, FIXED_AMOUNT, FREESHIP, SHIP_DISCOUNT
 
     @Column(name = "discount_value", precision = 12, scale = 2)
     private BigDecimal discountValue;
@@ -62,6 +65,29 @@ public class Coupon {
 
 	public void setCode(String code) {
 		this.code = code;
+	}
+
+	public String getCouponCategory() {
+		if (couponCategory != null && !couponCategory.isBlank()) {
+			return couponCategory;
+		}
+		if ("FREESHIP".equalsIgnoreCase(discountType) || "SHIP_DISCOUNT".equalsIgnoreCase(discountType)
+				|| (code != null && (code.toUpperCase().contains("FREESHIP") || code.toUpperCase().startsWith("SHIP")))) {
+			return "SHIPPING";
+		}
+		return "ORDER_DISCOUNT";
+	}
+
+	public void setCouponCategory(String couponCategory) {
+		this.couponCategory = couponCategory;
+	}
+
+	public boolean isShippingCoupon() {
+		return "SHIPPING".equalsIgnoreCase(getCouponCategory());
+	}
+
+	public boolean isOrderDiscountCoupon() {
+		return "ORDER_DISCOUNT".equalsIgnoreCase(getCouponCategory());
 	}
 
 	public String getDiscountType() {

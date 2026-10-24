@@ -76,8 +76,9 @@ public class AdminCouponController {
     @PreAuthorize("hasAnyAuthority('ROLE_ADMIN', 'ADMIN')")
     public String createCoupon(
             @RequestParam("code") String code,
+            @RequestParam(value = "couponCategory", defaultValue = "ORDER_DISCOUNT") String couponCategory,
             @RequestParam("discountType") String discountType,
-            @RequestParam("discountValue") BigDecimal discountValue,
+            @RequestParam(value = "discountValue", required = false) BigDecimal discountValue,
             @RequestParam(value = "minOrderAmount", required = false) BigDecimal minOrderAmount,
             @RequestParam(value = "maxDiscountAmount", required = false) BigDecimal maxDiscountAmount,
             @RequestParam(value = "applicableConditionGrade", required = false) String applicableConditionGrade,
@@ -96,7 +97,17 @@ public class AdminCouponController {
 
             Coupon coupon = new Coupon();
             coupon.setCode(cleanCode);
+            coupon.setCouponCategory(couponCategory);
             coupon.setDiscountType(discountType);
+            
+            // Nếu là FREESHIP mà để trống discountValue, mặc định 25.000₫
+            if (discountValue == null) {
+                if ("FREESHIP".equalsIgnoreCase(discountType)) {
+                    discountValue = new BigDecimal("25000");
+                } else {
+                    discountValue = BigDecimal.ZERO;
+                }
+            }
             coupon.setDiscountValue(discountValue);
             coupon.setMinOrderAmount(minOrderAmount != null ? minOrderAmount : BigDecimal.ZERO);
             coupon.setMaxDiscountAmount(maxDiscountAmount);

@@ -295,19 +295,98 @@
                         <i class="fas fa-receipt text-primary"></i> Tóm Tắt Đơn Hàng
                     </h3>
 
-                    <!-- Coupon Box -->
+                    <!-- Freeship Progress Bar -->
+                    <div class="mb-4 p-3.5 rounded-2xl bg-amber-50/70 border border-amber-200">
+                        <div class="flex items-center justify-between text-xs mb-1.5">
+                            <span class="font-bold text-amber-950 flex items-center gap-1.5">
+                                <i class="fas fa-truck-fast text-primary"></i>
+                                <span id="freeshipStatusText" th:text="${cart.shippingPromoMessage} ?: 'Ưu đãi phí giao hàng'">Ưu đãi phí giao hàng</span>
+                            </span>
+                            <span class="font-extrabold text-primary" id="freeshipPercentText" th:text="${cart.freeshipProgressPercent} + '%'">0%</span>
+                        </div>
+                        <div class="w-full bg-amber-200/50 rounded-full h-2 overflow-hidden">
+                            <div id="freeshipProgressBar" class="bg-gradient-to-r from-amber-500 to-emerald-500 h-2 rounded-full transition-all duration-500"
+                                 th:style="'width: ' + ${cart.freeshipProgressPercent} + '%;'"></div>
+                        </div>
+                        <div class="flex justify-between items-center text-[10px] text-on-surface-variant/80 mt-1.5">
+                            <span>0₫ (Phí 25k)</span>
+                            <span class="font-semibold text-amber-800">100k (Giảm 40% ship)</span>
+                            <span class="font-bold text-emerald-700">200k (Freeship 100%)</span>
+                        </div>
+                    </div>
+
+                    <!-- Coupon Box with 2 Categories (Shipping & Order Discount) -->
                     <div class="mb-5 pb-5 border-b border-outline/20">
-                        <label class="block text-xs font-bold text-on-surface-variant mb-1.5">Mã Giảm Giá / Khuyến Mãi:</label>
+                        <label class="block text-xs font-bold text-on-surface-variant mb-1.5">Mã Ưu Đãi (Vận Chuyển &amp; Đơn Hàng):</label>
                         <div class="flex gap-2">
                             <input type="text" id="couponCodeInput"
-                                   th:value="${cart.couponCode}"
                                    class="flex-grow px-3 py-2 rounded-xl border border-outline/40 text-xs uppercase font-mono tracking-wider focus:outline-hidden focus:border-primary"
-                                   placeholder="VD: BOOK10, TIETKIEM">
+                                   placeholder="Nhập mã Freeship hoặc Giảm giá...">
                             <button type="button" onclick="applyCouponCode()" class="px-4 py-2 rounded-xl bg-on-surface text-white text-xs font-bold hover:bg-primary transition-all">
                                 Áp dụng
                             </button>
                         </div>
-                        <div id="couponMessage" class="text-[11px] mt-1.5 font-medium"></div>
+
+                        <!-- Active Coupon Tags Display -->
+                        <div class="mt-2.5 flex items-center gap-2 flex-wrap" id="activeCouponsContainer">
+                            <!-- Tag Mã Đơn Hàng -->
+                            <div id="activeOrderCouponTag" class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-indigo-50 border border-indigo-200 text-indigo-900 text-[11px] font-bold shadow-xs"
+                                 th:style="${cart.hasOrderCoupon()} ? '' : 'display: none;'">
+                                <i class="fas fa-tag text-indigo-600 text-[10px]"></i>
+                                <span>Mã đơn: <strong id="activeOrderCouponText" th:text="${cart.orderCouponCode}">BOOK10</strong></span>
+                                <button type="button" onclick="removeCouponType('order')" class="text-rose-600 hover:text-rose-800 ml-1 cursor-pointer" title="Gỡ mã giảm giá đơn hàng">
+                                    <i class="fas fa-xmark"></i>
+                                </button>
+                            </div>
+
+                            <!-- Tag Mã Vận Chuyển -->
+                            <div id="activeShippingCouponTag" class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-emerald-50 border border-emerald-200 text-emerald-900 text-[11px] font-bold shadow-xs"
+                                 th:style="${cart.hasShippingCoupon()} ? '' : 'display: none;'">
+                                <i class="fas fa-motorcycle text-emerald-600 text-[10px]"></i>
+                                <span>Mã ship: <strong id="activeShippingCouponText" th:text="${cart.shippingCouponCode}">FREESHIP</strong></span>
+                                <button type="button" onclick="removeCouponType('shipping')" class="text-rose-600 hover:text-rose-800 ml-1 cursor-pointer" title="Gỡ mã miễn phí vận chuyển">
+                                    <i class="fas fa-xmark"></i>
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- 2 Categories of Quick Suggested Coupons -->
+                        <div class="mt-3 space-y-2.5">
+                            <!-- Category 1: Shipping Vouchers -->
+                            <div>
+                                <div class="text-[10px] font-bold text-emerald-800 uppercase tracking-wider mb-1 flex items-center gap-1">
+                                    <i class="fas fa-motorcycle text-[10px]"></i> 1. Mã Vận Chuyển / Freeship:
+                                </div>
+                                <div class="flex items-center gap-1.5 flex-wrap">
+                                    <button type="button" onclick="quickApplyCoupon('FREESHIP')" class="px-2 py-0.5 rounded-lg bg-emerald-100 text-emerald-800 hover:bg-emerald-200 text-[10px] font-bold border border-emerald-300 transition-all flex items-center gap-1" title="Miễn 100% phí ship mọi đơn">
+                                        <i class="fas fa-bolt text-[9px]"></i> FREESHIP (Đơn ≥ 0₫)
+                                    </button>
+                                    <button type="button" onclick="quickApplyCoupon('FREESHIPMAX')" class="px-2 py-0.5 rounded-lg bg-emerald-100 text-emerald-800 hover:bg-emerald-200 text-[10px] font-bold border border-emerald-300 transition-all flex items-center gap-1" title="Freeship tối đa 25k cho đơn từ 50k">
+                                        <i class="fas fa-shield text-[9px]"></i> FREESHIPMAX (Đơn ≥ 50k)
+                                    </button>
+                                    <button type="button" onclick="quickApplyCoupon('SHIP10K')" class="px-2 py-0.5 rounded-lg bg-amber-100 text-amber-800 hover:bg-amber-200 text-[10px] font-bold border border-amber-300 transition-all flex items-center gap-1" title="Giảm 10.000₫ tiền ship cho đơn từ 50k">
+                                        <i class="fas fa-truck text-[9px]"></i> SHIP10K (Đơn ≥ 50k)
+                                    </button>
+                                </div>
+                            </div>
+
+                            <!-- Category 2: Order Discount Vouchers -->
+                            <div>
+                                <div class="text-[10px] font-bold text-indigo-800 uppercase tracking-wider mb-1 flex items-center gap-1">
+                                    <i class="fas fa-tag text-[10px]"></i> 2. Mã Giảm Giá Đơn Hàng:
+                                </div>
+                                <div class="flex items-center gap-1.5 flex-wrap">
+                                    <button type="button" onclick="quickApplyCoupon('BOOK10')" class="px-2 py-0.5 rounded-lg bg-indigo-100 text-indigo-800 hover:bg-indigo-200 text-[10px] font-bold border border-indigo-300 transition-all flex items-center gap-1" title="Giảm 10% tiền sách cho đơn từ 100k">
+                                        <i class="fas fa-percent text-[9px]"></i> BOOK10 (Giảm 10% - Đơn ≥ 100k)
+                                    </button>
+                                    <button type="button" onclick="quickApplyCoupon('TIETKIEM')" class="px-2 py-0.5 rounded-lg bg-indigo-100 text-indigo-800 hover:bg-indigo-200 text-[10px] font-bold border border-indigo-300 transition-all flex items-center gap-1" title="Giảm 20.000₫ tiền sách cho đơn từ 150k">
+                                        <i class="fas fa-coins text-[9px]"></i> TIETKIEM (Giảm 20k - Đơn ≥ 150k)
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div id="couponMessage" class="text-[11px] mt-2 font-medium leading-relaxed"></div>
                     </div>
 
                     <!-- Price Calculations -->
@@ -321,6 +400,11 @@
                             <span>Phí giao hàng:</span>
                             <span class="font-bold text-on-surface" id="summaryShipping"
                                   th:text="${cart.shippingFee.compareTo(T(java.math.BigDecimal).ZERO) == 0} ? 'Miễn phí' : ${#numbers.formatDecimal(cart.shippingFee, 0, 'COMMA', 0, 'POINT')} + ' ₫'">25.000 ₫</span>
+                        </div>
+                        <div id="summaryShippingDiscountRow" class="flex justify-between text-emerald-700" th:style="${cart.shippingDiscountAmount.compareTo(T(java.math.BigDecimal).ZERO) > 0} ? '' : 'display: none;'">
+                            <span>Ưu đãi mã Freeship:</span>
+                            <span class="font-bold" id="summaryShippingDiscount"
+                                  th:text="'- ' + ${#numbers.formatDecimal(cart.shippingDiscountAmount, 0, 'COMMA', 0, 'POINT')} + ' ₫'">- 0 ₫</span>
                         </div>
                         <div id="summaryDiscountRow" class="flex justify-between text-emerald-700" th:style="${cart.discountAmount.compareTo(T(java.math.BigDecimal).ZERO) > 0} ? '' : 'display: none;'">
                             <span>Giảm giá coupon:</span>
@@ -592,18 +676,71 @@
                 }
             }
 
+            const shipDiscountRow = document.getElementById('summaryShippingDiscountRow');
+            const shipDiscount = document.getElementById('summaryShippingDiscount');
+            if (shipDiscountRow && shipDiscount) {
+                if (Number(data.shippingDiscountAmount) > 0) {
+                    shipDiscountRow.style.display = 'flex';
+                    shipDiscount.textContent = '- ' + formatVnd(data.shippingDiscountAmount);
+                } else {
+                    shipDiscountRow.style.display = 'none';
+                }
+            }
+
+            if (data.shippingPromoMessage) {
+                const promoTxt = document.getElementById('freeshipStatusText');
+                if (promoTxt) promoTxt.textContent = data.shippingPromoMessage;
+            }
+
+            const subtotalVal = Number(data.subtotal) || 0;
+            const target = 200000;
+            const percent = Math.min(100, Math.round((subtotalVal / target) * 100));
+            const pBar = document.getElementById('freeshipProgressBar');
+            const pTxt = document.getElementById('freeshipPercentText');
+            if (pBar) pBar.style.width = percent + '%';
+            if (pTxt) pTxt.textContent = percent + '%';
+
             const grandTotal = document.getElementById('summaryGrandTotal');
             if (grandTotal) grandTotal.textContent = formatVnd(data.grandTotal);
+
+            // Cập nhật thẻ hiển thị mã đang áp dụng
+            const orderTag = document.getElementById('activeOrderCouponTag');
+            const orderTxt = document.getElementById('activeOrderCouponText');
+            if (orderTag && orderTxt) {
+                if (data.orderCouponCode) {
+                    orderTxt.textContent = data.orderCouponCode;
+                    orderTag.style.display = 'inline-flex';
+                } else {
+                    orderTag.style.display = 'none';
+                }
+            }
+
+            const shipTag = document.getElementById('activeShippingCouponTag');
+            const shipTxt = document.getElementById('activeShippingCouponText');
+            if (shipTag && shipTxt) {
+                if (data.shippingCouponCode) {
+                    shipTxt.textContent = data.shippingCouponCode;
+                    shipTag.style.display = 'inline-flex';
+                } else {
+                    shipTag.style.display = 'none';
+                }
+            }
         }
 
-        // 4. Apply Coupon Code
+        // 4. Apply Coupon Code & Remove by Type
+        function quickApplyCoupon(code) {
+            const input = document.getElementById('couponCodeInput');
+            if (input) input.value = code;
+            applyCouponCode();
+        }
+
         function applyCouponCode() {
             const input = document.getElementById('couponCodeInput');
             const msg = document.getElementById('couponMessage');
             if (!input || !input.value.trim()) {
                 if (msg) {
-                    msg.className = 'text-[11px] mt-1.5 font-medium text-rose-600';
-                    msg.textContent = 'Vui lòng nhập mã giảm giá!';
+                    msg.className = 'text-[11px] mt-2 font-medium text-rose-600';
+                    msg.textContent = 'Vui lòng nhập mã ưu đãi!';
                 }
                 return;
             }
@@ -619,15 +756,40 @@
             .then(res => res.json())
             .then(data => {
                 if (msg) {
-                    msg.className = (data.success || data.status === 'success') ? 'text-[11px] mt-1.5 font-medium text-emerald-600' : 'text-[11px] mt-1.5 font-medium text-rose-600';
+                    msg.className = (data.success || data.status === 'success') ? 'text-[11px] mt-2 font-medium text-emerald-600' : 'text-[11px] mt-2 font-medium text-rose-600';
                     msg.textContent = data.message;
                 }
                 if (data.success || data.status === 'success') {
                     updateCartSummary(data);
-                    showToast('Đã áp dụng mã giảm giá!');
+                    showToast('Đã áp dụng mã ưu đãi!');
+                    input.value = '';
                 }
             })
             .catch(err => console.error('Lỗi coupon:', err));
+        }
+
+        function removeCouponType(type) {
+            const params = new URLSearchParams();
+            if (type) params.append('type', type);
+
+            fetch('/cart/remove-coupon', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                body: params.toString()
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.success) {
+                    updateCartSummary(data);
+                    const msg = document.getElementById('couponMessage');
+                    if (msg) {
+                        msg.className = 'text-[11px] mt-2 font-medium text-amber-700';
+                        msg.textContent = data.message;
+                    }
+                    showToast(data.message);
+                }
+            })
+            .catch(err => console.error('Lỗi gỡ mã:', err));
         }
 
         // 5. Checkout Modal Controls

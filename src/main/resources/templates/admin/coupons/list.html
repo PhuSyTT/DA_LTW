@@ -60,9 +60,10 @@
                 <thead class="table-light">
                     <tr>
                         <th class="ps-4">Mã Code</th>
-                        <th>Loại Giảm</th>
-                        <th>Mức Giảm</th>
-                        <th>Đơn Tối Thiểu</th>
+                        <th>Phân Loại</th>
+                        <th>Hình Thức</th>
+                        <th>Mức Ưu Đãi</th>
+                        <th>Điều Kiện Đơn Tối Thiểu</th>
                         <th>Giảm Tối Đa</th>
                         <th>Ràng Buộc Độ Cũ</th>
                         <th>Chi Nhánh Áp Dụng</th>
@@ -74,7 +75,7 @@
                 </thead>
                 <tbody>
                     <tr th:if="${coupons == null or #lists.isEmpty(coupons)}">
-                        <td th:colspan="${isAdmin ? 11 : 10}" class="text-center py-5 text-muted">
+                        <td th:colspan="${isAdmin ? 12 : 11}" class="text-center py-5 text-muted">
                             <i class="fas fa-ticket-alt fa-3x mb-3 opacity-25"></i>
                             <p class="fs-6">Chưa có mã giảm giá nào phù hợp với phạm vi quản lý.</p>
                         </td>
@@ -84,24 +85,49 @@
                             <span class="badge bg-primary font-monospace fs-6 px-3 py-1.5 shadow-sm" th:text="${cpn.code}">XACHO50</span>
                         </td>
                         <td>
+                            <span th:if="${cpn.isShippingCoupon()}" class="badge bg-success bg-opacity-10 text-success border border-success px-2.5 py-1 fw-bold">
+                                <i class="fas fa-motorcycle me-1"></i> VẬN CHUYỂN
+                            </span>
+                            <span th:if="${!cpn.isShippingCoupon()}" class="badge bg-primary bg-opacity-10 text-primary border border-primary px-2.5 py-1 fw-bold">
+                                <i class="fas fa-tag me-1"></i> ĐƠN HÀNG
+                            </span>
+                        </td>
+                        <td>
                             <span th:if="${cpn.discountType == 'PERCENT'}" class="badge bg-info bg-opacity-10 text-info border border-info px-2.5 py-1">
                                 <i class="fas fa-percent me-1"></i> Theo %
                             </span>
                             <span th:if="${cpn.discountType == 'FIXED_AMOUNT'}" class="badge bg-success bg-opacity-10 text-success border border-success px-2.5 py-1">
-                                <i class="fas fa-money-bill-wave me-1"></i> Số tiền cố định
+                                <i class="fas fa-money-bill-wave me-1"></i> Tiền mặt đơn
+                            </span>
+                            <span th:if="${cpn.discountType == 'FREESHIP'}" class="badge bg-emerald-subtle text-success border border-success px-2.5 py-1">
+                                <i class="fas fa-bolt me-1"></i> Freeship 100%
+                            </span>
+                            <span th:if="${cpn.discountType == 'SHIP_DISCOUNT'}" class="badge bg-warning bg-opacity-10 text-warning-emphasis border border-warning px-2.5 py-1">
+                                <i class="fas fa-truck me-1"></i> Giảm tiền ship
                             </span>
                         </td>
                         <td>
                             <strong class="text-primary fs-6"
+                                    th:if="${cpn.discountType == 'FREESHIP'}">
+                                Miễn Phí Ship
+                            </strong>
+                            <strong class="text-primary fs-6"
+                                    th:unless="${cpn.discountType == 'FREESHIP'}"
                                     th:text="${cpn.discountType == 'PERCENT' ? (cpn.discountValue + '%') : (#numbers.formatDecimal(cpn.discountValue, 0, 'COMMA', 0, 'POINT') + ' ₫')}">
                                 50%
                             </strong>
                         </td>
                         <td>
-                            <span class="small fw-semibold text-dark" th:text="${cpn.minOrderAmount != null and cpn.minOrderAmount > 0 ? (#numbers.formatDecimal(cpn.minOrderAmount, 0, 'COMMA', 0, 'POINT') + ' ₫') : 'Không giới hạn'}">100.000 ₫</span>
+                            <span th:if="${cpn.minOrderAmount != null and cpn.minOrderAmount > 0}" class="small fw-bold text-danger">
+                                <i class="fas fa-circle-exclamation me-1 text-warning"></i>
+                                ≥ <span th:text="${#numbers.formatDecimal(cpn.minOrderAmount, 0, 'COMMA', 0, 'POINT')} + ' ₫'">100.000 ₫</span>
+                            </span>
+                            <span th:unless="${cpn.minOrderAmount != null and cpn.minOrderAmount > 0}" class="small text-muted">
+                                Mọi đơn (≥ 0₫)
+                            </span>
                         </td>
                         <td>
-                            <span class="small text-muted" th:text="${cpn.maxDiscountAmount != null ? (#numbers.formatDecimal(cpn.maxDiscountAmount, 0, 'COMMA', 0, 'POINT') + ' ₫') : 'Không giới hạn'}">50.000 ₫</span>
+                            <span class="small text-muted" th:text="${cpn.maxDiscountAmount != null and cpn.maxDiscountAmount > 0 ? ('Tối đa ' + #numbers.formatDecimal(cpn.maxDiscountAmount, 0, 'COMMA', 0, 'POINT') + ' ₫') : 'Không giới hạn'}">50.000 ₫</span>
                         </td>
                         <td>
                             <span th:if="${cpn.applicableConditionGrade != null}" class="badge bg-warning bg-opacity-10 text-dark border border-warning px-2.5 py-1">
@@ -192,32 +218,49 @@
                                 <div class="form-text">Mã viết liền không dấu, sẽ tự động chuyển thành chữ hoa.</div>
                             </div>
 
+                            <!-- Phân loại nhóm voucher -->
+                            <div class="col-md-6">
+                                <label class="form-label fw-bold">Phân Loại Voucher <span class="text-danger">*</span></label>
+                                <select class="form-select" id="couponCategorySelect" name="couponCategory" onchange="onCategorySelectChange()" required>
+                                    <option value="ORDER_DISCOUNT">🏷️ Voucher Giảm Giá Đơn Hàng (Tiền Sách)</option>
+                                    <option value="SHIPPING">🛵 Voucher Vận Chuyển (Miễn / Giảm Phí Ship)</option>
+                                </select>
+                                <div class="form-text">Chọn nhóm voucher để áp dụng cho tiền hàng hay phí vận chuyển.</div>
+                            </div>
+
                             <!-- Loại giảm giá -->
                             <div class="col-md-6">
                                 <label class="form-label fw-bold">Hình Thức Giảm Giá <span class="text-danger">*</span></label>
-                                <select class="form-select" name="discountType" required>
-                                    <option value="PERCENT">Giảm theo tỷ lệ phần trăm (%)</option>
-                                    <option value="FIXED_AMOUNT">Giảm theo số tiền cố định (VNĐ)</option>
+                                <select class="form-select" id="discountTypeSelect" name="discountType" required>
+                                    <option value="PERCENT" class="opt-order">Giảm theo tỷ lệ phần trăm (%)</option>
+                                    <option value="FIXED_AMOUNT" class="opt-order">Giảm theo số tiền cố định (VNĐ)</option>
+                                    <option value="FREESHIP" class="opt-shipping" style="display:none;">Miễn phí vận chuyển 100%</option>
+                                    <option value="SHIP_DISCOUNT" class="opt-shipping" style="display:none;">Giảm tiền phí ship cố định (VNĐ)</option>
                                 </select>
+                                <div class="form-text" id="discountTypeHelp">Chọn hình thức tính giảm giá.</div>
                             </div>
 
                             <!-- Giá trị giảm -->
                             <div class="col-md-4">
-                                <label class="form-label fw-bold">Mức Giảm <span class="text-danger">*</span></label>
-                                <input type="number" class="form-control" name="discountValue" min="1" step="any" placeholder="VD: 20 hoặc 50000" required>
-                                <div class="form-text">Nhập số % (VD: 20) hoặc số tiền (VD: 50000).</div>
+                                <label class="form-label fw-bold" id="discountValueLabel">Mức Giảm <span class="text-danger">*</span></label>
+                                <input type="number" class="form-control" id="discountValueInput" name="discountValue" min="0" step="any" placeholder="VD: 20 hoặc 50000" required>
+                                <div class="form-text" id="discountValueHelp">Nhập số % (VD: 20) hoặc số tiền (VD: 50000).</div>
                             </div>
 
                             <!-- Đơn tối thiểu -->
                             <div class="col-md-4">
-                                <label class="form-label fw-bold">Đơn Hàng Tối Thiểu (VNĐ)</label>
-                                <input type="number" class="form-control" name="minOrderAmount" min="0" step="1000" placeholder="0 nếu không yêu cầu">
+                                <label class="form-label fw-bold text-primary">
+                                    <i class="fas fa-bullseye me-1"></i> Đơn Tối Thiểu (VNĐ)
+                                </label>
+                                <input type="number" class="form-control" name="minOrderAmount" min="0" step="1000" placeholder="VD: 100000 (0 nếu không yêu cầu)">
+                                <div class="form-text">Đơn đạt từ mức này mới được dùng voucher.</div>
                             </div>
 
                             <!-- Giảm tối đa -->
                             <div class="col-md-4">
                                 <label class="form-label fw-bold">Giảm Tối Đa (VNĐ)</label>
-                                <input type="number" class="form-control" name="maxDiscountAmount" min="0" step="1000" placeholder="Chỉ áp dụng với giảm theo %">
+                                <input type="number" class="form-control" name="maxDiscountAmount" min="0" step="1000" placeholder="VD: 25000 (0 nếu không giới hạn)">
+                                <div class="form-text">Mức giảm kịch trần (VD: Freeship tối đa 25k).</div>
                             </div>
 
                             <hr class="my-3">
@@ -279,5 +322,39 @@
         </div>
     </div>
 </section>
+
+<script>
+    function onCategorySelectChange() {
+        const cat = document.getElementById('couponCategorySelect')?.value;
+        const typeSelect = document.getElementById('discountTypeSelect');
+        const orderOpts = document.querySelectorAll('.opt-order');
+        const shipOpts = document.querySelectorAll('.opt-shipping');
+        const valInput = document.getElementById('discountValueInput');
+        const valLabel = document.getElementById('discountValueLabel');
+        const valHelp = document.getElementById('discountValueHelp');
+
+        if (cat === 'SHIPPING') {
+            orderOpts.forEach(o => o.style.display = 'none');
+            shipOpts.forEach(o => o.style.display = 'block');
+            if (typeSelect) typeSelect.value = 'FREESHIP';
+            if (valLabel) valLabel.innerHTML = 'Mức Phí Ship Giảm (VNĐ)';
+            if (valInput) {
+                valInput.value = '25000';
+                valInput.min = '0';
+            }
+            if (valHelp) valHelp.innerHTML = 'Mặc định 25.000₫ (toàn bộ phí ship chuẩn), hoặc số tiền hỗ trợ ship.';
+        } else {
+            orderOpts.forEach(o => o.style.display = 'block');
+            shipOpts.forEach(o => o.style.display = 'none');
+            if (typeSelect) typeSelect.value = 'PERCENT';
+            if (valLabel) valLabel.innerHTML = 'Mức Giảm <span class="text-danger">*</span>';
+            if (valInput) {
+                valInput.value = '';
+                valInput.min = '1';
+            }
+            if (valHelp) valHelp.innerHTML = 'Nhập số % (VD: 20) hoặc số tiền mặt (VD: 50000).';
+        }
+    }
+</script>
 </body>
 </html>

@@ -63,25 +63,71 @@ public class CouponServiceImpl implements CouponService {
         }
 
         if (coupon.getMinOrderAmount() != null && applicableSubtotal.compareTo(coupon.getMinOrderAmount()) < 0) {
-            return new CouponValidateResponseDto(false, "Chưa đạt giá trị đơn hàng tối thiểu để dùng mã", BigDecimal.ZERO);
+            BigDecimal deficit = coupon.getMinOrderAmount().subtract(applicableSubtotal);
+            String categoryName = coupon.isShippingCoupon() ? "miễn phí vận chuyển" : "giảm giá";
+            return new CouponValidateResponseDto(
+                    false,
+                    "Chưa đạt điều kiện: Đơn hàng cần tối thiểu " + formatVnd(coupon.getMinOrderAmount()) +
+                            " để nhận ưu đãi " + categoryName + " (Hiện tại: " + formatVnd(applicableSubtotal) +
+                            ", mua thêm " + formatVnd(deficit) + ")",
+                    BigDecimal.ZERO
+            );
         }
 
-        // Tính số tiền giảm
+        // Phân biệt 2 loại mã: SHIPPING (Vận chuyển) vs ORDER_DISCOUNT (Đơn hàng)
+        String category = coupon.getCouponCategory();
+        String resolvedType = coupon.getDiscountType() != null ? coupon.getDiscountType().toUpperCase() : "FIXED_AMOUNT";
         BigDecimal discountAmount = BigDecimal.ZERO;
-        if ("PERCENT".equals(coupon.getDiscountType())) {
-            discountAmount = applicableSubtotal.multiply(coupon.getDiscountValue()).divide(new BigDecimal(100));
-            // Áp dụng mức giảm tối đa
-            if (coupon.getMaxDiscountAmount() != null && discountAmount.compareTo(coupon.getMaxDiscountAmount()) > 0) {
-                discountAmount = coupon.getMaxDiscountAmount();
-            }
-        } else if ("FIXED_AMOUNT".equals(coupon.getDiscountType())) {
-            discountAmount = coupon.getDiscountValue();
-            if (discountAmount.compareTo(applicableSubtotal) > 0) {
-                discountAmount = applicableSubtotal; // Không giảm quá số tiền hàng
-            }
-        }
+        BigDecimal shippingDiscountAmount = BigDecimal.ZERO;
 
-        return new CouponValidateResponseDto(true, "Áp dụng mã thành công", discountAmount);
+        if ("SHIPPING".equalsIgnoreCase(category) || "FREESHIP".equalsIgnoreCase(resolvedType) || "SHIP_DISCOUNT".equalsIgnoreCase(resolvedType)) {
+            category = "SHIPPING";
+            BigDecimal standardFee = new BigDecimal("25000");
+
+            if ("FREESHIP".equalsIgnoreCase(resolvedType) || (coupon.getDiscountValue() == null || coupon.getDiscountValue().compareTo(BigDecimal.ZERO) == 0)) {
+                resolvedType = "FREESHIP";
+                shippingDiscountAmount = standardFee;
+            } else {
+                resolvedType = "SHIP_DISCOUNT";
+                shippingDiscountAmount = coupon.getDiscountValue();
+            }
+
+            // Giới hạn giảm ship tối đa nếu có
+            if (coupon.getMaxDiscountAmount() != null && coupon.getMaxDiscountAmount().compareTo(BigDecimal.ZERO) > 0) {
+                shippingDiscountAmount = shippingDiscountAmount.min(coupon.getMaxDiscountAmount());
+            }
+
+            discountAmount = BigDecimal.ZERO; // Không giảm trực tiếp trên tiền hàng
+            String successMsg = "Áp dụng mã vận chuyển [" + coupon.getCode() + "] thành công: Giảm " + formatVnd(shippingDiscountAmount) + " phí ship!";
+            return new CouponValidateResponseDto(true, successMsg, coupon.getCode(), category, discountAmount, resolvedType, shippingDiscountAmount, coupon.getMinOrderAmount());
+
+        } else {
+            category = "ORDER_DISCOUNT";
+            if ("PERCENT".equalsIgnoreCase(resolvedType)) {
+                BigDecimal percent = coupon.getDiscountValue() != null ? coupon.getDiscountValue() : BigDecimal.ZERO;
+                discountAmount = applicableSubtotal.multiply(percent).divide(new BigDecimal(100));
+                // Áp dụng mức giảm tối đa
+                if (coupon.getMaxDiscountAmount() != null && coupon.getMaxDiscountAmount().compareTo(BigDecimal.ZERO) > 0) {
+                    if (discountAmount.compareTo(coupon.getMaxDiscountAmount()) > 0) {
+                        discountAmount = coupon.getMaxDiscountAmount();
+                    }
+                }
+            } else {
+                resolvedType = "FIXED_AMOUNT";
+                discountAmount = coupon.getDiscountValue() != null ? coupon.getDiscountValue() : BigDecimal.ZERO;
+                if (discountAmount.compareTo(applicableSubtotal) > 0) {
+                    discountAmount = applicableSubtotal; // Không giảm quá số tiền hàng
+                }
+            }
+
+            String successMsg = "Áp dụng mã giảm giá đơn hàng [" + coupon.getCode() + "] thành công: Giảm " + formatVnd(discountAmount) + " tiền sách!";
+            return new CouponValidateResponseDto(true, successMsg, coupon.getCode(), category, discountAmount, resolvedType, BigDecimal.ZERO, coupon.getMinOrderAmount());
+        }
+    }
+
+    private String formatVnd(BigDecimal amount) {
+        if (amount == null) return "0₫";
+        return String.format("%,d₫", amount.longValue()).replace(',', '.');
     }
 
     @Transactional(rollbackFor = Exception.class)

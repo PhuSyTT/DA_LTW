@@ -165,9 +165,15 @@
 
                 <!-- Branch & Shipping Info -->
                 <div class="px-5 py-3 bg-amber-50/40 border-b border-surface-container flex flex-wrap items-center justify-between text-xs gap-3">
-                    <div class="flex items-center gap-2 text-on-surface-variant">
-                        <i class="fas fa-store text-primary"></i>
-                        <span>Chi nhánh phụ trách soạn sách: <strong class="text-on-surface" th:text="${order.branchName} ?: 'Chi nhánh trung tâm'">Chi nhánh Quận 1</strong></span>
+                    <div class="flex items-center gap-3 flex-wrap">
+                        <div class="flex items-center gap-2 text-on-surface-variant">
+                            <i class="fas fa-store text-primary"></i>
+                            <span>Chi nhánh: <strong class="text-on-surface" th:text="${order.branchName} ?: 'Chi nhánh trung tâm'">Chi nhánh Quận 1</strong></span>
+                        </div>
+                        <div class="flex items-center gap-1.5 text-on-surface-variant" th:if="${order.paymentMethod}">
+                            <i class="fas fa-wallet text-primary"></i>
+                            <span>PTTT: <strong class="text-on-surface font-semibold" th:text="${order.paymentMethod == 'POS'} ? 'Tại quầy chi nhánh' : 'Thanh toán khi nhận (COD)'">COD</strong></span>
+                        </div>
                     </div>
                     <div th:if="${order.trackingNumber}" class="flex items-center gap-1.5 text-indigo-700 bg-indigo-50 px-2.5 py-1 rounded-md border border-indigo-200 font-mono font-semibold">
                         <i class="fas fa-truck"></i>

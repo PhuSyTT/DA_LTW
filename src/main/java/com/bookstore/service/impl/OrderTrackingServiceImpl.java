@@ -542,6 +542,8 @@ public class OrderTrackingServiceImpl implements OrderTrackingService {
             dto.setMasterOrderCode(master.getMasterOrderCode());
             dto.setCustomerName(master.getReceiverName());
             dto.setCustomerPhone(master.getReceiverPhone());
+            dto.setPaymentMethod(master.getPaymentMethod());
+            dto.setPaymentStatus(master.getPaymentStatus());
             if (master.getUser() != null) {
                 dto.setCustomerEmail(master.getUser().getEmail());
             }

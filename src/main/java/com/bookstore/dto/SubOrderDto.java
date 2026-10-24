@@ -34,6 +34,8 @@ public class SubOrderDto {
     private String deliveryStatus;
     private String estimatedDeliveryTime;
     private String deliveryNotes;
+    private String paymentMethod;
+    private String paymentStatus;
 
     public SubOrderDto() {
     }
@@ -244,5 +246,21 @@ public class SubOrderDto {
 
     public void setDeliveryNotes(String deliveryNotes) {
         this.deliveryNotes = deliveryNotes;
+    }
+
+    public String getPaymentMethod() {
+        return paymentMethod;
+    }
+
+    public void setPaymentMethod(String paymentMethod) {
+        this.paymentMethod = paymentMethod;
+    }
+
+    public String getPaymentStatus() {
+        return paymentStatus;
+    }
+
+    public void setPaymentStatus(String paymentStatus) {
+        this.paymentStatus = paymentStatus;
     }
 }

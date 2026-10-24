@@ -11,6 +11,8 @@ import com.bookstore.service.BranchService;
 import com.bookstore.service.CartService;
 import com.bookstore.service.OrderService;
 import jakarta.servlet.http.HttpSession;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -25,6 +27,8 @@ import java.util.Map;
 
 @Controller
 public class CartController {
+
+    private static final Logger logger = LoggerFactory.getLogger(CartController.class);
 
     private final CartService cartService;
     private final OrderService orderService;
@@ -275,44 +279,91 @@ public class CartController {
 
         try {
             List<Long> bookItemIds = new ArrayList<>();
+            Map<Long, Integer> itemQuantities = new HashMap<>();
+
             for (CartItemDto item : cart.getItems()) {
-                if (item.getBookItemId() != null) {
-                    bookItemIds.add(item.getBookItemId());
+                Long effectiveItemId = item.getBookItemId();
+
+                // Nếu item chưa có bookItemId, tự động tìm BookItem khả dụng tốt nhất của cuốn sách này
+                if (effectiveItemId == null && item.getBookId() != null) {
+                    List<BookItem> availItems = bookItemRepository.findAvailableItemsByBookId(item.getBookId());
+                    if (!availItems.isEmpty()) {
+                        BookItem best = availItems.stream()
+                                .filter(i -> i.getSellingPrice() != null && i.getStockQuantity() != null && i.getStockQuantity() > 0)
+                                .min(java.util.Comparator.comparing(BookItem::getSellingPrice))
+                                .orElse(availItems.get(0));
+                        effectiveItemId = best.getId();
+                        item.setBookItemId(best.getId());
+                        if (best.getBranch() != null) {
+                            item.setBranchId(best.getBranch().getId());
+                            item.setBranchName(best.getBranch().getBranchName());
+                        }
+                    } else {
+                        List<BookItem> anyItems = bookItemRepository.findByBookId(item.getBookId());
+                        if (!anyItems.isEmpty()) {
+                            effectiveItemId = anyItems.get(0).getId();
+                            item.setBookItemId(effectiveItemId);
+                        }
+                    }
+                }
+
+                if (effectiveItemId != null) {
+                    bookItemIds.add(effectiveItemId);
+                    itemQuantities.put(effectiveItemId, item.getQuantity());
                 }
             }
 
-            // Create checkout request
+            if (bookItemIds.isEmpty()) {
+                redirectAttributes.addFlashAttribute("errorMessage", "Không tìm thấy cuốn sách nào khả dụng trong kho để thanh toán. Vui lòng thử lại!");
+                return "redirect:/cart";
+            }
+
+            // Create checkout request with full synchronized data
             CheckoutRequestDto req = new CheckoutRequestDto();
             req.setReceiverName(receiverName);
             req.setReceiverPhone(receiverPhone);
             req.setShippingAddress(shippingAddress);
-            req.setPaymentMethod(paymentMethod);
+            String effectivePaymentMethod = ("POS".equalsIgnoreCase(paymentMethod) || clickAndCollect) ? "POS" : "COD";
+            req.setPaymentMethod(effectivePaymentMethod);
             req.setClickAndCollect(clickAndCollect);
             req.setPreferredBranchId(preferredBranchId);
             req.setBookItemIds(bookItemIds);
+            req.setItemQuantities(itemQuantities);
 
-            String orderCode = "DH-" + System.currentTimeMillis();
-            if (!bookItemIds.isEmpty()) {
-                try {
-                    com.bookstore.entity.User currentUser = (userDetails != null) ? userDetails.getUser() : null;
-                    MasterOrder masterOrder = orderService.processCheckout(req, currentUser);
-                    orderCode = masterOrder.getMasterOrderCode();
-                } catch (Exception ex) {
-                    // Fallback safe order simulation
-                }
-            }
+            // Pass amounts and discounts from cart
+            req.setTotalItemsAmount(cart.getSubtotal());
+            BigDecimal effectiveShippingFee = clickAndCollect ? BigDecimal.ZERO : cart.getShippingFee();
+            req.setShippingFee(effectiveShippingFee);
+            req.setDiscountAmount(cart.getDiscountAmount());
+            req.setShippingDiscountAmount(clickAndCollect ? BigDecimal.ZERO : cart.getShippingDiscountAmount());
+
+            BigDecimal finalAmount = clickAndCollect
+                    ? cart.getSubtotal().subtract(cart.getDiscountAmount()).max(BigDecimal.ZERO)
+                    : cart.getGrandTotal();
+            req.setFinalAmount(finalAmount);
+
+            req.setCouponCode(cart.getOrderCouponCode());
+            req.setShippingCouponCode(cart.getShippingCouponCode());
+
+            com.bookstore.entity.User currentUser = (userDetails != null) ? userDetails.getUser() : null;
+            MasterOrder masterOrder = orderService.processCheckout(req, currentUser);
 
             // Clear cart upon successful order placement
             cartService.clearCart(session);
 
             redirectAttributes.addFlashAttribute("orderSuccess", true);
-            redirectAttributes.addFlashAttribute("orderCode", orderCode);
+            redirectAttributes.addFlashAttribute("orderCode", masterOrder.getMasterOrderCode());
+            redirectAttributes.addFlashAttribute("orderId", masterOrder.getId());
+            redirectAttributes.addFlashAttribute("paymentMethod", masterOrder.getPaymentMethod());
+            redirectAttributes.addFlashAttribute("finalAmount", masterOrder.getFinalAmount());
             redirectAttributes.addFlashAttribute("receiverName", receiverName);
             redirectAttributes.addFlashAttribute("receiverPhone", receiverPhone);
             redirectAttributes.addFlashAttribute("shippingAddress", shippingAddress);
-            redirectAttributes.addFlashAttribute("successMessage", "Đặt hàng thành công! Đơn hàng " + orderCode + " đã được ghi nhận.");
+            redirectAttributes.addFlashAttribute("clickAndCollect", clickAndCollect);
+            redirectAttributes.addFlashAttribute("successMessage", "Đặt hàng thành công! Đơn hàng " + masterOrder.getMasterOrderCode() + " đã được ghi nhận trên toàn hệ thống.");
             return "redirect:/cart";
         } catch (Exception e) {
+            logger.error("Lỗi khi xử lý đặt hàng: ", e);
             redirectAttributes.addFlashAttribute("errorMessage", "Không thể hoàn tất đơn hàng: " + e.getMessage());
             return "redirect:/cart";
         }

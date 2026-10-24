@@ -392,6 +392,15 @@
                             <span class="text-on-surface-variant block text-[11px]">Địa chỉ giao hàng:</span>
                             <p class="text-on-surface leading-relaxed mt-0.5" th:text="${tracking.shippingAddress} ?: 'Nhận tại cửa hàng'">123 Phố Cổ, Hà Nội</p>
                         </div>
+                        <div class="pt-2 border-t border-surface-container">
+                            <span class="text-on-surface-variant block text-[11px]">Phương thức thanh toán:</span>
+                            <div class="flex items-center justify-between gap-2 mt-1">
+                                <strong class="text-on-surface" th:text="${tracking.paymentMethod == 'POS'} ? 'Thanh toán tại quầy chi nhánh' : 'Thanh toán khi nhận hàng (COD)'">COD</strong>
+                                <span class="px-2 py-0.5 rounded-full text-[10px] font-bold"
+                                      th:classappend="${tracking.paymentStatus == 'PAID' or tracking.paymentStatus == 'COMPLETED'} ? 'bg-emerald-100 text-emerald-800' : 'bg-amber-100 text-amber-800'"
+                                      th:text="${tracking.paymentStatus == 'PAID' or tracking.paymentStatus == 'COMPLETED'} ? 'Đã thanh toán' : 'Chờ thanh toán'">Chờ thanh toán</span>
+                            </div>
+                        </div>
                         <div th:if="${tracking.trackingNumber}" class="pt-2 border-t border-surface-container">
                             <span class="text-on-surface-variant block text-[11px]">Mã vận đơn đối tác:</span>
                             <div class="flex items-center justify-between gap-2 mt-1 p-2 rounded-lg bg-indigo-50 border border-indigo-200">

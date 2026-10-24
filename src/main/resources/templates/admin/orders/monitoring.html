@@ -234,6 +234,10 @@
                         <td>
                             <strong class="text-success font-monospace"
                                     th:text="${#numbers.formatDecimal(order.totalAmount, 0, 'COMMA', 0, 'POINT')} + ' đ'">100.000 đ</strong>
+                            <div th:if="${order.paymentMethod}" class="mt-1">
+                                <span class="badge bg-light text-dark border" style="font-size: 10px;"
+                                      th:text="${order.paymentMethod == 'POS'} ? 'Tại quầy' : 'COD'">COD</span>
+                            </div>
                         </td>
                         <td>
                             <span th:switch="${order.status}">

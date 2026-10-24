@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org"
       th:replace="~{layout/admin-layout :: html(
-        pageTitle=${isEdit} ? 'Chỉnh Sửa Mặt Hàng Sách Cũ' : 'Nhập Kho Sách Cũ Chi Nhánh (Nhóm 2)',
+        pageTitle=${isEdit} ? 'Chỉnh Sửa Mặt Hàng Sách Cũ' : 'Nhập Kho Sách Cũ Chi Nhánh',
         pageSubtitle='Chấm điểm tình trạng sách, định giá bán theo chi nhánh và tải ảnh thực tế Cloudinary',
         content=~{::section}
       )}">
@@ -14,7 +14,7 @@
         </a>
 
         <span class="badge bg-primary-subtle text-primary border border-primary-subtle px-3 py-2 fw-semibold">
-            <i class="fas fa-barcode me-1"></i> Quy trình Nghiệp vụ Nhóm 2
+            <i class="fas fa-barcode me-1"></i> Quy trình Nhập Kho Chi Nhánh
         </span>
     </div>
 

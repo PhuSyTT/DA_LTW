@@ -111,19 +111,99 @@
         </nav>
 
         <!-- Flash Messages (Order Success / Error) -->
-        <div th:if="${successMessage}" class="mb-6 p-4 rounded-2xl bg-emerald-50 border border-emerald-200 text-emerald-800 flex items-start gap-3 shadow-sm">
-            <i class="fas fa-circle-check text-xl text-emerald-600 mt-0.5"></i>
-            <div>
-                <h5 class="font-bold text-sm" th:text="${successMessage}">Thành công</h5>
-                <p class="text-xs text-emerald-700 mt-1" th:if="${orderCode}">
-                    Mã đơn hàng: <strong class="font-mono text-emerald-900" th:text="${orderCode}">DH-123</strong>. Chúng tôi sẽ liên hệ qua số điện thoại để xác nhận đơn và giao sách tới bạn.
-                </p>
-                <div class="mt-3 flex items-center gap-2">
-                    <a th:href="@{/my-orders}" href="/my-orders" class="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-emerald-700 text-white text-xs font-bold hover:bg-emerald-800 shadow-sm transition-all">
-                        <i class="fas fa-route"></i>
-                        <span>Xem &amp; Theo Dõi Tiến Độ Đơn Hàng (Timeline)</span>
-                    </a>
+        <div th:if="${orderSuccess}" class="mb-8 p-6 sm:p-8 rounded-3xl bg-gradient-to-br from-emerald-50 via-white to-amber-50/40 border border-emerald-300 shadow-lg">
+            <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 pb-5 border-b border-emerald-100">
+                <div class="flex items-center gap-3">
+                    <div class="w-12 h-12 rounded-2xl bg-emerald-600 text-white flex items-center justify-center text-2xl shadow-md shrink-0">
+                        <i class="fas fa-circle-check"></i>
+                    </div>
+                    <div>
+                        <span class="px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-emerald-100 text-emerald-800 uppercase tracking-wider">Đặt Hàng Thành Công</span>
+                        <h4 class="font-serif font-bold text-xl sm:text-2xl text-on-surface mt-0.5">Cảm ơn bạn đã đặt sách tại Book4Life!</h4>
+                        <p class="text-xs text-on-surface-variant">Dữ liệu đơn hàng đã được đồng bộ toàn diện trên hệ thống quản lý chuỗi chi nhánh.</p>
+                    </div>
                 </div>
+                <div class="text-left sm:text-right shrink-0">
+                    <span class="text-xs text-on-surface-variant block">Mã đơn hàng tổng:</span>
+                    <strong class="font-mono text-lg text-primary" th:text="${orderCode}">MO-1710000000</strong>
+                </div>
+            </div>
+
+            <!-- Order Financial & Customer Summary Grid -->
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4 my-5 text-xs text-on-surface">
+                <div class="p-3.5 rounded-2xl bg-white border border-outline/20">
+                    <span class="text-on-surface-variant font-medium block mb-1">
+                        <i class="fas fa-user text-primary mr-1"></i> Người nhận hàng:
+                    </span>
+                    <strong class="font-bold text-sm block" th:text="${receiverName}">Nguyễn Văn A</strong>
+                    <span class="text-on-surface-variant" th:text="'SĐT: ' + ${receiverPhone}">0901234567</span>
+                </div>
+
+                <div class="p-3.5 rounded-2xl bg-white border border-outline/20">
+                    <span class="text-on-surface-variant font-medium block mb-1">
+                        <i class="fas fa-location-dot text-primary mr-1"></i> Địa chỉ giao / Nhận:
+                    </span>
+                    <strong class="font-bold line-clamp-2" th:text="${shippingAddress}">123 Nguyễn Thị Minh Khai, Q.1, TP.HCM</strong>
+                    <span th:if="${clickAndCollect}" class="inline-block mt-1 px-2 py-0.5 rounded-md bg-amber-100 text-amber-800 text-[10px] font-bold">
+                        Nhận tại quầy (Click &amp; Collect)
+                    </span>
+                </div>
+
+                <div class="p-3.5 rounded-2xl bg-white border border-outline/20">
+                    <span class="text-on-surface-variant font-medium block mb-1">
+                        <i class="fas fa-wallet text-primary mr-1"></i> Tổng tiền &amp; Thanh toán:
+                    </span>
+                    <div class="text-lg font-bold text-primary font-serif"
+                         th:text="${finalAmount != null} ? ${#numbers.formatDecimal(finalAmount, 0, 'COMMA', 0, 'POINT')} + ' ₫' : '0 ₫'">0 ₫</div>
+                    <span class="inline-block mt-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold"
+                          th:classappend="${paymentMethod == 'POS'} ? 'bg-amber-100 text-amber-900 border border-amber-300' : 'bg-emerald-100 text-emerald-900 border border-emerald-300'"
+                          th:text="${paymentMethod == 'POS'} ? 'Thanh toán tại quầy chi nhánh' : 'Thanh toán khi nhận hàng (COD)'">
+                        COD
+                    </span>
+                </div>
+            </div>
+
+            <!-- PAYMENT SPECIFIC INSTRUCTION SECTIONS (ONLY 2 METHODS) -->
+            <!-- 1. POS (Mua trực tiếp / Nhận tại quầy) -->
+            <div th:if="${paymentMethod == 'POS'}"
+                 class="p-5 rounded-2xl bg-amber-50 border border-amber-200 text-xs mb-5 flex flex-col sm:flex-row items-center gap-5">
+                <div class="w-14 h-14 rounded-2xl bg-amber-600 text-white flex items-center justify-center text-2xl shrink-0 shadow-md">
+                    <i class="fas fa-store"></i>
+                </div>
+                <div class="flex-grow space-y-1">
+                    <h5 class="font-bold text-sm text-amber-900">Thanh Toán Trực Tiếp Tại Quầy Chi Nhánh</h5>
+                    <p class="text-amber-800">
+                        Sách của bạn đã được gửi yêu cầu giữ tại chi nhánh trong vòng <strong>48 giờ</strong>. Quý khách vui lòng ghé quầy thu ngân đọc mã đơn hàng <strong class="font-mono font-bold text-amber-950" th:text="${orderCode}">MO-123</strong> để thanh toán (bằng tiền mặt hoặc quẹt thẻ POS) và nhận sách.
+                    </p>
+                </div>
+            </div>
+
+            <!-- 2. COD (Giao hàng tận nơi) -->
+            <div th:if="${paymentMethod != 'POS'}"
+                 class="p-5 rounded-2xl bg-emerald-50 border border-emerald-200 text-xs mb-5 flex flex-col sm:flex-row items-center gap-5">
+                <div class="w-14 h-14 rounded-2xl bg-emerald-600 text-white flex items-center justify-center text-2xl shrink-0 shadow-md">
+                    <i class="fas fa-truck-fast"></i>
+                </div>
+                <div class="flex-grow space-y-1">
+                    <h5 class="font-bold text-sm text-emerald-900">Giao Hàng Tận Nơi &amp; Thanh Toán Khi Nhận (COD)</h5>
+                    <p class="text-emerald-800">
+                        Chi nhánh phụ trách đang tiến hành đóng gói sách. Nhân viên giao hàng sẽ liên hệ với quý khách qua số điện thoại <strong class="font-semibold text-emerald-950" th:text="${receiverPhone}">0901234567</strong> trước khi giao. Quý khách vui lòng thanh toán tiền mặt khi nhận hàng.
+                    </p>
+                </div>
+            </div>
+
+            <!-- Action Buttons -->
+            <div class="flex flex-wrap items-center gap-3 pt-2">
+                <a th:href="@{/my-orders}" href="/my-orders"
+                   class="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-primary text-white text-xs font-bold hover:bg-primary-hover shadow-md hover:scale-105 active:scale-95 transition-all">
+                    <i class="fas fa-route"></i>
+                    <span>Xem &amp; Theo Dõi Tiến Độ Đơn Hàng (Timeline)</span>
+                </a>
+                <a th:href="@{/books}" href="/books"
+                   class="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl border border-outline/30 text-on-surface hover:bg-surface text-xs font-bold transition-all">
+                    <i class="fas fa-book"></i>
+                    <span>Tiếp Tục Khám Phá Kho Sách</span>
+                </a>
             </div>
         </div>
 
@@ -506,17 +586,45 @@
                     </p>
                 </div>
 
-                <!-- Payment Method -->
+                <!-- Payment Method Selection (2 Methods Only: COD & POS) -->
                 <div>
-                    <label class="block text-xs font-bold text-on-surface-variant mb-1.5">Phương thức thanh toán</label>
-                    <div class="grid grid-cols-2 gap-3">
-                        <label class="border border-outline/40 rounded-xl p-3 flex items-center gap-2 cursor-pointer hover:border-primary has-checked:border-primary has-checked:bg-primary-container/20">
-                            <input type="radio" name="paymentMethod" value="COD" checked class="text-primary focus:ring-primary">
-                            <span class="text-xs font-bold text-on-surface">Thanh toán khi nhận (COD)</span>
+                    <label class="block text-xs font-bold text-on-surface-variant mb-1.5 flex items-center justify-between">
+                        <span>Phương thức thanh toán <span class="text-rose-600">*</span></span>
+                        <span class="text-[11px] font-normal text-primary">An toàn &amp; Tiện lợi</span>
+                    </label>
+                    <div class="space-y-2.5" id="paymentMethodGroup">
+                        <!-- 1. COD -->
+                        <label id="codOptionWrapper" class="payment-option border border-outline/30 rounded-2xl p-3.5 flex items-start gap-3 cursor-pointer hover:border-primary hover:bg-surface transition-all has-checked:border-primary has-checked:bg-amber-500/10 has-checked:ring-1 has-checked:ring-primary">
+                            <input type="radio" name="paymentMethod" value="COD" id="codRadioInput" checked class="mt-1 text-primary focus:ring-primary">
+                            <div class="flex-grow">
+                                <div class="flex items-center gap-2">
+                                    <span class="w-7 h-7 rounded-lg bg-emerald-100 text-emerald-700 flex items-center justify-center text-xs shrink-0">
+                                        <i class="fas fa-money-bill-wave"></i>
+                                    </span>
+                                    <strong class="text-xs font-bold text-on-surface">Thanh toán khi nhận hàng (COD)</strong>
+                                    <span class="ml-auto px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-100 text-emerald-800">Giao tận nơi</span>
+                                </div>
+                                <p class="text-[11px] text-on-surface-variant mt-1 leading-relaxed">
+                                    Thanh toán bằng tiền mặt trực tiếp cho nhân viên giao hàng khi nhận sách tại địa chỉ của bạn.
+                                </p>
+                            </div>
                         </label>
-                        <label class="border border-outline/40 rounded-xl p-3 flex items-center gap-2 cursor-pointer hover:border-primary has-checked:border-primary has-checked:bg-primary-container/20">
-                            <input type="radio" name="paymentMethod" value="QR_TRANSFER" class="text-primary focus:ring-primary">
-                            <span class="text-xs font-bold text-on-surface">Chuyển khoản / Quét mã QR</span>
+
+                        <!-- 2. POS / Mua trực tiếp tại quầy -->
+                        <label id="posOptionWrapper" class="payment-option border border-outline/30 rounded-2xl p-3.5 flex items-start gap-3 cursor-pointer hover:border-primary hover:bg-surface transition-all has-checked:border-primary has-checked:bg-amber-500/10 has-checked:ring-1 has-checked:ring-primary">
+                            <input type="radio" name="paymentMethod" value="POS" id="posRadioInput" class="mt-1 text-primary focus:ring-primary">
+                            <div class="flex-grow">
+                                <div class="flex items-center gap-2">
+                                    <span class="w-7 h-7 rounded-lg bg-amber-100 text-amber-800 flex items-center justify-center text-xs shrink-0">
+                                        <i class="fas fa-store"></i>
+                                    </span>
+                                    <strong class="text-xs font-bold text-on-surface">Thanh toán tại quầy nếu mua trực tiếp</strong>
+                                    <span class="ml-auto px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-100 text-amber-900">Tại chi nhánh</span>
+                                </div>
+                                <p class="text-[11px] text-on-surface-variant mt-1 leading-relaxed">
+                                    Dành cho khách mua trực tiếp hoặc chọn <strong>Giữ sách tại quầy (Click &amp; Collect)</strong>. Thanh toán bằng tiền mặt hoặc quẹt thẻ POS khi đến chi nhánh nhận sách.
+                                </p>
+                            </div>
                         </label>
                     </div>
                 </div>
@@ -792,7 +900,29 @@
             .catch(err => console.error('Lỗi gỡ mã:', err));
         }
 
-        // 5. Checkout Modal Controls
+        // 5. Checkout Modal Controls & Copy Utilities
+        function copyToClipboard(elementId) {
+            const el = document.getElementById(elementId);
+            if (!el) return;
+            const text = el.innerText || el.textContent;
+            copyText(text);
+        }
+
+        function copyText(text) {
+            if (!text) return;
+            navigator.clipboard.writeText(text).then(() => {
+                showToast('Đã sao chép: ' + text);
+            }).catch(err => {
+                const ta = document.createElement('textarea');
+                ta.value = text;
+                document.body.appendChild(ta);
+                ta.select();
+                document.execCommand('copy');
+                document.body.removeChild(ta);
+                showToast('Đã sao chép: ' + text);
+            });
+        }
+
         function openCheckoutModal() {
             const modal = document.getElementById('checkoutModal');
             if (modal) modal.classList.remove('hidden');
@@ -802,6 +932,22 @@
             const modal = document.getElementById('checkoutModal');
             if (modal) modal.classList.add('hidden');
         }
+
+        // Tự động điều chỉnh phương thức thanh toán khi tích Click & Collect
+        document.addEventListener('DOMContentLoaded', () => {
+            const clickAndCollectCheckbox = document.getElementById('clickAndCollect');
+            const posRadio = document.getElementById('posRadioInput');
+            const codRadio = document.querySelector('input[name="paymentMethod"][value="COD"]');
+            if (clickAndCollectCheckbox) {
+                clickAndCollectCheckbox.addEventListener('change', (e) => {
+                    if (e.target.checked && posRadio) {
+                        posRadio.checked = true;
+                    } else if (!e.target.checked && codRadio) {
+                        codRadio.checked = true;
+                    }
+                });
+            }
+        });
 
         // 6. Best Price & Branch Selection
         function applyBestPriceForItem(bookId, targetBookItemId) {

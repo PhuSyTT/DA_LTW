@@ -30,8 +30,8 @@ public class CustomerOrderController {
         if (userDetails == null) {
             return "redirect:/login?redirect=/my-orders";
         }
-        User user = userDetails.getUser();
-        List<SubOrderDto> orders = orderTrackingService.getCustomerSubOrders(user.getId());
+        Long userId = userDetails.getId();
+        List<SubOrderDto> orders = orderTrackingService.getCustomerSubOrders(userId);
         model.addAttribute("orders", orders);
         model.addAttribute("pageTitle", "Đơn Hàng Của Tôi - Book4Life");
         return "customer/orders";

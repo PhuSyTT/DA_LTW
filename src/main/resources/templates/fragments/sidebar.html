@@ -32,7 +32,7 @@
             <div sec:authorize="!hasAnyAuthority('ROLE_ADMIN', 'ADMIN')" class="nav-section-title">Danh Mục Sách</div>
             <a th:href="@{/admin/categories}" class="sidebar-link" th:classappend="${activeMenu == 'categories'} ? 'active' : ''">
                 <i class="fas fa-layer-group text-primary"></i>
-                <span>Phân Loại Sách <span class="badge bg-secondary ms-auto" style="font-size: 0.65rem;">Thể loại</span></span>
+                <span>Phân Loại Sách</span>
             </a>
         </div>
 
@@ -41,48 +41,48 @@
         <a sec:authorize="hasAnyAuthority('ROLE_ADMIN', 'ADMIN', 'ROLE_BRANCH_MANAGER', 'BRANCH_MANAGER', 'ROLE_CASHIER', 'CASHIER', 'ROLE_STAFF_GENERAL', 'STAFF_GENERAL')"
            th:href="@{/admin/pos}" class="sidebar-link" th:classappend="${activeMenu == 'pos'} ? 'active' : ''">
             <i class="fas fa-cash-register text-success"></i>
-            <span>Bán Hàng Quầy (POS) <span class="badge bg-success ms-auto" style="font-size: 0.65rem;">Quầy</span></span>
+            <span>Bán Hàng Quầy (POS)</span>
         </a>
 
         <!-- Tồn kho chi nhánh -->
         <a th:href="@{/admin/inventory}" class="sidebar-link" th:classappend="${activeMenu == 'inventory'} ? 'active' : ''">
             <i class="fas fa-boxes-stacked"></i>
-            <span>Tồn Kho Chi Nhánh <span class="badge bg-warning text-dark ms-auto" style="font-size: 0.65rem;">N2</span></span>
+            <span>Tồn Kho Chi Nhánh</span>
         </a>
 
         <!-- Đơn hàng phân bổ -->
         <a sec:authorize="hasAnyAuthority('ROLE_ADMIN', 'ADMIN', 'ROLE_BRANCH_MANAGER', 'BRANCH_MANAGER', 'ROLE_CASHIER', 'CASHIER', 'ROLE_STAFF_GENERAL', 'STAFF_GENERAL', 'ROLE_WAREHOUSE_STAFF', 'WAREHOUSE_STAFF')"
            th:href="@{/admin/fulfillment}" class="sidebar-link" th:classappend="${activeMenu == 'fulfillment'} ? 'active' : ''">
             <i class="fas fa-truck-ramp-box"></i>
-            <span>Đơn Hàng Phân Bổ <span class="badge bg-primary ms-auto" style="font-size: 0.65rem;">N4</span></span>
+            <span>Đơn Hàng Phân Bổ</span>
         </a>
 
         <!-- Săn sách (Wishlist) -->
         <a sec:authorize="hasAnyAuthority('ROLE_ADMIN', 'ADMIN', 'ROLE_BRANCH_MANAGER', 'BRANCH_MANAGER')"
            th:href="@{/admin/wishlists}" class="sidebar-link" th:classappend="${activeMenu == 'wishlists'} ? 'active' : ''">
             <i class="fas fa-heart"></i>
-            <span>Săn Sách (Wishlist) <span class="badge bg-danger ms-auto" style="font-size: 0.65rem;">N6</span></span>
+            <span>Săn Sách (Wishlist)</span>
         </a>
 
         <!-- Luân chuyển kho -->
         <a sec:authorize="hasAnyAuthority('ROLE_ADMIN', 'ADMIN', 'ROLE_BRANCH_MANAGER', 'BRANCH_MANAGER', 'ROLE_WAREHOUSE_STAFF', 'WAREHOUSE_STAFF')"
            th:href="@{/admin/transfers}" class="sidebar-link" th:classappend="${activeMenu == 'transfers'} ? 'active' : ''">
             <i class="fas fa-dolly"></i>
-            <span>Luân Chuyển Kho <span class="badge bg-info text-dark ms-auto" style="font-size: 0.65rem;">N5</span></span>
+            <span>Luân Chuyển Kho</span>
         </a>
 
         <!-- Khuyến mãi & Coupon (Admin & Branch Manager) -->
         <a sec:authorize="hasAnyAuthority('ROLE_ADMIN', 'ADMIN', 'ROLE_BRANCH_MANAGER', 'BRANCH_MANAGER')"
            th:href="@{/admin/coupons}" class="sidebar-link" th:classappend="${activeMenu == 'coupons'} ? 'active' : ''">
             <i class="fas fa-ticket-simple"></i>
-            <span>Khuyến Mãi & Coupon <span class="badge bg-success ms-auto" style="font-size: 0.65rem;">N7</span></span>
+            <span>Khuyến Mãi & Coupon</span>
         </a>
 
         <!-- Thu mua sách cũ (Appraiser, Branch Manager, Admin) -->
         <a sec:authorize="hasAnyAuthority('ROLE_ADMIN', 'ADMIN', 'ROLE_BRANCH_MANAGER', 'BRANCH_MANAGER', 'ROLE_STAFF_APPRAISER', 'STAFF_APPRAISER', 'ROLE_WAREHOUSE_STAFF', 'WAREHOUSE_STAFF')"
            th:href="@{/admin/trade-in}" class="sidebar-link" th:classappend="${activeMenu == 'tradeIn'} ? 'active' : ''">
             <i class="fas fa-hand-holding-dollar"></i>
-            <span>Thu Mua Sách Cũ <span class="badge bg-warning text-dark ms-auto" style="font-size: 0.65rem;">N8</span></span>
+            <span>Thu Mua Sách Cũ</span>
         </a>
 
         <div class="nav-section-title mt-3">Giám Sát & Báo Cáo</div>
@@ -90,18 +90,18 @@
         <a sec:authorize="hasAnyAuthority('ROLE_ADMIN', 'ADMIN', 'ROLE_BRANCH_MANAGER', 'BRANCH_MANAGER')"
            th:href="@{/admin/analytics}" class="sidebar-link" th:classappend="${activeMenu == 'analytics'} ? 'active' : ''">
             <i class="fas fa-chart-pie text-primary"></i>
-            <span>Báo Cáo & Thống Kê <span class="badge bg-primary ms-auto" style="font-size: 0.65rem;">BI</span></span>
+            <span>Báo Cáo & Thống Kê</span>
         </a>
 
         <a sec:authorize="hasAnyAuthority('ROLE_ADMIN', 'ADMIN', 'ROLE_BRANCH_MANAGER', 'BRANCH_MANAGER')"
            th:href="@{/admin/orders/monitoring}" class="sidebar-link" th:classappend="${activeMenu == 'orderMonitoring'} ? 'active' : ''">
             <i class="fas fa-chart-line"></i>
-            <span>Giám Sát Tiến Độ <span class="badge bg-danger ms-auto" style="font-size: 0.65rem;">HQ</span></span>
+            <span>Giám Sát Tiến Độ</span>
         </a>
         <a sec:authorize="hasAnyAuthority('ROLE_ADMIN', 'ADMIN', 'ROLE_BRANCH_MANAGER', 'BRANCH_MANAGER')"
            th:href="@{/admin/orders/audit-logs}" class="sidebar-link" th:classappend="${activeMenu == 'orderAuditLogs'} ? 'active' : ''">
             <i class="fas fa-clock-rotate-left"></i>
-            <span>Nhật Ký Đơn Hàng <span class="badge bg-secondary ms-auto" style="font-size: 0.65rem;">Audit</span></span>
+            <span>Nhật Ký Đơn Hàng</span>
         </a>
 
         <!-- Hệ thống (Chỉ ADMIN) -->

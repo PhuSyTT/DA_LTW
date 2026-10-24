@@ -29,6 +29,32 @@ public class SubOrder {
     private String trackingNumber;
     private String status = "PENDING"; // PENDING, CONFIRMED, PACKING, SHIPPED, COMPLETED, CANCELLED
 
+    // Driver & Delivery Management
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "driver_id")
+    private Driver driver;
+
+    @Column(name = "shipper_name", length = 100)
+    private String shipperName;
+
+    @Column(name = "shipper_phone", length = 20)
+    private String shipperPhone;
+
+    @Column(name = "shipper_vehicle", length = 50)
+    private String shipperVehicle;
+
+    @Column(name = "shipping_carrier", length = 100)
+    private String shippingCarrier;
+
+    @Column(name = "delivery_status", length = 30)
+    private String deliveryStatus; // WAITING_SHIPPER, PICKED_UP, DELIVERING, DELIVERED, FAILED
+
+    @Column(name = "estimated_delivery_time")
+    private LocalDateTime estimatedDeliveryTime;
+
+    @Column(name = "delivery_notes", length = 500)
+    private String deliveryNotes;
+
     @Column(name = "cancel_reason", length = 500)
     private String cancelReason;
 
@@ -203,5 +229,69 @@ public class SubOrder {
 
     public void setUpdatedAt(LocalDateTime updatedAt) {
         this.updatedAt = updatedAt;
+    }
+
+    public Driver getDriver() {
+        return driver;
+    }
+
+    public void setDriver(Driver driver) {
+        this.driver = driver;
+    }
+
+    public String getShipperName() {
+        return shipperName;
+    }
+
+    public void setShipperName(String shipperName) {
+        this.shipperName = shipperName;
+    }
+
+    public String getShipperPhone() {
+        return shipperPhone;
+    }
+
+    public void setShipperPhone(String shipperPhone) {
+        this.shipperPhone = shipperPhone;
+    }
+
+    public String getShipperVehicle() {
+        return shipperVehicle;
+    }
+
+    public void setShipperVehicle(String shipperVehicle) {
+        this.shipperVehicle = shipperVehicle;
+    }
+
+    public String getShippingCarrier() {
+        return shippingCarrier;
+    }
+
+    public void setShippingCarrier(String shippingCarrier) {
+        this.shippingCarrier = shippingCarrier;
+    }
+
+    public String getDeliveryStatus() {
+        return deliveryStatus;
+    }
+
+    public void setDeliveryStatus(String deliveryStatus) {
+        this.deliveryStatus = deliveryStatus;
+    }
+
+    public LocalDateTime getEstimatedDeliveryTime() {
+        return estimatedDeliveryTime;
+    }
+
+    public void setEstimatedDeliveryTime(LocalDateTime estimatedDeliveryTime) {
+        this.estimatedDeliveryTime = estimatedDeliveryTime;
+    }
+
+    public String getDeliveryNotes() {
+        return deliveryNotes;
+    }
+
+    public void setDeliveryNotes(String deliveryNotes) {
+        this.deliveryNotes = deliveryNotes;
     }
 }

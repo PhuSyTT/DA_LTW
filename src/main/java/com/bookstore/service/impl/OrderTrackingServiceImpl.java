@@ -105,6 +105,18 @@ public class OrderTrackingServiceImpl implements OrderTrackingService {
         dto.setCancelledAt(subOrder.getCancelledAt());
         dto.setCancelReason(subOrder.getCancelReason());
 
+        // Driver & Delivery Info
+        if (subOrder.getDriver() != null) {
+            dto.setDriverId(subOrder.getDriver().getId());
+        }
+        dto.setShipperName(subOrder.getShipperName());
+        dto.setShipperPhone(subOrder.getShipperPhone());
+        dto.setShipperVehicle(subOrder.getShipperVehicle());
+        dto.setShippingCarrier(subOrder.getShippingCarrier());
+        dto.setDeliveryStatus(subOrder.getDeliveryStatus());
+        dto.setEstimatedDeliveryTime(subOrder.getEstimatedDeliveryTime());
+        dto.setDeliveryNotes(subOrder.getDeliveryNotes());
+
         // Khách hàng có quyền hủy khi trạng thái là PENDING
         dto.setCanCancel("PENDING".equalsIgnoreCase(subOrder.getStatus()));
 
@@ -549,6 +561,18 @@ public class OrderTrackingServiceImpl implements OrderTrackingService {
         dto.setStatus(entity.getStatus());
         dto.setCreatedAt(entity.getCreatedAt());
         dto.setUpdatedAt(entity.getUpdatedAt());
+
+        // Driver & Delivery Info
+        if (entity.getDriver() != null) {
+            dto.setDriverId(entity.getDriver().getId());
+        }
+        dto.setShipperName(entity.getShipperName());
+        dto.setShipperPhone(entity.getShipperPhone());
+        dto.setShipperVehicle(entity.getShipperVehicle());
+        dto.setShippingCarrier(entity.getShippingCarrier());
+        dto.setDeliveryStatus(entity.getDeliveryStatus());
+        dto.setEstimatedDeliveryTime(entity.getEstimatedDeliveryTime() != null ? entity.getEstimatedDeliveryTime().toString() : null);
+        dto.setDeliveryNotes(entity.getDeliveryNotes());
 
         if (entity.getItems() != null) {
             dto.setItems(entity.getItems().stream().map(this::mapToItemDto).collect(Collectors.toList()));

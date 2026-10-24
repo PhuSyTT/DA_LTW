@@ -5,8 +5,10 @@ import com.bookstore.dto.SubOrderDto;
 import com.bookstore.dto.SubOrderItemDto;
 import com.bookstore.dto.UpdateSubOrderStatusDto;
 import com.bookstore.entity.*;
+import com.bookstore.entity.Driver;
 import com.bookstore.repository.BookItemRepository;
 import com.bookstore.repository.BranchRepository;
+import com.bookstore.repository.DriverRepository;
 import com.bookstore.repository.OrderStatusHistoryRepository;
 import com.bookstore.repository.SubOrderRepository;
 import com.bookstore.service.OrderFulfillmentService;
@@ -26,15 +28,18 @@ public class OrderFulfillmentServiceImpl implements OrderFulfillmentService {
     private final BookItemRepository bookItemRepository;
     private final BranchRepository branchRepository;
     private final OrderStatusHistoryRepository orderStatusHistoryRepository;
+    private final DriverRepository driverRepository;
 
     public OrderFulfillmentServiceImpl(SubOrderRepository subOrderRepository,
                                       BookItemRepository bookItemRepository,
                                       BranchRepository branchRepository,
-                                      OrderStatusHistoryRepository orderStatusHistoryRepository) {
+                                      OrderStatusHistoryRepository orderStatusHistoryRepository,
+                                      DriverRepository driverRepository) {
         this.subOrderRepository = subOrderRepository;
         this.bookItemRepository = bookItemRepository;
         this.branchRepository = branchRepository;
         this.orderStatusHistoryRepository = orderStatusHistoryRepository;
+        this.driverRepository = driverRepository;
     }
 
     @Override
@@ -101,15 +106,57 @@ public class OrderFulfillmentServiceImpl implements OrderFulfillmentService {
                 if (dto.getTrackingNumber() != null && !dto.getTrackingNumber().isBlank()) {
                     subOrder.setTrackingNumber(dto.getTrackingNumber().trim());
                 } else if (subOrder.getTrackingNumber() == null || subOrder.getTrackingNumber().isBlank()) {
-                    subOrder.setTrackingNumber("VNPOST-" + System.currentTimeMillis());
+                    subOrder.setTrackingNumber("B4L-SHIP-" + System.currentTimeMillis());
                 }
+
+                // Cập nhật tài xế nếu có
+                if (dto.getDriverId() != null) {
+                    Driver driver = driverRepository.findById(dto.getDriverId()).orElse(null);
+                    if (driver != null) {
+                        subOrder.setDriver(driver);
+                        subOrder.setShipperName(driver.getFullName());
+                        subOrder.setShipperPhone(driver.getPhone());
+                        subOrder.setShipperVehicle(driver.getVehicleType() + " - " + driver.getLicensePlate());
+                        subOrder.setShippingCarrier(driver.getCarrierName());
+                        driver.setActiveOrdersCount(driver.getActiveOrdersCount() != null ? driver.getActiveOrdersCount() + 1 : 1);
+                        driverRepository.save(driver);
+                    }
+                } else {
+                    if (dto.getShipperName() != null && !dto.getShipperName().isBlank()) {
+                        subOrder.setShipperName(dto.getShipperName().trim());
+                    }
+                    if (dto.getShipperPhone() != null && !dto.getShipperPhone().isBlank()) {
+                        subOrder.setShipperPhone(dto.getShipperPhone().trim());
+                    }
+                    if (dto.getShipperVehicle() != null && !dto.getShipperVehicle().isBlank()) {
+                        subOrder.setShipperVehicle(dto.getShipperVehicle().trim());
+                    }
+                    if (dto.getShippingCarrier() != null && !dto.getShippingCarrier().isBlank()) {
+                        subOrder.setShippingCarrier(dto.getShippingCarrier().trim());
+                    }
+                }
+
+                subOrder.setDeliveryStatus("DELIVERING");
+                subOrder.setEstimatedDeliveryTime(now.plusHours(2));
+                if (dto.getDeliveryNotes() != null && !dto.getDeliveryNotes().isBlank()) {
+                    subOrder.setDeliveryNotes(dto.getDeliveryNotes().trim());
+                }
+
                 subOrder.setStatus("SHIPPED");
                 subOrder.setShippedAt(now);
                 break;
 
             case "COMPLETED":
                 subOrder.setStatus("COMPLETED");
+                subOrder.setDeliveryStatus("DELIVERED");
                 subOrder.setCompletedAt(now);
+                if (subOrder.getDriver() != null) {
+                    Driver d = subOrder.getDriver();
+                    if (d.getActiveOrdersCount() != null && d.getActiveOrdersCount() > 0) {
+                        d.setActiveOrdersCount(d.getActiveOrdersCount() - 1);
+                        driverRepository.save(d);
+                    }
+                }
                 break;
 
             default:
@@ -203,6 +250,94 @@ public class OrderFulfillmentServiceImpl implements OrderFulfillmentService {
         return new FulfillmentStatsDto(branchId, branch.getBranchName(), pending, packing, shipped, completed, cancelled);
     }
 
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public SubOrderDto assignDriver(Long subOrderId, Long driverId, String customShipperName,
+                                   String customShipperPhone, String customLicensePlate,
+                                   String carrierName, String trackingNumber, String notes, User staff) {
+        SubOrder subOrder = subOrderRepository.findById(subOrderId)
+                .orElseThrow(() -> new RuntimeException("Không tìm thấy đơn hàng con với ID: " + subOrderId));
+
+        String currentStatus = subOrder.getStatus();
+        if ("CANCELLED".equals(currentStatus) || "COMPLETED".equals(currentStatus)) {
+            throw new RuntimeException("Đơn hàng đã kết thúc (" + currentStatus + "), không thể phân công tài xế!");
+        }
+
+        if (driverId != null) {
+            Driver driver = driverRepository.findById(driverId).orElse(null);
+            if (driver != null) {
+                subOrder.setDriver(driver);
+                subOrder.setShipperName(driver.getFullName());
+                subOrder.setShipperPhone(driver.getPhone());
+                subOrder.setShipperVehicle(driver.getVehicleType() + " - " + driver.getLicensePlate());
+                subOrder.setShippingCarrier(driver.getCarrierName());
+                driver.setActiveOrdersCount(driver.getActiveOrdersCount() != null ? driver.getActiveOrdersCount() + 1 : 1);
+                driverRepository.save(driver);
+            }
+        } else {
+            if (customShipperName != null && !customShipperName.isBlank()) {
+                subOrder.setShipperName(customShipperName.trim());
+            }
+            if (customShipperPhone != null && !customShipperPhone.isBlank()) {
+                subOrder.setShipperPhone(customShipperPhone.trim());
+            }
+            if (customLicensePlate != null && !customLicensePlate.isBlank()) {
+                subOrder.setShipperVehicle(customLicensePlate.trim());
+            }
+            if (carrierName != null && !carrierName.isBlank()) {
+                subOrder.setShippingCarrier(carrierName.trim());
+            } else {
+                subOrder.setShippingCarrier("Đội xe Book4Life");
+            }
+        }
+
+        if (trackingNumber != null && !trackingNumber.isBlank()) {
+            subOrder.setTrackingNumber(trackingNumber.trim());
+        } else if (subOrder.getTrackingNumber() == null || subOrder.getTrackingNumber().isBlank()) {
+            subOrder.setTrackingNumber("B4L-SHIP-" + System.currentTimeMillis());
+        }
+
+        LocalDateTime now = LocalDateTime.now();
+        subOrder.setStatus("SHIPPED");
+        subOrder.setShippedAt(now);
+        subOrder.setDeliveryStatus("DELIVERING");
+        subOrder.setEstimatedDeliveryTime(now.plusHours(2));
+        if (notes != null && !notes.isBlank()) {
+            subOrder.setDeliveryNotes(notes.trim());
+        }
+        subOrder.setUpdatedAt(now);
+
+        SubOrder saved = subOrderRepository.save(subOrder);
+
+        String logNote = "Đã phân công tài xế: " + (saved.getShipperName() != null ? saved.getShipperName() : "Shipper đối tác")
+                + " (" + (saved.getShipperPhone() != null ? saved.getShipperPhone() : "") + ")"
+                + " - Đơn vị: " + (saved.getShippingCarrier() != null ? saved.getShippingCarrier() : "Book4Life Express");
+        if (notes != null && !notes.isBlank()) {
+            logNote += ". Ghi chú: " + notes;
+        }
+
+        OrderStatusHistory history = new OrderStatusHistory(
+                saved,
+                saved.getMasterOrder(),
+                currentStatus,
+                "SHIPPED",
+                logNote,
+                staff,
+                saved.getBranch(),
+                saved.getBranch(),
+                "STATUS_CHANGE"
+        );
+        orderStatusHistoryRepository.save(history);
+
+        return mapToDto(saved);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<Driver> getAvailableDrivers(Long branchId) {
+        return driverRepository.findAvailableDriversForBranch(branchId);
+    }
+
     private SubOrderDto mapToDto(SubOrder entity) {
         SubOrderDto dto = new SubOrderDto();
         dto.setId(entity.getId());
@@ -224,6 +359,18 @@ public class OrderFulfillmentServiceImpl implements OrderFulfillmentService {
             dto.setBranchName(entity.getBranch().getBranchName());
             dto.setBranchAddress(entity.getBranch().getAddress());
         }
+
+        // Driver & Delivery Info
+        if (entity.getDriver() != null) {
+            dto.setDriverId(entity.getDriver().getId());
+        }
+        dto.setShipperName(entity.getShipperName());
+        dto.setShipperPhone(entity.getShipperPhone());
+        dto.setShipperVehicle(entity.getShipperVehicle());
+        dto.setShippingCarrier(entity.getShippingCarrier());
+        dto.setDeliveryStatus(entity.getDeliveryStatus());
+        dto.setEstimatedDeliveryTime(entity.getEstimatedDeliveryTime() != null ? entity.getEstimatedDeliveryTime().toString() : null);
+        dto.setDeliveryNotes(entity.getDeliveryNotes());
 
         if (entity.getMasterOrder() != null) {
             dto.setMasterOrderId(entity.getMasterOrder().getId());

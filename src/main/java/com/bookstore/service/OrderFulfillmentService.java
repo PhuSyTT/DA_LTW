@@ -18,4 +18,10 @@ public interface OrderFulfillmentService {
     FulfillmentStatsDto getBranchFulfillmentStats(Long branchId);
 
     void cancelAndRestockSubOrder(Long subOrderId, String reason, User staff);
+
+    SubOrderDto assignDriver(Long subOrderId, Long driverId, String customShipperName,
+                             String customShipperPhone, String customLicensePlate,
+                             String carrierName, String trackingNumber, String notes, User staff);
+
+    List<com.bookstore.entity.Driver> getAvailableDrivers(Long branchId);
 }

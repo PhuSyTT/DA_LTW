@@ -1,5 +1,6 @@
 package com.bookstore.controller.admin;
 
+import com.bookstore.dto.SubOrderDto;
 import com.bookstore.service.BranchService;
 import com.bookstore.service.MasterDataService;
 import com.bookstore.service.OrderFulfillmentService;
@@ -112,9 +113,13 @@ public class StaffPortalController {
             @AuthenticationPrincipal CustomUserDetails userDetails,
             Model model) {
         try {
-            model.addAttribute("order", fulfillmentService.getSubOrderDetail(subOrderId));
+            SubOrderDto orderDto = fulfillmentService.getSubOrderDetail(subOrderId);
+            model.addAttribute("order", orderDto);
             Long userId = userDetails != null ? userDetails.getId() : null;
             model.addAttribute("tracking", orderTrackingService.getSubOrderTimeline(subOrderId, userId, true));
+            if (orderDto != null && orderDto.getBranchId() != null) {
+                model.addAttribute("availableDrivers", fulfillmentService.getAvailableDrivers(orderDto.getBranchId()));
+            }
         } catch (Exception e) {
             model.addAttribute("errorMessage", e.getMessage());
         }

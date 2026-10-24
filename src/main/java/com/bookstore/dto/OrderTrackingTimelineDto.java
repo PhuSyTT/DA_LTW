@@ -30,6 +30,16 @@ public class OrderTrackingTimelineDto {
     private String paymentMethod;
     private String paymentStatus;
 
+    // Thông tin tài xế & giao vận
+    private Long driverId;
+    private String shipperName;
+    private String shipperPhone;
+    private String shipperVehicle;
+    private String shippingCarrier;
+    private String deliveryStatus;
+    private LocalDateTime estimatedDeliveryTime;
+    private String deliveryNotes;
+
     // Giá tiền
     private BigDecimal branchSubtotal = BigDecimal.ZERO;
     private BigDecimal branchShippingFee = BigDecimal.ZERO;
@@ -296,6 +306,70 @@ public class OrderTrackingTimelineDto {
 
     public void setHistoryLogs(List<OrderStatusHistoryDto> historyLogs) {
         this.historyLogs = historyLogs;
+    }
+
+    public Long getDriverId() {
+        return driverId;
+    }
+
+    public void setDriverId(Long driverId) {
+        this.driverId = driverId;
+    }
+
+    public String getShipperName() {
+        return shipperName;
+    }
+
+    public void setShipperName(String shipperName) {
+        this.shipperName = shipperName;
+    }
+
+    public String getShipperPhone() {
+        return shipperPhone;
+    }
+
+    public void setShipperPhone(String shipperPhone) {
+        this.shipperPhone = shipperPhone;
+    }
+
+    public String getShipperVehicle() {
+        return shipperVehicle;
+    }
+
+    public void setShipperVehicle(String shipperVehicle) {
+        this.shipperVehicle = shipperVehicle;
+    }
+
+    public String getShippingCarrier() {
+        return shippingCarrier;
+    }
+
+    public void setShippingCarrier(String shippingCarrier) {
+        this.shippingCarrier = shippingCarrier;
+    }
+
+    public String getDeliveryStatus() {
+        return deliveryStatus;
+    }
+
+    public void setDeliveryStatus(String deliveryStatus) {
+        this.deliveryStatus = deliveryStatus;
+    }
+
+    public LocalDateTime getEstimatedDeliveryTime() {
+        return estimatedDeliveryTime;
+    }
+
+    public void setEstimatedDeliveryTime(LocalDateTime estimatedDeliveryTime) {
+        this.estimatedDeliveryTime = estimatedDeliveryTime;
+    }
+
+    public String getDeliveryNotes() {
+        return deliveryNotes;
+    }
+
+    public void setDeliveryNotes(String deliveryNotes) {
+        this.deliveryNotes = deliveryNotes;
     }
 }
 

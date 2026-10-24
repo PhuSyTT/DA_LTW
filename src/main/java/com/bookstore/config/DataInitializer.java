@@ -1,7 +1,9 @@
 package com.bookstore.config;
 
 import com.bookstore.entity.*;
+import com.bookstore.entity.Driver;
 import com.bookstore.repository.*;
+import com.bookstore.repository.DriverRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.CommandLineRunner;

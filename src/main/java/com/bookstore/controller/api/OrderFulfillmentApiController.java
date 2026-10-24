@@ -78,4 +78,34 @@ public class OrderFulfillmentApiController {
         FulfillmentStatsDto stats = fulfillmentService.getBranchFulfillmentStats(branchId);
         return ResponseEntity.ok(stats);
     }
+
+    // Danh sách tài xế sẵn sàng theo chi nhánh
+    @GetMapping("/branch/{branchId}/drivers")
+    public ResponseEntity<?> getBranchDrivers(@PathVariable Long branchId) {
+        return ResponseEntity.ok(fulfillmentService.getAvailableDrivers(branchId));
+    }
+
+    // Phân công tài xế giao hàng
+    @PostMapping("/orders/{subOrderId}/assign-driver")
+    public ResponseEntity<?> assignDriver(
+            @PathVariable Long subOrderId,
+            @RequestParam(name = "driverId", required = false) Long driverId,
+            @RequestParam(name = "customShipperName", required = false) String customShipperName,
+            @RequestParam(name = "customShipperPhone", required = false) String customShipperPhone,
+            @RequestParam(name = "customLicensePlate", required = false) String customLicensePlate,
+            @RequestParam(name = "carrierName", required = false, defaultValue = "Đội xe Book4Life") String carrierName,
+            @RequestParam(name = "trackingNumber", required = false) String trackingNumber,
+            @RequestParam(name = "notes", required = false) String notes,
+            @AuthenticationPrincipal CustomUserDetails userDetails) {
+        try {
+            User staff = (userDetails != null) ? userDetails.getUser() : null;
+            SubOrderDto updated = fulfillmentService.assignDriver(
+                    subOrderId, driverId, customShipperName, customShipperPhone,
+                    customLicensePlate, carrierName, trackingNumber, notes, staff
+            );
+            return ResponseEntity.ok(updated);
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
+    }
 }

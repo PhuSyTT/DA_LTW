@@ -199,7 +199,7 @@
         </div>
 
         <!-- Orders Table with Dispatch Action -->
-        <div class="table-responsive">
+        <div class="table-responsive" style="overflow-x: auto; min-height: 250px;">
             <table class="table table-hover align-middle mb-0">
                 <thead class="table-light">
                     <tr>
@@ -216,12 +216,12 @@
                 <tbody>
                     <tr th:each="order : ${orders}">
                         <td>
-                            <span class="fw-bold font-monospace text-primary" th:text="${order.subOrderCode}">SUB-001</span>
+                            <span class="fw-bold font-monospace text-primary" th:text="${order.subOrderCode} ?: '—'">SUB-001</span>
                             <div th:if="${order.masterOrderCode}" class="small text-muted font-monospace">Đơn mẹ: <span th:text="${order.masterOrderCode}">MO-001</span></div>
                         </td>
                         <td>
-                            <div class="fw-semibold text-dark" th:text="${order.branchName}">Chi nhánh Q1</div>
-                            <small class="text-muted d-block text-truncate" style="max-width: 180px;" th:text="${order.branchAddress}">Địa chỉ chi nhánh</small>
+                            <div class="fw-semibold text-dark" th:text="${order.branchName} ?: 'Chưa phân chi nhánh'">Chi nhánh Q1</div>
+                            <small class="text-muted d-block text-truncate" style="max-width: 180px;" th:text="${order.branchAddress} ?: '—'">Địa chỉ chi nhánh</small>
                         </td>
                         <td>
                             <div class="fw-semibold" th:text="${order.customerName} ?: 'Khách hàng'">Nguyễn Văn A</div>
@@ -233,7 +233,7 @@
                         </td>
                         <td>
                             <strong class="text-success font-monospace"
-                                    th:text="${#numbers.formatDecimal(order.totalAmount, 0, 'COMMA', 0, 'POINT')} + ' đ'">100.000 đ</strong>
+                                    th:text="${order.totalAmount != null ? #numbers.formatDecimal(order.totalAmount, 0, 'COMMA', 0, 'POINT') + ' đ' : '0 đ'}">100.000 đ</strong>
                             <div th:if="${order.paymentMethod}" class="mt-1">
                                 <span class="badge bg-light text-dark border" style="font-size: 10px;"
                                       th:text="${order.paymentMethod == 'POS'} ? 'Tại quầy' : 'COD'">COD</span>
@@ -247,31 +247,34 @@
                                 <span th:case="'SHIPPED'" class="badge bg-primary text-white"><i class="fas fa-truck-fast me-1"></i>Đang giao hàng</span>
                                 <span th:case="'COMPLETED'" class="badge bg-success text-white"><i class="fas fa-circle-check me-1"></i>Hoàn thành</span>
                                 <span th:case="'CANCELLED'" class="badge bg-danger text-white"><i class="fas fa-ban me-1"></i>Đã hủy</span>
-                                <span th:case="*" class="badge bg-secondary" th:text="${order.status}">N/A</span>
+                                <span th:case="*" class="badge bg-secondary" th:text="${order.status} ?: 'N/A'">N/A</span>
                             </span>
                         </td>
                         <td>
                             <small class="text-muted font-monospace"
-                                   th:text="${#temporals.format(order.createdAt, 'dd/MM/yyyy HH:mm')}">01/01/2026</small>
+                                   th:text="${order.createdAt != null ? #temporals.format(order.createdAt, 'dd/MM/yyyy HH:mm') : '—'}">01/01/2026</small>
                         </td>
                         <td class="text-center">
                             <div class="btn-group btn-group-sm">
                                 <!-- Reassign Branch Button (Super Admin) -->
                                 <button th:if="${order.status != 'COMPLETED' and order.status != 'CANCELLED'}"
                                         type="button" class="btn btn-outline-warning text-dark"
-                                        th:onclick="'openReassignModal(' + ${order.id} + ', \'' + ${order.subOrderCode} + '\', ' + ${order.branchId} + ')'"
+                                        th:data-id="${order.id}"
+                                        th:data-code="${order.subOrderCode}"
+                                        th:data-branch-id="${order.branchId}"
+                                        onclick="openReassignModal(this.getAttribute('data-id'), this.getAttribute('data-code'), this.getAttribute('data-branch-id'))"
                                         title="Điều phối đơn sang chi nhánh khác">
                                     <i class="fas fa-shuffle me-1"></i> Điều Phối
                                 </button>
 
                                 <!-- View Timeline Button -->
-                                <a th:href="@{'/orders/' + ${order.id} + '/timeline'}" target="_blank"
+                                <a th:if="${order.id != null}" th:href="@{'/orders/' + ${order.id} + '/timeline'}" target="_blank"
                                    class="btn btn-outline-primary" title="Xem Timeline Tiến Trình">
                                     <i class="fas fa-route"></i>
                                 </a>
 
                                 <!-- View Audit Logs -->
-                                <a th:href="@{'/admin/orders/audit-logs?subOrderId=' + ${order.id}}"
+                                <a th:if="${order.id != null}" th:href="@{'/admin/orders/audit-logs?subOrderId=' + ${order.id}}"
                                    class="btn btn-outline-secondary" title="Xem Lịch Sử Audit Logs">
                                     <i class="fas fa-clock-rotate-left"></i>
                                 </a>
@@ -338,26 +341,30 @@
         </div>
     </div>
 
-</section>
-
-<script th:inline="javascript">
-    function openReassignModal(subOrderId, subOrderCode, currentBranchId) {
-        document.getElementById('modalSubOrderCode').innerText = subOrderCode;
-        document.getElementById('reassignForm').action = '/admin/orders/' + subOrderId + '/reassign';
-        
-        // Disable current branch option
-        const select = document.getElementById('modalNewBranchId');
-        for (let i = 0; i < select.options.length; i++) {
-            if (select.options[i].value == currentBranchId) {
-                select.options[i].disabled = true;
-            } else {
-                select.options[i].disabled = false;
+    <script th:inline="javascript">
+        function openReassignModal(subOrderId, subOrderCode, currentBranchId) {
+            document.getElementById('modalSubOrderCode').innerText = subOrderCode || '—';
+            document.getElementById('reassignForm').action = '/admin/orders/' + subOrderId + '/reassign';
+            
+            // Disable current branch option
+            const select = document.getElementById('modalNewBranchId');
+            if (select) {
+                for (let i = 0; i < select.options.length; i++) {
+                    if (currentBranchId && select.options[i].value == currentBranchId) {
+                        select.options[i].disabled = true;
+                    } else {
+                        select.options[i].disabled = false;
+                    }
+                }
+                select.value = '';
+            }
+            const modalEl = document.getElementById('reassignModal');
+            if (modalEl) {
+                new bootstrap.Modal(modalEl).show();
             }
         }
-        select.value = '';
-        new bootstrap.Modal(document.getElementById('reassignModal')).show();
-    }
-</script>
+    </script>
+</section>
 </body>
 </html>
 

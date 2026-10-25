@@ -202,12 +202,16 @@ public class OrderTrackingServiceImpl implements OrderTrackingService {
 
         // Lọc thêm theo ngày nếu người dùng chọn
         if (fromDate != null && !fromDate.isBlank()) {
-            LocalDate start = LocalDate.parse(fromDate);
-            list = list.stream().filter(s -> s.getCreatedAt() != null && !s.getCreatedAt().toLocalDate().isBefore(start)).collect(Collectors.toList());
+            try {
+                LocalDate start = LocalDate.parse(fromDate.trim());
+                list = list.stream().filter(s -> s.getCreatedAt() != null && !s.getCreatedAt().toLocalDate().isBefore(start)).collect(Collectors.toList());
+            } catch (Exception ignored) {}
         }
         if (toDate != null && !toDate.isBlank()) {
-            LocalDate end = LocalDate.parse(toDate);
-            list = list.stream().filter(s -> s.getCreatedAt() != null && !s.getCreatedAt().toLocalDate().isAfter(end)).collect(Collectors.toList());
+            try {
+                LocalDate end = LocalDate.parse(toDate.trim());
+                list = list.stream().filter(s -> s.getCreatedAt() != null && !s.getCreatedAt().toLocalDate().isAfter(end)).collect(Collectors.toList());
+            } catch (Exception ignored) {}
         }
 
         return list.stream().map(this::mapToSubOrderDto).collect(Collectors.toList());
@@ -323,12 +327,16 @@ public class OrderTrackingServiceImpl implements OrderTrackingService {
         List<SubOrder> list = subOrderRepository.filterAllOrders(branchId, cleanStatus, cleanKeyword);
 
         if (fromDate != null && !fromDate.isBlank()) {
-            LocalDate start = LocalDate.parse(fromDate);
-            list = list.stream().filter(s -> s.getCreatedAt() != null && !s.getCreatedAt().toLocalDate().isBefore(start)).collect(Collectors.toList());
+            try {
+                LocalDate start = LocalDate.parse(fromDate.trim());
+                list = list.stream().filter(s -> s.getCreatedAt() != null && !s.getCreatedAt().toLocalDate().isBefore(start)).collect(Collectors.toList());
+            } catch (Exception ignored) {}
         }
         if (toDate != null && !toDate.isBlank()) {
-            LocalDate end = LocalDate.parse(toDate);
-            list = list.stream().filter(s -> s.getCreatedAt() != null && !s.getCreatedAt().toLocalDate().isAfter(end)).collect(Collectors.toList());
+            try {
+                LocalDate end = LocalDate.parse(toDate.trim());
+                list = list.stream().filter(s -> s.getCreatedAt() != null && !s.getCreatedAt().toLocalDate().isAfter(end)).collect(Collectors.toList());
+            } catch (Exception ignored) {}
         }
 
         return list.stream().map(this::mapToSubOrderDto).collect(Collectors.toList());
@@ -553,6 +561,10 @@ public class OrderTrackingServiceImpl implements OrderTrackingService {
             dto.setBranchId(entity.getBranch().getId());
             dto.setBranchName(entity.getBranch().getBranchName());
             dto.setBranchAddress(entity.getBranch().getAddress());
+        } else {
+            dto.setBranchId(0L);
+            dto.setBranchName("Chưa phân chi nhánh");
+            dto.setBranchAddress("—");
         }
 
         dto.setBranchSubtotal(entity.getBranchSubtotal() != null ? entity.getBranchSubtotal() : BigDecimal.ZERO);
@@ -560,9 +572,9 @@ public class OrderTrackingServiceImpl implements OrderTrackingService {
         dto.setTotalAmount(dto.getBranchSubtotal().add(dto.getBranchShippingFee()));
 
         dto.setTrackingNumber(entity.getTrackingNumber());
-        dto.setStatus(entity.getStatus());
-        dto.setCreatedAt(entity.getCreatedAt());
-        dto.setUpdatedAt(entity.getUpdatedAt());
+        dto.setStatus(entity.getStatus() != null ? entity.getStatus() : "PENDING");
+        dto.setCreatedAt(entity.getCreatedAt() != null ? entity.getCreatedAt() : LocalDateTime.now());
+        dto.setUpdatedAt(entity.getUpdatedAt() != null ? entity.getUpdatedAt() : LocalDateTime.now());
 
         // Driver & Delivery Info
         if (entity.getDriver() != null) {

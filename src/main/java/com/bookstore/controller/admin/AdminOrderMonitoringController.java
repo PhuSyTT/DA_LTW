@@ -43,7 +43,12 @@ public class AdminOrderMonitoringController {
             @AuthenticationPrincipal CustomUserDetails userDetails,
             Model model) {
 
-        AdminOrderDashboardDto dashboard = orderTrackingService.getAdminDashboard();
+        AdminOrderDashboardDto dashboard;
+        try {
+            dashboard = orderTrackingService.getAdminDashboard();
+        } catch (Exception e) {
+            dashboard = new AdminOrderDashboardDto();
+        }
         List<Branch> branches = branchService.getAllActiveBranches();
 
         // Nếu là Quản lý chi nhánh (không phải Admin), tự động gắn chi nhánh của họ nếu chưa chọn
@@ -52,10 +57,16 @@ public class AdminOrderMonitoringController {
             branchId = userDetails.getBranchId();
         }
 
-        List<SubOrderDto> orders = orderTrackingService.getAllSubOrdersForAdmin(branchId, status, keyword, fromDate, toDate);
+        List<SubOrderDto> orders;
+        try {
+            orders = orderTrackingService.getAllSubOrdersForAdmin(branchId, status, keyword, fromDate, toDate);
+        } catch (Exception e) {
+            orders = new java.util.ArrayList<>();
+            model.addAttribute("errorMessage", "Không thể truy vấn danh sách đơn hàng: " + e.getMessage());
+        }
 
         model.addAttribute("dashboard", dashboard);
-        model.addAttribute("orders", orders);
+        model.addAttribute("orders", orders != null ? orders : new java.util.ArrayList<>());
         model.addAttribute("branches", branches);
         model.addAttribute("selectedBranchId", branchId);
         model.addAttribute("selectedStatus", status != null ? status : "ALL");

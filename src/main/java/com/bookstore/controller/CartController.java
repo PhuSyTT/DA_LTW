@@ -92,18 +92,9 @@ public class CartController {
             }
         }
 
-        return ResponseEntity.ok(Map.of(
-                "success", true,
-                "status", "success",
-                "totalQuantity", cart.getTotalQuantity(),
-                "count", cart.getTotalQuantity(),
-                "itemSubtotal", itemSubtotal,
-                "subtotal", cart.getSubtotal(),
-                "discountAmount", cart.getDiscountAmount(),
-                "shippingFee", cart.getShippingFee(),
-                "grandTotal", cart.getGrandTotal(),
-                "isEmpty", cart.isEmpty()
-        ));
+        Map<String, Object> resp = buildCartResponse(cart, "Đã cập nhật số lượng thành công!", true);
+        resp.put("itemSubtotal", itemSubtotal);
+        return ResponseEntity.ok(resp);
     }
 
     @PostMapping("/cart/remove")
@@ -113,17 +104,7 @@ public class CartController {
             HttpSession session
     ) {
         CartDto cart = cartService.removeFromCart(bookId, session);
-        return ResponseEntity.ok(Map.of(
-                "success", true,
-                "status", "success",
-                "totalQuantity", cart.getTotalQuantity(),
-                "count", cart.getTotalQuantity(),
-                "subtotal", cart.getSubtotal(),
-                "discountAmount", cart.getDiscountAmount(),
-                "shippingFee", cart.getShippingFee(),
-                "grandTotal", cart.getGrandTotal(),
-                "isEmpty", cart.isEmpty()
-        ));
+        return ResponseEntity.ok(buildCartResponse(cart, "Đã xóa sách khỏi giỏ hàng!", true));
     }
 
     @PostMapping("/cart/clear")
@@ -150,23 +131,7 @@ public class CartController {
         String msg = cart.getLastCouponMessage() != null ? cart.getLastCouponMessage() :
                 (applied ? "Áp dụng mã giảm giá thành công!" : "Mã không hợp lệ hoặc chưa đủ điều kiện!");
 
-        Map<String, Object> resp = new HashMap<>();
-        resp.put("success", applied);
-        resp.put("message", msg);
-        resp.put("couponCode", cart.getCouponCode());
-        resp.put("orderCouponCode", cart.getOrderCouponCode());
-        resp.put("orderCouponType", cart.getOrderCouponType());
-        resp.put("shippingCouponCode", cart.getShippingCouponCode());
-        resp.put("shippingCouponType", cart.getShippingCouponType());
-        resp.put("couponType", cart.getCouponType());
-        resp.put("discountAmount", cart.getDiscountAmount());
-        resp.put("shippingDiscountAmount", cart.getShippingDiscountAmount());
-        resp.put("shippingPromoMessage", cart.getShippingPromoMessage());
-        resp.put("baseShippingFee", cart.getBaseShippingFee());
-        resp.put("subtotal", cart.getSubtotal());
-        resp.put("shippingFee", cart.getShippingFee());
-        resp.put("grandTotal", cart.getGrandTotal());
-        return ResponseEntity.ok(resp);
+        return ResponseEntity.ok(buildCartResponse(cart, msg, applied));
     }
 
     @PostMapping("/cart/remove-coupon")
@@ -184,16 +149,8 @@ public class CartController {
             cart = cartService.removeCoupon(session);
         }
 
-        return ResponseEntity.ok(Map.of(
-                "success", true,
-                "message", cart.getLastCouponMessage() != null ? cart.getLastCouponMessage() : "Đã gỡ mã giảm giá",
-                "discountAmount", cart.getDiscountAmount(),
-                "shippingDiscountAmount", cart.getShippingDiscountAmount(),
-                "shippingFee", cart.getShippingFee(),
-                "orderCouponCode", cart.getOrderCouponCode() != null ? cart.getOrderCouponCode() : "",
-                "shippingCouponCode", cart.getShippingCouponCode() != null ? cart.getShippingCouponCode() : "",
-                "grandTotal", cart.getGrandTotal()
-        ));
+        String msg = cart.getLastCouponMessage() != null ? cart.getLastCouponMessage() : "Đã gỡ mã giảm giá";
+        return ResponseEntity.ok(buildCartResponse(cart, msg, true));
     }
 
     @PostMapping("/cart/switch-branch")
@@ -204,33 +161,40 @@ public class CartController {
             HttpSession session
     ) {
         CartDto cart = cartService.switchItemBranch(bookId, targetBookItemId, session);
-        return ResponseEntity.ok(Map.of(
-                "success", true,
-                "message", "Đã chuyển đổi chi nhánh và cập nhật giá mới thành công!",
-                "totalQuantity", cart.getTotalQuantity(),
-                "subtotal", cart.getSubtotal(),
-                "shippingFee", cart.getShippingFee(),
-                "discountAmount", cart.getDiscountAmount(),
-                "grandTotal", cart.getGrandTotal(),
-                "totalSavings", cart.getTotalSavingsPotential(),
-                "hasSavings", cart.hasSavingsAvailable()
-        ));
+        return ResponseEntity.ok(buildCartResponse(cart, "Đã chuyển đổi chi nhánh và cập nhật giá mới thành công!", true));
     }
 
     @PostMapping("/cart/optimize-best-price")
     @ResponseBody
     public ResponseEntity<?> optimizeBestPrice(HttpSession session) {
         CartDto cart = cartService.optimizeCartForBestPrice(session);
-        return ResponseEntity.ok(Map.of(
-                "success", true,
-                "message", "Toàn bộ giỏ hàng đã được tự động tối ưu sang các chi nhánh có giá tốt nhất!",
-                "subtotal", cart.getSubtotal(),
-                "shippingFee", cart.getShippingFee(),
-                "discountAmount", cart.getDiscountAmount(),
-                "grandTotal", cart.getGrandTotal(),
-                "totalSavings", cart.getTotalSavingsPotential(),
-                "hasSavings", cart.hasSavingsAvailable()
-        ));
+        return ResponseEntity.ok(buildCartResponse(cart, "Toàn bộ giỏ hàng đã được tự động tối ưu sang các chi nhánh có giá tốt nhất!", true));
+    }
+
+    private Map<String, Object> buildCartResponse(CartDto cart, String message, boolean success) {
+        Map<String, Object> resp = new HashMap<>();
+        resp.put("success", success);
+        resp.put("status", success ? "success" : "error");
+        resp.put("message", message != null ? message : "");
+        resp.put("totalQuantity", cart.getTotalQuantity());
+        resp.put("count", cart.getTotalQuantity());
+        resp.put("subtotal", cart.getSubtotal());
+        resp.put("discountAmount", cart.getDiscountAmount());
+        resp.put("shippingFee", cart.getShippingFee());
+        resp.put("baseShippingFee", cart.getBaseShippingFee());
+        resp.put("shippingDiscountAmount", cart.getShippingDiscountAmount());
+        resp.put("shippingPromoMessage", cart.getShippingPromoMessage());
+        resp.put("grandTotal", cart.getGrandTotal());
+        resp.put("isEmpty", cart.isEmpty());
+        resp.put("couponCode", cart.getCouponCode() != null ? cart.getCouponCode() : "");
+        resp.put("orderCouponCode", cart.getOrderCouponCode() != null ? cart.getOrderCouponCode() : "");
+        resp.put("orderCouponType", cart.getOrderCouponType() != null ? cart.getOrderCouponType() : "");
+        resp.put("shippingCouponCode", cart.getShippingCouponCode() != null ? cart.getShippingCouponCode() : "");
+        resp.put("shippingCouponType", cart.getShippingCouponType() != null ? cart.getShippingCouponType() : "");
+        resp.put("couponType", cart.getCouponType() != null ? cart.getCouponType() : "");
+        resp.put("totalSavings", cart.getTotalSavingsPotential());
+        resp.put("hasSavings", cart.hasSavingsAvailable());
+        return resp;
     }
 
     @GetMapping("/api/cart/book/{bookId}/branches")

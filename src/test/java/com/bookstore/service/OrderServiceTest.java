@@ -172,5 +172,35 @@ class OrderServiceTest {
         RuntimeException ex = assertThrows(RuntimeException.class, () -> orderService.processCheckout(req, sampleUser));
         assertTrue(ex.getMessage().contains("hết hàng"));
     }
+
+    @Test
+    @DisplayName("Xử lý tranh chấp 2 người cùng đặt 1 cuốn sách: Người thứ 2 bị chặn vì sách đã SOLD hoặc hết kho")
+    void testProcessCheckout_ConcurrentConflict_SecondUserBlocked() {
+        // Mô phỏng User 1 vừa đặt xong cuốn sách duy nhất (stock = 0, status = SOLD)
+        bookItem.setStockQuantity(0);
+        bookItem.setStatus("SOLD");
+        when(bookItemRepository.findByIdWithLock(1L)).thenReturn(Optional.of(bookItem));
+
+        CheckoutRequestDto req = new CheckoutRequestDto();
+        req.setBookItemIds(List.of(1L));
+        req.setItemQuantities(Map.of(1L, 1));
+
+        RuntimeException ex = assertThrows(RuntimeException.class, () -> orderService.processCheckout(req, sampleUser));
+        assertTrue(ex.getMessage().contains("vừa có khách hàng khác đặt mua") || ex.getMessage().contains("hết hàng"));
+    }
+
+    @Test
+    @DisplayName("Đặt số lượng vượt quá tồn kho: báo lỗi không đủ số lượng")
+    void testProcessCheckout_InsufficientStock_ThrowsException() {
+        bookItem.setStockQuantity(1);
+        when(bookItemRepository.findByIdWithLock(1L)).thenReturn(Optional.of(bookItem));
+
+        CheckoutRequestDto req = new CheckoutRequestDto();
+        req.setBookItemIds(List.of(1L));
+        req.setItemQuantities(Map.of(1L, 3)); // Đặt 3 cuốn trong khi kho chỉ có 1
+
+        RuntimeException ex = assertThrows(RuntimeException.class, () -> orderService.processCheckout(req, sampleUser));
+        assertTrue(ex.getMessage().contains("không đủ số lượng"));
+    }
 }
 

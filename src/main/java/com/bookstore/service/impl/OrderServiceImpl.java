@@ -84,9 +84,14 @@ public class OrderServiceImpl implements OrderService {
                         ? Math.max(1, itemQuantities.get(itemId)) : 1;
                 int currentStock = item.getStockQuantity() != null ? item.getStockQuantity() : 0;
 
-                if (currentStock <= 0) {
-                    throw new RuntimeException("Sách '" + (item.getBook() != null ? item.getBook().getTitle() : item.getSkuBarcode())
-                            + "' tại chi nhánh " + (item.getBranch() != null ? item.getBranch().getBranchName() : "") + " hiện đã hết hàng.");
+                String bookTitle = item.getBook() != null ? item.getBook().getTitle() : item.getSkuBarcode();
+                String branchName = item.getBranch() != null ? item.getBranch().getBranchName() : "chi nhánh";
+
+                if (currentStock <= 0 || "SOLD".equalsIgnoreCase(item.getStatus())) {
+                    throw new RuntimeException("Sách '" + bookTitle + "' tại " + branchName + " hiện đã hết hàng hoặc vừa có khách hàng khác đặt mua.");
+                }
+                if (currentStock < requestedQty) {
+                    throw new RuntimeException("Sách '" + bookTitle + "' tại " + branchName + " không đủ số lượng trong kho (chỉ còn " + currentStock + " cuốn, bạn yêu cầu " + requestedQty + " cuốn).");
                 }
                 selectedItems.add(item);
             }
@@ -166,8 +171,13 @@ public class OrderServiceImpl implements OrderService {
                         ? Math.max(1, itemQuantities.get(item.getId())) : 1;
                 int currentStock = item.getStockQuantity() != null ? item.getStockQuantity() : 0;
 
+                if (currentStock < orderQty) {
+                    String bookTitle = item.getBook() != null ? item.getBook().getTitle() : item.getSkuBarcode();
+                    throw new RuntimeException("Rất tiếc! Sách '" + bookTitle + "' vừa được khách hàng khác đặt mua trước nên không đủ số lượng.");
+                }
+
                 // Trừ kho chuẩn xác theo số lượng đặt mua
-                int remainingStock = Math.max(0, currentStock - orderQty);
+                int remainingStock = currentStock - orderQty;
                 item.setStockQuantity(remainingStock);
 
                 // Nếu hết kho thì đổi trạng thái, ngược lại vẫn duy trì AVAILABLE

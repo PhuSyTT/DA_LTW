@@ -48,7 +48,7 @@
                     <tr th:each="log : ${logs}">
                         <td>
                             <small class="font-monospace text-muted"
-                                   th:text="${#temporals.format(log.createdAt, 'dd/MM/yyyy HH:mm:ss')}">18/10/2026 14:30:00</small>
+                                   th:text="${log.createdAt != null ? #temporals.format(log.createdAt, 'dd/MM/yyyy HH:mm:ss') : '—'}">18/10/2026 14:30:00</small>
                         </td>
                         <td>
                             <strong class="font-monospace text-primary" th:text="${log.subOrderCode} ?: '—'">SUB-001</strong>

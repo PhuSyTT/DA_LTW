@@ -31,9 +31,9 @@
         <div class="alert alert-danger border-0 bg-danger-subtle text-danger-emphasis rounded-3 p-3 mb-4">
             <div class="d-flex align-items-center gap-2 mb-1">
                 <strong class="fs-6"><i class="bi bi-info-circle-fill me-1"></i> Mã trạng thái:</strong>
-                <span class="badge bg-danger text-white fs-6" th:text="${status} ?: '500'">500</span>
+                <span class="badge bg-danger text-white fs-6" th:text="${status != null and status != 200 ? status : '500'}">500</span>
             </div>
-            <div class="small mt-2" th:if="${error}">
+            <div class="small mt-2" th:if="${error != null and error != 'OK'}">
                 <strong>Lỗi:</strong> <span th:text="${error}">Internal Server Error</span>
             </div>
             <div class="small mt-1" th:if="${message}">
@@ -44,9 +44,9 @@
         <div class="bg-white border rounded-3 p-3 mb-4">
             <h6 class="fw-bold text-primary mb-2"><i class="bi bi-tools me-1"></i> Cách khắc phục nhanh (Thường do kết nối CSDL):</h6>
             <ol class="small text-muted mb-0 ps-3">
-                <li class="mb-1"><strong>Khởi động lại SQL Server:</strong> Mở SSMS $\rightarrow$ Nhấp chuột phải vào tên Server ở thanh trái $\rightarrow$ Chọn <strong>Restart</strong>.</li>
-                <li class="mb-1"><strong>Kiểm tra mật khẩu SA:</strong> Đối chiếu tài khoản và mật khẩu trong file <code>src/main/resources/application.properties</code>.</li>
-                <li><strong>Chạy lại ứng dụng:</strong> Chạy lại lệnh <code>java -jar target/bookstore-chain-management-1.0.0.jar</code> hoặc Run trong IDE.</li>
+                <li class="mb-1"><strong>Kiểm tra kết nối CSDL:</strong> Đảm bảo máy chủ CSDL (SQL Server hoặc Cloud Aiven MySQL) đang hoạt động và không bị ngắt kết nối.</li>
+                <li class="mb-1"><strong>Làm mới trang:</strong> Nhấn <strong>F5</strong> hoặc bấm nút Thử Lại bên dưới.</li>
+                <li><strong>Kiểm tra cấu hình:</strong> Đối chiếu tài khoản, mật khẩu và URL kết nối trong <code>application.properties</code>.</li>
             </ol>
         </div>
 

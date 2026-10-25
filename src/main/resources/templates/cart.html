@@ -690,7 +690,10 @@
         }
 
         function formatVnd(amount) {
-            return Number(amount).toLocaleString('vi-VN') + ' ₫';
+            if (amount === undefined || amount === null || amount === '') return '0 ₫';
+            const num = Number(amount);
+            if (isNaN(num)) return '0 ₫';
+            return num.toLocaleString('vi-VN') + ' ₫';
         }
 
         // 1. Change Item Quantity (+ / -)
@@ -761,16 +764,21 @@
 
         // 3. Update Cart Summary Fields
         function updateCartSummary(data) {
+            if (!data) return;
             const count = data.totalQuantity ?? data.count ?? 0;
             const badge = document.getElementById('cartHeaderBadge');
             if (badge) badge.textContent = count;
 
-            const subtotal = document.getElementById('summarySubtotal');
-            if (subtotal) subtotal.textContent = formatVnd(data.subtotal);
+            if (data.subtotal !== undefined && data.subtotal !== null) {
+                const subtotal = document.getElementById('summarySubtotal');
+                if (subtotal) subtotal.textContent = formatVnd(data.subtotal);
+            }
 
-            const shipping = document.getElementById('summaryShipping');
-            if (shipping) {
-                shipping.textContent = Number(data.shippingFee) === 0 ? 'Miễn phí' : formatVnd(data.shippingFee);
+            if (data.shippingFee !== undefined && data.shippingFee !== null) {
+                const shipping = document.getElementById('summaryShipping');
+                if (shipping) {
+                    shipping.textContent = Number(data.shippingFee) === 0 ? 'Miễn phí' : formatVnd(data.shippingFee);
+                }
             }
 
             const discountRow = document.getElementById('summaryDiscountRow');
@@ -800,16 +808,19 @@
                 if (promoTxt) promoTxt.textContent = data.shippingPromoMessage;
             }
 
-            const subtotalVal = Number(data.subtotal) || 0;
+            const subtotalVal = (data.subtotal !== undefined && data.subtotal !== null && !isNaN(Number(data.subtotal)))
+                ? Number(data.subtotal) : 0;
             const target = 200000;
-            const percent = Math.min(100, Math.round((subtotalVal / target) * 100));
+            const percent = Math.min(100, Math.round((Math.max(0, subtotalVal) / target) * 100));
             const pBar = document.getElementById('freeshipProgressBar');
             const pTxt = document.getElementById('freeshipPercentText');
             if (pBar) pBar.style.width = percent + '%';
             if (pTxt) pTxt.textContent = percent + '%';
 
-            const grandTotal = document.getElementById('summaryGrandTotal');
-            if (grandTotal) grandTotal.textContent = formatVnd(data.grandTotal);
+            if (data.grandTotal !== undefined && data.grandTotal !== null) {
+                const grandTotal = document.getElementById('summaryGrandTotal');
+                if (grandTotal) grandTotal.textContent = formatVnd(data.grandTotal);
+            }
 
             // Cập nhật thẻ hiển thị mã đang áp dụng
             const orderTag = document.getElementById('activeOrderCouponTag');

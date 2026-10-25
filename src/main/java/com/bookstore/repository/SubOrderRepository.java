@@ -46,22 +46,27 @@ public interface SubOrderRepository extends JpaRepository<SubOrder, Long> {
     long countProcessingByBranchId(@Param("branchId") Long branchId);
 
     // Tìm kiếm / lọc đơn hàng tại chi nhánh theo từ khóa (mã đơn, tên người nhận, SĐT) và trạng thái
-    @Query("SELECT s FROM SubOrder s WHERE s.branch.id = :branchId " +
+    @Query("SELECT s FROM SubOrder s " +
+           "LEFT JOIN s.masterOrder mo " +
+           "WHERE s.branch.id = :branchId " +
            "AND (:status IS NULL OR s.status = :status) " +
            "AND (:keyword IS NULL OR LOWER(s.subOrderCode) LIKE LOWER(CONCAT('%', :keyword, '%')) " +
-           "     OR LOWER(s.masterOrder.receiverName) LIKE LOWER(CONCAT('%', :keyword, '%')) " +
-           "     OR s.masterOrder.receiverPhone LIKE CONCAT('%', :keyword, '%')) " +
+           "     OR (mo IS NOT NULL AND LOWER(mo.receiverName) LIKE LOWER(CONCAT('%', :keyword, '%'))) " +
+           "     OR (mo IS NOT NULL AND mo.receiverPhone LIKE CONCAT('%', :keyword, '%'))) " +
            "ORDER BY s.id DESC")
     List<SubOrder> filterBranchOrders(@Param("branchId") Long branchId,
                                       @Param("status") String status,
                                       @Param("keyword") String keyword);
 
     // Admin lọc toàn bộ đơn hàng của tất cả chi nhánh
-    @Query("SELECT s FROM SubOrder s WHERE (:branchId IS NULL OR s.branch.id = :branchId) " +
+    @Query("SELECT s FROM SubOrder s " +
+           "LEFT JOIN s.branch br " +
+           "LEFT JOIN s.masterOrder mo " +
+           "WHERE (:branchId IS NULL OR br.id = :branchId) " +
            "AND (:status IS NULL OR s.status = :status) " +
            "AND (:keyword IS NULL OR LOWER(s.subOrderCode) LIKE LOWER(CONCAT('%', :keyword, '%')) " +
-           "     OR LOWER(s.masterOrder.receiverName) LIKE LOWER(CONCAT('%', :keyword, '%')) " +
-           "     OR s.masterOrder.receiverPhone LIKE CONCAT('%', :keyword, '%')) " +
+           "     OR (mo IS NOT NULL AND LOWER(mo.receiverName) LIKE LOWER(CONCAT('%', :keyword, '%'))) " +
+           "     OR (mo IS NOT NULL AND mo.receiverPhone LIKE CONCAT('%', :keyword, '%'))) " +
            "ORDER BY s.id DESC")
     List<SubOrder> filterAllOrders(@Param("branchId") Long branchId,
                                    @Param("status") String status,

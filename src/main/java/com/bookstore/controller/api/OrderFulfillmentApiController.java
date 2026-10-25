@@ -57,6 +57,24 @@ public class OrderFulfillmentApiController {
         }
     }
 
+    // Nghiệp vụ: Phê duyệt đơn hàng (PENDING -> CONFIRMED)
+    @PostMapping("/orders/{subOrderId}/approve")
+    public ResponseEntity<?> approveOrder(
+            @PathVariable Long subOrderId,
+            @RequestParam(name = "note", required = false) String note,
+            @AuthenticationPrincipal CustomUserDetails userDetails) {
+        try {
+            User staff = (userDetails != null) ? userDetails.getUser() : null;
+            UpdateSubOrderStatusDto dto = new UpdateSubOrderStatusDto();
+            dto.setStatus("CONFIRMED");
+            dto.setNote(note != null && !note.isBlank() ? note.trim() : "Nhân viên/Quản lý chi nhánh phê duyệt đơn hàng");
+            SubOrderDto updated = fulfillmentService.updateSubOrderStatus(subOrderId, dto, staff);
+            return ResponseEntity.ok(updated);
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
+    }
+
     // Hủy đơn hàng và tự động hoàn kho (FR-FUL-04)
     @PostMapping("/orders/{subOrderId}/cancel")
     public ResponseEntity<?> cancelOrder(

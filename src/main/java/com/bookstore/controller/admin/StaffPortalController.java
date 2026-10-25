@@ -1,6 +1,8 @@
 package com.bookstore.controller.admin;
 
 import com.bookstore.dto.SubOrderDto;
+import com.bookstore.dto.UpdateSubOrderStatusDto;
+import com.bookstore.entity.User;
 import com.bookstore.service.BranchService;
 import com.bookstore.service.MasterDataService;
 import com.bookstore.service.OrderFulfillmentService;
@@ -11,7 +13,9 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import com.bookstore.security.CustomUserDetails;
 import com.bookstore.service.CategoryService;
@@ -126,6 +130,33 @@ public class StaffPortalController {
         model.addAttribute("activeMenu", "fulfillment");
         model.addAttribute("pageTitle", "Chi Tiết Đơn Hàng - Xử Lý Đóng Gói");
         return "admin/fulfillment/detail";
+    }
+
+    /**
+     * Thao tác nhanh: Phê duyệt đơn hàng (FR-FUL-01 / FR-FUL-02)
+     */
+    @PostMapping("/admin/fulfillment/orders/{id}/approve")
+    public String approveOrderMvc(
+            @PathVariable("id") Long subOrderId,
+            @RequestParam(name = "note", required = false) String note,
+            @RequestParam(name = "redirectToList", required = false, defaultValue = "false") boolean redirectToList,
+            @AuthenticationPrincipal CustomUserDetails userDetails,
+            RedirectAttributes redirectAttributes) {
+        try {
+            User staff = userDetails != null ? userDetails.getUser() : null;
+            UpdateSubOrderStatusDto dto = new UpdateSubOrderStatusDto();
+            dto.setStatus("CONFIRMED");
+            dto.setNote(note != null && !note.isBlank() ? note.trim() : "Nhân viên/Quản lý phê duyệt đơn hàng");
+            fulfillmentService.updateSubOrderStatus(subOrderId, dto, staff);
+            redirectAttributes.addFlashAttribute("successMessage", "Phê duyệt đơn hàng thành công!");
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("errorMessage", "Không thể phê duyệt: " + e.getMessage());
+        }
+
+        if (redirectToList) {
+            return "redirect:/admin/fulfillment";
+        }
+        return "redirect:/admin/fulfillment/orders/" + subOrderId;
     }
 
     // =================================================================

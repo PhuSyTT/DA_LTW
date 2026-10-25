@@ -61,6 +61,32 @@ public class OrderTrackingApiController {
     }
 
     /**
+     * API 2b: Khách hàng xác nhận đã nhận hàng (SHIPPED -> COMPLETED) kèm đánh giá
+     */
+    @PostMapping("/orders/{subOrderId}/confirm-received")
+    public ResponseEntity<?> confirmReceived(
+            @PathVariable Long subOrderId,
+            @RequestBody(required = false) Map<String, Object> body,
+            @AuthenticationPrincipal CustomUserDetails userDetails) {
+        if (userDetails == null) {
+            return ResponseEntity.status(401).body(ApiResponse.error("Vui lòng đăng nhập để xác nhận đã nhận hàng!"));
+        }
+        try {
+            String feedback = body != null && body.containsKey("feedback") ? String.valueOf(body.get("feedback")) : null;
+            Integer rating = null;
+            if (body != null && body.containsKey("rating") && body.get("rating") != null) {
+                try {
+                    rating = Integer.parseInt(String.valueOf(body.get("rating")));
+                } catch (Exception ignored) {}
+            }
+            orderTrackingService.confirmDeliveryByCustomer(subOrderId, userDetails.getId(), feedback, rating);
+            return ResponseEntity.ok(ApiResponse.success("Xác nhận đã nhận hàng thành công. Cảm ơn phản hồi của bạn!"));
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(ApiResponse.error(e.getMessage()));
+        }
+    }
+
+    /**
      * API 3: Quản lý chi nhánh lấy danh sách đơn & lọc
      */
     @GetMapping("/branch/{branchId}/orders")

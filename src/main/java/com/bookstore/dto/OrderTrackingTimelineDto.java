@@ -55,6 +55,7 @@ public class OrderTrackingTimelineDto {
 
     // Điều kiện thao tác
     private boolean canCancel;
+    private boolean canConfirmDelivery;
 
     // Danh sách mặt hàng sách trong đơn
     private List<SubOrderItemDto> items = new ArrayList<>();
@@ -282,6 +283,14 @@ public class OrderTrackingTimelineDto {
 
     public void setCanCancel(boolean canCancel) {
         this.canCancel = canCancel;
+    }
+
+    public boolean isCanConfirmDelivery() {
+        return canConfirmDelivery;
+    }
+
+    public void setCanConfirmDelivery(boolean canConfirmDelivery) {
+        this.canConfirmDelivery = canConfirmDelivery;
     }
 
     public List<SubOrderItemDto> getItems() {

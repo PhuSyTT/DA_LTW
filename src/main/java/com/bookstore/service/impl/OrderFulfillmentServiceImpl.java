@@ -371,6 +371,7 @@ public class OrderFulfillmentServiceImpl implements OrderFulfillmentService {
         dto.setDeliveryStatus(entity.getDeliveryStatus());
         dto.setEstimatedDeliveryTime(entity.getEstimatedDeliveryTime() != null ? entity.getEstimatedDeliveryTime().toString() : null);
         dto.setDeliveryNotes(entity.getDeliveryNotes());
+        dto.setCanConfirmDelivery("SHIPPED".equalsIgnoreCase(entity.getStatus()));
 
         if (entity.getMasterOrder() != null) {
             dto.setMasterOrderId(entity.getMasterOrder().getId());

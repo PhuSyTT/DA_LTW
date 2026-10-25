@@ -153,11 +153,11 @@
                     </div>
                     <div class="p-3 d-grid gap-2">
                         
-                        <!-- PENDING → CONFIRMED -->
+                        <!-- PENDING → CONFIRMED: Phê duyệt đơn hàng -->
                         <button th:if="${order.status == 'PENDING'}"
-                                class="btn btn-primary fw-semibold"
+                                class="btn btn-success fw-bold py-2 shadow-sm"
                                 id="btn-confirm-order">
-                            <i class="fas fa-clipboard-check me-2"></i> 1. Tiếp Nhận &amp; Xác Nhận Đơn
+                            <i class="fas fa-circle-check me-2"></i> 1. Phê Duyệt &amp; Tiếp Nhận Đơn Hàng
                         </button>
 
                         <!-- CONFIRMED / PENDING → PACKING -->
@@ -467,7 +467,7 @@
         else { alert('❌ Lỗi: ' + data); }
     }
 
-    document.getElementById('btn-confirm-order')?.addEventListener('click', () => updateStatus('CONFIRMED', null, 'Quản lý chi nhánh đã tiếp nhận đơn'));
+    document.getElementById('btn-confirm-order')?.addEventListener('click', () => updateStatus('CONFIRMED', null, 'Nhân viên/Quản lý chi nhánh đã phê duyệt đơn hàng'));
     document.getElementById('btn-start-packing')?.addEventListener('click', () => updateStatus('PACKING', null, 'Thủ kho bắt đầu nhặt sách đóng gói'));
     document.getElementById('btn-complete')?.addEventListener('click', () => updateStatus('COMPLETED', null, 'Đơn hàng giao thành công'));
 

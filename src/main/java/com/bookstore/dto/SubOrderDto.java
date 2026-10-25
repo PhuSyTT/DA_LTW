@@ -36,6 +36,7 @@ public class SubOrderDto {
     private String deliveryNotes;
     private String paymentMethod;
     private String paymentStatus;
+    private boolean canConfirmDelivery;
 
     public SubOrderDto() {
     }
@@ -262,5 +263,13 @@ public class SubOrderDto {
 
     public void setPaymentStatus(String paymentStatus) {
         this.paymentStatus = paymentStatus;
+    }
+
+    public boolean isCanConfirmDelivery() {
+        return canConfirmDelivery;
+    }
+
+    public void setCanConfirmDelivery(boolean canConfirmDelivery) {
+        this.canConfirmDelivery = canConfirmDelivery;
     }
 }

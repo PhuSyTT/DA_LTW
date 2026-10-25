@@ -16,6 +16,8 @@ public interface OrderTrackingService {
 
     void cancelSubOrderByCustomer(Long subOrderId, String cancelReason, Long userId);
 
+    void confirmDeliveryByCustomer(Long subOrderId, Long userId, String feedbackNotes, Integer rating);
+
 
     // ==========================================
     // 2. DÀNH CHO QUẢN LÝ CHI NHÁNH (BRANCH MANAGER)

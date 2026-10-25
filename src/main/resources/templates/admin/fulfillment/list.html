@@ -78,6 +78,16 @@
         </div>
     </div>
 
+    <!-- Flash Messages -->
+    <div th:if="${successMessage}" class="alert alert-success alert-dismissible fade show mb-4" role="alert">
+        <i class="fas fa-circle-check me-2"></i> <span th:text="${successMessage}">Thao tác thành công!</span>
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+    <div th:if="${errorMessage}" class="alert alert-danger alert-dismissible fade show mb-4" role="alert">
+        <i class="fas fa-circle-exclamation me-2"></i> <span th:text="${errorMessage}">Đã xảy ra lỗi!</span>
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+
     <!-- Filter + Main Table -->
     <div class="content-card">
         <div class="content-card-header">
@@ -202,13 +212,24 @@
                                    th:text="${#temporals.format(order.createdAt, 'dd/MM/yyyy HH:mm')}">01/01/2026</small>
                         </td>
                         <td class="text-center">
-                            <div class="btn-group btn-group-sm">
+                            <div class="d-flex align-items-center justify-content-center gap-1">
+                                <!-- Nút Phê Duyệt Đơn Nhanh nếu PENDING -->
+                                <form th:if="${order.status == 'PENDING'}"
+                                      th:action="@{/admin/fulfillment/orders/{id}/approve(id=${order.id})}"
+                                      method="post" class="d-inline"
+                                      onsubmit="return confirm('Bạn có chắc chắn muốn phê duyệt đơn hàng này?');">
+                                    <input type="hidden" name="redirectToList" value="true" />
+                                    <button type="submit" class="btn btn-sm btn-success fw-bold text-nowrap" title="Phê duyệt đơn hàng ngay">
+                                        <i class="fas fa-check-circle me-1"></i> Phê Duyệt
+                                    </button>
+                                </form>
+
                                 <a th:href="@{/admin/fulfillment/orders/{id}(id=${order.id})}"
-                                   class="btn btn-outline-primary" title="Xem chi tiết & Soạn sách">
+                                   class="btn btn-sm btn-outline-primary text-nowrap" title="Xem chi tiết & Soạn sách">
                                     <i class="fas fa-boxes-stacked me-1"></i> Soạn Sách
                                 </a>
                                 <a th:href="@{/orders/{id}/timeline(id=${order.id})}" target="_blank"
-                                   class="btn btn-outline-secondary" title="Xem Timeline Tiến Trình">
+                                   class="btn btn-sm btn-outline-secondary" title="Xem Timeline Tiến Trình">
                                     <i class="fas fa-route"></i>
                                 </a>
                             </div>

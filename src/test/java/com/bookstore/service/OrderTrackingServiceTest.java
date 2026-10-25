@@ -43,6 +43,9 @@ class OrderTrackingServiceTest {
     @Mock
     private UserRepository userRepository;
 
+    @Mock
+    private DriverRepository driverRepository;
+
     @InjectMocks
     private OrderTrackingServiceImpl orderTrackingService;
 
@@ -191,6 +194,49 @@ class OrderTrackingServiceTest {
         assertNotNull(dashboard);
         assertEquals(2, dashboard.getBranchLoads().size());
         assertNotNull(dashboard.getRecentAuditLogs());
+    }
+
+    @Test
+    @DisplayName("Khách hàng xác nhận đã nhận hàng thành công kèm đánh giá sao")
+    void testConfirmDeliveryByCustomer_Success() {
+        sampleSubOrder.setStatus("SHIPPED");
+        sampleMasterOrder.setPaymentStatus("UNPAID");
+
+        when(subOrderRepository.findById(50L)).thenReturn(Optional.of(sampleSubOrder));
+        when(userRepository.findById(100L)).thenReturn(Optional.of(sampleUser));
+        when(subOrderRepository.save(any(SubOrder.class))).thenReturn(sampleSubOrder);
+
+        orderTrackingService.confirmDeliveryByCustomer(50L, 100L, "Sách rất đẹp, bọc cẩn thận", 5);
+
+        assertEquals("COMPLETED", sampleSubOrder.getStatus());
+        assertEquals("DELIVERED", sampleSubOrder.getDeliveryStatus());
+        assertNotNull(sampleSubOrder.getCompletedAt());
+        assertEquals("PAID", sampleMasterOrder.getPaymentStatus());
+        verify(orderStatusHistoryRepository, times(1)).save(any(OrderStatusHistory.class));
+    }
+
+    @Test
+    @DisplayName("Khách hàng không thể xác nhận nhận hàng khi đơn chưa SHIPPED")
+    void testConfirmDeliveryByCustomer_InvalidStatus() {
+        sampleSubOrder.setStatus("PENDING");
+
+        when(subOrderRepository.findById(50L)).thenReturn(Optional.of(sampleSubOrder));
+
+        assertThrows(RuntimeException.class, () ->
+                orderTrackingService.confirmDeliveryByCustomer(50L, 100L, "Đã nhận", 5)
+        );
+    }
+
+    @Test
+    @DisplayName("Người dùng khác không thể xác nhận nhận hàng thay khách hàng chính chủ")
+    void testConfirmDeliveryByCustomer_Unauthorized() {
+        sampleSubOrder.setStatus("SHIPPED");
+
+        when(subOrderRepository.findById(50L)).thenReturn(Optional.of(sampleSubOrder));
+
+        assertThrows(RuntimeException.class, () ->
+                orderTrackingService.confirmDeliveryByCustomer(50L, 999L, "Hack", 5)
+        );
     }
 }
 

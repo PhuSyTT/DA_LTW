@@ -24,6 +24,7 @@ public class OrderTrackingServiceImpl implements OrderTrackingService {
     private final BranchRepository branchRepository;
     private final BookItemRepository bookItemRepository;
     private final UserRepository userRepository;
+    private final DriverRepository driverRepository;
 
     private static final DateTimeFormatter TIME_FORMATTER = DateTimeFormatter.ofPattern("HH:mm dd/MM/yyyy");
 
@@ -32,13 +33,15 @@ public class OrderTrackingServiceImpl implements OrderTrackingService {
                                    OrderStatusHistoryRepository orderStatusHistoryRepository,
                                    BranchRepository branchRepository,
                                    BookItemRepository bookItemRepository,
-                                   UserRepository userRepository) {
+                                   UserRepository userRepository,
+                                   DriverRepository driverRepository) {
         this.subOrderRepository = subOrderRepository;
         this.masterOrderRepository = masterOrderRepository;
         this.orderStatusHistoryRepository = orderStatusHistoryRepository;
         this.branchRepository = branchRepository;
         this.bookItemRepository = bookItemRepository;
         this.userRepository = userRepository;
+        this.driverRepository = driverRepository;
     }
 
     // =========================================================================
@@ -119,6 +122,8 @@ public class OrderTrackingServiceImpl implements OrderTrackingService {
 
         // Khách hàng có quyền hủy khi trạng thái là PENDING
         dto.setCanCancel("PENDING".equalsIgnoreCase(subOrder.getStatus()));
+        // Khách hàng có quyền xác nhận đã nhận hàng khi trạng thái là SHIPPED
+        dto.setCanConfirmDelivery("SHIPPED".equalsIgnoreCase(subOrder.getStatus()));
 
         // Map items
         if (subOrder.getItems() != null) {
@@ -184,6 +189,72 @@ public class OrderTrackingServiceImpl implements OrderTrackingService {
                 subOrder.getBranch(),
                 subOrder.getBranch(),
                 "ORDER_CANCELLED"
+        );
+        orderStatusHistoryRepository.save(history);
+    }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public void confirmDeliveryByCustomer(Long subOrderId, Long userId, String feedbackNotes, Integer rating) {
+        SubOrder subOrder = subOrderRepository.findById(subOrderId)
+                .orElseThrow(() -> new RuntimeException("Không tìm thấy đơn hàng với mã ID: " + subOrderId));
+
+        MasterOrder master = subOrder.getMasterOrder();
+        if (master == null || master.getUser() == null || !master.getUser().getId().equals(userId)) {
+            throw new RuntimeException("Bạn không có quyền thực hiện thao tác trên đơn hàng này!");
+        }
+
+        String currentStatus = subOrder.getStatus();
+        if (!"SHIPPED".equalsIgnoreCase(currentStatus)) {
+            throw new RuntimeException("Chỉ có thể xác nhận đã nhận hàng khi kiện hàng đang được giao (SHIPPED)!");
+        }
+
+        LocalDateTime now = LocalDateTime.now();
+
+        // 1. Cập nhật trạng thái SubOrder sang COMPLETED
+        subOrder.setStatus("COMPLETED");
+        subOrder.setDeliveryStatus("DELIVERED");
+        subOrder.setCompletedAt(now);
+        subOrder.setUpdatedAt(now);
+
+        // 2. Trừ activeOrdersCount của tài xế nếu có
+        if (subOrder.getDriver() != null && driverRepository != null) {
+            Driver driver = subOrder.getDriver();
+            if (driver.getActiveOrdersCount() != null && driver.getActiveOrdersCount() > 0) {
+                driver.setActiveOrdersCount(driver.getActiveOrdersCount() - 1);
+                driverRepository.save(driver);
+            }
+        }
+
+        subOrderRepository.save(subOrder);
+
+        // 3. Nếu là COD hoặc chưa thanh toán, cập nhật trạng thái thanh toán của MasterOrder thành PAID
+        if (master.getPaymentStatus() == null || !"PAID".equalsIgnoreCase(master.getPaymentStatus())) {
+            master.setPaymentStatus("PAID");
+            masterOrderRepository.save(master);
+        }
+
+        // 4. Tạo nội dung ghi chú phản hồi
+        StringBuilder noteBuilder = new StringBuilder("Khách hàng xác nhận đã nhận hàng thành công.");
+        if (rating != null && rating >= 1 && rating <= 5) {
+            noteBuilder.append(" Đánh giá: ").append(rating).append("/5 sao ⭐.");
+        }
+        if (feedbackNotes != null && !feedbackNotes.isBlank()) {
+            noteBuilder.append(" Phản hồi: \"").append(feedbackNotes.trim()).append("\"");
+        }
+
+        // 5. Ghi log lịch sử thay đổi trạng thái
+        User user = userRepository.findById(userId).orElse(null);
+        OrderStatusHistory history = new OrderStatusHistory(
+                subOrder,
+                master,
+                currentStatus,
+                "COMPLETED",
+                noteBuilder.toString(),
+                user,
+                subOrder.getBranch(),
+                subOrder.getBranch(),
+                "CUSTOMER_CONFIRMED_DELIVERY"
         );
         orderStatusHistoryRepository.save(history);
     }
@@ -587,6 +658,7 @@ public class OrderTrackingServiceImpl implements OrderTrackingService {
         dto.setDeliveryStatus(entity.getDeliveryStatus());
         dto.setEstimatedDeliveryTime(entity.getEstimatedDeliveryTime() != null ? entity.getEstimatedDeliveryTime().toString() : null);
         dto.setDeliveryNotes(entity.getDeliveryNotes());
+        dto.setCanConfirmDelivery("SHIPPED".equalsIgnoreCase(entity.getStatus()));
 
         if (entity.getItems() != null) {
             dto.setItems(entity.getItems().stream().map(this::mapToItemDto).collect(Collectors.toList()));

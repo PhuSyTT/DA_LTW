@@ -221,7 +221,23 @@
                     </div>
 
                     <!-- Action Buttons -->
-                    <div class="flex items-center gap-2.5">
+                    <div class="flex items-center gap-2.5 flex-wrap">
+                        <!-- Confirm Delivery Button (Only if SHIPPED) -->
+                        <button th:if="${order.status == 'SHIPPED'}"
+                                type="button"
+                                th:data-order-id="${order.id}"
+                                th:data-order-code="${order.subOrderCode}"
+                                onclick="openConfirmDeliveryModal(this.getAttribute('data-order-id'), this.getAttribute('data-order-code'))"
+                                class="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold shadow-sm hover:shadow transition-all animate-pulse">
+                            <i class="fas fa-circle-check"></i>
+                            <span>Đã Nhận Được Hàng</span>
+                        </button>
+
+                        <span th:if="${order.status == 'COMPLETED'}" class="inline-flex items-center gap-1 text-xs text-emerald-700 font-semibold px-2.5 py-1 bg-emerald-50 rounded-lg border border-emerald-200">
+                            <i class="fas fa-check-double text-emerald-600"></i>
+                            <span>Đã nhận sách</span>
+                        </span>
+
                         <!-- View Timeline Button -->
                         <a th:href="@{'/orders/' + ${order.id} + '/timeline'}" class="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-primary text-white text-xs font-bold hover:bg-primary-hover shadow-sm transition-all">
                             <i class="fas fa-route"></i>
@@ -256,6 +272,76 @@
 
     </main>
 
+    <!-- Modal Xác Nhận Đã Nhận Hàng & Phản Hồi Đánh Giá -->
+    <div id="confirmDeliveryModal" class="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4 hidden">
+        <div class="bg-white rounded-2xl max-w-lg w-full p-6 shadow-2xl border border-surface-container-high animate-in fade-in duration-200">
+            <div class="flex items-center justify-between pb-3 border-b border-surface-container">
+                <h3 class="font-bold text-base text-emerald-800 flex items-center gap-2">
+                    <i class="fas fa-box-open text-emerald-600"></i>
+                    <span>Xác Nhận Đã Nhận Hàng</span>
+                </h3>
+                <button type="button" onclick="closeConfirmDeliveryModal()" class="text-outline hover:text-on-surface p-1">
+                    <i class="fas fa-times text-base"></i>
+                </button>
+            </div>
+
+            <form id="confirmDeliveryForm" method="post" class="mt-4 space-y-4">
+                <input type="hidden" name="redirectToList" value="true" />
+                <input type="hidden" name="rating" id="selectedRating" value="5" />
+
+                <div class="p-3.5 rounded-xl bg-emerald-50 border border-emerald-200 text-xs text-emerald-900">
+                    <p class="font-semibold mb-1">
+                        📦 Bạn đang xác nhận đã nhận được kiện hàng <span id="modalOrderCode" class="font-mono font-bold text-emerald-950">#SUB</span>.
+                    </p>
+                    <p class="text-emerald-800 text-[11px]">
+                        Hệ thống sẽ hoàn tất đơn hàng và tích lũy điểm thưởng thành viên vào tài khoản của bạn.
+                    </p>
+                </div>
+
+                <!-- Đánh Giá Sao -->
+                <div>
+                    <label class="block text-xs font-bold text-on-surface mb-1.5">Đánh giá trải nghiệm nhận hàng:</label>
+                    <div class="flex items-center gap-2" id="starContainer">
+                        <button type="button" onclick="setRating(1)" class="star-btn text-2xl text-amber-400 focus:outline-none transition-transform hover:scale-110" data-val="1"><i class="fas fa-star"></i></button>
+                        <button type="button" onclick="setRating(2)" class="star-btn text-2xl text-amber-400 focus:outline-none transition-transform hover:scale-110" data-val="2"><i class="fas fa-star"></i></button>
+                        <button type="button" onclick="setRating(3)" class="star-btn text-2xl text-amber-400 focus:outline-none transition-transform hover:scale-110" data-val="3"><i class="fas fa-star"></i></button>
+                        <button type="button" onclick="setRating(4)" class="star-btn text-2xl text-amber-400 focus:outline-none transition-transform hover:scale-110" data-val="4"><i class="fas fa-star"></i></button>
+                        <button type="button" onclick="setRating(5)" class="star-btn text-2xl text-amber-400 focus:outline-none transition-transform hover:scale-110" data-val="5"><i class="fas fa-star"></i></button>
+                        <span id="ratingLabel" class="text-xs font-bold text-amber-700 ml-2">5 sao - Rất hài lòng</span>
+                    </div>
+                </div>
+
+                <!-- Quick feedback tags -->
+                <div>
+                    <label class="block text-xs font-bold text-on-surface mb-1.5">Phản hồi nhanh:</label>
+                    <div class="flex flex-wrap gap-1.5">
+                        <button type="button" onclick="appendTag('Sách đẹp nguyên vẹn')" class="px-2.5 py-1 rounded-lg bg-surface-container hover:bg-emerald-50 hover:text-emerald-800 text-[11px] font-medium transition-colors border border-surface-container-high">✨ Sách nguyên vẹn</button>
+                        <button type="button" onclick="appendTag('Đóng gói cẩn thận 2 lớp')" class="px-2.5 py-1 rounded-lg bg-surface-container hover:bg-emerald-50 hover:text-emerald-800 text-[11px] font-medium transition-colors border border-surface-container-high">📦 Đóng gói kỹ</button>
+                        <button type="button" onclick="appendTag('Giao hàng nhanh đúng hẹn')" class="px-2.5 py-1 rounded-lg bg-surface-container hover:bg-emerald-50 hover:text-emerald-800 text-[11px] font-medium transition-colors border border-surface-container-high">⚡ Giao nhanh</button>
+                        <button type="button" onclick="appendTag('Shipper thân thiện lịch sự')" class="px-2.5 py-1 rounded-lg bg-surface-container hover:bg-emerald-50 hover:text-emerald-800 text-[11px] font-medium transition-colors border border-surface-container-high">🛵 Shipper nhiệt tình</button>
+                    </div>
+                </div>
+
+                <!-- Textarea ghi chú -->
+                <div>
+                    <label class="block text-xs font-bold text-on-surface mb-1">Góp ý thêm cho cửa hàng (tùy chọn):</label>
+                    <textarea name="feedbackNotes" id="feedbackNotesInput" rows="3" class="w-full text-xs p-3 rounded-xl border border-surface-container-high focus:outline-primary bg-surface resize-none" placeholder="Nhập cảm nhận của bạn về chất lượng sách và dịch vụ giao hàng..."></textarea>
+                </div>
+
+                <!-- Actions -->
+                <div class="flex items-center justify-end gap-2 pt-2 border-t border-surface-container">
+                    <button type="button" onclick="closeConfirmDeliveryModal()" class="px-4 py-2 rounded-xl border border-surface-container-high text-xs font-bold hover:bg-surface-container transition-all">
+                        Đóng
+                    </button>
+                    <button type="submit" class="px-5 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold shadow-sm hover:shadow transition-all flex items-center gap-1.5">
+                        <i class="fas fa-check"></i>
+                        <span>Xác Nhận Hoàn Tất</span>
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
     <!-- Footer -->
     <footer class="bg-surface-container/60 border-t border-surface-container-high py-6 mt-12 text-center text-xs text-on-surface-variant">
         <p>© 2026 Book4Life - Hệ thống Quản lý Chuỗi Cửa Hàng Sách Cũ Toàn Quốc. Trao tri thức - Lan tỏa văn hóa đọc.</p>
@@ -265,6 +351,68 @@
     <div th:replace="~{fragments/chatbox :: chatboxWidget}"></div>
     <th:block th:replace="~{fragments/chatbox :: chatboxScripts}"></th:block>
 
+    <script>
+        function openConfirmDeliveryModal(orderId, orderCode) {
+            const modal = document.getElementById('confirmDeliveryModal');
+            const form = document.getElementById('confirmDeliveryForm');
+            const codeEl = document.getElementById('modalOrderCode');
+            if (form && orderId) {
+                form.action = '/orders/' + orderId + '/confirm-received';
+            }
+            if (codeEl) {
+                codeEl.textContent = '#' + (orderCode || orderId);
+            }
+            setRating(5);
+            modal.classList.remove('hidden');
+        }
+
+        function closeConfirmDeliveryModal() {
+            const modal = document.getElementById('confirmDeliveryModal');
+            if (modal) modal.classList.add('hidden');
+        }
+
+        const ratingLabels = {
+            1: '1 sao - Rất không hài lòng',
+            2: '2 sao - Chưa hài lòng',
+            3: '3 sao - Bình thường',
+            4: '4 sao - Hài lòng',
+            5: '5 sao - Rất hài lòng ⭐'
+        };
+
+        function setRating(val) {
+            document.getElementById('selectedRating').value = val;
+            const label = document.getElementById('ratingLabel');
+            if (label) label.textContent = ratingLabels[val] || (val + ' sao');
+
+            const stars = document.querySelectorAll('#starContainer .star-btn');
+            stars.forEach(btn => {
+                const starVal = parseInt(btn.getAttribute('data-val'));
+                const icon = btn.querySelector('i');
+                if (starVal <= val) {
+                    btn.classList.add('text-amber-400');
+                    btn.classList.remove('text-slate-300');
+                    if (icon) icon.className = 'fas fa-star';
+                } else {
+                    btn.classList.remove('text-amber-400');
+                    btn.classList.add('text-slate-300');
+                    if (icon) icon.className = 'far fa-star';
+                }
+            });
+        }
+
+        function appendTag(text) {
+            const input = document.getElementById('feedbackNotesInput');
+            if (!input) return;
+            if (input.value.trim().length > 0) {
+                if (!input.value.includes(text)) {
+                    input.value = input.value.trim() + ', ' + text;
+                }
+            } else {
+                input.value = text;
+            }
+            input.focus();
+        }
+    </script>
 </body>
 </html>
 

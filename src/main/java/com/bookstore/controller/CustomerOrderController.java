@@ -85,5 +85,32 @@ public class CustomerOrderController {
         }
         return "redirect:/orders/" + subOrderId + "/timeline";
     }
+
+    /**
+     * Khách hàng xác nhận đã nhận hàng thành công và gửi đánh giá / phản hồi
+     */
+    @PostMapping("/orders/{id}/confirm-received")
+    public String confirmReceivedOrder(
+            @PathVariable("id") Long subOrderId,
+            @RequestParam(name = "feedbackNotes", required = false) String feedbackNotes,
+            @RequestParam(name = "rating", required = false, defaultValue = "5") Integer rating,
+            @RequestParam(name = "redirectToList", required = false, defaultValue = "false") boolean redirectToList,
+            @AuthenticationPrincipal CustomUserDetails userDetails,
+            RedirectAttributes redirectAttributes) {
+        if (userDetails == null) {
+            return "redirect:/login";
+        }
+        try {
+            orderTrackingService.confirmDeliveryByCustomer(subOrderId, userDetails.getId(), feedbackNotes, rating);
+            redirectAttributes.addFlashAttribute("successMessage", "Cảm ơn bạn! Đơn hàng đã được xác nhận hoàn tất thành công.");
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("errorMessage", "Không thể xác nhận nhận hàng: " + e.getMessage());
+        }
+
+        if (redirectToList) {
+            return "redirect:/my-orders";
+        }
+        return "redirect:/orders/" + subOrderId + "/timeline";
+    }
 }
 

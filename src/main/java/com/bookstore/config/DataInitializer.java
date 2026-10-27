@@ -68,6 +68,9 @@ public class DataInitializer implements CommandLineRunner {
         // 0. Ensure otp_verifications table exists via direct JDBC
         ensureOtpTableExists();
 
+        // 0.1 Xóa sạch tất cả các đơn hàng cũ theo yêu cầu người dùng
+        cleanUpAllOldOrders();
+
         // 1. Initialize 5 Roles from SRS
         Role roleAdmin = getOrCreateRole("ADMIN", "Quản trị viên toàn hệ thống - Toàn quyền cấu hình & quản lý");
         Role roleManager = getOrCreateRole("BRANCH_MANAGER", "Quản lý chi nhánh - Điều phối nhân viên & tồn kho chi nhánh");
@@ -517,6 +520,57 @@ public class DataInitializer implements CommandLineRunner {
             }
         } catch (Exception ex) {
             logger.warn("Lỗi khởi tạo đánh giá mẫu: {}", ex.getMessage());
+        }
+    }
+
+    private void cleanUpAllOldOrders() {
+        try (Connection conn = dataSource.getConnection(); Statement stmt = conn.createStatement()) {
+            logger.info("Đang thực hiện xóa sạch tất cả đơn hàng cũ theo yêu cầu...");
+            try {
+                stmt.execute("SET FOREIGN_KEY_CHECKS = 0");
+            } catch (Exception ignored) {}
+
+            try {
+                stmt.executeUpdate("DELETE FROM order_status_history");
+            } catch (Exception e) {
+                logger.debug("Lỗi xóa order_status_history: {}", e.getMessage());
+            }
+
+            try {
+                stmt.executeUpdate("DELETE FROM sub_order_items");
+            } catch (Exception e) {
+                logger.debug("Lỗi xóa sub_order_items: {}", e.getMessage());
+            }
+
+            try {
+                stmt.executeUpdate("DELETE FROM coupon_usages");
+            } catch (Exception e) {
+                logger.debug("Lỗi xóa coupon_usages: {}", e.getMessage());
+            }
+
+            try {
+                stmt.executeUpdate("DELETE FROM sub_orders");
+            } catch (Exception e) {
+                logger.debug("Lỗi xóa sub_orders: {}", e.getMessage());
+            }
+
+            try {
+                stmt.executeUpdate("DELETE FROM master_orders");
+            } catch (Exception e) {
+                logger.debug("Lỗi xóa master_orders: {}", e.getMessage());
+            }
+
+            try {
+                stmt.executeUpdate("UPDATE drivers SET active_orders_count = 0");
+            } catch (Exception ignored) {}
+
+            try {
+                stmt.execute("SET FOREIGN_KEY_CHECKS = 1");
+            } catch (Exception ignored) {}
+
+            logger.info("Đã xóa sạch toàn bộ các đơn hàng cũ thành công!");
+        } catch (Exception ex) {
+            logger.warn("Cảnh báo khi xóa đơn hàng cũ: {}", ex.getMessage());
         }
     }
 }

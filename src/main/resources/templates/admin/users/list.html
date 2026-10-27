@@ -487,32 +487,26 @@
         }
 
         function evaluateAdminPwd(pwd, bar, badge) {
+            const hasMin = pwd.length > 6;
             const hasNum = /[0-9]/.test(pwd);
-            const hasUpper = /[A-Z]/.test(pwd);
-            const hasLower = /[a-z]/.test(pwd);
+            const hasLetter = /[a-zA-Z]/.test(pwd);
             const hasSpecial = /[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(pwd);
-            let count = (hasLower?1:0) + (hasUpper?1:0) + (hasNum?1:0) + (hasSpecial?1:0);
 
-            if (pwd.length < 6) {
+            if (pwd.length <= 6) {
                 bar.style.width = '20%';
                 bar.className = 'progress-bar bg-danger';
                 badge.className = 'badge bg-danger-subtle text-danger px-2 py-0.5';
-                badge.innerText = 'Rất yếu (< 6 ký tự)';
-            } else if (pwd.length < 8) {
-                bar.style.width = '40%';
+                badge.innerText = 'Rất yếu (Phải > 6 ký tự)';
+            } else if (!hasLetter || !hasNum || !hasSpecial) {
+                bar.style.width = '50%';
                 bar.className = 'progress-bar bg-warning';
                 badge.className = 'badge bg-warning-subtle text-dark px-2 py-0.5';
-                badge.innerText = 'Trung bình (Nên từ 8 ký tự)';
-            } else if (count >= 3) {
+                badge.innerText = 'Chưa đạt (Cần chữ, số và ký tự đặc biệt)';
+            } else {
                 bar.style.width = '100%';
                 bar.className = 'progress-bar bg-success';
                 badge.className = 'badge bg-success-subtle text-success px-2 py-0.5';
-                badge.innerText = 'Mạnh & An toàn';
-            } else {
-                bar.style.width = '65%';
-                bar.className = 'progress-bar bg-info';
-                badge.className = 'badge bg-info-subtle text-primary px-2 py-0.5';
-                badge.innerText = 'Khá';
+                badge.innerText = 'Mạnh & An toàn (Đạt chuẩn)';
             }
         }
     </script>

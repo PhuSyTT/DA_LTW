@@ -550,10 +550,10 @@
                             <!-- Tiêu chí bảo mật trực quan (Checklist) -->
                             <div class="row g-1 mt-1 text-muted" style="font-size: 0.68rem;" id="pwdCriteriaBox">
                                 <div class="col-6 d-flex align-items-center gap-1" id="critLength">
-                                    <i class="bi bi-circle text-muted"></i> <span>Tối thiểu 8 ký tự</span>
+                                    <i class="bi bi-circle text-muted"></i> <span>Độ dài > 6 ký tự</span>
                                 </div>
                                 <div class="col-6 d-flex align-items-center gap-1" id="critLetter">
-                                    <i class="bi bi-circle text-muted"></i> <span>Chữ hoa &amp; thường</span>
+                                    <i class="bi bi-circle text-muted"></i> <span>Có chữ cái (a-z, A-Z)</span>
                                 </div>
                                 <div class="col-6 d-flex align-items-center gap-1" id="critNumber">
                                     <i class="bi bi-circle text-muted"></i> <span>Có chữ số (0-9)</span>
@@ -568,7 +568,7 @@
                         <div class="mb-3">
                             <label class="form-label-custom">Xác nhận mật khẩu</label>
                             <div class="input-group input-group-sm">
-                                <input type="password" id="regConfirmPassword" required minlength="6" placeholder="Nhập lại mật khẩu" class="form-control rounded-start-3 py-1.5 px-3">
+                                <input type="password" id="regConfirmPassword" required minlength="7" placeholder="Nhập lại mật khẩu" class="form-control rounded-start-3 py-1.5 px-3">
                                 <button type="button" class="btn btn-outline-secondary rounded-end-3 px-2.5" onclick="togglePasswordVisibility('regConfirmPassword', 'toggleIcon2')" title="Hiện/ẩn mật khẩu">
                                     <i class="bi bi-eye-slash" id="toggleIcon2"></i>
                                 </button>
@@ -584,9 +584,26 @@
 
                     <!-- STEP 2: OTP Verification Form -->
                     <div id="step2Container" class="d-none">
-                        <div class="alert alert-warning py-1.5 px-2.5 rounded-3 small mb-2.5" style="font-size: 0.775rem;">
+                        <div class="alert alert-warning py-1.5 px-2.5 rounded-3 small mb-2" style="font-size: 0.775rem;">
                             Mã OTP 6 số đã được gửi đến: <strong id="step2TargetEmail" style="color: var(--accent-terracotta);"></strong>.
                             Vui lòng kiểm tra hộp thư đến (và thư mục Spam).
+                        </div>
+
+                        <!-- Hộp hiển thị mã OTP xác thực nhanh & dự phòng không nhận được mail -->
+                        <div class="alert alert-info py-2 px-2.5 rounded-3 small mb-2.5 border border-info-subtle">
+                            <div class="d-flex align-items-center justify-content-between flex-wrap gap-1">
+                                <div>
+                                    <i class="bi bi-key-fill text-primary me-1"></i>
+                                    <span class="fw-semibold">Mã xác thực OTP:</span>
+                                    <strong class="fs-6 font-monospace text-primary px-1.5 py-0.5 bg-white rounded border ms-1" id="otpDisplayCode">------</strong>
+                                </div>
+                                <button type="button" class="btn btn-sm btn-primary py-0.5 px-2 rounded-pill" onclick="autoFillOtp()" style="font-size: 0.72rem;">
+                                    <i class="bi bi-magic me-1"></i>Tự động điền mã
+                                </button>
+                            </div>
+                            <div class="text-muted mt-1" style="font-size: 0.68rem;">
+                                <i class="bi bi-envelope-check me-1 text-success"></i>Email đã phát đi qua Google SMTP. Nếu mạng chậm hoặc mail vào Spam, bạn có thể bấm <strong>"Tự động điền mã"</strong> ở trên để tiếp tục ngay!
+                            </div>
                         </div>
 
                         <form id="step2Form" onsubmit="handleVerifyOtp(event)">
@@ -823,15 +840,14 @@
             const bar = document.getElementById('passwordStrengthBar');
             const badge = document.getElementById('passwordStrengthBadge');
 
-            const hasMinLength = pwd.length >= 8;
-            const hasLower = /[a-z]/.test(pwd);
-            const hasUpper = /[A-Z]/.test(pwd);
-            const hasDigit = /[0-9]/.test(pwd);
-            const hasSpecial = /[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(pwd);
+            const hasMinLength = pwd.length > 6; // Yêu cầu: > 6 ký tự
+            const hasLetter = /[a-zA-Z]/.test(pwd); // Có chữ cái
+            const hasDigit = /[0-9]/.test(pwd); // Có chữ số
+            const hasSpecial = /[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(pwd); // Có ký tự đặc biệt
 
-            // Cập nhật Checklist trực quan
+            // Cập nhật Checklist trực quan theo yêu cầu người dùng
             updateChecklistIcon('critLength', hasMinLength);
-            updateChecklistIcon('critLetter', hasLower && hasUpper);
+            updateChecklistIcon('critLetter', hasLetter);
             updateChecklistIcon('critNumber', hasDigit);
             updateChecklistIcon('critSpecial', hasSpecial);
 
@@ -843,39 +859,37 @@
                 return;
             }
 
-            let criteriaCount = (hasLower ? 1 : 0) + (hasUpper ? 1 : 0) + (hasDigit ? 1 : 0) + (hasSpecial ? 1 : 0);
+            let criteriaCount = (hasLetter ? 1 : 0) + (hasDigit ? 1 : 0) + (hasSpecial ? 1 : 0);
 
-            if (pwd.length < 6) {
+            if (pwd.length <= 6) {
                 bar.style.width = '20%';
                 bar.className = 'progress-bar bg-danger';
                 badge.className = 'badge bg-danger-subtle text-danger px-2 py-0.5';
-                badge.innerText = 'Độ bảo mật: Rất yếu (< 6 ký tự)';
-            } else if (pwd.length < 8) {
-                bar.style.width = '40%';
-                bar.className = 'progress-bar bg-warning';
-                badge.className = 'badge bg-warning-subtle text-dark px-2 py-0.5';
-                badge.innerText = 'Độ bảo mật: Yếu (Nên từ 8 ký tự)';
-            } else {
+                badge.innerText = 'Độ bảo mật: Rất yếu (Phải > 6 ký tự)';
+            } else if (!hasLetter || !hasDigit || !hasSpecial) {
                 if (criteriaCount <= 1) {
-                    bar.style.width = '45%';
+                    bar.style.width = '35%';
                     bar.className = 'progress-bar bg-warning';
                     badge.className = 'badge bg-warning-subtle text-dark px-2 py-0.5';
-                    badge.innerText = 'Độ bảo mật: Yếu';
-                } else if (criteriaCount === 2) {
-                    bar.style.width = '65%';
-                    bar.className = 'progress-bar bg-info';
-                    badge.className = 'badge bg-info-subtle text-primary px-2 py-0.5';
-                    badge.innerText = 'Độ bảo mật: Trung bình';
-                } else if (criteriaCount === 3) {
-                    bar.style.width = '85%';
-                    bar.className = 'progress-bar bg-primary';
-                    badge.className = 'badge bg-primary-subtle text-primary px-2 py-0.5';
-                    badge.innerText = 'Độ bảo mật: Khá mạnh';
+                    badge.innerText = 'Độ bảo mật: Yếu (Thiếu số hoặc ký tự đặc biệt)';
                 } else {
+                    bar.style.width = '60%';
+                    bar.className = 'progress-bar bg-warning';
+                    badge.className = 'badge bg-warning-subtle text-dark px-2 py-0.5';
+                    badge.innerText = 'Độ bảo mật: Trung bình (Cần thêm ký tự đặc biệt)';
+                }
+            } else {
+                // Đạt trọn vẹn: > 6 ký tự, có chữ cái, có số, có ký tự đặc biệt
+                if (pwd.length >= 8 && /[a-z]/.test(pwd) && /[A-Z]/.test(pwd)) {
                     bar.style.width = '100%';
                     bar.className = 'progress-bar bg-success';
                     badge.className = 'badge bg-success-subtle text-success px-2 py-0.5';
-                    badge.innerText = 'Độ bảo mật: Rất an toàn';
+                    badge.innerText = 'Độ bảo mật: Rất an toàn (Đạt chuẩn tối đa)';
+                } else {
+                    bar.style.width = '85%';
+                    bar.className = 'progress-bar bg-primary';
+                    badge.className = 'badge bg-primary-subtle text-primary px-2 py-0.5';
+                    badge.innerText = 'Độ bảo mật: Khá mạnh (Đã đạt chuẩn an toàn)';
                 }
             }
 
@@ -1005,8 +1019,17 @@
                 return;
             }
 
-            if (!password || password.length < 6) {
-                showAlert('Mật khẩu phải có độ dài tối thiểu từ 6 ký tự trở lên!');
+            // Yêu cầu: Mật khẩu > 6 ký tự, có ký tự, số, ký tự đặc biệt
+            if (!password || password.length <= 6) {
+                showAlert('Mật khẩu phải có độ dài lớn hơn 6 ký tự (từ 7 ký tự trở lên)!');
+                return;
+            }
+
+            const hasLetter = /[a-zA-Z]/.test(password);
+            const hasDigit = /[0-9]/.test(password);
+            const hasSpecial = /[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(password);
+            if (!hasLetter || !hasDigit || !hasSpecial) {
+                showAlert('Mật khẩu bắt buộc phải bao gồm cả chữ cái, chữ số và ký tự đặc biệt (!@#$...)!');
                 return;
             }
 
@@ -1035,6 +1058,13 @@
 
                 if (response.ok && result.success) {
                     goToStep2(email);
+                    if (result.data) {
+                        pendingRegistration.lastOtp = result.data;
+                        const otpCodeDisplay = document.getElementById('otpDisplayCode');
+                        if (otpCodeDisplay) {
+                            otpCodeDisplay.innerText = result.data;
+                        }
+                    }
                     showAlert(result.message || 'Mã xác nhận 6 số đã được gửi tới email của bạn!', false);
                 } else {
                     showAlert(result.message || 'Có lỗi xảy ra khi yêu cầu mã OTP!');
@@ -1044,6 +1074,16 @@
             } finally {
                 btn.disabled = false;
                 btnText.innerText = 'Gửi Mã Xác Nhận OTP Qua Email';
+            }
+        }
+
+        function autoFillOtp() {
+            if (pendingRegistration.lastOtp) {
+                const otpInput = document.getElementById('otpCodeInput');
+                if (otpInput) {
+                    otpInput.value = pendingRegistration.lastOtp;
+                    otpInput.focus();
+                }
             }
         }
 

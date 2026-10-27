@@ -81,9 +81,14 @@ public class UserServiceImpl implements UserService {
                 : "1234@abc";
 
         if (userDto.getPassword() != null && !userDto.getPassword().trim().isEmpty()) {
-            com.bookstore.dto.PasswordStrengthDto strength = com.bookstore.dto.PasswordStrengthDto.evaluate(rawPassword);
-            if (rawPassword.length() < 6 || "VERY_WEAK".equals(strength.getLevel())) {
-                throw new IllegalArgumentException("Mật khẩu quá yếu! Vui lòng đặt mật khẩu tối thiểu 6 ký tự kết hợp chữ cái và số.");
+            if (rawPassword.length() <= 6) {
+                throw new IllegalArgumentException("Mật khẩu phải có độ dài lớn hơn 6 ký tự (từ 7 ký tự trở lên)!");
+            }
+            boolean hasLetter = rawPassword.matches(".*[a-zA-Z].*");
+            boolean hasDigit = rawPassword.matches(".*[0-9].*");
+            boolean hasSpecial = rawPassword.matches(".*[!@#$%^&*()_+\\-=\\[\\]{};':\"\\\\|,.<>\\/?].*");
+            if (!hasLetter || !hasDigit || !hasSpecial) {
+                throw new IllegalArgumentException("Mật khẩu bắt buộc phải bao gồm cả chữ cái, chữ số và ký tự đặc biệt (!@#$...)!");
             }
         }
 
@@ -128,9 +133,14 @@ public class UserServiceImpl implements UserService {
 
         if (userDto.getPassword() != null && !userDto.getPassword().trim().isEmpty()) {
             String newPassword = userDto.getPassword().trim();
-            com.bookstore.dto.PasswordStrengthDto strength = com.bookstore.dto.PasswordStrengthDto.evaluate(newPassword);
-            if (newPassword.length() < 6 || "VERY_WEAK".equals(strength.getLevel())) {
-                throw new IllegalArgumentException("Mật khẩu mới quá yếu! Vui lòng đặt mật khẩu tối thiểu 6 ký tự kết hợp chữ cái và số.");
+            if (newPassword.length() <= 6) {
+                throw new IllegalArgumentException("Mật khẩu mới phải có độ dài lớn hơn 6 ký tự (từ 7 ký tự trở lên)!");
+            }
+            boolean hasLetter = newPassword.matches(".*[a-zA-Z].*");
+            boolean hasDigit = newPassword.matches(".*[0-9].*");
+            boolean hasSpecial = newPassword.matches(".*[!@#$%^&*()_+\\-=\\[\\]{};':\"\\\\|,.<>\\/?].*");
+            if (!hasLetter || !hasDigit || !hasSpecial) {
+                throw new IllegalArgumentException("Mật khẩu mới bắt buộc phải bao gồm cả chữ cái, chữ số và ký tự đặc biệt (!@#$...)!");
             }
             user.setPassword(passwordEncoder.encode(newPassword));
         }

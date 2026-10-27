@@ -23,10 +23,14 @@ public class AdminOrderMonitoringController {
 
     private final OrderTrackingService orderTrackingService;
     private final BranchService branchService;
+    private final javax.sql.DataSource dataSource;
 
-    public AdminOrderMonitoringController(OrderTrackingService orderTrackingService, BranchService branchService) {
+    public AdminOrderMonitoringController(OrderTrackingService orderTrackingService,
+                                          BranchService branchService,
+                                          javax.sql.DataSource dataSource) {
         this.orderTrackingService = orderTrackingService;
         this.branchService = branchService;
+        this.dataSource = dataSource;
     }
 
     /**
@@ -149,6 +153,29 @@ public class AdminOrderMonitoringController {
             redirectAttributes.addFlashAttribute("successMessage", "Đã cập nhật trạng thái đơn hàng thành công!");
         } catch (Exception e) {
             redirectAttributes.addFlashAttribute("errorMessage", "Lỗi cập nhật: " + e.getMessage());
+        }
+        return "redirect:/admin/orders/monitoring";
+    }
+
+    /**
+     * Xóa sạch toàn bộ đơn hàng cũ trong hệ thống (Dành riêng cho ADMIN)
+     */
+    @PostMapping("/clear-all-orders")
+    @PreAuthorize("hasAnyAuthority('ROLE_ADMIN', 'ADMIN')")
+    public String clearAllOrders(RedirectAttributes redirectAttributes) {
+        try (java.sql.Connection conn = dataSource.getConnection(); java.sql.Statement stmt = conn.createStatement()) {
+            try { stmt.execute("SET FOREIGN_KEY_CHECKS = 0"); } catch (Exception ignored) {}
+            try { stmt.executeUpdate("DELETE FROM order_status_history"); } catch (Exception ignored) {}
+            try { stmt.executeUpdate("DELETE FROM sub_order_items"); } catch (Exception ignored) {}
+            try { stmt.executeUpdate("DELETE FROM coupon_usages"); } catch (Exception ignored) {}
+            try { stmt.executeUpdate("DELETE FROM sub_orders"); } catch (Exception ignored) {}
+            try { stmt.executeUpdate("DELETE FROM master_orders"); } catch (Exception ignored) {}
+            try { stmt.executeUpdate("UPDATE drivers SET active_orders_count = 0"); } catch (Exception ignored) {}
+            try { stmt.execute("SET FOREIGN_KEY_CHECKS = 1"); } catch (Exception ignored) {}
+
+            redirectAttributes.addFlashAttribute("successMessage", "Đã xóa sạch toàn bộ các đơn hàng cũ và lịch sử trạng thái thành công!");
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("errorMessage", "Lỗi khi xóa đơn hàng: " + e.getMessage());
         }
         return "redirect:/admin/orders/monitoring";
     }

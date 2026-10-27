@@ -102,28 +102,29 @@ class PasswordAndEmailValidationTest {
     }
 
     @Test
-    @DisplayName("Mật khẩu 6-7 ký tự chỉ toàn chữ hoặc số được đánh giá là Rất yếu; có cả chữ và số là Yếu")
+    @DisplayName("Mật khẩu <= 6 ký tự là Rất yếu; mật khẩu > 6 ký tự nhưng thiếu ký tự đặc biệt là Yếu/Trung bình")
     void testPasswordStrength_Weak() {
-        PasswordStrengthDto veryWeak = PasswordStrengthDto.evaluate("abcdef");
+        PasswordStrengthDto veryWeak = PasswordStrengthDto.evaluate("abc123"); // 6 ký tự
+        assertEquals(0, veryWeak.getScore());
         assertEquals("VERY_WEAK", veryWeak.getLevel());
 
-        PasswordStrengthDto weak = PasswordStrengthDto.evaluate("abc123");
-        assertEquals(1, weak.getScore());
-        assertEquals("WEAK", weak.getLevel());
+        PasswordStrengthDto weak = PasswordStrengthDto.evaluate("abc1234"); // 7 ký tự nhưng không có ký tự đặc biệt
+        assertTrue(weak.getScore() >= 1 && weak.getScore() <= 2);
+        assertFalse(weak.isAcceptable(), "Thiếu ký tự đặc biệt nên chưa đạt chuẩn");
     }
 
     @Test
-    @DisplayName("Mật khẩu từ 8 ký tự kết hợp chữ hoa, thường và số đạt mức Khá/Mạnh")
+    @DisplayName("Mật khẩu thỏa mãn > 6 ký tự, có chữ, có số và ký tự đặc biệt đạt chuẩn")
     void testPasswordStrength_MediumToStrong() {
-        PasswordStrengthDto medium = PasswordStrengthDto.evaluate("Matkhau12");
-        assertTrue(medium.getScore() >= 2);
-        assertTrue(medium.isHasMinLength());
-        assertTrue(medium.isHasDigit());
-        assertTrue(medium.isAcceptable());
+        // Thiếu ký tự đặc biệt -> chưa acceptable
+        PasswordStrengthDto noSpecial = PasswordStrengthDto.evaluate("Matkhau12");
+        assertFalse(noSpecial.isAcceptable(), "Phải có ký tự đặc biệt mới đạt chuẩn");
 
-        PasswordStrengthDto strong = PasswordStrengthDto.evaluate("Matkhau12@#$");
-        assertEquals(4, strong.getScore());
-        assertEquals("VERY_STRONG", strong.getLevel());
+        // Đủ > 6 ký tự, có chữ, số, ký tự đặc biệt
+        PasswordStrengthDto strong = PasswordStrengthDto.evaluate("Pass@123");
+        assertTrue(strong.getScore() >= 3);
+        assertTrue(strong.isHasMinLength());
+        assertTrue(strong.isHasDigit());
         assertTrue(strong.isHasSpecialChar());
         assertTrue(strong.isAcceptable());
     }
@@ -189,15 +190,35 @@ class PasswordAndEmailValidationTest {
     }
 
     @Test
-    @DisplayName("Đăng ký tài khoản bị từ chối nếu mật khẩu quá yếu hoặc dưới 6 ký tự")
+    @DisplayName("Đăng ký tài khoản bị từ chối nếu mật khẩu <= 6 ký tự hoặc thiếu số/ký tự đặc biệt")
     void testInitiateRegistration_RejectWeakPassword() {
         when(userRepository.existsByEmail("unique@gmail.com")).thenReturn(false);
 
-        RegisterInitRequestDto dto = new RegisterInitRequestDto("unique@gmail.com", "123", "User Name", "0901234567");
-        ApiResponse<String> response = authService.initiateRegistration(dto);
+        // Mật khẩu <= 6 ký tự
+        RegisterInitRequestDto shortPass = new RegisterInitRequestDto("unique@gmail.com", "123456", "User Name", "0901234567");
+        ApiResponse<String> res1 = authService.initiateRegistration(shortPass);
+        assertFalse(res1.isSuccess());
+        assertTrue(res1.getMessage().contains("lớn hơn 6 ký tự"));
 
-        assertFalse(response.isSuccess());
-        assertTrue(response.getMessage().contains("từ 6 ký tự trở lên"));
+        // Mật khẩu > 6 ký tự nhưng thiếu ký tự đặc biệt
+        RegisterInitRequestDto noSpecial = new RegisterInitRequestDto("unique@gmail.com", "Matkhau12", "User Name", "0901234567");
+        ApiResponse<String> res2 = authService.initiateRegistration(noSpecial);
+        assertFalse(res2.isSuccess());
+        assertTrue(res2.getMessage().contains("ký tự đặc biệt"));
+    }
+
+    @Test
+    @DisplayName("Đăng ký tài khoản thành công với mật khẩu chuẩn > 6 ký tự, trả về mã OTP")
+    void testInitiateRegistration_SuccessWithOtp() {
+        when(userRepository.existsByEmail("unique@gmail.com")).thenReturn(false);
+
+        RegisterInitRequestDto validDto = new RegisterInitRequestDto("unique@gmail.com", "Pass@123", "User Name", "0901234567");
+        ApiResponse<String> res = authService.initiateRegistration(validDto);
+
+        assertTrue(res.isSuccess());
+        assertNotNull(res.getData(), "Phải trả về mã OTP để hỗ trợ dự phòng không nhận được mail");
+        assertEquals(6, res.getData().length(), "Mã OTP phải có 6 chữ số");
+        verify(otpVerificationRepository, times(1)).save(any());
     }
 
     @Test

@@ -20,6 +20,21 @@
         <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
     </div>
 
+    <!-- Action Bar & Clear Old Orders Button (ADMIN only) -->
+    <div class="d-flex align-items-center justify-content-between flex-wrap gap-2 mb-3">
+        <div class="d-flex align-items-center gap-2">
+            <span class="badge rounded-pill bg-primary px-3 py-1.5 text-white">
+                <i class="fas fa-tower-broadcast me-1"></i> Trung Tâm Điều Phối
+            </span>
+            <span class="text-muted small">Cập nhật tiến trình và xử lý đơn hàng theo thời gian thực</span>
+        </div>
+        <form sec:authorize="hasAnyAuthority('ROLE_ADMIN', 'ADMIN')" th:action="@{/admin/orders/clear-all-orders}" method="post" onsubmit="return confirm('CẢNH BÁO: Thao tác này sẽ XÓA SẠCH toàn bộ các đơn hàng cũ, chi tiết đơn và lịch sử giao hàng trong hệ thống. Bạn có chắc chắn muốn thực hiện?');">
+            <button type="submit" class="btn btn-outline-danger btn-sm rounded-pill px-3 py-1 shadow-2xs font-semibold">
+                <i class="fas fa-trash-can me-1"></i> Xóa Tất Cả Đơn Hàng Cũ
+            </button>
+        </form>
+    </div>
+
     <!-- Top KPI Stats Row -->
     <div class="row g-3 mb-4" th:if="${dashboard != null}">
         <div class="col-md-2">

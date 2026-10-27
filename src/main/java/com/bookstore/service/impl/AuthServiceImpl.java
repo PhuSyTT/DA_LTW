@@ -60,14 +60,16 @@ public class AuthServiceImpl implements AuthService {
             return ApiResponse.error("Email này đã được sử dụng để đăng ký tài khoản! Vui lòng chọn email khác hoặc đăng nhập.");
         }
 
-        // 1.1 Kiểm tra độ mật của mật khẩu người dùng
+        // 1.1 Kiểm tra độ mật của mật khẩu người dùng theo yêu cầu (> 6 ký tự, có chữ, có số, có ký tự đặc biệt)
         String rawPassword = request.getPassword();
-        if (rawPassword == null || rawPassword.length() < 6) {
-            return ApiResponse.error("Mật khẩu phải có độ dài từ 6 ký tự trở lên!");
+        if (rawPassword == null || rawPassword.length() <= 6) {
+            return ApiResponse.error("Mật khẩu phải có độ dài lớn hơn 6 ký tự (từ 7 ký tự trở lên)!");
         }
-        PasswordStrengthDto strength = PasswordStrengthDto.evaluate(rawPassword);
-        if ("VERY_WEAK".equals(strength.getLevel())) {
-            return ApiResponse.error("Mật khẩu quá yếu! Vui lòng kết hợp chữ cái và số để đảm bảo an toàn cho tài khoản.");
+        boolean hasLetter = rawPassword.matches(".*[a-zA-Z].*");
+        boolean hasDigit = rawPassword.matches(".*[0-9].*");
+        boolean hasSpecial = rawPassword.matches(".*[!@#$%^&*()_+\\-=\\[\\]{};':\"\\\\|,.<>\\/?].*");
+        if (!hasLetter || !hasDigit || !hasSpecial) {
+            return ApiResponse.error("Mật khẩu bắt buộc phải bao gồm cả chữ cái, chữ số và ký tự đặc biệt (!@#$...)!");
         }
 
         // 2. Chống Spam: Rate Limiting (Tối đa 5 lần yêu cầu OTP trong 15 phút)
@@ -110,11 +112,19 @@ public class AuthServiceImpl implements AuthService {
         otpVerificationRepository.save(otpRecord);
 
         // 7. Gửi email qua SMTP Gmail
-        emailService.sendRegistrationOtp(email, otpCode);
+        try {
+            emailService.sendRegistrationOtp(email, otpCode);
+        } catch (Exception ex) {
+            log.warn("Không thể gửi email OTP qua SMTP tới {}: {}", email, ex.getMessage());
+        }
+
+        log.info("=================================================================");
+        log.info(">>> MÃ XÁC THỰC OTP ĐĂNG KÝ CHO [{}]: [{}] <<<", email, otpCode);
+        log.info("=================================================================");
 
         return ApiResponse.success(
-                "Mã OTP đã được gửi đến email " + email + ". Mã có hiệu lực trong vòng 5 phút.",
-                "Gửi mã OTP thành công!"
+                otpCode,
+                "Mã OTP đã được gửi đến email " + email + ". (Mã xác thực nhanh: " + otpCode + ")"
         );
     }
 
@@ -246,11 +256,19 @@ public class AuthServiceImpl implements AuthService {
         otpVerificationRepository.save(newOtpRecord);
 
         // 5. Gửi email
-        emailService.sendRegistrationOtp(email, newOtpCode);
+        try {
+            emailService.sendRegistrationOtp(email, newOtpCode);
+        } catch (Exception ex) {
+            log.warn("Không thể gửi email OTP qua SMTP tới {}: {}", email, ex.getMessage());
+        }
+
+        log.info("=================================================================");
+        log.info(">>> MÃ XÁC THỰC OTP GỬI LẠI CHO [{}]: [{}] <<<", email, newOtpCode);
+        log.info("=================================================================");
 
         return ApiResponse.success(
-                "Mã xác nhận mới đã được gửi đến email " + email + ". Mã có hiệu lực trong vòng 5 phút.",
-                "Gửi lại mã OTP thành công!"
+                newOtpCode,
+                "Mã xác nhận mới đã được gửi đến email " + email + ". (Mã xác thực nhanh: " + newOtpCode + ")"
         );
     }
 

@@ -11,7 +11,7 @@ public class RegisterInitRequestDto {
     private String email;
 
     @NotBlank(message = "Mật khẩu không được để trống!")
-    @Size(min = 6, message = "Mật khẩu phải có độ dài từ 6 ký tự trở lên!")
+    @Size(min = 7, message = "Mật khẩu phải có độ dài lớn hơn 6 ký tự (từ 7 ký tự trở lên)!")
     private String password;
 
     private String fullName;

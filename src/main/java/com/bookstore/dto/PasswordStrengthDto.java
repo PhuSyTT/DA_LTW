@@ -42,11 +42,12 @@ public class PasswordStrengthDto implements Serializable {
         }
 
         int length = password.length();
-        boolean hasMinLength = length >= 8;
+        boolean hasMinLength = length > 6; // Yêu cầu: Mật khẩu > 6 ký tự (từ 7 ký tự trở lên)
         boolean hasLower = password.matches(".*[a-z].*");
         boolean hasUpper = password.matches(".*[A-Z].*");
-        boolean hasDigit = password.matches(".*[0-9].*");
-        boolean hasSpecial = password.matches(".*[!@#$%^&*()_+\\-=\\[\\]{};':\"\\\\|,.<>\\/?].*");
+        boolean hasLetter = hasLower || hasUpper; // có ký tự chữ
+        boolean hasDigit = password.matches(".*[0-9].*"); // có chữ số
+        boolean hasSpecial = password.matches(".*[!@#$%^&*()_+\\-=\\[\\]{};':\"\\\\|,.<>\\/?].*"); // có ký tự đặc biệt
 
         dto.setHasMinLength(hasMinLength);
         dto.setHasLowerCase(hasLower);
@@ -54,28 +55,23 @@ public class PasswordStrengthDto implements Serializable {
         dto.setHasDigit(hasDigit);
         dto.setHasSpecialChar(hasSpecial);
 
-        // Tính điểm độ mạnh từ 0 đến 4
-        int criteriaMet = 0;
-        if (hasLower) criteriaMet++;
-        if (hasUpper) criteriaMet++;
-        if (hasDigit) criteriaMet++;
-        if (hasSpecial) criteriaMet++;
+        // Đạt chuẩn nếu thỏa mãn đồng thời: độ dài > 6, có chữ cái, có số, và có ký tự đặc biệt
+        boolean meetsAllRequired = hasMinLength && hasLetter && hasDigit && hasSpecial;
+        dto.setAcceptable(meetsAllRequired);
+
+        int criteriaCount = (hasLetter ? 1 : 0) + (hasDigit ? 1 : 0) + (hasSpecial ? 1 : 0);
 
         int calculatedScore;
-        if (length < 6) {
-            calculatedScore = 0; // Quá ngắn
-        } else if (length < 8) {
-            calculatedScore = (criteriaMet >= 2) ? 1 : 0;
+        if (length <= 6) {
+            calculatedScore = 0; // Quá ngắn (<= 6 ký tự)
+        } else if (!meetsAllRequired) {
+            calculatedScore = (criteriaCount >= 2) ? 2 : 1;
         } else {
-            // length >= 8
-            if (criteriaMet <= 1) {
-                calculatedScore = 1;
-            } else if (criteriaMet == 2) {
-                calculatedScore = 2;
-            } else if (criteriaMet == 3) {
-                calculatedScore = 3;
+            // Đã đủ > 6 ký tự, có chữ, có số, có ký tự đặc biệt
+            if (length >= 8 && hasLower && hasUpper) {
+                calculatedScore = 4; // Rất an toàn (>= 8 ký tự, có đủ chữ thường, hoa, số, đặc biệt)
             } else {
-                calculatedScore = 4;
+                calculatedScore = 3; // Khá mạnh (thỏa mãn trọn vẹn yêu cầu > 6 ký tự, có chữ, số, ký tự đặc biệt)
             }
         }
 
@@ -84,54 +80,49 @@ public class PasswordStrengthDto implements Serializable {
         switch (calculatedScore) {
             case 0:
                 dto.setLevel("VERY_WEAK");
-                dto.setLabel("Rất yếu");
+                dto.setLabel("Rất yếu (Phải > 6 ký tự)");
                 dto.setColor("#DC3545"); // Đỏ
                 dto.setPercentage(15);
-                dto.setAcceptable(false);
                 break;
             case 1:
                 dto.setLevel("WEAK");
-                dto.setLabel("Yếu");
+                dto.setLabel("Yếu (Thiếu số hoặc ký tự đặc biệt)");
                 dto.setColor("#FD7E14"); // Cam
                 dto.setPercentage(35);
-                dto.setAcceptable(length >= 6 && (hasLower || hasUpper) && hasDigit);
                 break;
             case 2:
                 dto.setLevel("MEDIUM");
-                dto.setLabel("Trung bình");
+                dto.setLabel("Trung bình (Cần thêm ký tự đặc biệt)");
                 dto.setColor("#FFC107"); // Vàng cam
-                dto.setPercentage(60);
-                dto.setAcceptable(true);
+                dto.setPercentage(65);
                 break;
             case 3:
                 dto.setLevel("STRONG");
-                dto.setLabel("Khá mạnh");
+                dto.setLabel("Khá mạnh (Đã đạt chuẩn an toàn)");
                 dto.setColor("#0D6EFD"); // Xanh dương
                 dto.setPercentage(85);
-                dto.setAcceptable(true);
                 break;
             case 4:
             default:
                 dto.setLevel("VERY_STRONG");
-                dto.setLabel("Rất an toàn");
+                dto.setLabel("Rất an toàn (Đạt chuẩn tối đa)");
                 dto.setColor("#198754"); // Xanh lá
                 dto.setPercentage(100);
-                dto.setAcceptable(true);
                 break;
         }
 
-        // Tạo danh sách gợi ý cải thiện
+        // Tạo danh sách gợi ý cải thiện theo đúng yêu cầu
         if (!hasMinLength) {
-            dto.getSuggestions().add("Nên có độ dài từ 8 ký tự trở lên");
+            dto.getSuggestions().add("Độ dài mật khẩu phải lớn hơn 6 ký tự (từ 7 ký tự trở lên)");
         }
-        if (!hasLower || !hasUpper) {
-            dto.getSuggestions().add("Nên kết hợp cả chữ thường (a-z) và chữ in hoa (A-Z)");
+        if (!hasLetter) {
+            dto.getSuggestions().add("Mật khẩu phải chứa ít nhất 1 chữ cái (a-z, A-Z)");
         }
         if (!hasDigit) {
-            dto.getSuggestions().add("Nên bổ sung thêm ít nhất 1 chữ số (0-9)");
+            dto.getSuggestions().add("Mật khẩu phải chứa ít nhất 1 chữ số (0-9)");
         }
         if (!hasSpecial) {
-            dto.getSuggestions().add("Nên thêm ký tự đặc biệt như @, #, $, %, ! để đạt độ an toàn tối đa");
+            dto.getSuggestions().add("Mật khẩu phải chứa ít nhất 1 ký tự đặc biệt (!@#$%...)");
         }
 
         return dto;
@@ -233,3 +224,4 @@ public class PasswordStrengthDto implements Serializable {
         this.suggestions = suggestions;
     }
 }
+

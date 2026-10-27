@@ -50,11 +50,11 @@
             <span>Tồn Kho Chi Nhánh</span>
         </a>
 
-        <!-- Đơn hàng phân bổ -->
+        <!-- Xử lý đơn hàng (Fulfillment & Phê duyệt) -->
         <a sec:authorize="hasAnyAuthority('ROLE_ADMIN', 'ADMIN', 'ROLE_BRANCH_MANAGER', 'BRANCH_MANAGER', 'ROLE_CASHIER', 'CASHIER', 'ROLE_STAFF_GENERAL', 'STAFF_GENERAL', 'ROLE_WAREHOUSE_STAFF', 'WAREHOUSE_STAFF')"
            th:href="@{/admin/fulfillment}" class="sidebar-link" th:classappend="${activeMenu == 'fulfillment'} ? 'active' : ''">
             <i class="fas fa-truck-ramp-box"></i>
-            <span>Đơn Hàng Phân Bổ</span>
+            <span>Xử Lý Đơn Hàng</span>
         </a>
 
         <!-- Săn sách (Wishlist) -->

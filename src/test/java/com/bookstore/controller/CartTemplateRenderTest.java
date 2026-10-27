@@ -102,3 +102,4 @@ public class CartTemplateRenderTest {
         assertTrue(rendered.contains("openCheckoutModal"));
     }
 }
+

@@ -36,12 +36,12 @@
                     <tr>
                         <th style="width: 140px;">Thời Gian</th>
                         <th>Mã Đơn Con</th>
-                        <th>Loại Thao Tác</th>
+                        <th>Hành Động Ghi Nhận</th>
                         <th>Tiến Trình Chuyển</th>
                         <th>Người Thực Hiện</th>
                         <th>Chi Nhánh Liên Quan</th>
                         <th>Ghi Chú Chi Tiết</th>
-                        <th class="text-center">Timeline</th>
+                        <th class="text-center" style="min-width: 160px;">Thao Tác</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -51,19 +51,23 @@
                                    th:text="${log.createdAt != null ? #temporals.format(log.createdAt, 'dd/MM/yyyy HH:mm:ss') : '—'}">18/10/2026 14:30:00</small>
                         </td>
                         <td>
-                            <strong class="font-monospace text-primary" th:text="${log.subOrderCode} ?: '—'">SUB-001</strong>
+                            <a th:if="${log.subOrderId != null}" th:href="@{'/admin/fulfillment/orders/' + ${log.subOrderId}}"
+                               class="font-monospace fw-bold text-primary text-decoration-none hover:underline"
+                               title="Bấm để xem và xử lý đơn hàng này"
+                               th:text="${log.subOrderCode} ?: '—'">SUB-001</a>
+                            <strong th:unless="${log.subOrderId != null}" class="font-monospace text-primary" th:text="${log.subOrderCode} ?: '—'">SUB-001</strong>
                             <div th:if="${log.masterOrderCode}" class="small text-muted font-monospace">Đơn: <span th:text="${log.masterOrderCode}">MO-001</span></div>
                         </td>
                         <td>
                             <span th:switch="${log.actionType}">
-                                <span th:case="'BRANCH_REASSIGN'" class="badge bg-purple-100 text-purple-800 border" style="background-color: #f3e8ff; color: #6b21a8;">
+                                <span th:case="'BRANCH_REASSIGN'" class="badge bg-purple-50 text-purple-700 border border-purple-200">
                                     <i class="fas fa-shuffle me-1"></i> Điều Phối
                                 </span>
                                 <span th:case="'ORDER_CANCELLED'" class="badge bg-danger-subtle text-danger border">
                                     <i class="fas fa-ban me-1"></i> Hủy Đơn
                                 </span>
-                                <span th:case="*" class="badge bg-primary-subtle text-primary border">
-                                    <i class="fas fa-sync-alt me-1"></i> Đổi Trạng Thái
+                                <span th:case="*" class="badge bg-light text-secondary border">
+                                    <i class="fas fa-clock-rotate-left me-1"></i> Cập Nhật Trạng Thái
                                 </span>
                             </span>
                         </td>
@@ -97,10 +101,16 @@
                             <p class="mb-0 small text-dark" style="max-width: 320px;" th:text="${log.note}">Chi tiết thao tác</p>
                         </td>
                         <td class="text-center">
-                            <a th:href="@{'/orders/' + ${log.subOrderId} + '/timeline'}" target="_blank"
-                               class="btn btn-sm btn-outline-primary" title="Xem Timeline Đơn">
-                                <i class="fas fa-route"></i>
-                            </a>
+                            <div class="btn-group btn-group-sm">
+                                <a th:if="${log.subOrderId != null}" th:href="@{'/admin/fulfillment/orders/' + ${log.subOrderId}}"
+                                   class="btn btn-sm btn-outline-success fw-semibold" title="Mở trang Xử Lý &amp; Đổi Trạng Thái đơn hàng này">
+                                    <i class="fas fa-boxes-packing me-1"></i> Xử Lý Đơn
+                                </a>
+                                <a th:href="@{'/orders/' + ${log.subOrderId} + '/timeline'}" target="_blank"
+                                   class="btn btn-sm btn-outline-primary" title="Xem Timeline Đơn">
+                                    <i class="fas fa-route"></i>
+                                </a>
+                            </div>
                         </td>
                     </tr>
                 </tbody>

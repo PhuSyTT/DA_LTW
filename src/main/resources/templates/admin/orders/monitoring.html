@@ -256,6 +256,12 @@
                         </td>
                         <td class="text-center">
                             <div class="btn-group btn-group-sm">
+                                <!-- Process Order / Fulfillment Link -->
+                                <a th:if="${order.id != null}" th:href="@{'/admin/fulfillment/orders/' + ${order.id}}"
+                                   class="btn btn-outline-success fw-semibold" title="Xử lý / Cập nhật tiến độ đơn hàng">
+                                    <i class="fas fa-boxes-packing me-1"></i> Xử Lý
+                                </a>
+
                                 <!-- Reassign Branch Button (Super Admin) -->
                                 <button th:if="${order.status != 'COMPLETED' and order.status != 'CANCELLED'}"
                                         type="button" class="btn btn-outline-warning text-dark"

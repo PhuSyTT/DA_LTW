@@ -43,7 +43,7 @@ public class OrderFulfillmentApiController {
     }
 
     // Cập nhật trạng thái xử lý đơn hàng: PACKING -> SHIPPED -> COMPLETED
-    @PutMapping("/orders/{subOrderId}/status")
+    @RequestMapping(value = "/orders/{subOrderId}/status", method = {RequestMethod.PUT, RequestMethod.POST})
     public ResponseEntity<?> updateStatus(
             @PathVariable Long subOrderId,
             @RequestBody UpdateSubOrderStatusDto dto,

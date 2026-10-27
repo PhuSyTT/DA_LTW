@@ -511,25 +511,69 @@
                         </div>
 
                         <div class="mb-2">
-                            <label class="form-label-custom">Địa chỉ Email (Nhận mã OTP)</label>
-                            <input type="email" id="regEmail" required placeholder="vidu@gmail.com" class="form-control form-control-sm rounded-3 py-1.5 px-3">
+                            <label class="form-label-custom d-flex justify-content-between align-items-center">
+                                <span>Địa chỉ Email (Nhận mã OTP)</span>
+                                <span id="emailCheckSpinner" class="spinner-border spinner-border-sm text-secondary d-none" style="width: 0.75rem; height: 0.75rem;"></span>
+                            </label>
+                            <div class="position-relative">
+                                <input type="email" id="regEmail" required placeholder="vidu@gmail.com" class="form-control form-control-sm rounded-3 py-1.5 px-3">
+                                <span id="emailStatusIcon" class="position-absolute end-0 top-50 translate-middle-y me-2.5 d-none"></span>
+                            </div>
+                            <!-- Cảnh báo trạng thái trùng lặp email -->
+                            <div id="emailCheckFeedback" class="mt-1 d-none" style="font-size: 0.72rem;"></div>
                             <div class="text-muted mt-0.5" style="font-size: 0.7rem;">Mã OTP 6 số sẽ được gửi đến email này qua Google SMTP.</div>
                         </div>
 
-                        <div class="row g-2 mb-2">
-                            <div class="col-6">
-                                <label class="form-label-custom">Số điện thoại</label>
-                                <input type="tel" id="regPhone" placeholder="0912345678" class="form-control form-control-sm rounded-3 py-1.5 px-3">
+                        <div class="mb-2">
+                            <label class="form-label-custom">Số điện thoại</label>
+                            <input type="tel" id="regPhone" placeholder="0912345678" class="form-control form-control-sm rounded-3 py-1.5 px-3">
+                        </div>
+
+                        <!-- Mật khẩu & Thước đo độ bảo mật -->
+                        <div class="mb-2">
+                            <div class="d-flex justify-content-between align-items-center mb-1">
+                                <label class="form-label-custom mb-0">Mật khẩu tài khoản</label>
+                                <span id="passwordStrengthBadge" class="badge bg-secondary-subtle text-secondary px-2 py-0.5" style="font-size: 0.68rem;">Độ bảo mật: Chưa nhập</span>
                             </div>
-                            <div class="col-6">
-                                <label class="form-label-custom">Mật khẩu</label>
-                                <input type="password" id="regPassword" required minlength="6" placeholder="Tối thiểu 6 ký tự" class="form-control form-control-sm rounded-3 py-1.5 px-3">
+                            <div class="input-group input-group-sm">
+                                <input type="password" id="regPassword" required minlength="6" placeholder="Tối thiểu 6-8 ký tự" class="form-control rounded-start-3 py-1.5 px-3">
+                                <button type="button" class="btn btn-outline-secondary rounded-end-3 px-2.5" onclick="togglePasswordVisibility('regPassword', 'toggleIcon1')" title="Hiện/ẩn mật khẩu">
+                                    <i class="bi bi-eye-slash" id="toggleIcon1"></i>
+                                </button>
+                            </div>
+
+                            <!-- Thanh tiến trình độ mạnh mật khẩu -->
+                            <div class="progress mt-1.5" style="height: 4px; background: rgba(0,0,0,0.06); border-radius: 2px;">
+                                <div id="passwordStrengthBar" class="progress-bar" role="progressbar" style="width: 0%; transition: all 0.3s ease;"></div>
+                            </div>
+
+                            <!-- Tiêu chí bảo mật trực quan (Checklist) -->
+                            <div class="row g-1 mt-1 text-muted" style="font-size: 0.68rem;" id="pwdCriteriaBox">
+                                <div class="col-6 d-flex align-items-center gap-1" id="critLength">
+                                    <i class="bi bi-circle text-muted"></i> <span>Tối thiểu 8 ký tự</span>
+                                </div>
+                                <div class="col-6 d-flex align-items-center gap-1" id="critLetter">
+                                    <i class="bi bi-circle text-muted"></i> <span>Chữ hoa &amp; thường</span>
+                                </div>
+                                <div class="col-6 d-flex align-items-center gap-1" id="critNumber">
+                                    <i class="bi bi-circle text-muted"></i> <span>Có chữ số (0-9)</span>
+                                </div>
+                                <div class="col-6 d-flex align-items-center gap-1" id="critSpecial">
+                                    <i class="bi bi-circle text-muted"></i> <span>Ký tự đặc biệt (!@#$)</span>
+                                </div>
                             </div>
                         </div>
 
+                        <!-- Xác nhận mật khẩu -->
                         <div class="mb-3">
                             <label class="form-label-custom">Xác nhận mật khẩu</label>
-                            <input type="password" id="regConfirmPassword" required minlength="6" placeholder="Nhập lại mật khẩu" class="form-control form-control-sm rounded-3 py-1.5 px-3">
+                            <div class="input-group input-group-sm">
+                                <input type="password" id="regConfirmPassword" required minlength="6" placeholder="Nhập lại mật khẩu" class="form-control rounded-start-3 py-1.5 px-3">
+                                <button type="button" class="btn btn-outline-secondary rounded-end-3 px-2.5" onclick="togglePasswordVisibility('regConfirmPassword', 'toggleIcon2')" title="Hiện/ẩn mật khẩu">
+                                    <i class="bi bi-eye-slash" id="toggleIcon2"></i>
+                                </button>
+                            </div>
+                            <div id="confirmPasswordFeedback" class="mt-1 d-none" style="font-size: 0.72rem;"></div>
                         </div>
 
                         <button type="submit" id="btnSubmitStep1" class="btn-terracotta-cta">
@@ -686,6 +730,199 @@
             document.getElementById('modalAlertBox').classList.add('d-none');
         }
 
+        let isEmailAvailableStatus = null; // null: chưa kiểm tra, true: hợp lệ, false: trùng
+        let emailDebounceTimer = null;
+
+        function togglePasswordVisibility(inputId, iconId) {
+            const input = document.getElementById(inputId);
+            const icon = document.getElementById(iconId);
+            if (!input || !icon) return;
+            if (input.type === 'password') {
+                input.type = 'text';
+                icon.className = 'bi bi-eye';
+            } else {
+                input.type = 'password';
+                icon.className = 'bi bi-eye-slash';
+            }
+        }
+
+        function fillLoginFromReg(email) {
+            closeRegisterModal();
+            const usernameInput = document.getElementById('username');
+            if (usernameInput) {
+                usernameInput.value = email;
+                const pwdInput = document.getElementById('password');
+                if (pwdInput) pwdInput.focus();
+            }
+        }
+
+        function handleEmailInputLive() {
+            clearTimeout(emailDebounceTimer);
+            const emailInput = document.getElementById('regEmail');
+            const spinner = document.getElementById('emailCheckSpinner');
+            const statusIcon = document.getElementById('emailStatusIcon');
+            const feedback = document.getElementById('emailCheckFeedback');
+            const email = emailInput.value.trim().toLowerCase();
+
+            if (!email) {
+                isEmailAvailableStatus = null;
+                emailInput.classList.remove('is-valid', 'is-invalid');
+                statusIcon.classList.add('d-none');
+                feedback.classList.add('d-none');
+                feedback.innerHTML = '';
+                return;
+            }
+
+            // Regex kiểm tra định dạng email
+            const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,6}$/;
+            if (!emailRegex.test(email)) {
+                isEmailAvailableStatus = false;
+                emailInput.classList.remove('is-valid');
+                emailInput.classList.add('is-invalid');
+                statusIcon.classList.remove('d-none');
+                statusIcon.innerHTML = '<i class="bi bi-exclamation-circle text-warning fs-6"></i>';
+                feedback.classList.remove('d-none');
+                feedback.innerHTML = '<span class="text-danger"><i class="bi bi-info-circle me-1"></i>Định dạng email chưa hợp lệ (ví dụ: tenban@gmail.com).</span>';
+                return;
+            }
+
+            // Hiển thị trạng thái đang kiểm tra (Debounce 350ms)
+            spinner.classList.remove('d-none');
+            emailDebounceTimer = setTimeout(async () => {
+                try {
+                    const res = await fetch('/api/auth/check-email?email=' + encodeURIComponent(email));
+                    const json = await res.json();
+                    spinner.classList.add('d-none');
+
+                    if (json && json.data && json.data.available === true) {
+                        isEmailAvailableStatus = true;
+                        emailInput.classList.remove('is-invalid');
+                        emailInput.classList.add('is-valid');
+                        statusIcon.classList.remove('d-none');
+                        statusIcon.innerHTML = '<i class="bi bi-check-circle-fill text-success fs-6"></i>';
+                        feedback.classList.remove('d-none');
+                        feedback.innerHTML = '<span class="text-success fw-semibold"><i class="bi bi-check2-circle me-1"></i>Email hợp lệ và khả dụng để đăng ký!</span>';
+                    } else {
+                        isEmailAvailableStatus = false;
+                        emailInput.classList.remove('is-valid');
+                        emailInput.classList.add('is-invalid');
+                        statusIcon.classList.remove('d-none');
+                        statusIcon.innerHTML = '<i class="bi bi-x-circle-fill text-danger fs-6"></i>';
+                        feedback.classList.remove('d-none');
+                        feedback.innerHTML = `<span class="text-danger fw-semibold"><i class="bi bi-exclamation-triangle-fill me-1"></i>Email này đã được sử dụng!</span> <a href="javascript:void(0)" onclick="fillLoginFromReg('${email}')" class="text-primary fw-bold text-decoration-underline ms-1">Đăng nhập ngay?</a>`;
+                    }
+                } catch (e) {
+                    spinner.classList.add('d-none');
+                    console.error('Lỗi kiểm tra email:', e);
+                }
+            }, 350);
+        }
+
+        function handlePasswordInputLive() {
+            const pwd = document.getElementById('regPassword').value;
+            const bar = document.getElementById('passwordStrengthBar');
+            const badge = document.getElementById('passwordStrengthBadge');
+
+            const hasMinLength = pwd.length >= 8;
+            const hasLower = /[a-z]/.test(pwd);
+            const hasUpper = /[A-Z]/.test(pwd);
+            const hasDigit = /[0-9]/.test(pwd);
+            const hasSpecial = /[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(pwd);
+
+            // Cập nhật Checklist trực quan
+            updateChecklistIcon('critLength', hasMinLength);
+            updateChecklistIcon('critLetter', hasLower && hasUpper);
+            updateChecklistIcon('critNumber', hasDigit);
+            updateChecklistIcon('critSpecial', hasSpecial);
+
+            if (pwd.length === 0) {
+                bar.style.width = '0%';
+                bar.className = 'progress-bar';
+                badge.className = 'badge bg-secondary-subtle text-secondary px-2 py-0.5';
+                badge.innerText = 'Độ bảo mật: Chưa nhập';
+                return;
+            }
+
+            let criteriaCount = (hasLower ? 1 : 0) + (hasUpper ? 1 : 0) + (hasDigit ? 1 : 0) + (hasSpecial ? 1 : 0);
+
+            if (pwd.length < 6) {
+                bar.style.width = '20%';
+                bar.className = 'progress-bar bg-danger';
+                badge.className = 'badge bg-danger-subtle text-danger px-2 py-0.5';
+                badge.innerText = 'Độ bảo mật: Rất yếu (< 6 ký tự)';
+            } else if (pwd.length < 8) {
+                bar.style.width = '40%';
+                bar.className = 'progress-bar bg-warning';
+                badge.className = 'badge bg-warning-subtle text-dark px-2 py-0.5';
+                badge.innerText = 'Độ bảo mật: Yếu (Nên từ 8 ký tự)';
+            } else {
+                if (criteriaCount <= 1) {
+                    bar.style.width = '45%';
+                    bar.className = 'progress-bar bg-warning';
+                    badge.className = 'badge bg-warning-subtle text-dark px-2 py-0.5';
+                    badge.innerText = 'Độ bảo mật: Yếu';
+                } else if (criteriaCount === 2) {
+                    bar.style.width = '65%';
+                    bar.className = 'progress-bar bg-info';
+                    badge.className = 'badge bg-info-subtle text-primary px-2 py-0.5';
+                    badge.innerText = 'Độ bảo mật: Trung bình';
+                } else if (criteriaCount === 3) {
+                    bar.style.width = '85%';
+                    bar.className = 'progress-bar bg-primary';
+                    badge.className = 'badge bg-primary-subtle text-primary px-2 py-0.5';
+                    badge.innerText = 'Độ bảo mật: Khá mạnh';
+                } else {
+                    bar.style.width = '100%';
+                    bar.className = 'progress-bar bg-success';
+                    badge.className = 'badge bg-success-subtle text-success px-2 py-0.5';
+                    badge.innerText = 'Độ bảo mật: Rất an toàn';
+                }
+            }
+
+            handleConfirmPasswordLive();
+        }
+
+        function updateChecklistIcon(elementId, isValid) {
+            const el = document.getElementById(elementId);
+            if (!el) return;
+            const icon = el.querySelector('i');
+            if (isValid) {
+                icon.className = 'bi bi-check-circle-fill text-success';
+                el.classList.add('fw-semibold', 'text-dark');
+                el.classList.remove('text-muted');
+            } else {
+                icon.className = 'bi bi-circle text-muted';
+                el.classList.remove('fw-semibold', 'text-dark');
+                el.classList.add('text-muted');
+            }
+        }
+
+        function handleConfirmPasswordLive() {
+            const pwd = document.getElementById('regPassword').value;
+            const confirm = document.getElementById('regConfirmPassword').value;
+            const feedback = document.getElementById('confirmPasswordFeedback');
+            const confirmInput = document.getElementById('regConfirmPassword');
+
+            if (!confirm) {
+                confirmInput.classList.remove('is-valid', 'is-invalid');
+                feedback.classList.add('d-none');
+                feedback.innerHTML = '';
+                return;
+            }
+
+            if (pwd === confirm) {
+                confirmInput.classList.remove('is-invalid');
+                confirmInput.classList.add('is-valid');
+                feedback.classList.remove('d-none');
+                feedback.innerHTML = '<span class="text-success"><i class="bi bi-check2-circle me-1"></i>Mật khẩu xác nhận trùng khớp!</span>';
+            } else {
+                confirmInput.classList.remove('is-valid');
+                confirmInput.classList.add('is-invalid');
+                feedback.classList.remove('d-none');
+                feedback.innerHTML = '<span class="text-danger"><i class="bi bi-x-circle me-1"></i>Mật khẩu xác nhận không khớp!</span>';
+            }
+        }
+
         function goToStep1() {
             hideAlert();
             clearIntervals();
@@ -696,6 +933,24 @@
             document.getElementById('progressFill').style.width = '0%';
             document.getElementById('step1Indicator').className = 'd-flex align-items-center gap-1 fw-bold';
             document.getElementById('step2Indicator').className = 'text-secondary d-flex align-items-center gap-1 fw-normal';
+
+            // Gắn lắng nghe sự kiện kiểm tra Email & Mật khẩu
+            const emailInput = document.getElementById('regEmail');
+            if (emailInput && !emailInput.dataset.bound) {
+                emailInput.addEventListener('input', handleEmailInputLive);
+                emailInput.addEventListener('blur', handleEmailInputLive);
+                emailInput.dataset.bound = "true";
+            }
+            const pwdInput = document.getElementById('regPassword');
+            if (pwdInput && !pwdInput.dataset.bound) {
+                pwdInput.addEventListener('input', handlePasswordInputLive);
+                pwdInput.dataset.bound = "true";
+            }
+            const confirmInput = document.getElementById('regConfirmPassword');
+            if (confirmInput && !confirmInput.dataset.bound) {
+                confirmInput.addEventListener('input', handleConfirmPasswordLive);
+                confirmInput.dataset.bound = "true";
+            }
         }
 
         function goToStep2(email) {
@@ -745,8 +1000,18 @@
             const password = document.getElementById('regPassword').value;
             const confirmPassword = document.getElementById('regConfirmPassword').value;
 
+            if (isEmailAvailableStatus === false) {
+                showAlert('Email này đã được đăng ký trong hệ thống! Vui lòng sử dụng email khác hoặc đăng nhập.');
+                return;
+            }
+
+            if (!password || password.length < 6) {
+                showAlert('Mật khẩu phải có độ dài tối thiểu từ 6 ký tự trở lên!');
+                return;
+            }
+
             if (password !== confirmPassword) {
-                showAlert('Mật khẩu xác nhận không khớp! Vui lòng nhập lại.');
+                showAlert('Mật khẩu xác nhận không khớp! Vui lòng kiểm tra lại.');
                 return;
             }
 

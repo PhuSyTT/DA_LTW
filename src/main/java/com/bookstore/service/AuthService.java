@@ -12,5 +12,11 @@ public interface AuthService {
 
     // Bước 3: Gửi lại mã OTP (kiểm tra Cooldown 60s)
     ApiResponse<String> resendOtp(ResendOtpRequestDto request);
+
+    // Kiểm tra email trùng lặp khả dụng theo thời gian thực
+    ApiResponse<java.util.Map<String, Object>> checkEmailAvailability(String email);
+
+    // Đánh giá độ bảo mật và độ mạnh của mật khẩu người dùng
+    ApiResponse<PasswordStrengthDto> checkPasswordStrength(String password);
 }
 

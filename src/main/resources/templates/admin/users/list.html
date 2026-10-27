@@ -262,12 +262,19 @@
                                                 </div>
                                                 <div class="mb-2">
                                                     <label class="form-label small fw-bold mb-1">Email Đăng Nhập <span class="text-danger">*</span></label>
-                                                    <input type="email" name="email" class="form-control form-control-sm" th:value="${user.email}" required>
+                                                    <input type="email" name="email" class="form-control form-control-sm" th:value="${user.email}" th:data-original-email="${user.email}" oninput="checkAdminEditEmail(this)" required>
+                                                    <div class="small mt-1 d-none edit-email-feedback" style="font-size: 0.72rem;"></div>
                                                 </div>
                                                 <div class="mb-2">
-                                                    <label class="form-label small fw-bold mb-1">Đổi Mật Khẩu Mới</label>
-                                                    <input type="password" name="password" class="form-control form-control-sm" placeholder="Để trống nếu muốn giữ nguyên mật khẩu cũ">
-                                                    <span class="text-muted" style="font-size: 0.72rem;">Chỉ nhập khi muốn thiết lập lại mật khẩu mới cho tài khoản này.</span>
+                                                    <div class="d-flex justify-content-between align-items-center mb-1">
+                                                        <label class="form-label small fw-bold mb-0">Đổi Mật Khẩu Mới</label>
+                                                        <span class="badge bg-secondary-subtle text-secondary px-2 py-0.5 edit-pwd-badge" style="font-size: 0.68rem;">Giữ nguyên cũ</span>
+                                                    </div>
+                                                    <input type="password" name="password" class="form-control form-control-sm" placeholder="Để trống nếu muốn giữ nguyên mật khẩu cũ" oninput="checkAdminEditPwd(this)">
+                                                    <div class="progress mt-1" style="height: 3px; background: rgba(0,0,0,0.06);">
+                                                        <div class="progress-bar edit-pwd-bar" style="width: 0%;"></div>
+                                                    </div>
+                                                    <span class="text-muted" style="font-size: 0.7rem;">Chỉ nhập khi muốn thiết lập lại mật khẩu mới cho tài khoản này (tối thiểu 6 ký tự).</span>
                                                 </div>
                                                 <div class="mb-2">
                                                     <label class="form-label small fw-bold mb-1">Số Điện Thoại</label>
@@ -336,12 +343,23 @@
                             <input type="text" name="fullName" class="form-control form-control-sm" placeholder="Ví dụ: Lê Minh Kiểm Duyệt" required>
                         </div>
                         <div class="mb-2">
-                            <label class="form-label small fw-bold mb-1">Email Đăng Nhập <span class="text-danger">*</span></label>
-                            <input type="email" name="email" class="form-control form-control-sm" placeholder="appraiser@bookstore.vn" required>
+                            <label class="form-label small fw-bold mb-1 d-flex justify-content-between align-items-center">
+                                <span>Email Đăng Nhập <span class="text-danger">*</span></span>
+                                <span id="adminCreateEmailSpinner" class="spinner-border spinner-border-sm text-secondary d-none" style="width: 0.7rem; height: 0.7rem;"></span>
+                            </label>
+                            <input type="email" name="email" id="adminCreateEmail" class="form-control form-control-sm" placeholder="appraiser@bookstore.vn" required oninput="checkAdminCreateEmail(this)">
+                            <div id="adminCreateEmailFeedback" class="small mt-1 d-none" style="font-size: 0.72rem;"></div>
                         </div>
                         <div class="mb-2">
-                            <label class="form-label small fw-bold mb-1">Mật Khẩu Ban Đầu</label>
-                            <input type="password" name="password" class="form-control form-control-sm" placeholder="Mặc định: 1234@abc nếu để trống">
+                            <div class="d-flex justify-content-between align-items-center mb-1">
+                                <label class="form-label small fw-bold mb-0">Mật Khẩu Ban Đầu</label>
+                                <span id="adminCreatePwdBadge" class="badge bg-secondary-subtle text-secondary px-2 py-0.5" style="font-size: 0.68rem;">Mặc định: 1234@abc</span>
+                            </div>
+                            <input type="password" name="password" id="adminCreatePwd" class="form-control form-control-sm" placeholder="Mặc định: 1234@abc nếu để trống" oninput="checkAdminCreatePwd(this)">
+                            <div class="progress mt-1.5" style="height: 3px; background: rgba(0,0,0,0.06);">
+                                <div id="adminCreatePwdBar" class="progress-bar" style="width: 0%;"></div>
+                            </div>
+                            <span class="text-muted" style="font-size: 0.7rem;">Gợi ý: Mật khẩu nên gồm ít nhất 6-8 ký tự kết hợp chữ cái và số.</span>
                         </div>
                         <div class="mb-2">
                             <label class="form-label small fw-bold mb-1">Số Điện Thoại</label>
@@ -370,6 +388,134 @@
             </div>
         </div>
     </div>
+    <script>
+        let adminEmailTimer = null;
+
+        function checkAdminCreateEmail(input) {
+            clearTimeout(adminEmailTimer);
+            const email = input.value.trim().toLowerCase();
+            const feedback = document.getElementById('adminCreateEmailFeedback');
+            const spinner = document.getElementById('adminCreateEmailSpinner');
+            if (!email) {
+                input.classList.remove('is-valid', 'is-invalid');
+                feedback.classList.add('d-none');
+                return;
+            }
+            spinner.classList.remove('d-none');
+            adminEmailTimer = setTimeout(async () => {
+                try {
+                    const res = await fetch('/api/auth/check-email?email=' + encodeURIComponent(email));
+                    const json = await res.json();
+                    spinner.classList.add('d-none');
+                    if (json && json.data && json.data.available === true) {
+                        input.classList.remove('is-invalid');
+                        input.classList.add('is-valid');
+                        feedback.classList.remove('d-none');
+                        feedback.innerHTML = '<span class="text-success"><i class="fas fa-circle-check me-1"></i>Email khả dụng, chưa có người dùng!</span>';
+                    } else {
+                        input.classList.remove('is-valid');
+                        input.classList.add('is-invalid');
+                        feedback.classList.remove('d-none');
+                        feedback.innerHTML = '<span class="text-danger"><i class="fas fa-circle-exclamation me-1"></i>Email này đã tồn tại trong hệ thống!</span>';
+                    }
+                } catch(e) {
+                    spinner.classList.add('d-none');
+                }
+            }, 350);
+        }
+
+        function checkAdminCreatePwd(input) {
+            const pwd = input.value;
+            const bar = document.getElementById('adminCreatePwdBar');
+            const badge = document.getElementById('adminCreatePwdBadge');
+            if (!pwd) {
+                bar.style.width = '0%';
+                badge.className = 'badge bg-secondary-subtle text-secondary px-2 py-0.5';
+                badge.innerText = 'Mặc định: 1234@abc';
+                return;
+            }
+            evaluateAdminPwd(pwd, bar, badge);
+        }
+
+        function checkAdminEditEmail(input) {
+            const original = input.dataset.originalEmail ? input.dataset.originalEmail.trim().toLowerCase() : '';
+            const email = input.value.trim().toLowerCase();
+            const feedback = input.parentElement.querySelector('.edit-email-feedback');
+            if (!email || email === original) {
+                input.classList.remove('is-valid', 'is-invalid');
+                if (feedback) feedback.classList.add('d-none');
+                return;
+            }
+            clearTimeout(adminEmailTimer);
+            adminEmailTimer = setTimeout(async () => {
+                try {
+                    const res = await fetch('/api/auth/check-email?email=' + encodeURIComponent(email));
+                    const json = await res.json();
+                    if (json && json.data && json.data.available === true) {
+                        input.classList.remove('is-invalid');
+                        input.classList.add('is-valid');
+                        if (feedback) {
+                            feedback.classList.remove('d-none');
+                            feedback.innerHTML = '<span class="text-success"><i class="fas fa-circle-check me-1"></i>Email mới khả dụng!</span>';
+                        }
+                    } else {
+                        input.classList.remove('is-valid');
+                        input.classList.add('is-invalid');
+                        if (feedback) {
+                            feedback.classList.remove('d-none');
+                            feedback.innerHTML = '<span class="text-danger"><i class="fas fa-circle-exclamation me-1"></i>Email đã trùng với tài khoản khác!</span>';
+                        }
+                    }
+                } catch(e) {}
+            }, 350);
+        }
+
+        function checkAdminEditPwd(input) {
+            const pwd = input.value;
+            const container = input.closest('.modal-body');
+            const bar = container.querySelector('.edit-pwd-bar');
+            const badge = container.querySelector('.edit-pwd-badge');
+            if (!pwd) {
+                if (bar) bar.style.width = '0%';
+                if (badge) {
+                    badge.className = 'badge bg-secondary-subtle text-secondary px-2 py-0.5';
+                    badge.innerText = 'Giữ nguyên cũ';
+                }
+                return;
+            }
+            evaluateAdminPwd(pwd, bar, badge);
+        }
+
+        function evaluateAdminPwd(pwd, bar, badge) {
+            const hasNum = /[0-9]/.test(pwd);
+            const hasUpper = /[A-Z]/.test(pwd);
+            const hasLower = /[a-z]/.test(pwd);
+            const hasSpecial = /[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(pwd);
+            let count = (hasLower?1:0) + (hasUpper?1:0) + (hasNum?1:0) + (hasSpecial?1:0);
+
+            if (pwd.length < 6) {
+                bar.style.width = '20%';
+                bar.className = 'progress-bar bg-danger';
+                badge.className = 'badge bg-danger-subtle text-danger px-2 py-0.5';
+                badge.innerText = 'Rất yếu (< 6 ký tự)';
+            } else if (pwd.length < 8) {
+                bar.style.width = '40%';
+                bar.className = 'progress-bar bg-warning';
+                badge.className = 'badge bg-warning-subtle text-dark px-2 py-0.5';
+                badge.innerText = 'Trung bình (Nên từ 8 ký tự)';
+            } else if (count >= 3) {
+                bar.style.width = '100%';
+                bar.className = 'progress-bar bg-success';
+                badge.className = 'badge bg-success-subtle text-success px-2 py-0.5';
+                badge.innerText = 'Mạnh & An toàn';
+            } else {
+                bar.style.width = '65%';
+                bar.className = 'progress-bar bg-info';
+                badge.className = 'badge bg-info-subtle text-primary px-2 py-0.5';
+                badge.innerText = 'Khá';
+            }
+        }
+    </script>
 </section>
 </body>
 </html>

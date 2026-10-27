@@ -57,5 +57,47 @@ public class AuthApiController {
             return ResponseEntity.badRequest().body(response);
         }
     }
+
+    /**
+     * Kiểm tra tính khả dụng và trùng lặp của Email theo thời gian thực
+     * GET /api/auth/check-email?email=...
+     */
+    @GetMapping("/check-email")
+    public ResponseEntity<ApiResponse<java.util.Map<String, Object>>> checkEmail(@RequestParam(value = "email", required = false) String email) {
+        ApiResponse<java.util.Map<String, Object>> response = authService.checkEmailAvailability(email);
+        return ResponseEntity.ok(response);
+    }
+
+    /**
+     * Kiểm tra tính khả dụng của Email (hỗ trợ POST payload)
+     * POST /api/auth/check-email
+     */
+    @PostMapping("/check-email")
+    public ResponseEntity<ApiResponse<java.util.Map<String, Object>>> checkEmailPost(@RequestBody java.util.Map<String, String> body) {
+        String email = body != null ? body.get("email") : null;
+        ApiResponse<java.util.Map<String, Object>> response = authService.checkEmailAvailability(email);
+        return ResponseEntity.ok(response);
+    }
+
+    /**
+     * Đánh giá độ bảo mật và độ mạnh của mật khẩu tài khoản người dùng
+     * POST /api/auth/check-password-strength
+     */
+    @PostMapping("/check-password-strength")
+    public ResponseEntity<ApiResponse<PasswordStrengthDto>> checkPasswordStrength(@RequestBody(required = false) java.util.Map<String, String> body) {
+        String password = body != null ? body.get("password") : "";
+        ApiResponse<PasswordStrengthDto> response = authService.checkPasswordStrength(password);
+        return ResponseEntity.ok(response);
+    }
+
+    /**
+     * Đánh giá độ bảo mật mật khẩu (hỗ trợ GET query param)
+     * GET /api/auth/check-password-strength?password=...
+     */
+    @GetMapping("/check-password-strength")
+    public ResponseEntity<ApiResponse<PasswordStrengthDto>> checkPasswordStrengthGet(@RequestParam(value = "password", required = false) String password) {
+        ApiResponse<PasswordStrengthDto> response = authService.checkPasswordStrength(password != null ? password : "");
+        return ResponseEntity.ok(response);
+    }
 }
 

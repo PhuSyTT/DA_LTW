@@ -53,8 +53,21 @@ public class AuthServiceImpl implements AuthService {
         String email = request.getEmail();
 
         // 1. Kiểm tra Email đã tồn tại trong hệ thống chưa
+        if (email == null || email.isBlank()) {
+            return ApiResponse.error("Vui lòng cung cấp địa chỉ email hợp lệ!");
+        }
         if (userRepository.existsByEmail(email)) {
-            return ApiResponse.error("Email này đã được sử dụng để đăng ký tài khoản!");
+            return ApiResponse.error("Email này đã được sử dụng để đăng ký tài khoản! Vui lòng chọn email khác hoặc đăng nhập.");
+        }
+
+        // 1.1 Kiểm tra độ mật của mật khẩu người dùng
+        String rawPassword = request.getPassword();
+        if (rawPassword == null || rawPassword.length() < 6) {
+            return ApiResponse.error("Mật khẩu phải có độ dài từ 6 ký tự trở lên!");
+        }
+        PasswordStrengthDto strength = PasswordStrengthDto.evaluate(rawPassword);
+        if ("VERY_WEAK".equals(strength.getLevel())) {
+            return ApiResponse.error("Mật khẩu quá yếu! Vui lòng kết hợp chữ cái và số để đảm bảo an toàn cho tài khoản.");
         }
 
         // 2. Chống Spam: Rate Limiting (Tối đa 5 lần yêu cầu OTP trong 15 phút)
@@ -239,6 +252,41 @@ public class AuthServiceImpl implements AuthService {
                 "Mã xác nhận mới đã được gửi đến email " + email + ". Mã có hiệu lực trong vòng 5 phút.",
                 "Gửi lại mã OTP thành công!"
         );
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public ApiResponse<java.util.Map<String, Object>> checkEmailAvailability(String email) {
+        if (email == null || email.trim().isEmpty()) {
+            return ApiResponse.error("Email không được để trống!");
+        }
+        String cleanEmail = email.trim().toLowerCase();
+        String emailRegex = "^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,6}$";
+        if (!cleanEmail.matches(emailRegex)) {
+            java.util.Map<String, Object> data = new java.util.HashMap<>();
+            data.put("email", cleanEmail);
+            data.put("available", false);
+            data.put("validFormat", false);
+            return new ApiResponse<>(false, "Định dạng email chưa hợp lệ!", data);
+        }
+
+        boolean exists = userRepository.existsByEmail(cleanEmail);
+        java.util.Map<String, Object> data = new java.util.HashMap<>();
+        data.put("email", cleanEmail);
+        data.put("available", !exists);
+        data.put("validFormat", true);
+
+        if (exists) {
+            return new ApiResponse<>(false, "Email này đã được sử dụng trong hệ thống!", data);
+        } else {
+            return new ApiResponse<>(true, "Email khả dụng, bạn có thể sử dụng email này!", data);
+        }
+    }
+
+    @Override
+    public ApiResponse<PasswordStrengthDto> checkPasswordStrength(String password) {
+        PasswordStrengthDto strength = PasswordStrengthDto.evaluate(password);
+        return ApiResponse.success(strength, "Đánh giá độ bảo mật mật khẩu thành công");
     }
 }
 

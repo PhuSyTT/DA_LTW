@@ -80,6 +80,13 @@ public class UserServiceImpl implements UserService {
                 ? userDto.getPassword().trim()
                 : "1234@abc";
 
+        if (userDto.getPassword() != null && !userDto.getPassword().trim().isEmpty()) {
+            com.bookstore.dto.PasswordStrengthDto strength = com.bookstore.dto.PasswordStrengthDto.evaluate(rawPassword);
+            if (rawPassword.length() < 6 || "VERY_WEAK".equals(strength.getLevel())) {
+                throw new IllegalArgumentException("Mật khẩu quá yếu! Vui lòng đặt mật khẩu tối thiểu 6 ký tự kết hợp chữ cái và số.");
+            }
+        }
+
         User user = User.builder()
                 .email(userDto.getEmail().trim())
                 .password(passwordEncoder.encode(rawPassword))
@@ -120,7 +127,12 @@ public class UserServiceImpl implements UserService {
         user.setBranch(branch);
 
         if (userDto.getPassword() != null && !userDto.getPassword().trim().isEmpty()) {
-            user.setPassword(passwordEncoder.encode(userDto.getPassword().trim()));
+            String newPassword = userDto.getPassword().trim();
+            com.bookstore.dto.PasswordStrengthDto strength = com.bookstore.dto.PasswordStrengthDto.evaluate(newPassword);
+            if (newPassword.length() < 6 || "VERY_WEAK".equals(strength.getLevel())) {
+                throw new IllegalArgumentException("Mật khẩu mới quá yếu! Vui lòng đặt mật khẩu tối thiểu 6 ký tự kết hợp chữ cái và số.");
+            }
+            user.setPassword(passwordEncoder.encode(newPassword));
         }
 
         if (userDto.getIsActive() != null) {

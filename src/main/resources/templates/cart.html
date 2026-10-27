@@ -560,7 +560,7 @@
                                     <optgroup label="🚚 1. Mã Miễn Phí / Giảm Phí Vận Chuyển">
                                         <th:block th:if="${not #lists.isEmpty(availableCoupons)}">
                                             <th:block th:each="c : ${availableCoupons}" th:if="${c.couponCategory == 'SHIPPING' or c.discountType == 'FREESHIP' or c.discountType == 'SHIP_DISCOUNT'}">
-                                                <option th:value="${c.code}" th:text="${c.code} + ' — ' + (${c.discountType == 'FREESHIP'} ? 'Freeship 100%' : 'Giảm ' + #numbers.formatDecimal(c.discountValue, 0, 'COMMA', 0, 'POINT') + '₫ ship') + ' (Đơn ≥ ' + #numbers.formatDecimal(c.minOrderAmount != null ? c.minOrderAmount : 0, 0, 'COMMA', 0, 'POINT') + '₫)'"></option>
+                                                <option th:value="${c.code}" th:text="${c.displayText}"></option>
                                             </th:block>
                                         </th:block>
                                         <th:block th:if="${#lists.isEmpty(availableCoupons)}">
@@ -572,7 +572,7 @@
                                     <optgroup label="🏷️ 2. Mã Giảm Giá Đơn Hàng / Tiền Sách">
                                         <th:block th:if="${not #lists.isEmpty(availableCoupons)}">
                                             <th:block th:each="c : ${availableCoupons}" th:if="${c.couponCategory != 'SHIPPING' and c.discountType != 'FREESHIP' and c.discountType != 'SHIP_DISCOUNT'}">
-                                                <option th:value="${c.code}" th:text="${c.code} + ' — ' + (${c.discountType == 'PERCENT'} ? 'Giảm ' + ${#numbers.formatDecimal(c.discountValue, 0, 'COMMA', 0, 'POINT')} + '%' : 'Giảm ' + #numbers.formatDecimal(c.discountValue, 0, 'COMMA', 0, 'POINT') + '₫') + ' (Đơn ≥ ' + #numbers.formatDecimal(c.minOrderAmount != null ? c.minOrderAmount : 0, 0, 'COMMA', 0, 'POINT') + '₫)'"></option>
+                                                <option th:value="${c.code}" th:text="${c.displayText}"></option>
                                             </th:block>
                                         </th:block>
                                         <th:block th:if="${#lists.isEmpty(availableCoupons)}">
@@ -702,7 +702,7 @@
     </main>
 
     <!-- CHECKOUT & PROVISIONAL INVOICE MODAL (2-COLUMN SPLIT SCREEN) -->
-    <div id="checkoutModal" class="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-3 sm:p-5 hidden">
+    <div id="checkoutModal" class="fixed inset-0 z-[9999] bg-black/60 backdrop-blur-xs flex items-center justify-center p-3 sm:p-5 hidden" style="display: none;">
         <div class="bg-white rounded-3xl max-w-6xl w-full p-5 sm:p-7 shadow-2xl border border-outline/30 relative max-h-[95vh] overflow-y-auto">
             <!-- Close button -->
             <button type="button" onclick="closeCheckoutModal()" class="absolute top-4 right-4 text-on-surface-variant hover:text-on-surface p-2 rounded-full hover:bg-surface-container transition-colors z-20" title="Đóng">
@@ -986,7 +986,7 @@
                                     <optgroup label="🚚 1. Mã Miễn Phí / Giảm Phí Vận Chuyển">
                                         <th:block th:if="${not #lists.isEmpty(availableCoupons)}">
                                             <th:block th:each="c : ${availableCoupons}" th:if="${c.couponCategory == 'SHIPPING' or c.discountType == 'FREESHIP' or c.discountType == 'SHIP_DISCOUNT'}">
-                                                <option th:value="${c.code}" th:text="${c.code} + ' — ' + (${c.discountType == 'FREESHIP'} ? 'Freeship 100%' : 'Giảm ' + #numbers.formatDecimal(c.discountValue, 0, 'COMMA', 0, 'POINT') + '₫ ship') + ' (Đơn ≥ ' + #numbers.formatDecimal(c.minOrderAmount != null ? c.minOrderAmount : 0, 0, 'COMMA', 0, 'POINT') + '₫)'"></option>
+                                                <option th:value="${c.code}" th:text="${c.displayText}"></option>
                                             </th:block>
                                         </th:block>
                                         <th:block th:if="${#lists.isEmpty(availableCoupons)}">
@@ -998,7 +998,7 @@
                                     <optgroup label="🏷️ 2. Mã Giảm Giá Đơn Hàng / Tiền Sách">
                                         <th:block th:if="${not #lists.isEmpty(availableCoupons)}">
                                             <th:block th:each="c : ${availableCoupons}" th:if="${c.couponCategory != 'SHIPPING' and c.discountType != 'FREESHIP' and c.discountType != 'SHIP_DISCOUNT'}">
-                                                <option th:value="${c.code}" th:text="${c.code} + ' — ' + (${c.discountType == 'PERCENT'} ? 'Giảm ' + ${#numbers.formatDecimal(c.discountValue, 0, 'COMMA', 0, 'POINT')} + '%' : 'Giảm ' + #numbers.formatDecimal(c.discountValue, 0, 'COMMA', 0, 'POINT') + '₫') + ' (Đơn ≥ ' + #numbers.formatDecimal(c.minOrderAmount != null ? c.minOrderAmount : 0, 0, 'COMMA', 0, 'POINT') + '₫)'"></option>
+                                                <option th:value="${c.code}" th:text="${c.displayText}"></option>
                                             </th:block>
                                         </th:block>
                                         <th:block th:if="${#lists.isEmpty(availableCoupons)}">
@@ -1108,7 +1108,7 @@
     </div>
 
     <!-- BRANCH SELECTOR MODAL (When clicking branch pill on any item) -->
-    <div id="branchSelectModal" class="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4 hidden">
+    <div id="branchSelectModal" class="fixed inset-0 z-[9999] bg-black/60 backdrop-blur-xs flex items-center justify-center p-4 hidden" style="display: none;">
         <div class="bg-white rounded-3xl max-w-lg w-full p-6 sm:p-8 shadow-2xl border border-outline/30 relative max-h-[90vh] overflow-y-auto">
             <button type="button" onclick="closeBranchSelectorModal()" class="absolute top-5 right-5 text-on-surface-variant hover:text-on-surface p-2">
                 <i class="fas fa-xmark text-lg"></i>
@@ -1146,6 +1146,19 @@
 
     <!-- Scripts -->
     <script th:inline="javascript">
+        function parseAmount(val) {
+            if (val === undefined || val === null || val === '') return 0;
+            if (typeof val === 'number') return isNaN(val) ? 0 : val;
+            const cleaned = String(val).replace(/[^\d.-]/g, '');
+            const num = parseFloat(cleaned);
+            return isNaN(num) ? 0 : num;
+        }
+
+        function formatVnd(amount) {
+            const num = parseAmount(amount);
+            return Math.round(num).toLocaleString('vi-VN') + ' ₫';
+        }
+
         /*<![CDATA[*/
         const initialCartState = {
             subtotal: /*[[${cart != null and cart.subtotal != null ? cart.subtotal : 0}]]*/ 0,
@@ -1341,19 +1354,6 @@
             setTimeout(() => {
                 toast.classList.add('translate-y-32');
             }, 3000);
-        }
-
-        function parseAmount(val) {
-            if (val === undefined || val === null || val === '') return 0;
-            if (typeof val === 'number') return isNaN(val) ? 0 : val;
-            const cleaned = String(val).replace(/[^\d.-]/g, '');
-            const num = parseFloat(cleaned);
-            return isNaN(num) ? 0 : num;
-        }
-
-        function formatVnd(amount) {
-            const num = parseAmount(amount);
-            return Math.round(num).toLocaleString('vi-VN') + ' ₫';
         }
 
         // 1. Change Item Quantity (+ / -)
@@ -1690,12 +1690,19 @@
 
         // 5. Checkout Modal & Location Cascades & Realtime Provisional Invoice
         function openCheckoutModal() {
-            initLocationDropdowns();
-            updateProvisionalInvoice();
+            try {
+                initLocationDropdowns();
+                updateProvisionalInvoice();
+            } catch (err) {
+                console.error('Lỗi khởi tạo modal thanh toán:', err);
+            }
             const modal = document.getElementById('checkoutModal');
             if (modal) {
                 modal.classList.remove('hidden');
+                modal.style.display = 'flex';
                 document.body.style.overflow = 'hidden';
+            } else {
+                console.error('Không tìm thấy element #checkoutModal');
             }
         }
 
@@ -1703,6 +1710,7 @@
             const modal = document.getElementById('checkoutModal');
             if (modal) {
                 modal.classList.add('hidden');
+                modal.style.display = 'none';
                 document.body.style.overflow = '';
             }
         }
@@ -2073,7 +2081,10 @@
             const modal = document.getElementById('branchSelectModal');
             const loading = document.getElementById('branchModalLoading');
             const list = document.getElementById('branchModalList');
-            if (modal) modal.classList.remove('hidden');
+            if (modal) {
+                modal.classList.remove('hidden');
+                modal.style.display = 'flex';
+            }
             if (loading) loading.classList.remove('hidden');
             if (list) {
                 list.classList.add('hidden');
@@ -2132,7 +2143,10 @@
 
         function closeBranchSelectorModal() {
             const modal = document.getElementById('branchSelectModal');
-            if (modal) modal.classList.add('hidden');
+            if (modal) {
+                modal.classList.add('hidden');
+                modal.style.display = 'none';
+            }
         }
 
         function selectBranchItem(bookId, bookItemId) {

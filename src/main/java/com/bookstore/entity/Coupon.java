@@ -178,4 +178,26 @@ public class Coupon {
 		this.isActive = isActive;
 	}
 
+	@Transient
+	public String getDisplayText() {
+		StringBuilder sb = new StringBuilder();
+		sb.append(code != null ? code : "COUPON").append(" — ");
+		java.text.NumberFormat nf = java.text.NumberFormat.getInstance(new java.util.Locale("vi", "VN"));
+		if ("FREESHIP".equalsIgnoreCase(discountType)) {
+			sb.append("Freeship 100%");
+		} else if ("PERCENT".equalsIgnoreCase(discountType)) {
+			sb.append("Giảm ").append(discountValue != null ? discountValue.stripTrailingZeros().toPlainString() : "0").append("%");
+		} else if ("SHIP_DISCOUNT".equalsIgnoreCase(discountType)) {
+			sb.append("Giảm ").append(discountValue != null ? nf.format(discountValue) : "0").append("₫ ship");
+		} else {
+			sb.append("Giảm ").append(discountValue != null ? nf.format(discountValue) : "0").append("₫");
+		}
+		if (minOrderAmount != null && minOrderAmount.compareTo(BigDecimal.ZERO) > 0) {
+			sb.append(" (Đơn ≥ ").append(nf.format(minOrderAmount)).append("₫)");
+		} else {
+			sb.append(" (Đơn ≥ 0₫)");
+		}
+		return sb.toString();
+	}
+
 }

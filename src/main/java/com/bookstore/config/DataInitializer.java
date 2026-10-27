@@ -33,6 +33,7 @@ public class DataInitializer implements CommandLineRunner {
     private final DataSource dataSource;
     private final DriverRepository driverRepository;
     private final CouponRepository couponRepository;
+    private final ReviewRepository reviewRepository;
 
     public DataInitializer(RoleRepository roleRepository,
                            UserRepository userRepository,
@@ -44,7 +45,8 @@ public class DataInitializer implements CommandLineRunner {
                            PasswordEncoder passwordEncoder,
                            DataSource dataSource,
                            DriverRepository driverRepository,
-                           CouponRepository couponRepository) {
+                           CouponRepository couponRepository,
+                           ReviewRepository reviewRepository) {
         this.roleRepository = roleRepository;
         this.userRepository = userRepository;
         this.branchRepository = branchRepository;
@@ -56,6 +58,7 @@ public class DataInitializer implements CommandLineRunner {
         this.dataSource = dataSource;
         this.driverRepository = driverRepository;
         this.couponRepository = couponRepository;
+        this.reviewRepository = reviewRepository;
     }
 
     @Override
@@ -95,6 +98,9 @@ public class DataInitializer implements CommandLineRunner {
 
         // 7. Khởi tạo danh sách Tài xế (Drivers) và Mã Freeship / Ưu đãi giao hàng
         ensureDriversAndCouponsSeeded(branches);
+
+        // 8. Khởi tạo các đánh giá mẫu (mặc định 5 sao) nếu chưa có đánh giá nào
+        ensureSampleReviewsSeeded(customerUser);
 
         logger.info("DataInitializer completed successfully. 5 Roles & default catalog are ready!");
     }
@@ -465,6 +471,52 @@ public class DataInitializer implements CommandLineRunner {
             }
         } catch (Exception ex) {
             logger.warn("Lỗi khởi tạo drivers/coupons: {}", ex.getMessage());
+        }
+    }
+
+    private void ensureSampleReviewsSeeded(User customerUser) {
+        try {
+            if (reviewRepository.count() == 0 && customerUser != null) {
+                List<Book> books = bookRepository.findAll();
+                if (!books.isEmpty()) {
+                    Book book1 = books.get(0);
+                    Review r1 = new Review();
+                    r1.setBook(book1);
+                    r1.setUser(customerUser);
+                    r1.setRating(5);
+                    r1.setTitle("Sách Like New rất đẹp, khử trùng sạch sẽ!");
+                    r1.setComment("Sách cũ tình trạng nguyên vẹn, gáy sách phẳng phiu, trang giấy đẹp và được bọc màng co cẩn thận. Giao hàng từ chi nhánh nhanh bất ngờ. Chắc chắn sẽ tiếp tục ủng hộ Book4Life!");
+                    r1.setIsVerifiedPurchase(true);
+                    r1.setCreatedAt(LocalDateTime.now().minusDays(2));
+
+                    Review r2 = new Review();
+                    r2.setBook(book1);
+                    r2.setUser(customerUser);
+                    r2.setRating(5);
+                    r2.setTitle("Tuyệt phẩm kinh điển, giá tiết kiệm");
+                    r2.setComment("Một ấn bản tuyệt vời để bổ sung vào tủ sách gia đình. Giá sách cũ rẻ hơn một nửa so với giá bìa mới mà chất lượng gần như mới tinh. 5 sao cho Book4Life!");
+                    r2.setIsVerifiedPurchase(true);
+                    r2.setCreatedAt(LocalDateTime.now().minusDays(1));
+
+                    if (books.size() > 1) {
+                        Book book2 = books.get(1);
+                        Review r3 = new Review();
+                        r3.setBook(book2);
+                        r3.setUser(customerUser);
+                        r3.setRating(5);
+                        r3.setTitle("Chất lượng sách vượt mong đợi");
+                        r3.setComment("Giấy thơm mùi sách, nét chữ rõ ràng, không bị ố vàng hay quăn góc. Quy trình thẩm định sách cũ của cửa hàng rất uy tín!");
+                        r3.setIsVerifiedPurchase(true);
+                        r3.setCreatedAt(LocalDateTime.now().minusDays(3));
+                        reviewRepository.saveAll(List.of(r1, r2, r3));
+                    } else {
+                        reviewRepository.saveAll(List.of(r1, r2));
+                    }
+                    logger.info("Đã khởi tạo thành công các đánh giá 5 sao mẫu cho sách.");
+                }
+            }
+        } catch (Exception ex) {
+            logger.warn("Lỗi khởi tạo đánh giá mẫu: {}", ex.getMessage());
         }
     }
 }

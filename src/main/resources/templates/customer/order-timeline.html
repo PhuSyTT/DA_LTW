@@ -142,15 +142,23 @@
             </div>
 
             <!-- Completed Notice -->
-            <div th:if="${tracking.currentStatus == 'COMPLETED'}" class="mt-4 p-4 rounded-xl bg-emerald-50/80 border border-emerald-200 text-emerald-900 flex items-start gap-3">
-                <i class="fas fa-circle-check text-emerald-600 text-lg mt-0.5"></i>
-                <div class="text-xs">
-                    <div class="font-bold text-sm">Đơn hàng đã được giao và tiếp nhận thành công</div>
-                    <div class="text-emerald-800 text-[11px] mt-0.5" th:if="${tracking.completedAt}">
-                        Thời gian hoàn tất: <span class="font-mono font-semibold" th:text="${#temporals.format(tracking.completedAt, 'HH:mm dd/MM/yyyy')}">15:00 20/10/2026</span>
+            <div th:if="${tracking.currentStatus == 'COMPLETED'}" class="mt-4 p-4 rounded-xl bg-emerald-50/80 border border-emerald-200 text-emerald-900 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+                <div class="flex items-start gap-3">
+                    <i class="fas fa-circle-check text-emerald-600 text-lg mt-0.5"></i>
+                    <div class="text-xs">
+                        <div class="font-bold text-sm">Đơn hàng đã được giao và tiếp nhận thành công</div>
+                        <div class="text-emerald-800 text-[11px] mt-0.5" th:if="${tracking.completedAt}">
+                            Thời gian hoàn tất: <span class="font-mono font-semibold" th:text="${#temporals.format(tracking.completedAt, 'HH:mm dd/MM/yyyy')}">15:00 20/10/2026</span>
+                        </div>
+                        <div class="text-emerald-700 font-semibold mt-1">Cảm ơn bạn đã đồng hành cùng văn hóa đọc và Book4Life! 🌿</div>
                     </div>
-                    <div class="text-emerald-700 font-semibold mt-1">Cảm ơn bạn đã đồng hành cùng văn hóa đọc và Book4Life! 🌿</div>
                 </div>
+                <a th:if="${tracking.items != null and !tracking.items.isEmpty() and tracking.items[0].bookId != null}"
+                   th:href="@{'/books/' + ${tracking.items[0].bookId} + '/review?orderId=' + ${tracking.subOrderId}}"
+                   class="inline-flex items-center gap-1.5 px-4 py-2.5 rounded-xl bg-amber-500 hover:bg-amber-600 text-white text-xs font-bold shadow-sm hover:shadow transition-all whitespace-nowrap">
+                    <i class="fas fa-star"></i>
+                    <span>Đánh Giá Sản Phẩm (Mặc định 5★)</span>
+                </a>
             </div>
 
             <!-- Cancelled Notice if cancelled -->
@@ -257,6 +265,14 @@
                                     </div>
                                     <div th:if="${item.shelfLocation}" class="text-[11px] text-amber-800 bg-amber-50 px-2 py-0.5 rounded inline-block mt-1 border border-amber-200">
                                         Vị trí kệ sách tại chi nhánh: <strong th:text="${item.shelfLocation}">K1-A01</strong>
+                                    </div>
+                                    <!-- Nút đánh giá sách khi đơn hàng hoàn thành -->
+                                    <div th:if="${tracking.currentStatus == 'COMPLETED' and item.bookId != null}" class="mt-2">
+                                        <a th:href="@{'/books/' + ${item.bookId} + '/review?orderId=' + ${tracking.subOrderId}}"
+                                           class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-amber-50 hover:bg-amber-100 text-amber-900 border border-amber-300 text-xs font-semibold shadow-2xs transition-all hover:scale-105">
+                                            <i class="fas fa-star text-amber-500"></i>
+                                            <span>Đánh Giá Sách Này</span>
+                                        </a>
                                     </div>
                                 </div>
                             </div>

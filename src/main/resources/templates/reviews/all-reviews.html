@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title th:text="${pageTitle} ?: 'Góc Độc Giả - Đánh Giá &amp; Cảm Nhận - Book4Life'">Góc Độc Giả - Đánh Giá &amp; Cảm Nhận - Book4Life</title>
+
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts: Plus Jakarta Sans -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Playfair+Display:ital,wght@0,600;0,700;1,400&display=swap" rel="stylesheet">
+    <!-- FontAwesome 6 -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" rel="stylesheet">
+
+    <!-- Chatbox AI Styles -->
+    <th:block th:replace="~{fragments/chatbox :: chatboxStyles}"></th:block>
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: "#835500",
+                        "primary-hover": "#9e6700",
+                        "primary-container": "#ffddb4",
+                        "on-primary-container": "#291800",
+                        surface: "#FAF8F5",
+                        "surface-container": "#F0EAE1",
+                        "surface-container-high": "#E8E0D5",
+                        "on-surface": "#2D261E",
+                        "on-surface-variant": "#6A5E52",
+                        outline: "#9B8E80",
+                    },
+                    fontFamily: {
+                        sans: ['"Plus Jakarta Sans"', 'sans-serif'],
+                        serif: ['"Playfair Display"', 'serif'],
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="bg-surface text-on-surface font-sans min-h-screen flex flex-col">
+
+    <!-- Header Navigation -->
+    <header class="bg-surface/90 backdrop-blur sticky top-0 z-40 border-b border-surface-container-high">
+        <div class="max-w-6xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">
+            <div class="flex items-center gap-3">
+                <a th:href="@{/}" href="/" class="flex items-center gap-2 group">
+                    <div class="w-10 h-10 rounded-xl bg-primary flex items-center justify-center text-white shadow-sm group-hover:scale-105 transition-transform">
+                        <i class="fas fa-book-open"></i>
+                    </div>
+                    <div>
+                        <span class="font-serif font-bold text-xl text-primary tracking-tight">Book4Life</span>
+                        <span class="block text-[10px] text-on-surface-variant uppercase tracking-widest font-semibold">Tủ Sách Tri Thức</span>
+                    </div>
+                </a>
+            </div>
+
+            <div class="flex items-center gap-3">
+                <a th:href="@{/books}" class="text-xs font-bold text-on-surface hover:text-primary flex items-center gap-1.5 px-3 py-2 rounded-lg hover:bg-surface-container">
+                    <i class="fas fa-compass"></i>
+                    <span>Khám phá sách</span>
+                </a>
+                <a th:href="@{/cart}" class="text-xs font-bold text-on-surface hover:text-primary flex items-center gap-1.5 px-3 py-2 rounded-lg hover:bg-surface-container">
+                    <i class="fas fa-shopping-bag"></i>
+                    <span>Giỏ hàng</span>
+                </a>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Container -->
+    <main class="flex-1 max-w-6xl w-full mx-auto px-4 sm:px-6 py-8">
+
+        <!-- Title Banner -->
+        <div class="text-center max-w-2xl mx-auto mb-10">
+            <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-amber-100 text-primary text-xs font-bold mb-3">
+                <i class="fas fa-quote-left"></i>
+                <span>Góc Độc Giả Book4Life</span>
+            </span>
+            <h1 class="text-3xl sm:text-4xl font-serif font-bold text-on-surface mb-3">
+                Đánh Giá &amp; Cảm Nhận Từ Bạn Đọc
+            </h1>
+            <p class="text-xs sm:text-sm text-on-surface-variant">
+                Lắng nghe những chia sẻ chân thật nhất về từng trang sách cũ, chất lượng bảo quản và niềm vui trao nhận tri thức.
+            </p>
+        </div>
+
+        <!-- Grid of Reviews -->
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div th:each="r : ${reviews}" class="bg-white rounded-3xl border border-surface-container-high p-6 shadow-sm hover:shadow-md transition-shadow flex flex-col justify-between">
+                <div>
+                    <!-- Book Info Header -->
+                    <div class="flex items-center gap-3 pb-3 border-b border-surface-container mb-4">
+                        <div class="w-12 h-16 rounded-xl overflow-hidden bg-stone-100 flex-shrink-0 border border-outline/30">
+                            <img th:if="${r.bookCoverImage}" th:src="${r.bookCoverImage}" class="w-full h-full object-cover" alt="Bìa">
+                            <div th:unless="${r.bookCoverImage}" class="w-full h-full flex items-center justify-center text-stone-400">
+                                <i class="fas fa-book text-xs"></i>
+                            </div>
+                        </div>
+                        <div class="min-w-0 flex-1">
+                            <a th:href="@{'/books/' + ${r.bookId} + '/reviews'}" class="text-xs font-bold text-on-surface hover:text-primary transition-colors line-clamp-1">
+                                <span th:text="${r.bookTitle}">Tên sách</span>
+                            </a>
+                            <p class="text-[11px] text-stone-500 line-clamp-1" th:text="${r.authorName}">Tác giả</p>
+                            <div class="flex items-center gap-0.5 text-amber-400 text-xs mt-1">
+                                <i class="fas fa-star" th:each="i : ${#numbers.sequence(1, r.rating)}"></i>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Review Content -->
+                    <h3 th:if="${r.title}" class="font-bold text-xs text-on-surface mb-1" th:text="${r.title}">
+                        Tiêu đề nhận xét
+                    </h3>
+                    <p class="text-xs leading-relaxed text-stone-700 italic line-clamp-4" th:text="'“' + ${r.comment} + '”'">
+                        “Cuốn sách rất hay...”
+                    </p>
+                </div>
+
+                <!-- Reviewer Footer -->
+                <div class="pt-4 border-t border-surface-container mt-4 flex items-center justify-between">
+                    <div class="flex items-center gap-2">
+                        <div class="w-7 h-7 rounded-full bg-amber-100 text-primary font-bold flex items-center justify-center text-xs">
+                            <span th:text="${#strings.substring(r.userName, 0, 1)}">H</span>
+                        </div>
+                        <div>
+                            <span class="text-xs font-bold text-on-surface block" th:text="${r.userName}">Tên bạn đọc</span>
+                            <span th:if="${r.isVerifiedPurchase}" class="text-[10px] text-emerald-700 font-bold block flex items-center gap-0.5">
+                                <i class="fas fa-check-circle text-[9px]"></i> Đã mua hàng
+                            </span>
+                        </div>
+                    </div>
+                    <span class="text-[10px] text-stone-400" th:text="${r.formattedDate}">25/10/2026</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Empty state -->
+        <div th:if="${#lists.isEmpty(reviews)}" class="text-center py-16 text-stone-400">
+            <i class="fas fa-comments text-5xl mb-3 opacity-25"></i>
+            <p class="text-base font-semibold">Chưa có đánh giá nào trong hệ thống.</p>
+        </div>
+
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-surface-container/60 border-t border-surface-container-high py-6 mt-12 text-center text-xs text-on-surface-variant">
+        <p>© 2026 Book4Life - Hệ thống Quản lý Chuỗi Cửa Hàng Sách Cũ Toàn Quốc. Trao tri thức - Lan tỏa văn hóa đọc.</p>
+    </footer>
+
+    <!-- Chatbox AI Widget -->
+    <th:block th:replace="~{fragments/chatbox :: chatboxWidget}"></th:block>
+</body>
+</html>

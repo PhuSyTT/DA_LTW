@@ -104,6 +104,13 @@
             <span>Nhật Ký Đơn Hàng</span>
         </a>
 
+        <!-- Đánh giá & phản hồi độc giả -->
+        <a sec:authorize="hasAnyAuthority('ROLE_ADMIN', 'ADMIN', 'ROLE_BRANCH_MANAGER', 'BRANCH_MANAGER')"
+           th:href="@{/admin/reviews}" class="sidebar-link" th:classappend="${activeMenu == 'reviews'} ? 'active' : ''">
+            <i class="fas fa-star-half-stroke"></i>
+            <span>Đánh Giá Khách Hàng</span>
+        </a>
+
         <!-- Hệ thống (Chỉ ADMIN) -->
         <div sec:authorize="hasAnyAuthority('ROLE_ADMIN', 'ADMIN')">
             <div class="nav-section-title mt-3">Hệ Thống</div>

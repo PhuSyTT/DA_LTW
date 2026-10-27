@@ -197,6 +197,14 @@
                                     <span class="px-1.5 py-0.5 rounded bg-surface-container text-[11px] font-semibold" th:text="${item.conditionGrade}">LIKE_NEW</span>
                                     <span th:if="${item.shelfLocation}" class="text-outline text-[11px]">(Kệ: <span th:text="${item.shelfLocation}">A1</span>)</span>
                                 </div>
+                                <!-- Nút đánh giá cho từng cuốn sách khi đơn đã hoàn thành -->
+                                <div th:if="${order.status == 'COMPLETED' and item.bookId != null}" class="mt-2">
+                                    <a th:href="@{'/books/' + ${item.bookId} + '/review?orderId=' + ${order.id}}"
+                                       class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-amber-50 hover:bg-amber-100 text-amber-900 border border-amber-300 text-xs font-semibold shadow-2xs transition-all hover:scale-105">
+                                        <i class="fas fa-star text-amber-500"></i>
+                                        <span>Đánh Giá Sách Này</span>
+                                    </a>
+                                </div>
                             </div>
                         </div>
 
@@ -237,6 +245,14 @@
                             <i class="fas fa-check-double text-emerald-600"></i>
                             <span>Đã nhận sách</span>
                         </span>
+
+                        <!-- Nút Đánh Giá Sản Phẩm khi đã nhận hàng -->
+                        <a th:if="${order.status == 'COMPLETED' and order.items != null and !order.items.isEmpty() and order.items[0].bookId != null}"
+                           th:href="@{'/books/' + ${order.items[0].bookId} + '/review?orderId=' + ${order.id}}"
+                           class="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-amber-500 hover:bg-amber-600 text-white text-xs font-bold shadow-sm transition-all hover:scale-105">
+                            <i class="fas fa-star"></i>
+                            <span>Đánh Giá Sản Phẩm</span>
+                        </a>
 
                         <!-- View Timeline Button -->
                         <a th:href="@{'/orders/' + ${order.id} + '/timeline'}" class="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-primary text-white text-xs font-bold hover:bg-primary-hover shadow-sm transition-all">

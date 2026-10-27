@@ -402,6 +402,7 @@ public class OrderFulfillmentServiceImpl implements OrderFulfillmentService {
 
                     Book book = bookItem.getBook();
                     if (book != null) {
+                        itemDto.setBookId(book.getId());
                         itemDto.setBookTitle(book.getTitle());
                         if (book.getAuthor() != null) {
                             itemDto.setAuthorName(book.getAuthor().getName());

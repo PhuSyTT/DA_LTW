@@ -1,0 +1,345 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title th:text="${pageTitle} ?: 'Đánh Giá Tổng Quan - Book4Life'">Đánh Giá Tổng Quan - Book4Life</title>
+
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts: Plus Jakarta Sans -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Playfair+Display:ital,wght@0,600;0,700;1,400&display=swap" rel="stylesheet">
+    <!-- FontAwesome 6 -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" rel="stylesheet">
+
+    <!-- Chatbox AI Styles -->
+    <th:block th:replace="~{fragments/chatbox :: chatboxStyles}"></th:block>
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: "#835500",
+                        "primary-hover": "#9e6700",
+                        "primary-container": "#ffddb4",
+                        "on-primary-container": "#291800",
+                        surface: "#FAF8F5",
+                        "surface-container": "#F0EAE1",
+                        "surface-container-high": "#E8E0D5",
+                        "on-surface": "#2D261E",
+                        "on-surface-variant": "#6A5E52",
+                        outline: "#9B8E80",
+                    },
+                    fontFamily: {
+                        sans: ['"Plus Jakarta Sans"', 'sans-serif'],
+                        serif: ['"Playfair Display"', 'serif'],
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="bg-surface text-on-surface font-sans min-h-screen flex flex-col">
+
+    <!-- Header Navigation -->
+    <header class="bg-surface/90 backdrop-blur sticky top-0 z-40 border-b border-surface-container-high">
+        <div class="max-w-5xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">
+            <div class="flex items-center gap-3">
+                <a th:href="@{/}" href="/" class="flex items-center gap-2 group">
+                    <div class="w-10 h-10 rounded-xl bg-primary flex items-center justify-center text-white shadow-sm group-hover:scale-105 transition-transform">
+                        <i class="fas fa-book-open"></i>
+                    </div>
+                    <div>
+                        <span class="font-serif font-bold text-xl text-primary tracking-tight">Book4Life</span>
+                        <span class="block text-[10px] text-on-surface-variant uppercase tracking-widest font-semibold">Tủ Sách Tri Thức</span>
+                    </div>
+                </a>
+            </div>
+
+            <div class="flex items-center gap-3">
+                <a th:href="@{'/books/' + ${book.id}}" class="text-xs font-bold text-primary hover:underline flex items-center gap-1.5 px-3 py-2 rounded-lg hover:bg-surface-container">
+                    <i class="fas fa-book"></i>
+                    <span>Xem trang sách</span>
+                </a>
+                <a th:href="@{/cart}" class="text-xs font-bold text-on-surface hover:text-primary flex items-center gap-1.5 px-3 py-2 rounded-lg hover:bg-surface-container">
+                    <i class="fas fa-shopping-bag"></i>
+                    <span>Giỏ hàng</span>
+                </a>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Container -->
+    <main class="flex-1 max-w-5xl w-full mx-auto px-4 sm:px-6 py-8">
+
+        <!-- Flash messages -->
+        <div th:if="${successMessage}" class="mb-6 p-4 rounded-2xl bg-emerald-50 border border-emerald-200 text-emerald-800 flex items-center gap-3 shadow-xs">
+            <i class="fas fa-circle-check text-emerald-600 text-xl"></i>
+            <span class="text-xs sm:text-sm font-semibold" th:text="${successMessage}">Thành công!</span>
+        </div>
+        <div th:if="${errorMessage}" class="mb-6 p-4 rounded-2xl bg-red-50 border border-red-200 text-red-800 flex items-center gap-3 shadow-xs">
+            <i class="fas fa-circle-exclamation text-red-600 text-xl"></i>
+            <span class="text-xs sm:text-sm font-semibold" th:text="${errorMessage}">Đã xảy ra lỗi!</span>
+        </div>
+
+        <!-- Book Header Banner -->
+        <div class="bg-white rounded-3xl border border-surface-container-high p-6 sm:p-8 shadow-sm mb-8">
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-6 pb-6 border-b border-surface-container">
+                <div class="flex items-center gap-4">
+                    <div class="w-16 h-22 sm:w-20 sm:h-28 rounded-2xl overflow-hidden bg-stone-100 flex-shrink-0 border border-outline/30 shadow-2xs">
+                        <img th:if="${book.coverImageUrl != null and !book.coverImageUrl.isEmpty()}"
+                             th:src="${book.coverImageUrl}"
+                             th:alt="${book.title}"
+                             class="w-full h-full object-cover">
+                        <div th:unless="${book.coverImageUrl != null and !book.coverImageUrl.isEmpty()}"
+                             class="w-full h-full flex items-center justify-center text-stone-400">
+                            <i class="fas fa-book text-2xl"></i>
+                        </div>
+                    </div>
+                    <div>
+                        <span class="text-[11px] font-bold text-primary px-2.5 py-0.5 rounded-full bg-amber-100/70"
+                              th:text="${book.category != null ? book.category.name : 'Sách Cũ'}">Văn Học</span>
+                        <h1 class="text-xl sm:text-2xl font-serif font-bold text-on-surface mt-1" th:text="${book.title}">
+                            Tên Cuốn Sách
+                        </h1>
+                        <p class="text-xs text-on-surface-variant" th:text="${book.author != null ? 'Tác giả: ' + book.author.name : 'Tác giả: Đang cập nhật'}">
+                            Tác giả
+                        </p>
+                    </div>
+                </div>
+
+                <!-- Action Button: Write Review if eligible -->
+                <div class="flex-shrink-0">
+                    <a th:if="${canReview}"
+                       th:href="@{'/books/' + ${book.id} + '/review'}"
+                       class="inline-flex items-center gap-2 px-5 py-3 rounded-2xl bg-primary hover:bg-primary-hover text-white text-xs sm:text-sm font-bold shadow-md hover:shadow-lg transition-all active:scale-95">
+                        <i class="fas fa-pen-nib"></i>
+                        <span>⭐ Viết Đánh Giá Của Bạn</span>
+                    </a>
+                    <div th:unless="${canReview}" class="text-right">
+                        <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-surface border border-surface-container-high text-xs text-on-surface-variant font-medium">
+                            <i class="fas fa-shield-halved text-emerald-600"></i>
+                            <span>Chỉ khách đã mua mới có thể đánh giá</span>
+                        </span>
+                        <div class="mt-2">
+                            <a th:href="@{'/books/' + ${book.id}}" class="text-xs font-bold text-primary hover:underline">
+                                Đặt mua sách này để tham gia đánh giá ➔
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- OVERALL RATING SUMMARY CARD (Trang xem đánh giá tổng) -->
+            <div class="pt-6 grid grid-cols-1 md:grid-cols-12 gap-6 items-center">
+                
+                <!-- Left: Big Average Score -->
+                <div class="md:col-span-4 text-center md:border-r border-surface-container md:pr-6">
+                    <div class="font-serif font-extrabold text-5xl sm:text-6xl text-primary"
+                          th:text="${#numbers.formatDecimal(summary.averageRating, 1, 1)}">
+                        5.0
+                    </div>
+                    <!-- Stars visual -->
+                    <div class="flex items-center justify-center gap-1 text-amber-400 text-lg my-2">
+                        <i class="fas fa-star"></i>
+                        <i class="fas fa-star"></i>
+                        <i class="fas fa-star"></i>
+                        <i class="fas fa-star"></i>
+                        <i class="fas fa-star"></i>
+                    </div>
+                    <p class="text-xs font-bold text-on-surface" th:text="'Dựa trên ' + ${summary.totalReviews} + ' lượt đánh giá'">
+                        Dựa trên 15 lượt đánh giá
+                    </p>
+                    <p class="text-[11px] text-stone-500 mt-0.5">100% đánh giá từ độc giả thực tế</p>
+                </div>
+
+                <!-- Right: Star Breakdown Progress Bars -->
+                <div class="md:col-span-8 space-y-2">
+                    <!-- 5 Stars -->
+                    <div class="flex items-center gap-3 text-xs">
+                        <span class="w-12 text-on-surface-variant font-medium flex items-center gap-1">
+                            <span>5</span> <i class="fas fa-star text-amber-400 text-[10px]"></i>
+                        </span>
+                        <div class="flex-1 h-3 rounded-full bg-stone-100 overflow-hidden border border-stone-200">
+                            <div class="h-full bg-amber-400 rounded-full transition-all duration-500"
+                                 th:style="'width: ' + ${summary.star5Percent} + '%;'"></div>
+                        </div>
+                        <span class="w-10 text-right font-mono text-[11px] font-bold text-on-surface"
+                              th:text="${summary.star5Percent} + '%'">85%</span>
+                        <span class="w-14 text-right text-stone-400 text-[10px]"
+                              th:text="'(' + ${summary.star5Count} + ')'">(12)</span>
+                    </div>
+
+                    <!-- 4 Stars -->
+                    <div class="flex items-center gap-3 text-xs">
+                        <span class="w-12 text-on-surface-variant font-medium flex items-center gap-1">
+                            <span>4</span> <i class="fas fa-star text-amber-400 text-[10px]"></i>
+                        </span>
+                        <div class="flex-1 h-3 rounded-full bg-stone-100 overflow-hidden border border-stone-200">
+                            <div class="h-full bg-amber-400 rounded-full transition-all duration-500"
+                                 th:style="'width: ' + ${summary.star4Percent} + '%;'"></div>
+                        </div>
+                        <span class="w-10 text-right font-mono text-[11px] font-bold text-on-surface"
+                              th:text="${summary.star4Percent} + '%'">10%</span>
+                        <span class="w-14 text-right text-stone-400 text-[10px]"
+                              th:text="'(' + ${summary.star4Count} + ')'">(2)</span>
+                    </div>
+
+                    <!-- 3 Stars -->
+                    <div class="flex items-center gap-3 text-xs">
+                        <span class="w-12 text-on-surface-variant font-medium flex items-center gap-1">
+                            <span>3</span> <i class="fas fa-star text-amber-400 text-[10px]"></i>
+                        </span>
+                        <div class="flex-1 h-3 rounded-full bg-stone-100 overflow-hidden border border-stone-200">
+                            <div class="h-full bg-amber-400 rounded-full transition-all duration-500"
+                                 th:style="'width: ' + ${summary.star3Percent} + '%;'"></div>
+                        </div>
+                        <span class="w-10 text-right font-mono text-[11px] font-bold text-on-surface"
+                              th:text="${summary.star3Percent} + '%'">5%</span>
+                        <span class="w-14 text-right text-stone-400 text-[10px]"
+                              th:text="'(' + ${summary.star3Count} + ')'">(1)</span>
+                    </div>
+
+                    <!-- 2 Stars -->
+                    <div class="flex items-center gap-3 text-xs">
+                        <span class="w-12 text-on-surface-variant font-medium flex items-center gap-1">
+                            <span>2</span> <i class="fas fa-star text-amber-400 text-[10px]"></i>
+                        </span>
+                        <div class="flex-1 h-3 rounded-full bg-stone-100 overflow-hidden border border-stone-200">
+                            <div class="h-full bg-amber-400 rounded-full transition-all duration-500"
+                                 th:style="'width: ' + ${summary.star2Percent} + '%;'"></div>
+                        </div>
+                        <span class="w-10 text-right font-mono text-[11px] font-bold text-on-surface"
+                              th:text="${summary.star2Percent} + '%'">0%</span>
+                        <span class="w-14 text-right text-stone-400 text-[10px]"
+                              th:text="'(' + ${summary.star2Count} + ')'">(0)</span>
+                    </div>
+
+                    <!-- 1 Star -->
+                    <div class="flex items-center gap-3 text-xs">
+                        <span class="w-12 text-on-surface-variant font-medium flex items-center gap-1">
+                            <span>1</span> <i class="fas fa-star text-amber-400 text-[10px]"></i>
+                        </span>
+                        <div class="flex-1 h-3 rounded-full bg-stone-100 overflow-hidden border border-stone-200">
+                            <div class="h-full bg-amber-400 rounded-full transition-all duration-500"
+                                 th:style="'width: ' + ${summary.star1Percent} + '%;'"></div>
+                        </div>
+                        <span class="w-10 text-right font-mono text-[11px] font-bold text-on-surface"
+                              th:text="${summary.star1Percent} + '%'">0%</span>
+                        <span class="w-14 text-right text-stone-400 text-[10px]"
+                              th:text="'(' + ${summary.star1Count} + ')'">(0)</span>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+        <!-- REVIEWS LIST -->
+        <div class="bg-white rounded-3xl border border-surface-container-high p-6 sm:p-8 shadow-sm">
+            <div class="flex items-center justify-between pb-4 border-b border-surface-container mb-6">
+                <h2 class="text-lg font-bold text-on-surface flex items-center gap-2">
+                    <i class="fas fa-comments text-primary"></i>
+                    <span>Nhận Xét &amp; Cảm Nhận Từ Độc Giả</span>
+                    <span class="text-xs font-normal text-stone-500" th:text="'(' + ${#lists.size(summary.reviews)} + ')'">(15)</span>
+                </h2>
+
+                <!-- Star Filter Pill Buttons -->
+                <div class="flex items-center gap-1.5 flex-wrap">
+                    <button type="button" onclick="filterReviews('all')" class="filter-btn px-3 py-1 rounded-xl text-xs font-bold bg-primary text-white" data-filter="all">Tất cả</button>
+                    <button type="button" onclick="filterReviews(5)" class="filter-btn px-3 py-1 rounded-xl text-xs font-medium bg-surface hover:bg-stone-100 border border-stone-200" data-filter="5">5 ⭐</button>
+                    <button type="button" onclick="filterReviews(4)" class="filter-btn px-3 py-1 rounded-xl text-xs font-medium bg-surface hover:bg-stone-100 border border-stone-200" data-filter="4">4 ⭐</button>
+                    <button type="button" onclick="filterReviews(3)" class="filter-btn px-3 py-1 rounded-xl text-xs font-medium bg-surface hover:bg-stone-100 border border-stone-200" data-filter="3">3 ⭐</button>
+                    <button type="button" onclick="filterReviews(2)" class="filter-btn px-3 py-1 rounded-xl text-xs font-medium bg-surface hover:bg-stone-100 border border-stone-200" data-filter="2">≤2 ⭐</button>
+                </div>
+            </div>
+
+            <!-- List items -->
+            <div class="space-y-6 divide-y divide-surface-container" id="reviewContainer">
+                
+                <div th:each="r : ${summary.reviews}" class="review-card pt-6 first:pt-0" th:data-rating="${r.rating}">
+                    <div class="flex items-start justify-between gap-4">
+                        <div class="flex items-center gap-3">
+                            <div class="w-10 h-10 rounded-full bg-amber-100 text-primary font-bold flex items-center justify-center text-sm border border-amber-200 shadow-2xs">
+                                <span th:text="${#strings.substring(r.userName, 0, 1)}">H</span>
+                            </div>
+                            <div>
+                                <div class="flex items-center gap-2">
+                                    <strong class="text-xs font-bold text-on-surface" th:text="${r.userName}">Nguyễn Văn A</strong>
+                                    <!-- Verified Badge -->
+                                    <span th:if="${r.isVerifiedPurchase}"
+                                          class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-emerald-50 border border-emerald-200 text-emerald-800 text-[10px] font-bold">
+                                        <i class="fas fa-circle-check text-emerald-600"></i>
+                                        <span>Đã mua hàng</span>
+                                    </span>
+                                </div>
+                                <div class="flex items-center gap-2 mt-0.5">
+                                    <!-- Stars -->
+                                    <div class="text-amber-400 text-xs flex items-center gap-0.5">
+                                        <i class="fas fa-star" th:each="i : ${#numbers.sequence(1, r.rating)}"></i>
+                                    </div>
+                                    <span class="text-[10px] text-stone-400" th:text="${r.formattedDate}">25/10/2026 14:30</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <span th:if="${r.subOrderCode}" class="text-[10px] font-mono text-stone-400 border border-stone-200 px-2 py-0.5 rounded-md">
+                            Đơn: <span th:text="${r.subOrderCode}">SUB-001</span>
+                        </span>
+                    </div>
+
+                    <div class="mt-3 pl-13 text-xs leading-relaxed text-on-surface">
+                        <h4 th:if="${r.title != null and !r.title.isEmpty()}" class="font-bold text-on-surface mb-1" th:text="${r.title}">
+                            Tiêu đề nhận xét
+                        </h4>
+                        <p class="whitespace-pre-line text-stone-700" th:text="${r.comment}">
+                            Cuốn sách rất hay và ý nghĩa...
+                        </p>
+                    </div>
+                </div>
+
+                <!-- Empty state if no reviews -->
+                <div th:if="${#lists.isEmpty(summary.reviews)}" class="text-center py-12 text-stone-400">
+                    <i class="fas fa-comment-dots text-4xl mb-3 opacity-30"></i>
+                    <p class="text-sm font-medium">Chưa có đánh giá nào cho cuốn sách này.</p>
+                    <p class="text-xs text-stone-500 mt-1">Hãy là người đầu tiên mua và chia sẻ cảm nhận về tác phẩm!</p>
+                </div>
+            </div>
+        </div>
+
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-surface-container/60 border-t border-surface-container-high py-6 mt-12 text-center text-xs text-on-surface-variant">
+        <p>© 2026 Book4Life - Hệ thống Quản lý Chuỗi Cửa Hàng Sách Cũ Toàn Quốc. Trao tri thức - Lan tỏa văn hóa đọc.</p>
+    </footer>
+
+    <!-- Chatbox AI Widget -->
+    <th:block th:replace="~{fragments/chatbox :: chatboxWidget}"></th:block>
+
+    <script>
+        function filterReviews(target) {
+            document.querySelectorAll('.filter-btn').forEach(btn => {
+                if (btn.getAttribute('data-filter') == target) {
+                    btn.className = "filter-btn px-3 py-1 rounded-xl text-xs font-bold bg-primary text-white";
+                } else {
+                    btn.className = "filter-btn px-3 py-1 rounded-xl text-xs font-medium bg-surface hover:bg-stone-100 border border-stone-200";
+                }
+            });
+
+            document.querySelectorAll('.review-card').forEach(card => {
+                const rating = parseInt(card.getAttribute('data-rating'));
+                if (target === 'all') {
+                    card.style.display = 'block';
+                } else if (target === 2) {
+                    card.style.display = (rating <= 2) ? 'block' : 'none';
+                } else {
+                    card.style.display = (rating === parseInt(target)) ? 'block' : 'none';
+                }
+            });
+        }
+    </script>
+</body>
+</html>

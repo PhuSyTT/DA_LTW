@@ -682,6 +682,7 @@ public class OrderTrackingServiceImpl implements OrderTrackingService {
             dto.setShelfLocation(bookItem.getShelfLocation());
 
             if (bookItem.getBook() != null) {
+                dto.setBookId(bookItem.getBook().getId());
                 dto.setBookTitle(bookItem.getBook().getTitle());
                 dto.setBookCoverImage(bookItem.getBook().getCoverImageUrl());
                 if (bookItem.getBook().getAuthor() != null) {

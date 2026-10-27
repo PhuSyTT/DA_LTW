@@ -4,6 +4,7 @@ import java.math.BigDecimal;
 
 public class SubOrderItemDto {
     private Long id;
+    private Long bookId;
     private Long bookItemId;
     private String skuBarcode;
     private String bookTitle;
@@ -24,6 +25,14 @@ public class SubOrderItemDto {
 
     public void setId(Long id) {
         this.id = id;
+    }
+
+    public Long getBookId() {
+        return bookId;
+    }
+
+    public void setBookId(Long bookId) {
+        this.bookId = bookId;
     }
 
     public Long getBookItemId() {

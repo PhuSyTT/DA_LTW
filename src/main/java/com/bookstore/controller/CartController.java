@@ -5,8 +5,10 @@ import com.bookstore.dto.CartItemDto;
 import com.bookstore.dto.CheckoutRequestDto;
 import com.bookstore.entity.BookItem;
 import com.bookstore.entity.Branch;
+import com.bookstore.entity.Coupon;
 import com.bookstore.entity.MasterOrder;
 import com.bookstore.repository.BookItemRepository;
+import com.bookstore.repository.CouponRepository;
 import com.bookstore.service.BranchService;
 import com.bookstore.service.CartService;
 import com.bookstore.service.OrderService;
@@ -34,13 +36,16 @@ public class CartController {
     private final OrderService orderService;
     private final BranchService branchService;
     private final BookItemRepository bookItemRepository;
+    private final CouponRepository couponRepository;
 
     public CartController(CartService cartService, OrderService orderService,
-                          BranchService branchService, BookItemRepository bookItemRepository) {
+                          BranchService branchService, BookItemRepository bookItemRepository,
+                          CouponRepository couponRepository) {
         this.cartService = cartService;
         this.orderService = orderService;
         this.branchService = branchService;
         this.bookItemRepository = bookItemRepository;
+        this.couponRepository = couponRepository;
     }
 
     @GetMapping("/cart")
@@ -48,6 +53,7 @@ public class CartController {
         CartDto cart = cartService.getCart(session);
         model.addAttribute("cart", cart);
         model.addAttribute("branches", branchService.getAllActiveBranches());
+        model.addAttribute("availableCoupons", getActiveAvailableCoupons());
         model.addAttribute("pageTitle", "Giỏ Hàng Sách Cũ Của Bạn - Book4Life");
         return "cart";
     }
@@ -60,9 +66,21 @@ public class CartController {
         }
         model.addAttribute("cart", cart);
         model.addAttribute("branches", branchService.getAllActiveBranches());
+        model.addAttribute("availableCoupons", getActiveAvailableCoupons());
         model.addAttribute("pageTitle", "Thanh Toán & Hóa Đơn Tạm Tính - Book4Life");
         model.addAttribute("autoOpenCheckout", true);
         return "cart";
+    }
+
+    private List<Coupon> getActiveAvailableCoupons() {
+        try {
+            return couponRepository.findAllByOrderByIdDesc().stream()
+                    .filter(c -> Boolean.TRUE.equals(c.getIsActive()))
+                    .toList();
+        } catch (Exception e) {
+            logger.warn("Không thể tải danh sách coupon có sẵn: {}", e.getMessage());
+            return new ArrayList<>();
+        }
     }
 
     @PostMapping("/cart/add")

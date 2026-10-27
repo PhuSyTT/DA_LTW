@@ -1,20 +1,19 @@
 <!DOCTYPE html>
-<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<html lang="vi" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title th:text="${pageTitle} ?: 'Giỏ Hàng Sách Cũ - Book4Life'">Giỏ Hàng - Book4Life</title>
 
-    <!-- Tailwind CSS CDN -->
-    <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Google Fonts: Plus Jakarta Sans -->
+    <!-- Google Fonts: Plus Jakarta Sans (Không chân) & Inter -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Playfair+Display:ital,wght@0,600;0,700;1,400&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,400;0,500;0,600;0,700;0,800;1,400;1,600;1,700&amp;family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet"/>
+
     <!-- FontAwesome 6 -->
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.5.1/css/all.min.css" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet">
 
     <!-- Landing Page Vintage Styles (Blurred Backgrounds & Gradients) -->
     <link rel="stylesheet" th:href="@{/css/landing-page.css}">
@@ -22,25 +21,52 @@
     <!-- Chatbox AI Styles -->
     <th:block th:replace="~{fragments/chatbox :: chatboxStyles}"></th:block>
 
-    <script>
+    <!-- Tailwind CSS with Book4Life Literary Warmth Tokens -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script id="tailwind-config">
         tailwind.config = {
+            darkMode: "class",
             theme: {
                 extend: {
                     colors: {
-                        primary: "#B8860B",
-                        "primary-hover": "#CD853F",
-                        "primary-container": "#F5EBE1",
-                        "on-primary-container": "#4A3525",
-                        surface: "#FAF8F5",
-                        "surface-container": "#F0EAE1",
-                        "surface-container-high": "#E8E0D5",
-                        "on-surface": "#2C1E16",
-                        "on-surface-variant": "#6E5D53",
-                        outline: "#D7C3AE"
+                        "primary": "#835500",
+                        "primary-hover": "#644000",
+                        "primary-container": "#f5a623",
+                        "on-primary": "#ffffff",
+                        "on-primary-container": "#644000",
+                        "primary-fixed": "#ffddb4",
+                        "primary-fixed-dim": "#ffb955",
+                        "on-primary-fixed": "#291800",
+                        "secondary": "#6c5b51",
+                        "secondary-container": "#f6ded1",
+                        "on-secondary": "#ffffff",
+                        "on-secondary-container": "#726157",
+                        "tertiary": "#6d5a50",
+                        "tertiary-container": "#c9b1a5",
+                        "surface": "#faf9f6",
+                        "surface-dim": "#dbdad7",
+                        "surface-bright": "#faf9f6",
+                        "surface-variant": "#e3e2e0",
+                        "surface-container-lowest": "#ffffff",
+                        "surface-container-low": "#f4f3f1",
+                        "surface-container": "#efeeeb",
+                        "surface-container-high": "#e9e8e5",
+                        "surface-container-highest": "#e3e2e0",
+                        "on-surface": "#1a1c1a",
+                        "on-surface-variant": "#524534",
+                        "outline": "#857462",
+                        "outline-variant": "#d7c3ae",
+                        "surface-tint": "#835500",
+                        "background": "#faf9f6",
+                        "on-background": "#1a1c1a",
+                        "error": "#ba1a1a",
+                        "error-container": "#ffdad6",
+                        "on-error": "#ffffff",
+                        "on-error-container": "#93000a"
                     },
                     fontFamily: {
-                        sans: ["'Plus Jakarta Sans'", "-apple-system", "BlinkMacSystemFont", "sans-serif"],
-                        serif: ["'Playfair Display'", "Georgia", "serif"]
+                        "sans": ["'Plus Jakarta Sans'", "Inter", "-apple-system", "BlinkMacSystemFont", "'Segoe UI'", "sans-serif"],
+                        "serif": ["'Plus Jakarta Sans'", "Inter", "sans-serif"]
                     }
                 }
             }
@@ -57,51 +83,155 @@
         .material-symbols-outlined {
             font-family: 'Material Symbols Outlined' !important;
         }
+        /* Custom override to prevent bootstrap or external css from ruining cart badges & links */
+        .cart-tag-category {
+            background-color: #fef3c7 !important;
+            color: #78350f !important;
+            border: 1px solid #fde68a !important;
+        }
+        .cart-tag-condition {
+            background-color: #d1fae5 !important;
+            color: #065f46 !important;
+            border: 1px solid #a7f3d0 !important;
+        }
+        .cart-tag-branch {
+            background-color: #ffedd5 !important;
+            color: #9a3412 !important;
+            border: 1px solid #fed7aa !important;
+        }
+        a.cart-book-title {
+            color: #1a1c1a !important;
+            text-decoration: none !important;
+        }
+        a.cart-book-title:hover {
+            color: #835500 !important;
+        }
     </style>
 </head>
 <body class="bg-surface text-on-surface antialiased min-h-screen flex flex-col font-sans">
 
-    <!-- Header / Navbar -->
-    <header class="sticky top-0 z-40 bg-surface/95 backdrop-blur-md border-b border-outline/30 shadow-xs">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between gap-4">
-            <!-- Brand Logo -->
-            <a href="/" class="flex items-center gap-3 group">
-                <div class="w-11 h-11 rounded-2xl bg-primary flex items-center justify-center text-white shadow-md shadow-primary/20 group-hover:scale-105 transition-all">
-                    <i class="fas fa-book-open text-xl"></i>
+    <!-- ========================================== -->
+    <!-- HEADER: Book4Life Top Navigation & Sub-Bar -->
+    <!-- ========================================== -->
+    <header class="fixed top-0 left-0 right-0 z-50 bg-surface/95 backdrop-blur-xl border-b border-outline-variant/30 shadow-[0_1px_8px_rgba(44,30,22,0.04)]">
+        <div class="w-full">
+            <!-- Main Header Row -->
+            <div class="h-20 w-full max-w-7xl mx-auto px-4 sm:px-6 flex items-center justify-between gap-4 md:gap-6">
+                
+                <!-- Logo & Brand Name -->
+                <div class="flex items-center gap-3 shrink-0">
+                    <a th:href="@{/}" href="/" class="flex items-center gap-3 group">
+                        <img th:src="@{/images/book4life-logo.png}"
+                             src="/images/book4life-logo.png"
+                             onerror="this.onerror=null; this.src='https://lh3.googleusercontent.com/aida/AEtjO1VFRXY_NxriMnSUoyOlnJkpi_znEOfbT5nqVF_bWOeMuQrL28jtA3tETNkUlNIEvXJm19CEHOkGmCwnVISoEMhl5cfEIGWneqFqQTEH2YVxCJT61G2j2-6D0aqTouvk9S4LMHzp7_D4BtPEKRDgZ-a42hUwlA9vSusc7zVTRfWF9HyMuFlJPcKDbdvyCu6om3wwYvn8--WJGC61Nv6WZJ_H2WA8IPtCQmf7qoGvV5cvAnQdgl-cs0nr3g';"
+                             alt="Book4Life Logo" 
+                             class="h-9 w-auto object-contain transition-transform group-hover:scale-105"/>
+                        <div class="flex flex-col">
+                            <span class="font-bold text-2xl text-on-surface tracking-tight leading-none group-hover:text-primary transition-colors">Book4Life</span>
+                            <span class="text-[10px] text-tertiary font-semibold tracking-wider uppercase mt-0.5">Hiệu Sách Cũ Bền Vững</span>
+                        </div>
+                    </a>
                 </div>
-                <div>
-                    <span class="font-serif text-2xl font-bold tracking-tight text-on-surface">Book4Life</span>
-                    <span class="block text-[10px] tracking-widest uppercase font-semibold text-primary">Sách Cũ & Sưu Tầm</span>
+
+                <!-- Category Selector & Omni Search Bar -->
+                <div class="flex-1 max-w-xl mx-2 hidden md:flex items-center">
+                    <form th:action="@{/books}" method="get" class="w-full flex items-center bg-surface-container-low border border-outline-variant/40 rounded-xl px-3 py-1.5 shadow-[0_1px_4px_rgba(44,30,22,0.04)] focus-within:bg-surface-container-lowest focus-within:border-primary focus-within:shadow-[0_2px_12px_rgba(131,85,0,0.12)] transition-all">
+                        <div class="relative">
+                            <select name="categoryId" class="appearance-none bg-transparent flex items-center gap-1 text-on-surface-variant text-xs font-semibold pr-6 mr-2 border-r border-outline-variant/40 shrink-0 hover:text-on-surface cursor-pointer focus:outline-none">
+                                <option value="">Tất cả thể loại</option>
+                                <option th:each="cat : ${categories}" th:value="${cat.id}" th:text="${cat.name}">Tiểu thuyết</option>
+                            </select>
+                            <span class="material-symbols-outlined pointer-events-none absolute right-2 top-1/2 -translate-y-1/2 text-[14px] text-on-surface-variant">expand_more</span>
+                        </div>
+                        <button type="submit" aria-label="Tìm kiếm" class="flex items-center justify-center text-on-surface-variant hover:text-primary transition-colors focus:outline-none shrink-0 mr-2">
+                            <span class="material-symbols-outlined text-[20px]">search</span>
+                        </button>
+                        <input name="keyword" placeholder="Tìm tên sách, tác giả, ISBN..." class="w-full bg-transparent text-sm text-on-surface focus:outline-none" type="text"/>
+                    </form>
                 </div>
-            </a>
 
-            <!-- Navigation Links -->
-            <nav class="hidden md:flex items-center gap-8 text-sm font-semibold text-on-surface-variant">
-                <a href="/" class="hover:text-primary transition-colors">Trang Chủ</a>
-                <a href="/books" class="hover:text-primary transition-colors">Tủ Sách Cũ</a>
-                <a href="/authors" class="hover:text-primary transition-colors">Tác Giả</a>
-                <a href="/blog" class="hover:text-primary transition-colors">Blog</a>
-                <a href="/trade-in" class="hover:text-primary transition-colors">Thu Mua Sách</a>
-                <a href="/my-orders" class="hover:text-primary transition-colors">Đơn Hàng Của Tôi</a>
-            </nav>
+                <!-- Navigation Links & User Actions -->
+                <div class="flex items-center gap-4 shrink-0">
+                    <nav class="hidden xl:flex items-center gap-5 text-sm font-semibold text-on-surface-variant">
+                        <a th:href="@{/books}" class="hover:text-primary transition-colors">Kho sách</a>
+                        <a th:href="@{/authors}" class="hover:text-primary transition-colors">Tác giả</a>
+                        <a th:href="@{/trade-in/new}" class="hover:text-primary transition-colors">Thu mua sách</a>
+                        <a th:href="@{/my-wishlist}" class="hover:text-primary transition-colors">Săn sách</a>
+                        <a th:href="@{/blog}" class="hover:text-primary transition-colors">Blog</a>
+                        <a th:href="@{/about}" class="hover:text-primary transition-colors">Về chúng tôi</a>
+                    </nav>
 
-            <!-- Actions -->
-            <div class="flex items-center gap-3">
-                <a href="/cart" class="relative p-2.5 rounded-full bg-primary-container text-on-primary-container hover:brightness-95 transition-all shadow-xs flex items-center justify-center">
-                    <i class="fas fa-cart-shopping text-base"></i>
-                    <span id="cartHeaderBadge"
-                          class="absolute -top-1 -right-1 bg-red-600 text-white text-[10px] font-bold w-5 h-5 rounded-full flex items-center justify-center shadow"
-                          th:text="${cart.totalQuantity}">0</span>
-                </a>
-                <a href="/books" class="hidden sm:inline-flex items-center gap-2 px-4 py-2 rounded-full border border-primary text-primary text-xs font-bold hover:bg-primary hover:text-white transition-all">
-                    <i class="fas fa-plus"></i> Chọn Thêm Sách
-                </a>
+                    <!-- Wishlist, Orders & Cart Badges -->
+                    <div class="flex items-center gap-1">
+                        <a th:href="@{/my-wishlist}" href="/my-wishlist" aria-label="Săn Sách Yêu Thích" class="relative p-2 rounded-full hover:bg-surface-container-high text-on-surface-variant hover:text-primary transition-all">
+                            <span class="material-symbols-outlined text-[22px]">favorite</span>
+                            <span class="absolute top-1 right-1 flex items-center justify-center min-w-[16px] h-4 px-1 rounded-full bg-secondary text-on-secondary text-[10px] font-bold">★</span>
+                        </a>
+                        <a th:href="@{/my-orders}" href="/my-orders" aria-label="Đơn hàng của tôi" title="Theo dõi tiến độ đơn hàng" class="relative p-2 rounded-full hover:bg-surface-container-high text-on-surface-variant hover:text-primary transition-all">
+                            <span class="material-symbols-outlined text-[22px]">local_shipping</span>
+                        </a>
+                        <a th:href="@{/cart}" href="/cart" aria-label="Giỏ hàng" class="relative p-2 rounded-full bg-primary-container text-on-primary-container hover:brightness-95 transition-all shadow-xs flex items-center justify-center">
+                            <span class="material-symbols-outlined text-[22px]">shopping_bag</span>
+                            <span id="cartHeaderBadge"
+                                  class="absolute -top-1 -right-1 bg-primary text-white text-[10px] font-bold min-w-[18px] h-[18px] px-1 rounded-full flex items-center justify-center shadow"
+                                  th:text="${cart.totalQuantity}">0</span>
+                        </a>
+                    </div>
+
+                    <!-- Multi-Role Auth Controls -->
+                    <div class="flex items-center border-l border-outline-variant/40 pl-3">
+                        <div sec:authorize="isAnonymous()">
+                            <a th:href="@{/login}" href="/login" class="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-surface-container-high hover:bg-primary-container text-on-surface hover:text-on-primary-container text-xs font-bold shadow-sm transition-all">
+                                <div class="w-6 h-6 rounded-full bg-primary flex items-center justify-center text-white text-xs">
+                                    <span class="material-symbols-outlined text-[14px]">person</span>
+                                </div>
+                                <span>Đăng nhập</span>
+                            </a>
+                        </div>
+
+                        <div sec:authorize="isAuthenticated()" class="flex items-center gap-2">
+                            <a th:href="@{/admin/books}" 
+                               sec:authorize="hasAnyAuthority('ROLE_ADMIN', 'ADMIN', 'ROLE_BRANCH_MANAGER', 'BRANCH_MANAGER', 'ROLE_WAREHOUSE_STAFF', 'WAREHOUSE_STAFF', 'ROLE_CASHIER', 'CASHIER')" 
+                               class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-primary text-white text-xs font-bold shadow hover:bg-primary/90 transition-all">
+                                <span class="material-symbols-outlined text-[16px]">admin_panel_settings</span>
+                                <span sec:authentication="principal.roleName">Admin HQ</span>
+                            </a>
+
+                            <span sec:authorize="hasAnyAuthority('ROLE_CUSTOMER', 'CUSTOMER')" 
+                                  class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-secondary-container text-on-secondary-container text-xs font-bold">
+                                <span class="material-symbols-outlined text-[16px]">account_circle</span>
+                                <span sec:authentication="principal.fullName">Độc Giả</span>
+                            </span>
+
+                            <a th:href="@{/logout}" href="/logout" title="Đăng xuất" class="p-2 rounded-xl hover:bg-error-container text-outline hover:text-error transition-colors">
+                                <span class="material-symbols-outlined text-[20px]">logout</span>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Sub-Header Category Pills Bar -->
+            <div class="h-11 w-full bg-surface-container-low/90 border-t border-outline-variant/20">
+                <div class="h-full max-w-7xl mx-auto px-4 sm:px-6 flex items-center justify-between overflow-x-auto scrollbar-none">
+                    <nav class="flex items-center gap-2 sm:gap-3 text-nowrap text-xs font-semibold">
+                        <a th:href="@{/books}" class="px-3 py-1 rounded-full text-on-surface-variant hover:text-on-surface hover:bg-surface-container-high transition-colors">Tất cả kho sách</a>
+                        <a th:href="@{/cart}" class="px-3 py-1 rounded-full bg-primary-container text-on-primary-container font-bold shadow-sm">Giỏ hàng của bạn</a>
+                        <a th:href="@{/books(categoryId=1)}" class="px-3 py-1 rounded-full text-on-surface-variant hover:text-on-surface hover:bg-surface-container-high transition-colors">Kinh Điển</a>
+                        <a th:href="@{/books(categoryId=2)}" class="px-3 py-1 rounded-full text-on-surface-variant hover:text-on-surface hover:bg-surface-container-high transition-colors">Văn Học Việt Nam</a>
+                        <a th:href="@{/books(categoryId=6)}" class="px-3 py-1 rounded-full text-on-surface-variant hover:text-on-surface hover:bg-surface-container-high transition-colors">Triết Học &amp; Lịch Sử</a>
+                    </nav>
+                    <div class="hidden sm:flex items-center gap-4 text-xs text-tertiary shrink-0">
+                        <span class="flex items-center gap-1"><i class="fas fa-truck-fast text-primary"></i> Freeship từ 200k</span>
+                        <span class="flex items-center gap-1"><i class="fas fa-shield-halved text-emerald-700"></i> Đổi trả 7 ngày</span>
+                    </div>
+                </div>
             </div>
         </div>
     </header>
 
     <!-- Main Container -->
-    <main class="flex-grow max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 w-full">
+    <main class="flex-grow max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-36 pb-16 w-full">
 
         <!-- Breadcrumb -->
         <nav class="flex items-center gap-2 text-xs text-on-surface-variant mb-6">
@@ -239,15 +369,28 @@
             
             <!-- LEFT COLUMN: CART ITEMS (8 cols) -->
             <div class="lg:col-span-8 bg-white rounded-3xl border border-outline/30 shadow-sm overflow-hidden">
-                <div class="p-5 sm:p-6 border-b border-outline/20 flex items-center justify-between">
-                    <span class="font-bold text-base text-on-surface flex items-center gap-2">
-                        <i class="fas fa-boxes-stacked text-primary"></i> Danh sách sách tuyển chọn
-                    </span>
-                    <form th:action="@{/cart/clear}" method="post" onsubmit="return confirm('Bạn có chắc chắn muốn xóa toàn bộ giỏ hàng?');">
-                        <button type="submit" class="text-xs text-rose-600 hover:text-rose-800 font-semibold flex items-center gap-1 transition-colors">
-                            <i class="fas fa-trash-can"></i> Xóa tất cả
+                <div class="p-5 sm:p-6 border-b border-outline/20 flex flex-wrap items-center justify-between gap-3 bg-stone-50/70">
+                    <div class="flex items-center gap-2.5">
+                        <span class="w-8 h-8 rounded-xl bg-primary/10 text-primary flex items-center justify-center font-bold text-sm">
+                            <i class="fas fa-boxes-stacked"></i>
+                        </span>
+                        <div>
+                            <h3 class="font-bold text-base text-on-surface">Danh sách sách trong giỏ</h3>
+                            <span class="text-xs text-on-surface-variant font-medium" th:text="${cart.totalQuantity} + ' cuốn sách đã chọn'">1 cuốn sách</span>
+                        </div>
+                    </div>
+                    <div class="flex items-center gap-3">
+                        <button type="button" onclick="openCheckoutModal()"
+                                class="px-4 py-2.5 rounded-xl bg-gradient-to-r from-primary to-amber-900 hover:from-primary-hover hover:to-amber-950 text-white text-xs font-bold shadow-md hover:shadow-lg hover:scale-105 active:scale-95 transition-all flex items-center gap-1.5 cursor-pointer">
+                            <i class="fas fa-truck-fast"></i>
+                            <span>Tiến Hành Đặt Hàng ➔</span>
                         </button>
-                    </form>
+                        <form th:action="@{/cart/clear}" method="post" onsubmit="return confirm('Bạn có chắc chắn muốn xóa toàn bộ giỏ hàng?');">
+                            <button type="submit" class="p-2 text-xs text-rose-600 hover:text-rose-800 hover:bg-rose-50 rounded-xl font-semibold flex items-center gap-1 transition-colors" title="Xóa toàn bộ giỏ hàng">
+                                <i class="fas fa-trash-can text-sm"></i>
+                            </button>
+                        </form>
+                    </div>
                 </div>
 
                 <!-- Optimization Banner if cart has savings available -->
@@ -283,21 +426,21 @@
 
                         <!-- Book Info -->
                         <div class="flex-grow min-w-0">
-                            <div class="flex items-center gap-2 mb-1 flex-wrap">
-                                <span class="badge px-2 py-0.5 rounded-full text-[10px] font-bold bg-primary-container text-on-primary-container"
+                            <div class="flex items-center gap-2 mb-1.5 flex-wrap">
+                                <span class="cart-tag-category inline-flex items-center px-2.5 py-0.5 rounded-full text-[11px] font-bold shadow-2xs"
                                       th:text="${item.categoryName} ?: 'Văn học'">Thể loại</span>
-                                <span class="badge px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200"
+                                <span class="cart-tag-condition inline-flex items-center px-2.5 py-0.5 rounded-full text-[11px] font-bold shadow-2xs"
                                       th:text="${item.conditionGrade} ?: 'Sách cũ chuẩn'">Độ mới 90%</span>
-                                <span class="badge px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-50 text-amber-800 border border-amber-200 inline-flex items-center gap-1 cursor-pointer hover:bg-amber-100 transition-colors"
+                                <span class="cart-tag-branch inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-bold shadow-2xs cursor-pointer hover:brightness-95 transition-all"
                                       th:onclick="'openBranchSelector(' + ${item.bookId} + ')'"
                                       title="Bấm để xem và đổi chi nhánh mua sách này">
-                                    <i class="fas fa-store text-[9px]"></i>
+                                    <i class="fas fa-store text-[10px]"></i>
                                     <span th:text="${item.branchName} ?: 'Kho Tổng'">Chi nhánh</span>
-                                    <i class="fas fa-arrow-right-arrow-left text-[8px] ml-0.5 opacity-60"></i>
+                                    <i class="fas fa-arrow-right-arrow-left text-[8px] ml-0.5 opacity-70"></i>
                                 </span>
                             </div>
-                            <h4 class="font-bold text-base text-on-surface hover:text-primary transition-colors truncate">
-                                <a th:href="@{/books/{id}(id=${item.bookId})}" th:text="${item.title}">Tựa sách mẫu</a>
+                            <h4 class="font-bold text-base text-on-surface truncate">
+                                <a th:href="@{/books/{id}(id=${item.bookId})}" th:text="${item.title}" class="cart-book-title font-bold text-base hover:text-primary transition-colors no-underline">Tựa sách mẫu</a>
                             </h4>
                             <p class="text-xs text-on-surface-variant mt-0.5" th:text="${item.authorName}">Tác giả</p>
                             <p class="text-[11px] font-mono text-outline mt-1" th:if="${item.isbn}" th:text="'ISBN: ' + ${item.isbn}">ISBN: 978604...</p>
@@ -519,15 +662,15 @@
                         </div>
                     </div>
 
-                    <!-- Checkout Trigger Button -->
+                    <!-- Checkout Trigger Button (Prominent & High-Contrast) -->
                     <button type="button" onclick="openCheckoutModal()"
-                            class="w-full py-3.5 rounded-2xl bg-primary text-white text-sm font-bold shadow-md hover:bg-primary-hover hover:scale-[1.02] active:scale-[0.98] transition-all flex items-center justify-center gap-2">
-                        <i class="fas fa-lock"></i>
-                        <span>Tiến Hành Đặt Hàng & Thanh Toán</span>
+                            class="w-full py-4 rounded-2xl bg-gradient-to-r from-amber-800 via-amber-900 to-amber-950 hover:from-amber-900 hover:to-black text-white text-sm font-bold shadow-lg hover:shadow-xl hover:scale-[1.02] active:scale-[0.98] transition-all flex items-center justify-center gap-2.5 cursor-pointer">
+                        <i class="fas fa-truck-fast text-base text-amber-300"></i>
+                        <span>Tiến Hành Đặt Hàng &amp; Thanh Toán ➔</span>
                     </button>
 
-                    <p class="text-center text-[11px] text-on-surface-variant/70 mt-3 flex items-center justify-center gap-1">
-                        <i class="fas fa-circle-check text-emerald-600"></i> Hỗ trợ nhận sách tại quầy & giao tận nơi COD
+                    <p class="text-center text-[11px] text-on-surface-variant/70 mt-3 flex items-center justify-center gap-1.5">
+                        <i class="fas fa-shield-halved text-emerald-600"></i> Hỗ trợ thanh toán khi nhận hàng (COD) &amp; nhận tại quầy
                     </p>
                 </div>
 
@@ -541,6 +684,20 @@
                     </div>
                 </div>
             </div>
+        </div>
+
+        <!-- MOBILE FLOATING CHECKOUT BAR (Visible permanently on mobile & tablet) -->
+        <div th:unless="${cart.isEmpty()}" class="lg:hidden fixed bottom-0 left-0 right-0 z-40 bg-white/95 backdrop-blur-md border-t border-stone-200 px-4 py-3 shadow-[0_-4px_20px_rgba(0,0,0,0.12)] flex items-center justify-between gap-3">
+            <div>
+                <span class="text-[11px] text-stone-500 block leading-tight">Tổng thanh toán (<span th:text="${cart.totalQuantity}">1</span> cuốn):</span>
+                <span class="font-bold text-lg text-primary font-serif" id="mobileSummaryTotal"
+                      th:text="${#numbers.formatDecimal(cart.grandTotal, 0, 'COMMA', 0, 'POINT')} + ' ₫'">0 ₫</span>
+            </div>
+            <button type="button" onclick="openCheckoutModal()"
+                    class="px-5 py-2.5 rounded-xl bg-gradient-to-r from-primary to-amber-950 text-white text-xs font-bold shadow-md hover:brightness-110 active:scale-95 transition-all flex items-center gap-1.5 cursor-pointer">
+                <i class="fas fa-truck-fast"></i>
+                <span>Đặt Hàng Ngay ➔</span>
+            </button>
         </div>
     </main>
 
@@ -1001,11 +1158,11 @@
         /*]]>*/
 
         let cartState = {
-            subtotal: (initialCartState && !isNaN(Number(initialCartState.subtotal))) ? Number(initialCartState.subtotal) : 0,
+            subtotal: parseAmount(initialCartState ? initialCartState.subtotal : 0),
             shippingCouponCode: (initialCartState && initialCartState.shippingCouponCode) ? initialCartState.shippingCouponCode : null,
             orderCouponCode: (initialCartState && initialCartState.orderCouponCode) ? initialCartState.orderCouponCode : null,
-            discountAmount: (initialCartState && !isNaN(Number(initialCartState.discountAmount))) ? Number(initialCartState.discountAmount) : 0,
-            shippingDiscountAmount: (initialCartState && !isNaN(Number(initialCartState.shippingDiscountAmount))) ? Number(initialCartState.shippingDiscountAmount) : 0
+            discountAmount: parseAmount(initialCartState ? initialCartState.discountAmount : 0),
+            shippingDiscountAmount: parseAmount(initialCartState ? initialCartState.shippingDiscountAmount : 0)
         };
 
         const VIETNAM_LOCATIONS = {
@@ -1186,11 +1343,17 @@
             }, 3000);
         }
 
+        function parseAmount(val) {
+            if (val === undefined || val === null || val === '') return 0;
+            if (typeof val === 'number') return isNaN(val) ? 0 : val;
+            const cleaned = String(val).replace(/[^\d.-]/g, '');
+            const num = parseFloat(cleaned);
+            return isNaN(num) ? 0 : num;
+        }
+
         function formatVnd(amount) {
-            if (amount === undefined || amount === null || amount === '') return '0 ₫';
-            const num = Number(amount);
-            if (isNaN(num)) return '0 ₫';
-            return num.toLocaleString('vi-VN') + ' ₫';
+            const num = parseAmount(amount);
+            return Math.round(num).toLocaleString('vi-VN') + ' ₫';
         }
 
         // 1. Change Item Quantity (+ / -)
@@ -1317,6 +1480,8 @@
             if (data.grandTotal !== undefined && data.grandTotal !== null) {
                 const grandTotal = document.getElementById('summaryGrandTotal');
                 if (grandTotal) grandTotal.textContent = formatVnd(data.grandTotal);
+                const mobTotal = document.getElementById('mobileSummaryTotal');
+                if (mobTotal) mobTotal.textContent = formatVnd(data.grandTotal);
             }
 
             // Cập nhật thẻ hiển thị mã đang áp dụng
@@ -1975,6 +2140,93 @@
             applyBestPriceForItem(bookId, bookItemId);
         }
     </script>
+
+    <!-- ========================================== -->
+    <!-- FOOTER: Book4Life Literary Warmth Palette -->
+    <!-- ========================================== -->
+    <footer class="w-full bg-[#2C1E16] text-[#FAF9F6] border-t border-[#4A3B32] mt-16">
+        <div class="max-w-7xl mx-auto px-6 py-16">
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-10">
+                
+                <!-- Brand Column -->
+                <div class="space-y-4">
+                    <div class="flex items-center gap-2">
+                        <span class="text-2xl font-extrabold text-primary-container tracking-tight">Book4Life</span>
+                    </div>
+                    <p class="text-xs text-outline-variant leading-relaxed font-normal">
+                        Tiệm sách cũ trực tuyến gìn giữ di sản tri thức. Mỗi cuốn sách sang tay là một hành trình tái sinh, giảm lượng khí thải carbon và vun đắp lối sống đọc bền vững.
+                    </p>
+                    <div class="flex items-center gap-3 pt-2 text-[#FAF9F6]">
+                        <span class="material-symbols-outlined text-primary-container text-[20px]">nature_people</span>
+                        <span class="text-xs text-outline-variant font-medium">Trung hòa carbon &amp; Bảo vệ cây xanh</span>
+                    </div>
+                </div>
+
+                <!-- Explore & Categories Column -->
+                <div class="space-y-3">
+                    <h4 class="text-sm font-bold text-[#FAF9F6]">Khám Phá &amp; Danh Mục</h4>
+                    <ul class="space-y-2 text-xs text-outline-variant font-medium">
+                        <li><a th:href="@{/books(keyword='hiem')}" class="hover:text-primary-container transition-colors">Bản in đầu &amp; Sách hiếm tuyển chọn</a></li>
+                        <li><a th:href="@{/books(keyword='tieu thuyet')}" class="hover:text-primary-container transition-colors">Tiểu thuyết kinh điển thế giới</a></li>
+                        <li><a th:href="@{/books(keyword='van hoc')}" class="hover:text-primary-container transition-colors">Văn học hiện đại Việt Nam</a></li>
+                        <li><a th:href="@{/books(keyword='triet hoc')}" class="hover:text-primary-container transition-colors">Triết học, Khảo cứu &amp; Sử liệu</a></li>
+                        <li><a th:href="@{/books(keyword='combo')}" class="hover:text-primary-container transition-colors">Gói Combo độc giả thông thái</a></li>
+                    </ul>
+                </div>
+
+                <!-- Grading & Appraisal Column -->
+                <div class="space-y-3">
+                    <h4 class="text-sm font-bold text-[#FAF9F6]">Hỗ Trợ &amp; Thẩm Định</h4>
+                    <p class="text-xs text-outline-variant font-normal">Hệ thống 3 bậc phân loại chuẩn xác:</p>
+                    <div class="space-y-2 pt-1">
+                        <div class="flex items-start gap-2">
+                            <span class="px-2 py-0.5 rounded bg-white/10 text-primary-container text-[11px] font-bold shrink-0">Rare</span>
+                            <span class="text-[12px] text-outline-variant">Sách cổ, có chữ ký, ấn bản giới hạn</span>
+                        </div>
+                        <div class="flex items-start gap-2">
+                            <span class="px-2 py-0.5 rounded bg-white/10 text-[#FAF9F6] text-[11px] font-bold shrink-0">Like New</span>
+                            <span class="text-[12px] text-outline-variant">Gần như mới 95-99%, gáy nguyên vẹn</span>
+                        </div>
+                        <div class="flex items-start gap-2">
+                            <span class="px-2 py-0.5 rounded bg-white/10 text-outline-variant text-[11px] font-bold shrink-0">Good</span>
+                            <span class="text-[12px] text-outline-variant">Dấu vết thời gian nhẹ 80-90%, giấy đẹp</span>
+                        </div>
+                    </div>
+                    <div class="pt-2">
+                        <a th:href="@{/thu-mua-sach}" class="text-xs font-bold text-primary-container hover:underline">Chính sách gửi bán &amp; Thu mua →</a>
+                    </div>
+                </div>
+
+                <!-- Newsletter Column -->
+                <div class="space-y-4">
+                    <h4 class="text-sm font-bold text-[#FAF9F6]">Bản Tin Mọt Sách</h4>
+                    <p class="text-xs text-outline-variant font-normal">Nhận danh mục sách hiếm về mỗi tuần và voucher giảm 50.000₫ cho đơn đầu tiên.</p>
+                    <div class="flex items-center gap-2">
+                        <input class="w-full px-3 py-2 rounded-lg bg-white/10 text-xs text-[#FAF9F6] placeholder:text-outline-variant/60 focus:outline-none focus:ring-1 focus:ring-primary-container border border-white/10 font-medium" placeholder="Nhập email của bạn..." type="email"/>
+                        <button onclick="showToast('Cảm ơn bạn đã đăng ký nhận bản tin Book4Life!')" class="px-4 py-2 bg-primary-container text-on-primary-container text-xs font-bold rounded-lg shrink-0 hover:brightness-95 transition-colors" type="button">Nhận</button>
+                    </div>
+                    <span class="inline-block text-[11px] text-outline-variant/80 font-normal">*Cam kết không gửi thư rác, hủy nhận bất cứ lúc nào.</span>
+                </div>
+            </div>
+
+            <!-- Bottom Copyright & Badges -->
+            <div class="mt-12 pt-8 border-t border-outline-variant/20 flex flex-col md:flex-row items-center justify-between gap-4 text-xs text-outline-variant font-normal">
+                <div class="flex items-center gap-4">
+                    <span>© 2025 Book4Life Inc. Bảo lưu mọi quyền.</span>
+                    <span class="inline-block w-1 h-1 rounded-full bg-outline-variant/40"></span>
+                    <span class="flex items-center gap-1"><span class="material-symbols-outlined text-[16px]">language</span>Tiếng Việt (VN)</span>
+                </div>
+                <div class="flex items-center gap-6">
+                    <div class="flex items-center gap-3 text-[12px]">
+                        <span>Thanh toán an toàn:</span>
+                        <span class="material-symbols-outlined text-[20px] text-outline-variant">credit_card</span>
+                        <span class="material-symbols-outlined text-[20px] text-outline-variant">account_balance_wallet</span>
+                        <span class="material-symbols-outlined text-[20px] text-outline-variant">qr_code_2</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </footer>
 
     <!-- Chatbox AI Widget -->
     <div th:replace="~{fragments/chatbox :: chatboxWidget}"></div>

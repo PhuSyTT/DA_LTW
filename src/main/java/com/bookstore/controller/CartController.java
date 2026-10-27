@@ -8,6 +8,7 @@ import com.bookstore.entity.Branch;
 import com.bookstore.entity.Coupon;
 import com.bookstore.entity.MasterOrder;
 import com.bookstore.repository.BookItemRepository;
+import com.bookstore.repository.CategoryRepository;
 import com.bookstore.repository.CouponRepository;
 import com.bookstore.service.BranchService;
 import com.bookstore.service.CartService;
@@ -37,15 +38,17 @@ public class CartController {
     private final BranchService branchService;
     private final BookItemRepository bookItemRepository;
     private final CouponRepository couponRepository;
+    private final CategoryRepository categoryRepository;
 
     public CartController(CartService cartService, OrderService orderService,
                           BranchService branchService, BookItemRepository bookItemRepository,
-                          CouponRepository couponRepository) {
+                          CouponRepository couponRepository, CategoryRepository categoryRepository) {
         this.cartService = cartService;
         this.orderService = orderService;
         this.branchService = branchService;
         this.bookItemRepository = bookItemRepository;
         this.couponRepository = couponRepository;
+        this.categoryRepository = categoryRepository;
     }
 
     @GetMapping("/cart")
@@ -53,6 +56,7 @@ public class CartController {
         CartDto cart = cartService.getCart(session);
         model.addAttribute("cart", cart);
         model.addAttribute("branches", branchService.getAllActiveBranches());
+        model.addAttribute("categories", categoryRepository.findAll());
         model.addAttribute("availableCoupons", getActiveAvailableCoupons());
         model.addAttribute("pageTitle", "Giỏ Hàng Sách Cũ Của Bạn - Book4Life");
         return "cart";
@@ -66,6 +70,7 @@ public class CartController {
         }
         model.addAttribute("cart", cart);
         model.addAttribute("branches", branchService.getAllActiveBranches());
+        model.addAttribute("categories", categoryRepository.findAll());
         model.addAttribute("availableCoupons", getActiveAvailableCoupons());
         model.addAttribute("pageTitle", "Thanh Toán & Hóa Đơn Tạm Tính - Book4Life");
         model.addAttribute("autoOpenCheckout", true);

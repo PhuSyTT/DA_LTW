@@ -970,11 +970,11 @@
                                 <div th:each="item : ${cart.items}" class="pt-2 first:pt-0 flex items-center justify-between gap-3 text-xs">
                                     <div class="flex items-center gap-2.5 min-w-0">
                                         <div class="w-9 h-12 rounded bg-stone-200 overflow-hidden shrink-0 border border-stone-300 flex items-center justify-center">
-                                            <img th:if="${item.bookCoverImage}" th:src="${item.bookCoverImage}" th:alt="${item.bookTitle}" class="w-full h-full object-cover">
-                                            <i th:unless="${item.bookCoverImage}" class="fas fa-book text-stone-400 text-xs"></i>
+                                            <img th:if="${item.coverImageUrl}" th:src="${item.coverImageUrl}" th:alt="${item.title}" class="w-full h-full object-cover">
+                                            <i th:unless="${item.coverImageUrl}" class="fas fa-book text-stone-400 text-xs"></i>
                                         </div>
                                         <div class="min-w-0">
-                                            <div class="font-bold text-on-surface truncate text-xs" th:text="${item.bookTitle}" title="${item.bookTitle}">Tên sách</div>
+                                            <div class="font-bold text-on-surface truncate text-xs" th:text="${item.title}" th:attr="title=${item.title}">Tên sách</div>
                                             <div class="text-[10px] text-on-surface-variant flex items-center gap-1.5 flex-wrap">
                                                 <span class="px-1.5 py-0.2 rounded bg-stone-100 text-stone-700" th:text="${item.conditionGrade}">LIKE_NEW</span>
                                                 <span th:if="${item.branchName}" class="text-primary truncate" th:text="${item.branchName}">Chi nhánh Q1</span>

@@ -80,6 +80,22 @@ public class CartItemDto implements Serializable {
         this.title = title;
     }
 
+    public String getBookTitle() {
+        return title;
+    }
+
+    public void setBookTitle(String bookTitle) {
+        this.title = bookTitle;
+    }
+
+    public String getBookCoverImage() {
+        return coverImageUrl;
+    }
+
+    public void setBookCoverImage(String bookCoverImage) {
+        this.coverImageUrl = bookCoverImage;
+    }
+
     public String getIsbn() {
         return isbn;
     }

@@ -52,6 +52,19 @@ public class CartController {
         return "cart";
     }
 
+    @GetMapping("/checkout")
+    public String viewCheckout(HttpSession session, Model model) {
+        CartDto cart = cartService.getCart(session);
+        if (cart.isEmpty()) {
+            return "redirect:/cart";
+        }
+        model.addAttribute("cart", cart);
+        model.addAttribute("branches", branchService.getAllActiveBranches());
+        model.addAttribute("pageTitle", "Thanh Toán & Hóa Đơn Tạm Tính - Book4Life");
+        model.addAttribute("autoOpenCheckout", true);
+        return "cart";
+    }
+
     @PostMapping("/cart/add")
     @ResponseBody
     public ResponseEntity<?> addToCart(
@@ -223,11 +236,85 @@ public class CartController {
         return ResponseEntity.ok(result);
     }
 
+    @GetMapping("/api/cart/calculate-shipping")
+    @ResponseBody
+    public ResponseEntity<?> calculateShipping(
+            @RequestParam(value = "province", required = false) String province,
+            @RequestParam(value = "district", required = false) String district,
+            @RequestParam(value = "clickAndCollect", defaultValue = "false") boolean clickAndCollect,
+            HttpSession session
+    ) {
+        CartDto cart = cartService.getCart(session);
+        BigDecimal subtotal = cart.getSubtotal();
+        BigDecimal baseShip;
+        String deliveryEst;
+
+        if (clickAndCollect) {
+            baseShip = BigDecimal.ZERO;
+            deliveryEst = "Sẵn sàng trong 2 giờ tại quầy chi nhánh";
+        } else if (subtotal.compareTo(new BigDecimal("200000")) >= 0) {
+            baseShip = BigDecimal.ZERO;
+            deliveryEst = "Freeship toàn quốc (Đơn từ 200.000₫) • 1 - 3 ngày";
+        } else {
+            boolean isLocalHcm = province != null && (province.contains("Hồ Chí Minh") || province.contains("TP.HCM"));
+            boolean isInnerDistrict = district != null && (
+                    district.contains("1") || district.contains("3") || district.contains("5") ||
+                    district.contains("7") || district.contains("10") || district.contains("Thủ Đức") ||
+                    district.contains("Bình Thạnh") || district.contains("Phú Nhuận") ||
+                    district.contains("Tân Bình") || district.contains("Gò Vấp") || district.contains("Tân Phú") ||
+                    district.contains("4") || district.contains("6") || district.contains("8") || district.contains("11")
+            );
+
+            if (isLocalHcm && isInnerDistrict) {
+                baseShip = new BigDecimal("15000");
+                deliveryEst = "Giao siêu tốc nội thành: 24h - 48h";
+            } else if (isLocalHcm) {
+                baseShip = new BigDecimal("22000");
+                deliveryEst = "Giao ngoại thành TP.HCM: 1 - 2 ngày";
+            } else if (province != null && (province.contains("Bình Dương") || province.contains("Đồng Nai") || province.contains("Long An") || province.contains("Vũng Tàu"))) {
+                baseShip = new BigDecimal("28000");
+                deliveryEst = "Giao tỉnh lân cận: 2 - 3 ngày";
+            } else {
+                baseShip = new BigDecimal("35000");
+                deliveryEst = "Chuyển phát nhanh liên tỉnh: 3 - 5 ngày";
+            }
+        }
+
+        BigDecimal shippingDiscount = BigDecimal.ZERO;
+        if (!clickAndCollect && cart.hasShippingCoupon()) {
+            if ("FREESHIP".equalsIgnoreCase(cart.getShippingCouponCode()) || "FREESHIPMAX".equalsIgnoreCase(cart.getShippingCouponCode())) {
+                shippingDiscount = baseShip;
+            } else if ("SHIP10K".equalsIgnoreCase(cart.getShippingCouponCode())) {
+                shippingDiscount = new BigDecimal("10000").min(baseShip);
+            }
+        }
+
+        BigDecimal finalShippingFee = baseShip.subtract(shippingDiscount).max(BigDecimal.ZERO);
+        BigDecimal orderDiscount = cart.getDiscountAmount() != null ? cart.getDiscountAmount() : BigDecimal.ZERO;
+        BigDecimal grandTotal = subtotal.add(finalShippingFee).subtract(orderDiscount).max(BigDecimal.ZERO);
+
+        return ResponseEntity.ok(Map.of(
+                "subtotal", subtotal,
+                "baseShippingFee", baseShip,
+                "shippingDiscount", shippingDiscount,
+                "shippingFee", finalShippingFee,
+                "orderDiscount", orderDiscount,
+                "grandTotal", grandTotal,
+                "deliveryEstimate", deliveryEst
+        ));
+    }
+
     @PostMapping("/checkout/place-order")
     public String placeOrder(
             @RequestParam("receiverName") String receiverName,
             @RequestParam("receiverPhone") String receiverPhone,
-            @RequestParam("shippingAddress") String shippingAddress,
+            @RequestParam(value = "shippingAddress", required = false) String shippingAddress,
+            @RequestParam(value = "province", required = false) String province,
+            @RequestParam(value = "district", required = false) String district,
+            @RequestParam(value = "ward", required = false) String ward,
+            @RequestParam(value = "streetAddress", required = false) String streetAddress,
+            @RequestParam(value = "orderNote", required = false) String orderNote,
+            @RequestParam(value = "shippingFee", required = false) BigDecimal customShippingFee,
             @RequestParam(value = "paymentMethod", defaultValue = "COD") String paymentMethod,
             @RequestParam(value = "clickAndCollect", defaultValue = "false") boolean clickAndCollect,
             @RequestParam(value = "preferredBranchId", required = false) Long preferredBranchId,
@@ -242,6 +329,18 @@ public class CartController {
         }
 
         try {
+            // Chuẩn hóa địa chỉ nhận hàng từ 3 cấp hành chính nếu có
+            if ((shippingAddress == null || shippingAddress.isBlank()) && province != null && !province.isBlank()) {
+                StringBuilder sb = new StringBuilder();
+                if (streetAddress != null && !streetAddress.isBlank()) sb.append(streetAddress.trim()).append(", ");
+                if (ward != null && !ward.isBlank()) sb.append(ward.trim()).append(", ");
+                if (district != null && !district.isBlank()) sb.append(district.trim()).append(", ");
+                sb.append(province.trim());
+                shippingAddress = sb.toString();
+            } else if (shippingAddress == null || shippingAddress.isBlank()) {
+                shippingAddress = clickAndCollect ? "Nhận trực tiếp tại quầy chi nhánh" : "Địa chỉ giao hàng";
+            }
+
             List<Long> bookItemIds = new ArrayList<>();
             Map<Long, Integer> itemQuantities = new HashMap<>();
 
@@ -287,6 +386,12 @@ public class CartController {
             req.setReceiverName(receiverName);
             req.setReceiverPhone(receiverPhone);
             req.setShippingAddress(shippingAddress);
+            req.setProvince(province);
+            req.setDistrict(district);
+            req.setWard(ward);
+            req.setStreetAddress(streetAddress);
+            req.setOrderNote(orderNote);
+
             String effectivePaymentMethod = ("POS".equalsIgnoreCase(paymentMethod) || clickAndCollect) ? "POS" : "COD";
             req.setPaymentMethod(effectivePaymentMethod);
             req.setClickAndCollect(clickAndCollect);
@@ -294,16 +399,23 @@ public class CartController {
             req.setBookItemIds(bookItemIds);
             req.setItemQuantities(itemQuantities);
 
-            // Pass amounts and discounts from cart
+            // Pass amounts and discounts from cart / dynamic calculation
             req.setTotalItemsAmount(cart.getSubtotal());
-            BigDecimal effectiveShippingFee = clickAndCollect ? BigDecimal.ZERO : cart.getShippingFee();
+            BigDecimal effectiveShippingFee;
+            if (clickAndCollect) {
+                effectiveShippingFee = BigDecimal.ZERO;
+            } else if (customShippingFee != null && customShippingFee.compareTo(BigDecimal.ZERO) >= 0) {
+                effectiveShippingFee = customShippingFee;
+            } else {
+                effectiveShippingFee = cart.getShippingFee();
+            }
             req.setShippingFee(effectiveShippingFee);
-            req.setDiscountAmount(cart.getDiscountAmount());
+
+            BigDecimal effectiveDiscount = cart.getDiscountAmount() != null ? cart.getDiscountAmount() : BigDecimal.ZERO;
+            req.setDiscountAmount(effectiveDiscount);
             req.setShippingDiscountAmount(clickAndCollect ? BigDecimal.ZERO : cart.getShippingDiscountAmount());
 
-            BigDecimal finalAmount = clickAndCollect
-                    ? cart.getSubtotal().subtract(cart.getDiscountAmount()).max(BigDecimal.ZERO)
-                    : cart.getGrandTotal();
+            BigDecimal finalAmount = cart.getSubtotal().add(effectiveShippingFee).subtract(effectiveDiscount).max(BigDecimal.ZERO);
             req.setFinalAmount(finalAmount);
 
             req.setCouponCode(cart.getOrderCouponCode());

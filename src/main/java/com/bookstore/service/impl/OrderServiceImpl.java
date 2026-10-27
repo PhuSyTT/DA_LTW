@@ -204,6 +204,9 @@ public class OrderServiceImpl implements OrderService {
 
             subOrder.setItems(subOrderItems);
             subOrder.setBranchSubtotal(branchSubtotal);
+            if (request.getOrderNote() != null && !request.getOrderNote().isBlank()) {
+                subOrder.setDeliveryNotes(request.getOrderNote().trim());
+            }
             subOrders.add(subOrder);
             calculatedTotalItems = calculatedTotalItems.add(branchSubtotal);
         }

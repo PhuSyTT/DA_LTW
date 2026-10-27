@@ -524,116 +524,331 @@
         </div>
     </main>
 
-    <!-- CHECKOUT MODAL -->
-    <div id="checkoutModal" class="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4 hidden">
-        <div class="bg-white rounded-3xl max-w-lg w-full p-6 sm:p-8 shadow-2xl border border-outline/30 relative max-h-[90vh] overflow-y-auto">
-            <button type="button" onclick="closeCheckoutModal()" class="absolute top-5 right-5 text-on-surface-variant hover:text-on-surface p-2">
-                <i class="fas fa-xmark text-lg"></i>
+    <!-- CHECKOUT & PROVISIONAL INVOICE MODAL (2-COLUMN SPLIT SCREEN) -->
+    <div id="checkoutModal" class="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-3 sm:p-5 hidden">
+        <div class="bg-white rounded-3xl max-w-6xl w-full p-5 sm:p-7 shadow-2xl border border-outline/30 relative max-h-[95vh] overflow-y-auto">
+            <!-- Close button -->
+            <button type="button" onclick="closeCheckoutModal()" class="absolute top-4 right-4 text-on-surface-variant hover:text-on-surface p-2 rounded-full hover:bg-surface-container transition-colors z-20" title="Đóng">
+                <i class="fas fa-xmark text-xl"></i>
             </button>
 
-            <div class="flex items-center gap-3 mb-5">
-                <div class="w-10 h-10 rounded-xl bg-primary-container text-primary flex items-center justify-center text-lg">
-                    <i class="fas fa-truck-ramp-box"></i>
+            <!-- Modal Header -->
+            <div class="flex items-center gap-3.5 pb-4 mb-5 border-b border-surface-container">
+                <div class="w-11 h-11 rounded-2xl bg-primary text-white flex items-center justify-center text-xl shadow-md shrink-0">
+                    <i class="fas fa-file-invoice-dollar"></i>
                 </div>
                 <div>
-                    <h3 class="font-serif font-bold text-xl text-on-surface">Thông Tin Giao Hàng</h3>
-                    <p class="text-xs text-on-surface-variant">Điền thông tin để Book4Life tiến hành đóng gói & chuyển sách</p>
+                    <h2 class="font-serif font-bold text-xl sm:text-2xl text-on-surface">Thanh Toán &amp; Hóa Đơn Tạm Tính</h2>
+                    <p class="text-xs text-on-surface-variant mt-0.5">
+                        Điền thông tin giao nhận ở <strong>Cột Trái</strong>. Hệ thống sẽ tự động cập nhật phí vận chuyển và xuất <strong>Hóa Đơn Tạm Tính</strong> tương ứng ở <strong>Cột Phải</strong>.
+                    </p>
                 </div>
             </div>
 
-            <form th:action="@{/checkout/place-order}" method="post" id="placeOrderForm" class="space-y-4">
-                <div>
-                    <label class="block text-xs font-bold text-on-surface-variant mb-1">Họ và tên người nhận <span class="text-rose-600">*</span></label>
-                    <input type="text" name="receiverName" required
-                           placeholder="Ví dụ: Nguyễn Văn A"
-                           class="w-full px-4 py-2.5 rounded-xl border border-outline/40 text-sm focus:border-primary focus:outline-hidden">
-                </div>
+            <form th:action="@{/checkout/place-order}" method="post" id="placeOrderForm">
+                <!-- Hidden inputs for calculated values -->
+                <input type="hidden" name="shippingFee" id="hiddenShippingFee" th:value="${cart.shippingFee}" />
+                <input type="hidden" name="shippingAddress" id="hiddenShippingAddress" />
 
-                <div>
-                    <label class="block text-xs font-bold text-on-surface-variant mb-1">Số điện thoại nhận hàng <span class="text-rose-600">*</span></label>
-                    <input type="tel" name="receiverPhone" required pattern="[0-9]{10,11}"
-                           placeholder="Ví dụ: 0901234567"
-                           class="w-full px-4 py-2.5 rounded-xl border border-outline/40 text-sm focus:border-primary focus:outline-hidden">
-                </div>
+                <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-8 items-start">
+                    
+                    <!-- ========================================== -->
+                    <!-- CỘT TRÁI: 1. ĐIỀN THÔNG TIN GIAO NHẬN (7 COLS) -->
+                    <!-- ========================================== -->
+                    <div class="lg:col-span-7 space-y-4">
+                        <div class="flex items-center gap-2 pb-2 border-b border-outline/20">
+                            <span class="w-6 h-6 rounded-full bg-primary text-white text-xs font-bold flex items-center justify-center">1</span>
+                            <h3 class="font-bold text-sm text-on-surface uppercase tracking-wide">Thông Tin Người Nhận &amp; Địa Chỉ Giao Hàng</h3>
+                        </div>
 
-                <div>
-                    <label class="block text-xs font-bold text-on-surface-variant mb-1">Địa chỉ nhận sách chi tiết <span class="text-rose-600">*</span></label>
-                    <textarea name="shippingAddress" required rows="2"
-                              placeholder="Số nhà, tên đường, phường/xã, quận/huyện, tỉnh/thành phố..."
-                              class="w-full px-4 py-2.5 rounded-xl border border-outline/40 text-sm focus:border-primary focus:outline-hidden"></textarea>
-                </div>
-
-                <!-- Click & Collect Option -->
-                <div class="p-3 rounded-xl bg-surface border border-outline/30 flex items-start gap-2.5">
-                    <input type="checkbox" id="clickAndCollect" name="clickAndCollect" value="true" class="mt-1 rounded text-primary focus:ring-primary">
-                    <label for="clickAndCollect" class="text-xs text-on-surface leading-snug cursor-pointer">
-                        <strong class="font-bold text-primary">Giữ sách tại quầy (Click & Collect):</strong> Tôi sẽ trực tiếp đến chi nhánh gần nhất để nhận sách thay vì giao tận nơi.
-                    </label>
-                </div>
-
-                <!-- Preferred Branch Selection -->
-                <div>
-                    <label class="block text-xs font-bold text-on-surface-variant mb-1">
-                        <i class="fas fa-store text-primary mr-1"></i> Chi nhánh nhận sách / Ưu tiên xử lý
-                    </label>
-                    <select name="preferredBranchId" id="preferredBranchSelect"
-                            class="w-full px-4 py-2.5 rounded-xl border border-outline/40 text-sm focus:border-primary focus:outline-hidden bg-white">
-                        <option value="">-- Mặc định (Tự động điều phối theo chi nhánh giữ sách) --</option>
-                        <option th:each="br : ${branches}" th:value="${br.id}" th:text="${br.branchName} + ' - ' + ${br.address}">Chi nhánh 1</option>
-                    </select>
-                    <p class="text-[11px] text-on-surface-variant/70 mt-1">
-                        Khuyên dùng: Nếu chọn Click & Collect, vui lòng chọn đúng chi nhánh bạn thuận tiện ghé qua lấy sách nhất.
-                    </p>
-                </div>
-
-                <!-- Payment Method Selection (2 Methods Only: COD & POS) -->
-                <div>
-                    <label class="block text-xs font-bold text-on-surface-variant mb-1.5 flex items-center justify-between">
-                        <span>Phương thức thanh toán <span class="text-rose-600">*</span></span>
-                        <span class="text-[11px] font-normal text-primary">An toàn &amp; Tiện lợi</span>
-                    </label>
-                    <div class="space-y-2.5" id="paymentMethodGroup">
-                        <!-- 1. COD -->
-                        <label id="codOptionWrapper" class="payment-option border border-outline/30 rounded-2xl p-3.5 flex items-start gap-3 cursor-pointer hover:border-primary hover:bg-surface transition-all has-checked:border-primary has-checked:bg-amber-500/10 has-checked:ring-1 has-checked:ring-primary">
-                            <input type="radio" name="paymentMethod" value="COD" id="codRadioInput" checked class="mt-1 text-primary focus:ring-primary">
-                            <div class="flex-grow">
-                                <div class="flex items-center gap-2">
-                                    <span class="w-7 h-7 rounded-lg bg-emerald-100 text-emerald-700 flex items-center justify-center text-xs shrink-0">
-                                        <i class="fas fa-money-bill-wave"></i>
-                                    </span>
-                                    <strong class="text-xs font-bold text-on-surface">Thanh toán khi nhận hàng (COD)</strong>
-                                    <span class="ml-auto px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-100 text-emerald-800">Giao tận nơi</span>
-                                </div>
-                                <p class="text-[11px] text-on-surface-variant mt-1 leading-relaxed">
-                                    Thanh toán bằng tiền mặt trực tiếp cho nhân viên giao hàng khi nhận sách tại địa chỉ của bạn.
-                                </p>
+                        <!-- Họ tên & SĐT (2 cột) -->
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
+                            <div>
+                                <label class="block text-xs font-bold text-on-surface-variant mb-1">
+                                    Họ và tên người nhận <span class="text-rose-600">*</span>
+                                </label>
+                                <input type="text" name="receiverName" id="receiverNameInput" required
+                                       placeholder="Ví dụ: Nguyễn Văn A"
+                                       th:value="${#authentication != null and #authentication.principal != null and #authentication.principal != 'anonymousUser'} ? ${#authentication.principal.fullName} : ''"
+                                       oninput="updateProvisionalInvoice()"
+                                       class="w-full px-3.5 py-2.5 rounded-xl border border-outline/40 text-sm focus:border-primary focus:outline-hidden bg-white">
                             </div>
-                        </label>
-
-                        <!-- 2. POS / Mua trực tiếp tại quầy -->
-                        <label id="posOptionWrapper" class="payment-option border border-outline/30 rounded-2xl p-3.5 flex items-start gap-3 cursor-pointer hover:border-primary hover:bg-surface transition-all has-checked:border-primary has-checked:bg-amber-500/10 has-checked:ring-1 has-checked:ring-primary">
-                            <input type="radio" name="paymentMethod" value="POS" id="posRadioInput" class="mt-1 text-primary focus:ring-primary">
-                            <div class="flex-grow">
-                                <div class="flex items-center gap-2">
-                                    <span class="w-7 h-7 rounded-lg bg-amber-100 text-amber-800 flex items-center justify-center text-xs shrink-0">
-                                        <i class="fas fa-store"></i>
-                                    </span>
-                                    <strong class="text-xs font-bold text-on-surface">Thanh toán tại quầy nếu mua trực tiếp</strong>
-                                    <span class="ml-auto px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-100 text-amber-900">Tại chi nhánh</span>
-                                </div>
-                                <p class="text-[11px] text-on-surface-variant mt-1 leading-relaxed">
-                                    Dành cho khách mua trực tiếp hoặc chọn <strong>Giữ sách tại quầy (Click &amp; Collect)</strong>. Thanh toán bằng tiền mặt hoặc quẹt thẻ POS khi đến chi nhánh nhận sách.
-                                </p>
+                            <div>
+                                <label class="block text-xs font-bold text-on-surface-variant mb-1">
+                                    Số điện thoại nhận hàng <span class="text-rose-600">*</span>
+                                </label>
+                                <input type="tel" name="receiverPhone" id="receiverPhoneInput" required pattern="[0-9]{10,11}"
+                                       placeholder="Ví dụ: 0901234567"
+                                       th:value="${#authentication != null and #authentication.principal != null and #authentication.principal != 'anonymousUser'} ? ${#authentication.principal.phone} : ''"
+                                       oninput="updateProvisionalInvoice()"
+                                       class="w-full px-3.5 py-2.5 rounded-xl border border-outline/40 text-sm focus:border-primary focus:outline-hidden bg-white font-mono">
                             </div>
-                        </label>
+                        </div>
+
+                        <!-- ĐỊA CHỈ: 3 DROPDOWNS TỈNH/THÀNH, QUẬN/HUYỆN, PHƯỜNG/XÃ -->
+                        <div class="p-4 rounded-2xl bg-surface-container/30 border border-outline/25 space-y-3">
+                            <div class="text-xs font-bold text-primary flex items-center gap-1.5">
+                                <i class="fas fa-location-dot"></i>
+                                <span>Địa Điểm Giao Hàng (Chọn để hóa đơn tự tính phí ship)</span>
+                            </div>
+
+                            <div class="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
+                                <!-- 1. Tỉnh / Thành phố -->
+                                <div>
+                                    <label class="block text-[11px] font-bold text-on-surface-variant mb-1">
+                                        Tỉnh / Thành phố <span class="text-rose-600">*</span>
+                                    </label>
+                                    <select name="province" id="provinceSelect" onchange="onProvinceChange()" required
+                                            class="w-full px-3 py-2 rounded-xl border border-outline/40 text-xs focus:border-primary focus:outline-hidden bg-white">
+                                        <option value="">-- Chọn Tỉnh/Thành --</option>
+                                    </select>
+                                </div>
+
+                                <!-- 2. Quận / Huyện -->
+                                <div>
+                                    <label class="block text-[11px] font-bold text-on-surface-variant mb-1">
+                                        Quận / Huyện <span class="text-rose-600">*</span>
+                                    </label>
+                                    <select name="district" id="districtSelect" onchange="onDistrictChange()" required disabled
+                                            class="w-full px-3 py-2 rounded-xl border border-outline/40 text-xs focus:border-primary focus:outline-hidden bg-white disabled:bg-slate-100 disabled:text-slate-400">
+                                        <option value="">-- Chọn Quận/Huyện --</option>
+                                    </select>
+                                </div>
+
+                                <!-- 3. Phường / Xã -->
+                                <div>
+                                    <label class="block text-[11px] font-bold text-on-surface-variant mb-1">
+                                        Phường / Xã <span class="text-rose-600">*</span>
+                                    </label>
+                                    <select name="ward" id="wardSelect" onchange="onWardChange()" required disabled
+                                            class="w-full px-3 py-2 rounded-xl border border-outline/40 text-xs focus:border-primary focus:outline-hidden bg-white disabled:bg-slate-100 disabled:text-slate-400">
+                                        <option value="">-- Chọn Phường/Xã --</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <!-- Số nhà, tên đường -->
+                            <div>
+                                <label class="block text-[11px] font-bold text-on-surface-variant mb-1">
+                                    Số nhà, tên đường, tòa nhà/ngõ hẻm <span class="text-rose-600">*</span>
+                                </label>
+                                <input type="text" name="streetAddress" id="streetAddressInput" required
+                                       placeholder="Ví dụ: 123 Lê Lợi, Tòa nhà A, Phòng 402"
+                                       oninput="updateProvisionalInvoice()"
+                                       class="w-full px-3.5 py-2.5 rounded-xl border border-outline/40 text-xs focus:border-primary focus:outline-hidden bg-white">
+                            </div>
+
+                            <!-- Địa chỉ hiển thị tổng hợp xem trước -->
+                            <div class="text-[11px] text-on-surface-variant flex items-start gap-1.5 pt-1">
+                                <i class="fas fa-route text-emerald-600 mt-0.5"></i>
+                                <span>Địa chỉ gửi hàng: <strong id="previewAddressText" class="text-on-surface">Vui lòng chọn Tỉnh/Thành phố...</strong></span>
+                            </div>
+                        </div>
+
+                        <!-- Click & Collect Option -->
+                        <div class="p-3.5 rounded-2xl bg-amber-500/10 border border-amber-500/25 flex items-start gap-3">
+                            <input type="checkbox" id="clickAndCollect" name="clickAndCollect" value="true"
+                                   onchange="onClickAndCollectToggle(this)"
+                                   class="mt-1 rounded text-primary focus:ring-primary w-4 h-4 cursor-pointer">
+                            <label for="clickAndCollect" class="text-xs text-on-surface leading-snug cursor-pointer flex-grow">
+                                <div class="font-bold text-primary flex items-center gap-1.5">
+                                    <i class="fas fa-hand-holding-box"></i>
+                                    <span>Giữ sách tại quầy chi nhánh (Click &amp; Collect)</span>
+                                    <span class="px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 text-[10px] font-bold">Miễn phí ship</span>
+                                </div>
+                                <p class="text-[11px] text-on-surface-variant mt-0.5">
+                                    Sách sẽ được đóng gói và giữ sẵn tại quầy trong 48h. Bạn có thể ghé chi nhánh kiểm tra và lấy sách mà không tốn phí giao hàng.
+                                </p>
+                            </label>
+                        </div>
+
+                        <!-- Chi nhánh nhận sách / Ưu tiên -->
+                        <div>
+                            <label class="block text-xs font-bold text-on-surface-variant mb-1">
+                                <i class="fas fa-store text-primary mr-1"></i> Chi nhánh nhận sách / Ưu tiên đóng gói
+                            </label>
+                            <select name="preferredBranchId" id="preferredBranchSelect" onchange="updateProvisionalInvoice()"
+                                    class="w-full px-3.5 py-2.5 rounded-xl border border-outline/40 text-xs focus:border-primary focus:outline-hidden bg-white">
+                                <option value="">-- Mặc định (Tự động đề xuất chi nhánh tối ưu kho sách) --</option>
+                                <option th:each="br : ${branches}" th:value="${br.id}" th:text="${br.branchName} + ' - ' + ${br.address}">Chi nhánh 1</option>
+                            </select>
+                        </div>
+
+                        <!-- Phương thức thanh toán (COD / POS) -->
+                        <div>
+                            <label class="block text-xs font-bold text-on-surface-variant mb-1.5 flex items-center justify-between">
+                                <span>Phương thức thanh toán <span class="text-rose-600">*</span></span>
+                                <span class="text-[11px] text-primary">2 hình thức tiện lợi</span>
+                            </label>
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5" id="paymentMethodGroup">
+                                <!-- 1. COD -->
+                                <label id="codOptionWrapper" class="payment-option border border-outline/30 rounded-2xl p-3 flex items-start gap-2.5 cursor-pointer hover:border-primary hover:bg-surface transition-all has-checked:border-primary has-checked:bg-primary-container/20 has-checked:ring-1 has-checked:ring-primary">
+                                    <input type="radio" name="paymentMethod" value="COD" id="codRadioInput" checked onchange="updateProvisionalInvoice()" class="mt-1 text-primary focus:ring-primary">
+                                    <div class="flex-grow">
+                                        <div class="flex items-center gap-1.5">
+                                            <span class="w-6 h-6 rounded-lg bg-emerald-100 text-emerald-700 flex items-center justify-center text-xs shrink-0">
+                                                <i class="fas fa-money-bill-wave"></i>
+                                            </span>
+                                            <strong class="text-xs font-bold text-on-surface">Thanh toán khi nhận (COD)</strong>
+                                        </div>
+                                        <p class="text-[10px] text-on-surface-variant mt-1 leading-tight">
+                                            Thanh toán tiền mặt cho shipper khi nhận hàng.
+                                        </p>
+                                    </div>
+                                </label>
+
+                                <!-- 2. POS / Mua tại quầy -->
+                                <label id="posOptionWrapper" class="payment-option border border-outline/30 rounded-2xl p-3 flex items-start gap-2.5 cursor-pointer hover:border-primary hover:bg-surface transition-all has-checked:border-primary has-checked:bg-primary-container/20 has-checked:ring-1 has-checked:ring-primary">
+                                    <input type="radio" name="paymentMethod" value="POS" id="posRadioInput" onchange="updateProvisionalInvoice()" class="mt-1 text-primary focus:ring-primary">
+                                    <div class="flex-grow">
+                                        <div class="flex items-center gap-1.5">
+                                            <span class="w-6 h-6 rounded-lg bg-amber-100 text-amber-800 flex items-center justify-center text-xs shrink-0">
+                                                <i class="fas fa-store"></i>
+                                            </span>
+                                            <strong class="text-xs font-bold text-on-surface">Thanh toán tại quầy</strong>
+                                        </div>
+                                        <p class="text-[10px] text-on-surface-variant mt-1 leading-tight">
+                                            Tiền mặt / quẹt thẻ POS tại chi nhánh.
+                                        </p>
+                                    </div>
+                                </label>
+                            </div>
+                        </div>
+
+                        <!-- Ghi chú giao hàng -->
+                        <div>
+                            <label class="block text-xs font-bold text-on-surface-variant mb-1">
+                                Ghi chú đơn hàng (Tùy chọn)
+                            </label>
+                            <input type="text" name="orderNote" id="orderNoteInput" placeholder="Ví dụ: Giao giờ hành chính, gọi trước khi đến..."
+                                   class="w-full px-3.5 py-2 rounded-xl border border-outline/40 text-xs focus:border-primary focus:outline-hidden bg-white">
+                        </div>
                     </div>
-                </div>
 
-                <div class="pt-3 border-t border-outline/20">
-                    <button type="submit" class="w-full py-3.5 rounded-2xl bg-primary text-white text-sm font-bold shadow-lg hover:bg-primary-hover hover:scale-[1.01] transition-all flex items-center justify-center gap-2">
-                        <i class="fas fa-check-circle"></i>
-                        <span>Xác Nhận & Đặt Đơn Hàng</span>
-                    </button>
+
+                    <!-- ========================================== -->
+                    <!-- CỘT PHẢI: 2. HÓA ĐƠN TẠM TÍNH (5 COLS) -->
+                    <!-- ========================================== -->
+                    <div class="lg:col-span-5 bg-stone-50 rounded-2xl border-2 border-primary/25 p-4 sm:p-5 shadow-sm space-y-4 relative">
+                        <!-- Invoice Header Badge -->
+                        <div class="flex items-center justify-between pb-3 border-b border-stone-200">
+                            <div>
+                                <div class="text-[10px] font-mono uppercase font-bold text-primary tracking-wider flex items-center gap-1">
+                                    <i class="fas fa-receipt"></i> BOOK4LIFE PROVISIONAL INVOICE
+                                </div>
+                                <h4 class="font-serif font-bold text-base text-on-surface mt-0.5">Hóa Đơn Tạm Tính</h4>
+                            </div>
+                            <span class="px-2.5 py-1 rounded-full bg-amber-100 text-amber-900 text-[10px] font-bold border border-amber-300 flex items-center gap-1">
+                                <i class="fas fa-clock text-[9px]"></i> Chờ đặt hàng
+                            </span>
+                        </div>
+
+                        <!-- Recipient preview card inside invoice -->
+                        <div class="p-3 rounded-xl bg-white border border-stone-200 text-xs space-y-1">
+                            <div class="flex justify-between items-center text-[11px] text-on-surface-variant">
+                                <span>Khách nhận:</span>
+                                <strong id="invReceiverName" class="text-on-surface font-semibold">Chưa nhập</strong>
+                            </div>
+                            <div class="flex justify-between items-center text-[11px] text-on-surface-variant">
+                                <span>Số điện thoại:</span>
+                                <strong id="invReceiverPhone" class="text-on-surface font-mono">Chưa nhập</strong>
+                            </div>
+                            <div class="text-[11px] text-on-surface-variant pt-1 border-t border-stone-100">
+                                <span>Nơi nhận:</span>
+                                <div id="invShippingAddress" class="text-on-surface font-medium text-[11px] mt-0.5 leading-snug text-primary">
+                                    (Vui lòng chọn Tỉnh/Thành &amp; Quận/Huyện)
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Itemized list of books in cart -->
+                        <div>
+                            <div class="text-[11px] font-bold text-on-surface-variant uppercase tracking-wider mb-2 flex items-center justify-between">
+                                <span>Danh mục sách trong đơn</span>
+                                <span class="font-normal lowercase text-stone-500" th:text="${cart.items != null ? #lists.size(cart.items) : 0} + ' tựa sách'">0 tựa sách</span>
+                            </div>
+
+                            <div class="max-h-44 overflow-y-auto space-y-2 pr-1 divide-y divide-stone-100">
+                                <div th:each="item : ${cart.items}" class="pt-2 first:pt-0 flex items-center justify-between gap-3 text-xs">
+                                    <div class="flex items-center gap-2.5 min-w-0">
+                                        <div class="w-9 h-12 rounded bg-stone-200 overflow-hidden shrink-0 border border-stone-300 flex items-center justify-center">
+                                            <img th:if="${item.bookCoverImage}" th:src="${item.bookCoverImage}" th:alt="${item.bookTitle}" class="w-full h-full object-cover">
+                                            <i th:unless="${item.bookCoverImage}" class="fas fa-book text-stone-400 text-xs"></i>
+                                        </div>
+                                        <div class="min-w-0">
+                                            <div class="font-bold text-on-surface truncate text-xs" th:text="${item.bookTitle}" title="${item.bookTitle}">Tên sách</div>
+                                            <div class="text-[10px] text-on-surface-variant flex items-center gap-1.5 flex-wrap">
+                                                <span class="px-1.5 py-0.2 rounded bg-stone-100 text-stone-700" th:text="${item.conditionGrade}">LIKE_NEW</span>
+                                                <span th:if="${item.branchName}" class="text-primary truncate" th:text="${item.branchName}">Chi nhánh Q1</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="text-right shrink-0">
+                                        <div class="text-[10px] text-on-surface-variant" th:text="'x' + ${item.quantity}">x1</div>
+                                        <div class="font-bold text-xs text-on-surface" th:text="${#numbers.formatDecimal(item.subtotal, 0, 'COMMA', 0, 'POINT')} + ' ₫'">50.000 ₫</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Financial Breakdown (Live Calculated) -->
+                        <div class="p-3.5 rounded-2xl bg-white border border-stone-200 text-xs space-y-2.5">
+                            <!-- Tiền sách -->
+                            <div class="flex justify-between items-center text-on-surface-variant">
+                                <span>Tạm tính tiền sách:</span>
+                                <span class="font-bold text-on-surface" id="invSubtotal"
+                                      th:text="${#numbers.formatDecimal(cart.subtotal, 0, 'COMMA', 0, 'POINT')} + ' ₫'">0 ₫</span>
+                            </div>
+
+                            <!-- Phí giao hàng (Tự động tính lại khi chọn địa điểm) -->
+                            <div class="flex justify-between items-center">
+                                <span class="flex items-center gap-1">
+                                    <span>Phí giao hàng:</span>
+                                    <span id="invShippingBadge" class="text-[10px] font-bold px-1.5 py-0.2 rounded bg-stone-100 text-stone-600">Đang tính...</span>
+                                </span>
+                                <span class="font-bold text-on-surface font-mono" id="invShippingFee">25.000 ₫</span>
+                            </div>
+
+                            <!-- Giảm phí ship (Freeship coupon / ưu đãi) -->
+                            <div class="flex justify-between items-center text-emerald-700" id="invShippingDiscountRow">
+                                <span>Ưu đãi mã Freeship:</span>
+                                <span class="font-bold" id="invShippingDiscount">- 0 ₫</span>
+                            </div>
+
+                            <!-- Giảm giá đơn hàng (Book10...) -->
+                            <div class="flex justify-between items-center text-emerald-700" id="invOrderDiscountRow">
+                                <span>Giảm giá coupon đơn:</span>
+                                <span class="font-bold" id="invOrderDiscount">- 0 ₫</span>
+                            </div>
+
+                            <!-- Ước tính thời gian giao -->
+                            <div class="pt-2 border-t border-stone-100 flex items-center justify-between text-[11px] text-stone-600">
+                                <span class="flex items-center gap-1">
+                                    <i class="fas fa-truck-fast text-primary"></i> Dự kiến giao:
+                                </span>
+                                <strong id="invDeliveryEstimate" class="text-primary font-semibold">1 - 3 ngày làm việc</strong>
+                            </div>
+
+                            <!-- Tổng thanh toán cuối cùng -->
+                            <div class="pt-3 border-t-2 border-dashed border-stone-200 flex justify-between items-baseline">
+                                <span class="font-bold text-sm text-on-surface">Tổng thanh toán:</span>
+                                <span class="font-serif font-bold text-2xl text-primary" id="invGrandTotal">0 ₫</span>
+                            </div>
+                        </div>
+
+                        <!-- Nút Xác Nhận & Đặt Đơn Hàng -->
+                        <div class="pt-2">
+                            <button type="submit" id="btnSubmitOrder"
+                                    class="w-full py-3.5 px-4 rounded-2xl bg-primary text-white text-sm font-bold shadow-lg hover:bg-primary-hover hover:scale-[1.01] active:scale-[0.98] transition-all flex items-center justify-center gap-2">
+                                <i class="fas fa-check-circle text-base"></i>
+                                <span id="btnSubmitOrderText">Xác Nhận &amp; Đặt Hàng</span>
+                            </button>
+                            <p class="text-center text-[11px] text-stone-500 mt-2 flex items-center justify-center gap-1">
+                                <i class="fas fa-shield-halved text-emerald-600"></i> Đảm bảo hoàn tiền 100% nếu sách không đúng mô tả
+                            </p>
+                        </div>
+                    </div>
+
                 </div>
             </form>
         </div>
@@ -677,7 +892,193 @@
     </div>
 
     <!-- Scripts -->
-    <script>
+    <script th:inline="javascript">
+        /*<![CDATA[*/
+        const initialCartState = {
+            subtotal: /*[[${cart != null and cart.subtotal != null ? cart.subtotal : 0}]]*/ 0,
+            shippingCouponCode: /*[[${cart != null ? cart.shippingCouponCode : null}]]*/ null,
+            orderCouponCode: /*[[${cart != null ? cart.orderCouponCode : null}]]*/ null,
+            discountAmount: /*[[${cart != null and cart.discountAmount != null ? cart.discountAmount : 0}]]*/ 0,
+            shippingDiscountAmount: /*[[${cart != null and cart.shippingDiscountAmount != null ? cart.shippingDiscountAmount : 0}]]*/ 0,
+            autoOpenCheckout: /*[[${autoOpenCheckout != null ? autoOpenCheckout : false}]]*/ false
+        };
+        /*]]>*/
+
+        let cartState = {
+            subtotal: (initialCartState && !isNaN(Number(initialCartState.subtotal))) ? Number(initialCartState.subtotal) : 0,
+            shippingCouponCode: (initialCartState && initialCartState.shippingCouponCode) ? initialCartState.shippingCouponCode : null,
+            orderCouponCode: (initialCartState && initialCartState.orderCouponCode) ? initialCartState.orderCouponCode : null,
+            discountAmount: (initialCartState && !isNaN(Number(initialCartState.discountAmount))) ? Number(initialCartState.discountAmount) : 0,
+            shippingDiscountAmount: (initialCartState && !isNaN(Number(initialCartState.shippingDiscountAmount))) ? Number(initialCartState.shippingDiscountAmount) : 0
+        };
+
+        const VIETNAM_LOCATIONS = {
+            "Thành phố Hồ Chí Minh": {
+                zone: "HCM",
+                districts: {
+                    "Quận 1": ["Phường Bến Nghé", "Phường Bến Thành", "Phường Cầu Kho", "Phường Cầu Ông Lãnh", "Phường Đa Kao", "Phường Nguyễn Cư Trinh", "Phường Nguyễn Thái Bình", "Phường Phạm Ngũ Lão", "Phường Tân Định"],
+                    "Quận 3": ["Phường Võ Thị Sáu", "Phường 1", "Phường 2", "Phường 4", "Phường 5", "Phường 9", "Phường 11", "Phường 12", "Phường 14"],
+                    "Quận 5": ["Phường 1", "Phường 2", "Phường 3", "Phường 4", "Phường 5", "Phường 6", "Phường 7", "Phường 8", "Phường 9", "Phường 10", "Phường 11", "Phường 12"],
+                    "Quận 7": ["Phường Tân Thuận Đông", "Phường Tân Thuận Tây", "Phường Tân Kiểng", "Phường Tân Hưng", "Phường Bình Thuận", "Phường Tân Quy", "Phường Phú Thuận", "Phường Phú Mỹ", "Phường Tân Phong", "Phường Tân Phú"],
+                    "Quận 10": ["Phường 1", "Phường 2", "Phường 4", "Phường 6", "Phường 8", "Phường 9", "Phường 10", "Phường 12", "Phường 14"],
+                    "Thành phố Thủ Đức": ["Phường Linh Chiểu", "Phường Hiệp Phú", "Phường Tăng Nhơn Phú A", "Phường Phước Long B", "Phường Thảo Điền", "Phường An Phú", "Phường Bình Trưng Tây", "Phường Tam Phú", "Phường Linh Trung"],
+                    "Quận Bình Thạnh": ["Phường 1", "Phường 2", "Phường 3", "Phường 11", "Phường 14", "Phường 15", "Phường 19", "Phường 24", "Phường 25", "Phường 26"],
+                    "Quận Phú Nhuận": ["Phường 1", "Phường 2", "Phường 3", "Phường 5", "Phường 7", "Phường 9", "Phường 11", "Phường 15"],
+                    "Quận Tân Bình": ["Phường 1", "Phường 2", "Phường 4", "Phường 12", "Phường 13", "Phường 15"],
+                    "Quận Gò Vấp": ["Phường 1", "Phường 3", "Phường 5", "Phường 7", "Phường 10", "Phường 11", "Phường 16"],
+                    "Quận Tân Phú": ["Phường Tân Sơn Nhì", "Phường Tây Thạnh", "Phường Sơn Kỳ", "Phường Tân Quý", "Phường Phú Thọ Hòa"],
+                    "Quận 4": ["Phường 1", "Phường 3", "Phường 4", "Phường 6", "Phường 8", "Phường 9", "Phường 13", "Phường 15"],
+                    "Quận 6": ["Phường 1", "Phường 2", "Phường 5", "Phường 6", "Phường 8", "Phường 11", "Phường 12"],
+                    "Quận 8": ["Phường 1", "Phường 2", "Phường 4", "Phường 5", "Phường 8", "Phường 14", "Phường 16"],
+                    "Quận 11": ["Phường 1", "Phường 3", "Phường 5", "Phường 8", "Phường 11", "Phường 14"],
+                    "Quận 12": ["Phường Thạnh Xuân", "Phường Thạnh Lộc", "Phường Hiệp Thành", "Phường Thới An", "Phường Tân Chánh Hiệp", "Phường An Phú Đông"],
+                    "Quận Bình Tân": ["Phường An Lạc", "Phường An Lạc A", "Phường Bình Hưng Hòa", "Phường Bình Trị Đông", "Phường Tân Tạo"],
+                    "Huyện Bình Chánh": ["Thị trấn Tân Túc", "Xã An Phú Tây", "Xã Bình Chánh", "Xã Đa Phước", "Xã Vĩnh Lộc A", "Xã Vĩnh Lộc B"],
+                    "Huyện Hóc Môn": ["Thị trấn Hóc Môn", "Xã Bà Điểm", "Xã Đông Thạnh", "Xã Nhị Bình", "Xã Tân Xuân"],
+                    "Huyện Nhà Bè": ["Thị trấn Nhà Bè", "Xã Phước Kiển", "Xã Phú Xuân", "Xã Nhơn Đức", "Xã Long Thới"],
+                    "Huyện Củ Chi": ["Thị trấn Củ Chi", "Xã An Nhơn Tây", "Xã Phú Hòa Đông", "Xã Tân An Hội", "Xã Thái Mỹ"],
+                    "Huyện Cần Giờ": ["Thị trấn Cần Thạnh", "Xã Long Hòa", "Xã Cần Thạnh", "Xã Tam Thôn Hiệp", "Xã Bình Khánh"]
+                }
+            },
+            "Thành phố Hà Nội": {
+                zone: "NATIONAL",
+                districts: {
+                    "Quận Hoàn Kiếm": ["Phường Hàng Bạc", "Phường Hàng Đào", "Phường Tràng Tiền", "Phường Cửa Đông", "Phường Phan Chu Trinh"],
+                    "Quận Ba Đình": ["Phường Điện Biên", "Phường Quán Thánh", "Phường Đội Cấn", "Phường Kim Mã", "Phường Giảng Võ"],
+                    "Quận Cầu Giấy": ["Phường Dịch Vọng", "Phường Dịch Vọng Hậu", "Phường Mai Dịch", "Phường Nghĩa Đô", "Phường Quan Hoa"],
+                    "Quận Đống Đa": ["Phường Cát Linh", "Phường Văn Miếu", "Phường Ô Chợ Dừa", "Phường Láng Hạ", "Phường Trung Tự"],
+                    "Quận Hai Bà Trưng": ["Phường Bách Khoa", "Phường Bạch Mai", "Phường Đồng Tâm", "Phường Lê Đại Hành", "Phường Phố Huế"],
+                    "Quận Thanh Xuân": ["Phường Khương Mai", "Phường Khương Trung", "Phường Nhân Chính", "Phường Thanh Xuân Bắc"],
+                    "Quận Tây Hồ": ["Phường Bưởi", "Phường Thụy Khuê", "Phường Yên Phụ", "Phường Quảng An", "Phường Nhật Tân"],
+                    "Quận Nam Từ Liêm": ["Phường Cầu Diễn", "Phường Mỹ Đình 1", "Phường Mỹ Đình 2", "Phường Tây Mỗ", "Phường Mễ Trì"],
+                    "Quận Bắc Từ Liêm": ["Phường Cổ Nhuế 1", "Phường Cổ Nhuế 2", "Phường Xuân Đỉnh", "Phường Phúc Diễn"],
+                    "Quận Hà Đông": ["Phường Hà Cầu", "Phường Quang Trung", "Phường Mộ Lao", "Phường Vạn Phúc", "Phường Kiến Hưng"],
+                    "Quận Long Biên": ["Phường Bồ Đề", "Phường Gia Thụy", "Phường Ngọc Lâm", "Phường Sài Đồng", "Phường Việt Hưng"],
+                    "Quận Hoàng Mai": ["Phường Định Công", "Phường Giáp Bát", "Phường Hoàng Liệt", "Phường Linh Đàm", "Phường Tân Mai"]
+                }
+            },
+            "Thành phố Đà Nẵng": {
+                zone: "NATIONAL",
+                districts: {
+                    "Quận Hải Châu": ["Phường Hải Châu 1", "Phường Hải Châu 2", "Phường Thạch Thang", "Phường Thuận Phước", "Phường Hòa Cường Bắc"],
+                    "Quận Thanh Khê": ["Phường Tam Thuận", "Phường Thanh Khê Đông", "Phường Thanh Khê Tây", "Phường Xuân Hà", "Phường An Khê"],
+                    "Quận Sơn Trà": ["Phường An Hải Bắc", "Phường An Hải Tây", "Phường Phước Mỹ", "Phường Nại Hiên Đông", "Phường Mân Thái"],
+                    "Quận Ngũ Hành Sơn": ["Phường Mỹ An", "Phường Khuê Mỹ", "Phường Hòa Quý", "Phường Hòa Hải"],
+                    "Quận Liên Chiểu": ["Phường Hòa Hiệp Bắc", "Phường Hòa Khánh Bắc", "Phường Hòa Khánh Nam", "Phường Hòa Minh"],
+                    "Quận Cẩm Lệ": ["Phường Khuê Trung", "Phường Hòa Phát", "Phường Hòa An", "Phường Hòa Thọ Đông"]
+                }
+            },
+            "Tỉnh Bình Dương": {
+                zone: "NEARBY",
+                districts: {
+                    "Thành phố Thủ Dầu Một": ["Phường Phú Cường", "Phường Hiệp Thành", "Phường Chánh Nghĩa", "Phường Định Hòa", "Phường Phú Hòa"],
+                    "Thành phố Thuận An": ["Phường Lái Thiêu", "Phường An Phú", "Phường Bình Chuẩn", "Phường Thuận Giao"],
+                    "Thành phố Dĩ An": ["Phường Dĩ An", "Phường An Bình", "Phường Tân Bình", "Phường Đông Hòa"],
+                    "Thị xã Bến Cát": ["Phường Mỹ Phước", "Phường Thới Hòa", "Phường Tân Định", "Xã An Điền"],
+                    "Thị xã Tân Uyên": ["Phường Uyên Hưng", "Phường Thái Hòa", "Phường Tân Hiệp", "Phường Khánh Bình"]
+                }
+            },
+            "Tỉnh Đồng Nai": {
+                zone: "NEARBY",
+                districts: {
+                    "Thành phố Biên Hòa": ["Phường Quyết Thắng", "Phường Trung Dũng", "Phường Thống Nhất", "Phường Tân Phong", "Phường Long Bình"],
+                    "Thành phố Long Khánh": ["Phường Xuân An", "Phường Xuân Bình", "Phường Xuân Hòa", "Phường Phú Bình"],
+                    "Huyện Long Thành": ["Thị trấn Long Thành", "Xã An Phước", "Xã Bình Sơn", "Xã Lộc An"],
+                    "Huyện Nhơn Trạch": ["Xã Hiệp Phước", "Xã Phú Hội", "Xã Phước Thiền", "Xã Đại Phước"],
+                    "Huyện Trảng Bom": ["Thị trấn Trảng Bom", "Xã Hố Nai 3", "Xã Bắc Sơn", "Xã Bình Minh"]
+                }
+            },
+            "Tỉnh Long An": {
+                zone: "NEARBY",
+                districts: {
+                    "Thành phố Tân An": ["Phường 1", "Phường 2", "Phường 3", "Phường 4", "Phường 5", "Phường Tân Khánh"],
+                    "Huyện Bến Lức": ["Thị trấn Bến Lức", "Xã An Thạnh", "Xã Thạnh Đức", "Xã Lương Hòa"],
+                    "Huyện Đức Hòa": ["Thị trấn Hậu Nghĩa", "Thị trấn Đức Hòa", "Xã Đức Hòa Hạ", "Xã Mỹ Hạnh Bắc"],
+                    "Huyện Cần Giuộc": ["Thị trấn Cần Giuộc", "Xã Long Hậu", "Xã Trường Bình", "Xã Phước Lại"]
+                }
+            },
+            "Tỉnh Bà Rịa - Vũng Tàu": {
+                zone: "NEARBY",
+                districts: {
+                    "Thành phố Vũng Tàu": ["Phường 1", "Phường 2", "Phường 3", "Phường 7", "Phường 8", "Phường Thắng Tam", "Phường Nguyễn An Ninh"],
+                    "Thành phố Bà Rịa": ["Phường Phước Hưng", "Phường Phước Trung", "Phường Phước Hiệp", "Phường Long Toàn"],
+                    "Thị xã Phú Mỹ": ["Phường Phú Mỹ", "Phường Tân Phước", "Phường Mỹ Xuân", "Phường Hắc Dịch"]
+                }
+            },
+            "Thành phố Cần Thơ": {
+                zone: "NATIONAL",
+                districts: {
+                    "Quận Ninh Kiều": ["Phường Tân An", "Phường An Cư", "Phường An Hội", "Phường Xuân Khánh", "Phường Hưng Lợi"],
+                    "Quận Bình Thủy": ["Phường Bình Thủy", "Phường Trà An", "Phường Trà Nóc", "Phường An Thới"],
+                    "Quận Cái Răng": ["Phường Lê Bình", "Phường Hưng Phú", "Phường Hưng Thạnh", "Phường Ba Láng"]
+                }
+            },
+            "Thành phố Hải Phòng": {
+                zone: "NATIONAL",
+                districts: {
+                    "Quận Hồng Bàng": ["Phường Hạ Lý", "Phường Hoàng Văn Thụ", "Phường Minh Khai", "Phường Phan Bội Châu"],
+                    "Quận Ngô Quyền": ["Phường Máy Tơ", "Phường Cầu Đất", "Phường Lạc Viên", "Phường Lạch Tray"],
+                    "Quận Lê Chân": ["Phường An Biên", "Phường Cát Dài", "Phường Niệm Nghĩa", "Phường Dư Hàng"]
+                }
+            },
+            "Tỉnh Thừa Thiên Huế": {
+                zone: "NATIONAL",
+                districts: {
+                    "Thành phố Huế": ["Phường Vĩnh Ninh", "Phường Phú Nhuận", "Phường Phú Hội", "Phường Thuận Thành", "Phường Tây Lộc"],
+                    "Thị xã Hương Thủy": ["Phường Phú Bài", "Phường Thủy Châu", "Phường Thủy Lương"],
+                    "Thị xã Hương Trà": ["Phường Tứ Hạ", "Phường Hương Văn", "Phường Hương Xuân"]
+                }
+            },
+            "Tỉnh Khánh Hòa": {
+                zone: "NATIONAL",
+                districts: {
+                    "Thành phố Nha Trang": ["Phường Lộc Thọ", "Phường Tân Lập", "Phường Vĩnh Hải", "Phường Phước Tân", "Phường Phương Sài"],
+                    "Thành phố Cam Ranh": ["Phường Cam Linh", "Phường Cam Lộc", "Phường Cam Lợi", "Phường Cam Thuận"]
+                }
+            },
+            "Tỉnh Lâm Đồng": {
+                zone: "NATIONAL",
+                districts: {
+                    "Thành phố Đà Lạt": ["Phường 1", "Phường 2", "Phường 3", "Phường 4", "Phường 8", "Phường 9", "Phường 10"],
+                    "Thành phố Bảo Lộc": ["Phường 1", "Phường 2", "Phường B'Lao", "Phường Lộc Sơn"]
+                }
+            },
+            "Tỉnh Quảng Nam": {
+                zone: "NATIONAL",
+                districts: {
+                    "Thành phố Tam Kỳ": ["Phường An Mỹ", "Phường An Xuân", "Phường Hòa Hương"],
+                    "Thành phố Hội An": ["Phường Minh An", "Phường Cẩm Phô", "Phường Sơn Phong", "Phường Cẩm Châu"]
+                }
+            },
+            "Tỉnh An Giang": {
+                zone: "NATIONAL",
+                districts: {
+                    "Thành phố Long Xuyên": ["Phường Mỹ Bình", "Phường Mỹ Long", "Phường Mỹ Phước", "Phường Bình Khánh"],
+                    "Thành phố Châu Đốc": ["Phường Châu Phú A", "Phường Châu Phú B", "Phường Vĩnh Mỹ"]
+                }
+            },
+            "Tỉnh Tiền Giang": {
+                zone: "NATIONAL",
+                districts: {
+                    "Thành phố Mỹ Tho": ["Phường 1", "Phường 2", "Phường 4", "Phường 5", "Phường 6"],
+                    "Thị xã Gò Công": ["Phường 1", "Phường 2", "Phường 3", "Phường 4"]
+                }
+            },
+            "Tỉnh Kiên Giang": {
+                zone: "NATIONAL",
+                districts: {
+                    "Thành phố Rạch Giá": ["Phường Vĩnh Thanh Vân", "Phường Vĩnh Thanh", "Phường Vĩnh Quang"],
+                    "Thành phố Phú Quốc": ["Phường Dương Đông", "Phường An Thới", "Xã Cửa Cạn", "Xã Gành Dầu"]
+                }
+            },
+            "Các Tỉnh Thành Khác": {
+                zone: "NATIONAL",
+                districts: {
+                    "Thành phố / Thị xã trung tâm": ["Phường Trung Tâm", "Phường 1", "Phường 2", "Xã Ngoại Thành"],
+                    "Huyện khu vực lân cận": ["Thị trấn Huyện Lỵ", "Xã 1", "Xã 2"]
+                }
+            }
+        };
         function showToast(msg) {
             const toast = document.getElementById('cartToast');
             const toastMsg = document.getElementById('cartToastMsg');
@@ -844,6 +1245,24 @@
                     shipTag.style.display = 'none';
                 }
             }
+
+            // Sync cartState & Live Provisional Invoice
+            if (data.subtotal !== undefined && data.subtotal !== null && !isNaN(Number(data.subtotal))) {
+                cartState.subtotal = Number(data.subtotal);
+            }
+            if (data.discountAmount !== undefined) {
+                cartState.discountAmount = Number(data.discountAmount) || 0;
+            }
+            if (data.shippingDiscountAmount !== undefined) {
+                cartState.shippingDiscountAmount = Number(data.shippingDiscountAmount) || 0;
+            }
+            if (data.shippingCouponCode !== undefined) {
+                cartState.shippingCouponCode = data.shippingCouponCode;
+            }
+            if (data.orderCouponCode !== undefined) {
+                cartState.orderCouponCode = data.orderCouponCode;
+            }
+            updateProvisionalInvoice();
         }
 
         // 4. Apply Coupon Code & Remove by Type
@@ -934,29 +1353,342 @@
             });
         }
 
+        // 5. Checkout Modal & Location Cascades & Realtime Provisional Invoice
         function openCheckoutModal() {
+            initLocationDropdowns();
+            updateProvisionalInvoice();
             const modal = document.getElementById('checkoutModal');
-            if (modal) modal.classList.remove('hidden');
+            if (modal) {
+                modal.classList.remove('hidden');
+                document.body.style.overflow = 'hidden';
+            }
         }
 
         function closeCheckoutModal() {
             const modal = document.getElementById('checkoutModal');
-            if (modal) modal.classList.add('hidden');
+            if (modal) {
+                modal.classList.add('hidden');
+                document.body.style.overflow = '';
+            }
         }
 
-        // Tự động điều chỉnh phương thức thanh toán khi tích Click & Collect
-        document.addEventListener('DOMContentLoaded', () => {
-            const clickAndCollectCheckbox = document.getElementById('clickAndCollect');
+        let isDropdownsInitialized = false;
+
+        function initLocationDropdowns() {
+            if (isDropdownsInitialized) return;
+            const provinceSelect = document.getElementById('provinceSelect');
+            if (!provinceSelect) return;
+
+            // Xóa các options cũ trừ option tiêu đề
+            provinceSelect.innerHTML = '<option value="">-- Chọn Tỉnh/Thành phố --</option>';
+
+            Object.keys(VIETNAM_LOCATIONS).forEach(provName => {
+                const opt = document.createElement('option');
+                opt.value = provName;
+                opt.textContent = provName;
+                provinceSelect.appendChild(opt);
+            });
+
+            isDropdownsInitialized = true;
+
+            // Mặc định chọn Thành phố Hồ Chí Minh nếu chưa có giá trị
+            if (!provinceSelect.value && VIETNAM_LOCATIONS["Thành phố Hồ Chí Minh"]) {
+                provinceSelect.value = "Thành phố Hồ Chí Minh";
+                onProvinceChange();
+            }
+        }
+
+        function onProvinceChange() {
+            const provinceSelect = document.getElementById('provinceSelect');
+            const districtSelect = document.getElementById('districtSelect');
+            const wardSelect = document.getElementById('wardSelect');
+            if (!provinceSelect || !districtSelect || !wardSelect) return;
+
+            const selectedProv = provinceSelect.value;
+            districtSelect.innerHTML = '<option value="">-- Chọn Quận/Huyện --</option>';
+            wardSelect.innerHTML = '<option value="">-- Chọn Phường/Xã --</option>';
+            wardSelect.disabled = true;
+
+            if (!selectedProv || !VIETNAM_LOCATIONS[selectedProv]) {
+                districtSelect.disabled = true;
+                updateProvisionalInvoice();
+                return;
+            }
+
+            const districts = VIETNAM_LOCATIONS[selectedProv].districts;
+            Object.keys(districts).forEach(dName => {
+                const opt = document.createElement('option');
+                opt.value = dName;
+                opt.textContent = dName;
+                districtSelect.appendChild(opt);
+            });
+
+            districtSelect.disabled = false;
+
+            // Nếu là TP. Hồ Chí Minh, tự động chọn Quận 1 để có trải nghiệm liền mạch
+            if (selectedProv === "Thành phố Hồ Chí Minh" && districts["Quận 1"]) {
+                districtSelect.value = "Quận 1";
+                onDistrictChange();
+            } else {
+                updateProvisionalInvoice();
+            }
+        }
+
+        function onDistrictChange() {
+            const provinceSelect = document.getElementById('provinceSelect');
+            const districtSelect = document.getElementById('districtSelect');
+            const wardSelect = document.getElementById('wardSelect');
+            if (!provinceSelect || !districtSelect || !wardSelect) return;
+
+            const selectedProv = provinceSelect.value;
+            const selectedDist = districtSelect.value;
+            wardSelect.innerHTML = '<option value="">-- Chọn Phường/Xã --</option>';
+
+            if (!selectedProv || !selectedDist || !VIETNAM_LOCATIONS[selectedProv] || !VIETNAM_LOCATIONS[selectedProv].districts[selectedDist]) {
+                wardSelect.disabled = true;
+                updateProvisionalInvoice();
+                return;
+            }
+
+            const wards = VIETNAM_LOCATIONS[selectedProv].districts[selectedDist];
+            wards.forEach(wName => {
+                const opt = document.createElement('option');
+                opt.value = wName;
+                opt.textContent = wName;
+                wardSelect.appendChild(opt);
+            });
+
+            wardSelect.disabled = false;
+            if (wards.length > 0) {
+                wardSelect.value = wards[0];
+            }
+            updateProvisionalInvoice();
+        }
+
+        function onWardChange() {
+            updateProvisionalInvoice();
+        }
+
+        function onClickAndCollectToggle(el) {
+            const isChecked = el ? el.checked : document.getElementById('clickAndCollect')?.checked;
             const posRadio = document.getElementById('posRadioInput');
-            const codRadio = document.querySelector('input[name="paymentMethod"][value="COD"]');
-            if (clickAndCollectCheckbox) {
-                clickAndCollectCheckbox.addEventListener('change', (e) => {
-                    if (e.target.checked && posRadio) {
-                        posRadio.checked = true;
-                    } else if (!e.target.checked && codRadio) {
-                        codRadio.checked = true;
-                    }
-                });
+            const codRadio = document.getElementById('codRadioInput');
+            const districtSelect = document.getElementById('districtSelect');
+            const wardSelect = document.getElementById('wardSelect');
+            const streetInput = document.getElementById('streetAddressInput');
+
+            if (isChecked) {
+                if (posRadio) posRadio.checked = true;
+                if (districtSelect) districtSelect.removeAttribute('required');
+                if (wardSelect) wardSelect.removeAttribute('required');
+                if (streetInput) streetInput.removeAttribute('required');
+            } else {
+                if (codRadio) codRadio.checked = true;
+                if (districtSelect) districtSelect.setAttribute('required', 'required');
+                if (wardSelect) wardSelect.setAttribute('required', 'required');
+                if (streetInput) streetInput.setAttribute('required', 'required');
+            }
+            updateProvisionalInvoice();
+        }
+
+        function calculateShippingFeeForLocation(province, district, isClickAndCollect, subtotal) {
+            if (isClickAndCollect) {
+                return {
+                    baseFee: 0,
+                    discount: 0,
+                    finalFee: 0,
+                    badge: "Tại quầy (0₫)",
+                    estimate: "Lấy sau 2 - 4h làm việc"
+                };
+            }
+
+            if (!province) {
+                return {
+                    baseFee: 25000,
+                    discount: 0,
+                    finalFee: 25000,
+                    badge: "Chưa chọn địa điểm",
+                    estimate: "1 - 3 ngày làm việc"
+                };
+            }
+
+            let baseFee = 35000;
+            let badge = "Toàn quốc";
+            let estimate = "3 - 5 ngày làm việc";
+
+            const locData = VIETNAM_LOCATIONS[province];
+            if (province === "Thành phố Hồ Chí Minh") {
+                const innerDistricts = [
+                    "Quận 1", "Quận 3", "Quận 5", "Quận 7", "Quận 10",
+                    "Thành phố Thủ Đức", "Quận Bình Thạnh", "Quận Phú Nhuận",
+                    "Quận Tân Bình", "Quận Gò Vấp", "Quận Tân Phú",
+                    "Quận 4", "Quận 6", "Quận 8", "Quận 11"
+                ];
+                if (district && innerDistricts.includes(district)) {
+                    baseFee = 15000;
+                    badge = "HCM Nội thành";
+                    estimate = "Giao trong 24h";
+                } else {
+                    baseFee = 22000;
+                    badge = "HCM Ngoại thành";
+                    estimate = "1 - 2 ngày làm việc";
+                }
+            } else if (locData && locData.zone === "NEARBY") {
+                baseFee = 28000;
+                badge = "Tỉnh lân cận";
+                estimate = "1 - 2 ngày làm việc";
+            } else {
+                baseFee = 35000;
+                badge = "Liên tỉnh";
+                estimate = "2 - 4 ngày làm việc";
+            }
+
+            let shippingDiscount = 0;
+            // Áp dụng chính sách Freeship hoặc Voucher vận chuyển
+            if (subtotal >= 200000) {
+                shippingDiscount = baseFee; // Miễn 100% phí ship
+                badge += " • Freeship ≥200k";
+            } else if (cartState.shippingCouponCode === "FREESHIP" || cartState.shippingCouponCode === "FREESHIPMAX") {
+                shippingDiscount = baseFee;
+                badge += " • Freeship Mã";
+            } else if (cartState.shippingCouponCode === "SHIP10K") {
+                shippingDiscount = Math.min(baseFee, 10000);
+                badge += " • Giảm 10k Ship";
+            } else if (subtotal >= 100000) {
+                shippingDiscount = Math.round(baseFee * 0.4); // Giảm 40% phí ship
+                badge += " • Giảm 40% Ship";
+            }
+
+            const finalFee = Math.max(0, baseFee - shippingDiscount);
+
+            return {
+                baseFee,
+                discount: shippingDiscount,
+                finalFee,
+                badge,
+                estimate
+            };
+        }
+
+        function updateProvisionalInvoice() {
+            const receiverName = document.getElementById('receiverNameInput')?.value?.trim() || '';
+            const receiverPhone = document.getElementById('receiverPhoneInput')?.value?.trim() || '';
+            const province = document.getElementById('provinceSelect')?.value || '';
+            const district = document.getElementById('districtSelect')?.value || '';
+            const ward = document.getElementById('wardSelect')?.value || '';
+            const street = document.getElementById('streetAddressInput')?.value?.trim() || '';
+            const isClickAndCollect = document.getElementById('clickAndCollect')?.checked || false;
+
+            // 1. Cập nhật thông tin người nhận trên hóa đơn tạm tính
+            const invName = document.getElementById('invReceiverName');
+            if (invName) invName.textContent = receiverName || 'Chưa nhập';
+
+            const invPhone = document.getElementById('invReceiverPhone');
+            if (invPhone) invPhone.textContent = receiverPhone || 'Chưa nhập';
+
+            // 2. Tổng hợp địa chỉ gửi hàng
+            let fullAddr = '';
+            const addrParts = [];
+            if (street) addrParts.push(street);
+            if (ward) addrParts.push(ward);
+            if (district) addrParts.push(district);
+            if (province) addrParts.push(province);
+
+            if (isClickAndCollect) {
+                const preferredBranch = document.getElementById('preferredBranchSelect');
+                const branchText = preferredBranch && preferredBranch.selectedIndex > 0 ? preferredBranch.options[preferredBranch.selectedIndex].text : 'Chi nhánh gần nhất';
+                fullAddr = 'Nhận trực tiếp tại quầy: ' + branchText;
+            } else {
+                fullAddr = addrParts.join(', ');
+            }
+
+            const previewAddress = document.getElementById('previewAddressText');
+            if (previewAddress) previewAddress.textContent = fullAddr || 'Vui lòng chọn Tỉnh/Thành & Quận/Huyện...';
+
+            const invAddress = document.getElementById('invShippingAddress');
+            if (invAddress) invAddress.textContent = fullAddr || '(Vui lòng chọn Tỉnh/Thành & Quận/Huyện)';
+
+            const hiddenAddress = document.getElementById('hiddenShippingAddress');
+            if (hiddenAddress) hiddenAddress.value = fullAddr;
+
+            // 3. Tự động tính toán lại phí ship dựa vào địa điểm
+            const currentSubtotal = (cartState && !isNaN(Number(cartState.subtotal))) ? Number(cartState.subtotal) : 0;
+            const calc = calculateShippingFeeForLocation(province, district, isClickAndCollect, currentSubtotal);
+
+            const invBadge = document.getElementById('invShippingBadge');
+            if (invBadge) {
+                invBadge.textContent = calc.badge;
+                invBadge.className = calc.finalFee === 0
+                    ? 'text-[10px] font-bold px-1.5 py-0.2 rounded bg-emerald-100 text-emerald-800'
+                    : 'text-[10px] font-bold px-1.5 py-0.2 rounded bg-stone-100 text-stone-700';
+            }
+
+            const invShippingFee = document.getElementById('invShippingFee');
+            if (invShippingFee) {
+                invShippingFee.textContent = formatVnd(calc.baseFee);
+            }
+
+            const hiddenShipping = document.getElementById('hiddenShippingFee');
+            if (hiddenShipping) {
+                hiddenShipping.value = calc.finalFee;
+            }
+
+            // Dòng giảm phí ship
+            const shipDiscountRow = document.getElementById('invShippingDiscountRow');
+            const shipDiscountEl = document.getElementById('invShippingDiscount');
+            if (shipDiscountRow && shipDiscountEl) {
+                if (calc.discount > 0) {
+                    shipDiscountRow.style.display = 'flex';
+                    shipDiscountEl.textContent = '- ' + formatVnd(calc.discount);
+                } else {
+                    shipDiscountRow.style.display = 'none';
+                }
+            }
+
+            // Dòng giảm giá đơn hàng
+            const orderDiscountAmount = (cartState && !isNaN(Number(cartState.discountAmount))) ? Number(cartState.discountAmount) : 0;
+            const orderDiscountRow = document.getElementById('invOrderDiscountRow');
+            const orderDiscountEl = document.getElementById('invOrderDiscount');
+            if (orderDiscountRow && orderDiscountEl) {
+                if (orderDiscountAmount > 0) {
+                    orderDiscountRow.style.display = 'flex';
+                    orderDiscountEl.textContent = '- ' + formatVnd(orderDiscountAmount);
+                } else {
+                    orderDiscountRow.style.display = 'none';
+                }
+            }
+
+            // Ước tính thời gian giao
+            const invEstimate = document.getElementById('invDeliveryEstimate');
+            if (invEstimate) {
+                invEstimate.textContent = calc.estimate;
+            }
+
+            // Tổng thanh toán trên hóa đơn tạm tính và trên nút đặt hàng
+            const grandTotal = Math.max(0, currentSubtotal + calc.finalFee - orderDiscountAmount);
+            const invGrandTotal = document.getElementById('invGrandTotal');
+            if (invGrandTotal) {
+                invGrandTotal.textContent = formatVnd(grandTotal);
+            }
+
+            const btnSubmitText = document.getElementById('btnSubmitOrderText');
+            if (btnSubmitText) {
+                btnSubmitText.textContent = 'Xác Nhận & Đặt Hàng (' + formatVnd(grandTotal) + ')';
+            }
+        }
+
+        // Tự động khởi tạo & mở modal nếu có tham số action=checkout hoặc autoOpenCheckout
+        document.addEventListener('DOMContentLoaded', () => {
+            initLocationDropdowns();
+            updateProvisionalInvoice();
+
+            if (initialCartState && initialCartState.autoOpenCheckout) {
+                openCheckoutModal();
+            } else {
+                const urlParams = new URLSearchParams(window.location.search);
+                if (urlParams.get('action') === 'checkout') {
+                    openCheckoutModal();
+                }
             }
         });
 

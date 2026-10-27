@@ -8,6 +8,11 @@ public class CheckoutRequestDto {
     private String receiverName;
     private String receiverPhone;
     private String shippingAddress;
+    private String province;
+    private String district;
+    private String ward;
+    private String streetAddress;
+    private String orderNote;
     private String paymentMethod;
     private boolean clickAndCollect; // Khách chọn giữ sách tại quầy (FR-ORD-04)
     private Long preferredBranchId; // Chi nhánh khách chọn nhận sách hoặc ưu tiên xử lý
@@ -110,5 +115,35 @@ public class CheckoutRequestDto {
 	}
 	public void setShippingCouponCode(String shippingCouponCode) {
 		this.shippingCouponCode = shippingCouponCode;
+	}
+	public String getProvince() {
+		return province;
+	}
+	public void setProvince(String province) {
+		this.province = province;
+	}
+	public String getDistrict() {
+		return district;
+	}
+	public void setDistrict(String district) {
+		this.district = district;
+	}
+	public String getWard() {
+		return ward;
+	}
+	public void setWard(String ward) {
+		this.ward = ward;
+	}
+	public String getStreetAddress() {
+		return streetAddress;
+	}
+	public void setStreetAddress(String streetAddress) {
+		this.streetAddress = streetAddress;
+	}
+	public String getOrderNote() {
+		return orderNote;
+	}
+	public void setOrderNote(String orderNote) {
+		this.orderNote = orderNote;
 	}
 }

@@ -1164,14 +1164,7 @@
 
                 if (response.ok && result.success) {
                     goToStep2(email);
-                    if (result.data) {
-                        pendingRegistration.lastOtp = result.data;
-                        const otpCodeDisplay = document.getElementById('otpDisplayCode');
-                        if (otpCodeDisplay) {
-                            otpCodeDisplay.innerText = result.data;
-                        }
-                    }
-                    showAlert(result.message || 'Mã xác nhận 6 số đã được gửi tới email của bạn!', false);
+                    showAlert(result.message || 'Mã xác nhận 6 số đã được gửi trực tiếp tới email của bạn qua Google Mail!', false);
                 } else {
                     showAlert(result.message || 'Có lỗi xảy ra khi yêu cầu mã OTP!');
                 }
@@ -1180,16 +1173,6 @@
             } finally {
                 btn.disabled = false;
                 btnText.innerText = 'Gửi Mã Xác Nhận OTP Qua Email';
-            }
-        }
-
-        function autoFillOtp() {
-            if (pendingRegistration.lastOtp) {
-                const otpInput = document.getElementById('otpCodeInput');
-                if (otpInput) {
-                    otpInput.value = pendingRegistration.lastOtp;
-                    otpInput.focus();
-                }
             }
         }
 
@@ -1396,13 +1379,6 @@
             }
         }
 
-        function autoFillForgotOtp() {
-            const code = document.getElementById('forgotDisplayCode')?.innerText;
-            if (code) {
-                document.getElementById('forgotOtpInput').value = code.trim();
-            }
-        }
-
         async function handleForgotStep1Submit(isResend = false) {
             hideForgotAlert();
             const email = isResend ? pendingForgotEmail : document.getElementById('forgotEmail')?.value?.trim();
@@ -1434,11 +1410,6 @@
                     pendingForgotEmail = email;
                     pendingForgotNewPwd = newPassword;
                     document.getElementById('forgotTargetEmail').innerText = email;
-
-                    if (result.displayOtp) {
-                        document.getElementById('forgotDisplayCode').innerText = result.displayOtp;
-                        document.getElementById('forgotOtpFallbackBox').classList.remove('d-none');
-                    }
 
                     document.getElementById('forgotStep1').classList.add('d-none');
                     document.getElementById('forgotStep2').classList.remove('d-none');

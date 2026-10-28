@@ -478,32 +478,15 @@
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Đóng" onclick="clearIntervals()"></button>
                 </div>
 
-                <!-- Step Progress -->
-                <div class="px-3 pt-2 pb-1">
-                    <div class="d-flex align-items-center justify-content-between small fw-bold mb-2">
-                        <span id="step1Indicator" class="d-flex align-items-center gap-1 fw-bold" style="color: var(--accent-terracotta);">
-                            <span class="badge rounded-circle text-white p-1" style="width: 20px; height: 20px; background: var(--accent-terracotta);">1</span>
-                            <span>Nhập Thông Tin</span>
-                        </span>
-                        <div class="flex-grow-1 mx-2" style="height: 3px; background: rgba(0,0,0,0.08); border-radius: 2px;">
-                            <div id="progressFill" style="width: 0%; height: 100%; background: var(--accent-terracotta); transition: width 0.3s ease;"></div>
-                        </div>
-                        <span id="step2Indicator" class="text-secondary d-flex align-items-center gap-1">
-                            <span class="badge rounded-circle bg-secondary-subtle text-secondary p-1" style="width: 20px; height: 20px;">2</span>
-                            <span>Xác Nhận OTP</span>
-                        </span>
-                    </div>
-                </div>
-
                 <!-- Modal Body -->
-                <div class="modal-body pt-1">
+                <div class="modal-body pt-2">
                     <!-- Alert Box -->
                     <div id="modalAlertBox" class="alert d-none small py-1.5 px-2.5 rounded-3 mb-2.5 d-flex align-items-center gap-2">
                         <i class="bi bi-info-circle-fill fs-6" id="alertIcon"></i>
                         <span id="alertMessage"></span>
                     </div>
 
-                    <!-- STEP 1: Registration Form -->
+                    <!-- Registration Form (Giữ nguyên trên cùng 1 trang, không hiệu ứng chuyển trang) -->
                     <form id="step1Form" onsubmit="handleRegisterInit(event)">
                         <div class="mb-2">
                             <label class="form-label-custom">Họ và tên</label>
@@ -576,61 +559,55 @@
                             <div id="confirmPasswordFeedback" class="mt-1 d-none" style="font-size: 0.72rem;"></div>
                         </div>
 
-                        <button type="submit" id="btnSubmitStep1" class="btn-terracotta-cta">
-                            <span id="step1BtnText">Gửi Mã Xác Nhận OTP Qua Email</span>
-                            <i class="bi bi-send-fill fs-6"></i>
-                        </button>
-                    </form>
-
-                    <!-- STEP 2: OTP Verification Form -->
-                    <div id="step2Container" class="d-none">
-                        <div class="alert alert-success-subtle border border-success-subtle py-2 px-3 rounded-3 small mb-2.5">
-                            <div class="d-flex align-items-center gap-2">
-                                <i class="bi bi-envelope-check-fill text-success fs-5"></i>
-                                <div>
-                                    <div class="text-muted" style="font-size: 0.75rem;">Mã OTP thực tế 6 số đã được gửi trực tiếp đến:</div>
-                                    <strong class="font-monospace text-dark fs-6" id="step2TargetEmail"></strong>
-                                </div>
-                            </div>
-                            <div class="text-muted mt-2 border-top pt-1.5" style="font-size: 0.72rem; line-height: 1.5;">
-                                <i class="bi bi-info-circle me-1 text-primary"></i>Vui lòng mở hộp thư email của bạn để lấy mã xác thực. Nếu chưa thấy trong <strong>Hộp thư đến</strong>, vui lòng kiểm tra thêm thư mục <strong>Thư rác (Spam)</strong> hoặc tab <strong>Quảng cáo</strong>.
-                            </div>
+                        <!-- Nút Gửi Mã Ban Đầu -->
+                        <div id="btnSendOtpBox">
+                            <button type="submit" id="btnSubmitStep1" class="btn-terracotta-cta">
+                                <span id="step1BtnText">Gửi Mã Xác Nhận OTP Qua Email</span>
+                                <i class="bi bi-send-fill fs-6"></i>
+                            </button>
                         </div>
 
-                        <form id="step2Form" onsubmit="handleVerifyOtp(event)">
-                            <div class="text-center mb-3">
-                                <label class="form-label-custom text-center mb-1.5">Nhập mã xác nhận 6 chữ số</label>
-                                <div class="mx-auto" style="max-width: 260px;">
-                                    <input type="text" id="otpCodeInput" maxlength="6" pattern="[0-9]{6}" required autofocus
+                        <!-- Khối Xác Thực OTP (Mở rộng ngay trên cùng trang, không hiệu ứng chuyển trang) -->
+                        <div id="regOtpSection" class="d-none mt-3 pt-3 border-top">
+                            <div class="alert alert-success-subtle border border-success-subtle py-2 px-2.5 rounded-3 small mb-2.5">
+                                <div class="d-flex align-items-center gap-2">
+                                    <i class="bi bi-envelope-check-fill text-success fs-5"></i>
+                                    <div style="font-size: 0.74rem;">
+                                        <div>Mã xác nhận 6 số đã gửi trực tiếp đến: <strong id="regOtpTargetEmail" class="text-dark"></strong></div>
+                                        <div class="text-muted mt-0.5">Vui lòng mở email kiểm tra (cả thư mục Spam) và nhập mã vào ô bên dưới:</div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="mb-2.5">
+                                <label class="form-label-custom d-flex justify-content-between align-items-center mb-1">
+                                    <span>Nhập mã xác nhận 6 chữ số</span>
+                                    <span class="text-danger small fw-bold" style="font-size: 0.72rem;">
+                                        <i class="bi bi-stopwatch"></i> Hết hạn sau: <span id="otpTimerText" class="font-monospace">05:00</span>
+                                    </span>
+                                </label>
+                                <div class="d-flex gap-2">
+                                    <input type="text" id="otpCodeInput" maxlength="6" pattern="[0-9]{6}"
                                            placeholder="Mã OTP" autocomplete="one-time-code"
-                                           class="form-control text-center fs-3 fw-bold rounded-3 border-2 py-1.5 font-monospace" 
-                                           style="border-color: var(--accent-terracotta); letter-spacing: 0.45em; color: var(--text-main);">
+                                           onkeydown="if(event.key==='Enter'){event.preventDefault();handleVerifyOtp(event);}"
+                                           class="form-control text-center fs-5 fw-bold font-monospace border-2 rounded-3 py-1.5" 
+                                           style="border-color: var(--accent-terracotta); letter-spacing: 0.35em;">
+                                    <button type="button" id="btnResendOtp" onclick="handleResendOtp()" 
+                                            class="btn btn-outline-secondary btn-sm text-nowrap rounded-3 px-2.5 fw-semibold" style="font-size: 0.72rem;">
+                                        <span>Gửi lại mã</span><span id="resendCountdownText"></span>
+                                    </button>
                                 </div>
                             </div>
 
-                            <div class="d-flex justify-content-between align-items-center small text-muted mb-3 px-1" style="font-size: 0.75rem;">
-                                <div class="d-flex align-items-center gap-1 text-danger fw-bold">
-                                    <i class="bi bi-stopwatch"></i>
-                                    <span>Hết hạn sau: <span id="otpTimerText" class="font-monospace">05:00</span></span>
-                                </div>
-                                <div>Tối đa 5 lần thử sai</div>
-                            </div>
-
-                            <button type="submit" id="btnSubmitStep2" class="btn-terracotta-cta mb-2">
-                                <span id="step2BtnText">Xác Thực &amp; Hoàn Tất Đăng Ký</span>
+                            <button type="button" id="btnSubmitStep2" onclick="handleVerifyOtp(event)" class="btn-terracotta-cta">
+                                <span id="step2BtnText">Xác Thực OTP &amp; Hoàn Tất Đăng Ký</span>
                                 <i class="bi bi-check-circle-fill fs-6"></i>
                             </button>
+                        </div>
+                    </form>
 
-                            <div class="d-flex justify-content-between align-items-center pt-2 border-top small" style="font-size: 0.75rem;">
-                                <button type="button" onclick="goToStep1()" class="btn btn-sm btn-link text-decoration-none text-muted p-0 fw-semibold">
-                                    <i class="bi bi-arrow-left"></i> Sửa lại Email
-                                </button>
-                                <button type="button" id="btnResendOtp" onclick="handleResendOtp()" class="btn btn-sm btn-link text-decoration-none p-0 fw-bold" style="color: var(--accent-terracotta);">
-                                    <span>Gửi lại mã OTP</span><span id="resendCountdownText"></span>
-                                </button>
-                            </div>
-                        </form>
-                    </div>
+                    <!-- Khối ẩn tạm thời cho step2Container cũ (giữ an toàn) -->
+                    <div id="step2Container" class="d-none"></div>
 
                     <!-- STEP 3: Success Screen -->
                     <div id="step3SuccessContainer" class="d-none text-center py-3">
@@ -1046,13 +1023,14 @@
         function goToStep1() {
             hideAlert();
             clearIntervals();
-            document.getElementById('step1Form').classList.remove('d-none');
-            document.getElementById('step2Container').classList.add('d-none');
-            document.getElementById('step3SuccessContainer').classList.add('d-none');
-
-            document.getElementById('progressFill').style.width = '0%';
-            document.getElementById('step1Indicator').className = 'd-flex align-items-center gap-1 fw-bold';
-            document.getElementById('step2Indicator').className = 'text-secondary d-flex align-items-center gap-1 fw-normal';
+            const form = document.getElementById('step1Form');
+            if (form) form.classList.remove('d-none');
+            const otpSec = document.getElementById('regOtpSection');
+            if (otpSec) otpSec.classList.add('d-none');
+            const btnSendBox = document.getElementById('btnSendOtpBox');
+            if (btnSendBox) btnSendBox.classList.remove('d-none');
+            const successContainer = document.getElementById('step3SuccessContainer');
+            if (successContainer) successContainer.classList.add('d-none');
 
             // Gắn lắng nghe sự kiện kiểm tra Email & Mật khẩu
             const emailInput = document.getElementById('regEmail');
@@ -1075,19 +1053,27 @@
 
         function goToStep2(email) {
             hideAlert();
-            document.getElementById('step1Form').classList.add('d-none');
-            document.getElementById('step2Container').classList.remove('d-none');
-            document.getElementById('step3SuccessContainer').classList.add('d-none');
-            document.getElementById('step2TargetEmail').innerText = email;
+            // KHÔNG ẩn form tạo tài khoản, giữ nguyên trên cùng một trang:
+            const form = document.getElementById('step1Form');
+            if (form) form.classList.remove('d-none');
 
-            document.getElementById('progressFill').style.width = '100%';
-            document.getElementById('step1Indicator').className = 'text-secondary d-flex align-items-center gap-1 fw-normal';
-            document.getElementById('step2Indicator').className = 'd-flex align-items-center gap-1 fw-bold';
-            document.getElementById('step2Indicator').style.color = 'var(--accent-terracotta)';
+            const targetEmailEl = document.getElementById('regOtpTargetEmail');
+            if (targetEmailEl) targetEmailEl.innerText = email;
+
+            const otpSec = document.getElementById('regOtpSection');
+            if (otpSec) otpSec.classList.remove('d-none');
+
+            const btnSendBox = document.getElementById('btnSendOtpBox');
+            if (btnSendBox) btnSendBox.classList.add('d-none');
+
+            const successContainer = document.getElementById('step3SuccessContainer');
+            if (successContainer) successContainer.classList.add('d-none');
 
             const otpInput = document.getElementById('otpCodeInput');
-            otpInput.value = '';
-            otpInput.focus();
+            if (otpInput) {
+                otpInput.value = '';
+                otpInput.focus();
+            }
 
             startOtpCountdown(300);
             startResendCooldown(60);
@@ -1096,9 +1082,10 @@
         function goToStep3(data) {
             hideAlert();
             clearIntervals();
-            document.getElementById('step1Form').classList.add('d-none');
-            document.getElementById('step2Container').classList.add('d-none');
-            document.getElementById('step3SuccessContainer').classList.remove('d-none');
+            const form = document.getElementById('step1Form');
+            if (form) form.classList.add('d-none');
+            const successContainer = document.getElementById('step3SuccessContainer');
+            if (successContainer) successContainer.classList.remove('d-none');
 
             document.getElementById('successFullName').innerText = data.fullName || pendingRegistration.fullName;
             document.getElementById('successEmail').innerText = data.email || pendingRegistration.email;

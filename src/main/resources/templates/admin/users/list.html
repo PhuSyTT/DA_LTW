@@ -270,7 +270,7 @@
                                                         <label class="form-label small fw-bold mb-0">Đổi Mật Khẩu Mới</label>
                                                         <span class="badge bg-secondary-subtle text-secondary px-2 py-0.5 edit-pwd-badge" style="font-size: 0.68rem;">Giữ nguyên cũ</span>
                                                     </div>
-                                                    <input type="password" name="password" class="form-control form-control-sm" placeholder="Để trống nếu muốn giữ nguyên mật khẩu cũ" oninput="checkAdminEditPwd(this)">
+                                                    <input type="password" name="password" class="form-control form-control-sm" placeholder="Mật khẩu mới" oninput="checkAdminEditPwd(this)">
                                                     <div class="progress mt-1" style="height: 3px; background: rgba(0,0,0,0.06);">
                                                         <div class="progress-bar edit-pwd-bar" style="width: 0%;"></div>
                                                     </div>
@@ -340,14 +340,14 @@
                     <div class="modal-body p-3">
                         <div class="mb-2">
                             <label class="form-label small fw-bold mb-1">Họ và Tên <span class="text-danger">*</span></label>
-                            <input type="text" name="fullName" class="form-control form-control-sm" placeholder="Ví dụ: Lê Minh Kiểm Duyệt" required>
+                            <input type="text" name="fullName" class="form-control form-control-sm" placeholder="Họ và tên" required>
                         </div>
                         <div class="mb-2">
                             <label class="form-label small fw-bold mb-1 d-flex justify-content-between align-items-center">
                                 <span>Email Đăng Nhập <span class="text-danger">*</span></span>
                                 <span id="adminCreateEmailSpinner" class="spinner-border spinner-border-sm text-secondary d-none" style="width: 0.7rem; height: 0.7rem;"></span>
                             </label>
-                            <input type="email" name="email" id="adminCreateEmail" class="form-control form-control-sm" placeholder="appraiser@bookstore.vn" required oninput="checkAdminCreateEmail(this)">
+                            <input type="email" name="email" id="adminCreateEmail" class="form-control form-control-sm" placeholder="Email" required oninput="checkAdminCreateEmail(this)">
                             <div id="adminCreateEmailFeedback" class="small mt-1 d-none" style="font-size: 0.72rem;"></div>
                         </div>
                         <div class="mb-2">
@@ -355,7 +355,7 @@
                                 <label class="form-label small fw-bold mb-0">Mật Khẩu Ban Đầu</label>
                                 <span id="adminCreatePwdBadge" class="badge bg-secondary-subtle text-secondary px-2 py-0.5" style="font-size: 0.68rem;">Mặc định: 1234@abc</span>
                             </div>
-                            <input type="password" name="password" id="adminCreatePwd" class="form-control form-control-sm" placeholder="Mặc định: 1234@abc nếu để trống" oninput="checkAdminCreatePwd(this)">
+                            <input type="password" name="password" id="adminCreatePwd" class="form-control form-control-sm" placeholder="Mật khẩu" oninput="checkAdminCreatePwd(this)">
                             <div class="progress mt-1.5" style="height: 3px; background: rgba(0,0,0,0.06);">
                                 <div id="adminCreatePwdBar" class="progress-bar" style="width: 0%;"></div>
                             </div>
@@ -363,7 +363,7 @@
                         </div>
                         <div class="mb-2">
                             <label class="form-label small fw-bold mb-1">Số Điện Thoại</label>
-                            <input type="text" name="phone" class="form-control form-control-sm" placeholder="090x.xxx.xxx">
+                            <input type="text" name="phone" class="form-control form-control-sm" placeholder="Số điện thoại">
                         </div>
                         <div class="mb-2">
                             <label class="form-label small fw-bold mb-1">Vai Trò (Role SRS) <span class="text-danger">*</span></label>

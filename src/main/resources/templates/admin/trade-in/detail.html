@@ -116,13 +116,13 @@
                                 </label>
                             </div>
                             <input type="number" id="staffPriceInput" class="form-control"
-                                   placeholder="Hoặc nhập giá thẩm định mới (VNĐ)"
+                                   placeholder="Giá thẩm định mới (VNĐ)"
                                    th:attr="value=${request.autoEstimatedPrice}">
                         </div>
                         <div class="mb-3">
                             <label class="form-label fw-semibold">Ghi Chú Thẩm Định</label>
                             <textarea id="staffNotesInput" class="form-control" rows="3"
-                                      placeholder="Mô tả chi tiết tình trạng thực tế so với ảnh khách gửi..."></textarea>
+                                      placeholder="Ghi chú thẩm định"></textarea>
                         </div>
                         <button class="btn btn-warning fw-semibold w-100" id="btn-review">
                             <i class="fas fa-stamp me-2"></i> Gửi Kết Quả Thẩm Định & Báo Giá
@@ -144,7 +144,7 @@
                         <div class="mb-3">
                             <label class="form-label fw-semibold">Vị Trí Kệ Lưu Trữ</label>
                             <input type="text" id="shelfLocationInput" class="form-control"
-                                   placeholder="VD: Kệ Thu Mua - Dãy T1 - Tầng 1">
+                                   placeholder="Vị trí kệ lưu trữ">
                         </div>
                         <button class="btn btn-success fw-semibold w-100" id="btn-confirm-stock">
                             <i class="fas fa-check-double me-2"></i> Xác Nhận Nhập Kho & Tạo Phiếu Chi

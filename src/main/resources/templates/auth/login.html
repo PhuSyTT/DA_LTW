@@ -403,7 +403,7 @@
                            class="form-control-custom" 
                            id="email" 
                            name="email" 
-                           placeholder="admin.book4life@gmail.com" 
+                           placeholder="Email hoặc Tên đăng nhập" 
                            required 
                            autofocus>
                 </div>
@@ -418,7 +418,7 @@
                            class="form-control-custom pe-5" 
                            id="password" 
                            name="password" 
-                           placeholder="••••••••" 
+                           placeholder="Mật khẩu" 
                            required>
                     <button type="button" 
                             class="password-toggle-btn" 
@@ -507,7 +507,7 @@
                     <form id="step1Form" onsubmit="handleRegisterInit(event)">
                         <div class="mb-2">
                             <label class="form-label-custom">Họ và tên</label>
-                            <input type="text" id="regFullName" required placeholder="Nguyễn Văn A" class="form-control form-control-sm rounded-3 py-1.5 px-3">
+                            <input type="text" id="regFullName" required placeholder="Họ và tên" class="form-control form-control-sm rounded-3 py-1.5 px-3">
                         </div>
 
                         <div class="mb-2">
@@ -516,7 +516,7 @@
                                 <span id="emailCheckSpinner" class="spinner-border spinner-border-sm text-secondary d-none" style="width: 0.75rem; height: 0.75rem;"></span>
                             </label>
                             <div class="position-relative">
-                                <input type="email" id="regEmail" required placeholder="vidu@gmail.com" class="form-control form-control-sm rounded-3 py-1.5 px-3">
+                                <input type="email" id="regEmail" required placeholder="Email" class="form-control form-control-sm rounded-3 py-1.5 px-3">
                                 <span id="emailStatusIcon" class="position-absolute end-0 top-50 translate-middle-y me-2.5 d-none"></span>
                             </div>
                             <!-- Cảnh báo trạng thái trùng lặp email -->
@@ -526,7 +526,7 @@
 
                         <div class="mb-2">
                             <label class="form-label-custom">Số điện thoại</label>
-                            <input type="tel" id="regPhone" placeholder="0912345678" class="form-control form-control-sm rounded-3 py-1.5 px-3">
+                            <input type="tel" id="regPhone" placeholder="Số điện thoại" class="form-control form-control-sm rounded-3 py-1.5 px-3">
                         </div>
 
                         <!-- Mật khẩu & Thước đo độ bảo mật -->
@@ -536,7 +536,7 @@
                                 <span id="passwordStrengthBadge" class="badge bg-secondary-subtle text-secondary px-2 py-0.5" style="font-size: 0.68rem;">Độ bảo mật: Chưa nhập</span>
                             </div>
                             <div class="input-group input-group-sm">
-                                <input type="password" id="regPassword" required minlength="6" placeholder="Tối thiểu 6-8 ký tự" class="form-control rounded-start-3 py-1.5 px-3">
+                                <input type="password" id="regPassword" required minlength="7" placeholder="Mật khẩu" class="form-control rounded-start-3 py-1.5 px-3">
                                 <button type="button" class="btn btn-outline-secondary rounded-end-3 px-2.5" onclick="togglePasswordVisibility('regPassword', 'toggleIcon1')" title="Hiện/ẩn mật khẩu">
                                     <i class="bi bi-eye-slash" id="toggleIcon1"></i>
                                 </button>
@@ -568,7 +568,7 @@
                         <div class="mb-3">
                             <label class="form-label-custom">Xác nhận mật khẩu</label>
                             <div class="input-group input-group-sm">
-                                <input type="password" id="regConfirmPassword" required minlength="7" placeholder="Nhập lại mật khẩu" class="form-control rounded-start-3 py-1.5 px-3">
+                                <input type="password" id="regConfirmPassword" required minlength="7" placeholder="Xác nhận mật khẩu" class="form-control rounded-start-3 py-1.5 px-3">
                                 <button type="button" class="btn btn-outline-secondary rounded-end-3 px-2.5" onclick="togglePasswordVisibility('regConfirmPassword', 'toggleIcon2')" title="Hiện/ẩn mật khẩu">
                                     <i class="bi bi-eye-slash" id="toggleIcon2"></i>
                                 </button>
@@ -611,7 +611,7 @@
                                 <label class="form-label-custom text-center mb-1.5">Nhập mã xác nhận 6 chữ số</label>
                                 <div class="mx-auto" style="max-width: 260px;">
                                     <input type="text" id="otpCodeInput" maxlength="6" pattern="[0-9]{6}" required autofocus
-                                           placeholder="______" autocomplete="one-time-code"
+                                           placeholder="Mã OTP" autocomplete="one-time-code"
                                            class="form-control text-center fs-3 fw-bold rounded-3 border-2 py-1.5 font-monospace" 
                                            style="border-color: var(--accent-terracotta); letter-spacing: 0.45em; color: var(--text-main);">
                                 </div>

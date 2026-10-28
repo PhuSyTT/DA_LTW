@@ -213,7 +213,7 @@
                                 <label class="form-label fw-bold">Mã Khuyến Mãi (Coupon Code) <span class="text-danger">*</span></label>
                                 <div class="input-group">
                                     <span class="input-group-text"><i class="fas fa-barcode"></i></span>
-                                    <input type="text" class="form-control text-uppercase font-monospace fw-bold" name="code" placeholder="VD: BOOK4LIFE20" required>
+                                    <input type="text" class="form-control text-uppercase font-monospace fw-bold" name="code" placeholder="Mã giảm giá" required>
                                 </div>
                                 <div class="form-text">Mã viết liền không dấu, sẽ tự động chuyển thành chữ hoa.</div>
                             </div>
@@ -243,7 +243,7 @@
                             <!-- Giá trị giảm -->
                             <div class="col-md-4">
                                 <label class="form-label fw-bold" id="discountValueLabel">Mức Giảm <span class="text-danger">*</span></label>
-                                <input type="number" class="form-control" id="discountValueInput" name="discountValue" min="0" step="any" placeholder="VD: 20 hoặc 50000" required>
+                                <input type="number" class="form-control" id="discountValueInput" name="discountValue" min="0" step="any" placeholder="Mức giảm giá" required>
                                 <div class="form-text" id="discountValueHelp">Nhập số % (VD: 20) hoặc số tiền (VD: 50000).</div>
                             </div>
 
@@ -252,14 +252,14 @@
                                 <label class="form-label fw-bold text-primary">
                                     <i class="fas fa-bullseye me-1"></i> Đơn Tối Thiểu (VNĐ)
                                 </label>
-                                <input type="number" class="form-control" name="minOrderAmount" min="0" step="1000" placeholder="VD: 100000 (0 nếu không yêu cầu)">
+                                <input type="number" class="form-control" name="minOrderAmount" min="0" step="1000" placeholder="Giá trị đơn hàng tối thiểu">
                                 <div class="form-text">Đơn đạt từ mức này mới được dùng voucher.</div>
                             </div>
 
                             <!-- Giảm tối đa -->
                             <div class="col-md-4">
                                 <label class="form-label fw-bold">Giảm Tối Đa (VNĐ)</label>
-                                <input type="number" class="form-control" name="maxDiscountAmount" min="0" step="1000" placeholder="VD: 25000 (0 nếu không giới hạn)">
+                                <input type="number" class="form-control" name="maxDiscountAmount" min="0" step="1000" placeholder="Mức giảm tối đa">
                                 <div class="form-text">Mức giảm kịch trần (VD: Freeship tối đa 25k).</div>
                             </div>
 

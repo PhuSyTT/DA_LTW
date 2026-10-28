@@ -125,7 +125,7 @@
                         <div class="input-group">
                             <span class="input-group-text bg-success text-white"><i class="fas fa-barcode"></i></span>
                             <input type="text" id="barcodeInput" class="form-control font-monospace fw-bold"
-                                   placeholder="Quét mã SKU Barcode (VD: Q1-DNT-90-001)..." autofocus
+                                   placeholder="Mã SKU / Barcode" autofocus
                                    onkeydown="if(event.key === 'Enter') handleBarcodeEnter()">
                             <button class="btn btn-success" type="button" onclick="handleBarcodeEnter()">
                                 <i class="fas fa-plus"></i> Thêm
@@ -136,7 +136,7 @@
                         <div class="input-group">
                             <span class="input-group-text"><i class="fas fa-search"></i></span>
                             <input type="text" id="keywordSearchInput" class="form-control"
-                                   placeholder="Tìm tên sách / tác giả..."
+                                   placeholder="Tên sách hoặc tác giả"
                                    oninput="debounceSearch()">
                         </div>
                     </div>
@@ -180,10 +180,10 @@
                 <!-- Thông tin khách hàng tùy chọn -->
                 <div class="row g-1 my-2">
                     <div class="col-6">
-                        <input type="text" id="customerNameInput" class="form-control form-control-sm" placeholder="Tên khách lẻ...">
+                        <input type="text" id="customerNameInput" class="form-control form-control-sm" placeholder="Họ và tên khách hàng">
                     </div>
                     <div class="col-6">
-                        <input type="text" id="customerPhoneInput" class="form-control form-control-sm" placeholder="SĐT khách hàng...">
+                        <input type="text" id="customerPhoneInput" class="form-control form-control-sm" placeholder="Số điện thoại">
                     </div>
                 </div>
 
@@ -200,7 +200,7 @@
                     <!-- Nhập mã giảm giá -->
                     <div class="input-group input-group-sm mb-2">
                         <span class="input-group-text"><i class="fas fa-ticket-simple text-warning"></i></span>
-                        <input type="text" id="couponCodeInput" class="form-control text-uppercase font-monospace" placeholder="Mã giảm giá (VD: XACHO50)">
+                        <input type="text" id="couponCodeInput" class="form-control text-uppercase font-monospace" placeholder="Mã giảm giá">
                         <button class="btn btn-dark" type="button" onclick="applyCouponCode()">Áp Dụng</button>
                     </div>
 

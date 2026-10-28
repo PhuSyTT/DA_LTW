@@ -115,8 +115,11 @@ public class AuthServiceImpl implements AuthService {
         try {
             emailService.sendRegistrationOtp(email, otpCode);
         } catch (Exception ex) {
-            log.error("Không thể gửi email OTP qua SMTP tới {}: {}", email, ex.getMessage());
-            return ApiResponse.error("Không thể gửi mã xác nhận đến email [" + email + "]. Vui lòng kiểm tra lại địa chỉ email hoặc thử lại sau!");
+            log.error("Không thể gửi email OTP qua SMTP tới {}: {}", email, ex.getMessage(), ex);
+            String detailMsg = (ex.getMessage() != null && ex.getMessage().contains("timed out"))
+                    ? "Kết nối tới máy chủ Google SMTP bị gián đoạn (timeout). Vui lòng thử lại sau vài giây!"
+                    : "Không thể gửi mã xác nhận đến email [" + email + "]. Vui lòng kiểm tra lại địa chỉ email hoặc thử lại sau!";
+            return ApiResponse.error(detailMsg);
         }
 
         log.info("=================================================================");

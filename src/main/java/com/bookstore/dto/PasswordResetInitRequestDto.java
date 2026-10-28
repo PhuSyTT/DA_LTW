@@ -38,3 +38,4 @@ public class PasswordResetInitRequestDto {
         this.newPassword = newPassword;
     }
 }
+

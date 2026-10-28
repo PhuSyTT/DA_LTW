@@ -17,4 +17,7 @@ public interface MasterOrderRepository extends JpaRepository<MasterOrder, Long> 
     // Lịch sử đơn hàng của 1 khách hàng, mới nhất lên trước
     @Query("SELECT mo FROM MasterOrder mo WHERE mo.user.id = :userId ORDER BY mo.id DESC")
     List<MasterOrder> findByUserIdOrderByIdDesc(@Param("userId") Long userId);
+
+    // Kiểm tra xem khách hàng đã từng phát sinh đơn hàng nào hay chưa
+    boolean existsByUserId(Long userId);
 }

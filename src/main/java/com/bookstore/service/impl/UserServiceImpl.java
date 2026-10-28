@@ -26,6 +26,7 @@ public class UserServiceImpl implements UserService {
     private final RoleRepository roleRepository;
     private final BranchRepository branchRepository;
     private final PasswordEncoder passwordEncoder;
+    private com.bookstore.repository.MasterOrderRepository masterOrderRepository;
 
     public UserServiceImpl(UserRepository userRepository,
                            RoleRepository roleRepository,
@@ -35,6 +36,11 @@ public class UserServiceImpl implements UserService {
         this.roleRepository = roleRepository;
         this.branchRepository = branchRepository;
         this.passwordEncoder = passwordEncoder;
+    }
+
+    @org.springframework.beans.factory.annotation.Autowired(required = false)
+    public void setMasterOrderRepository(com.bookstore.repository.MasterOrderRepository masterOrderRepository) {
+        this.masterOrderRepository = masterOrderRepository;
     }
 
     @Override
@@ -163,10 +169,22 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public void deleteUser(Long id) {
-        if (!userRepository.existsById(id)) {
-            throw new IllegalArgumentException("Không tìm thấy người dùng ID: " + id);
+        User user = userRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("Không tìm thấy người dùng ID: " + id));
+
+        if (id == 1L) {
+            throw new IllegalArgumentException("Không được phép xóa tài khoản Quản trị viên tối cao (Super Admin)!");
         }
-        userRepository.deleteById(id);
+
+        // Kiểm tra nếu tài khoản đã từng phát sinh đơn hàng trong hệ thống
+        if (masterOrderRepository != null && masterOrderRepository.existsByUserId(id)) {
+            user.setIsActive(false);
+            userRepository.save(user);
+            throw new IllegalStateException("Tài khoản [" + user.getEmail() + "] đã có lịch sử đơn hàng trong hệ thống. Để bảo toàn hóa đơn và kiểm toán, hệ thống đã tự động chuyển sang trạng thái [KHÓA VÔ HIỆU HÓA] thay vì xóa hoàn toàn!");
+        }
+
+        userRepository.delete(user);
+        userRepository.flush();
     }
 
     private UserDto mapToDto(User user) {

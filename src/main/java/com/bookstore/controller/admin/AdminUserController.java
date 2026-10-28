@@ -76,9 +76,17 @@ public class AdminUserController {
     public String deleteUser(@PathVariable Long id, RedirectAttributes redirectAttributes) {
         try {
             userService.deleteUser(id);
-            redirectAttributes.addFlashAttribute("successMessage", "Đã xóa tài khoản thành công!");
+            redirectAttributes.addFlashAttribute("successMessage", "Đã xóa tài khoản vĩnh viễn khỏi hệ thống thành công!");
+        } catch (IllegalStateException e) {
+            redirectAttributes.addFlashAttribute("warningMessage", e.getMessage());
+        } catch (org.springframework.dao.DataIntegrityViolationException e) {
+            try {
+                userService.toggleUserStatus(id);
+            } catch (Exception ignored) {}
+            redirectAttributes.addFlashAttribute("warningMessage",
+                    "Tài khoản này có dữ liệu liên kết (đơn hàng, đánh giá hoặc lịch sử kiểm toán) trong hệ thống nên không thể xóa cứng. Hệ thống đã tự động KHÓA VÔ HIỆU HÓA tài khoản để bảo toàn dữ liệu!");
         } catch (Exception e) {
-            redirectAttributes.addFlashAttribute("errorMessage", "Lỗi: " + e.getMessage());
+            redirectAttributes.addFlashAttribute("errorMessage", "Không thể xóa: " + e.getMessage());
         }
         return "redirect:/admin/users";
     }

@@ -36,3 +36,4 @@ public class ProfileUpdateInitRequestDto {
         this.phone = phone;
     }
 }
+

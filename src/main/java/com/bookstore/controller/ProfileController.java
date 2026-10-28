@@ -29,3 +29,4 @@ public class ProfileController {
         return "customer/profile";
     }
 }
+

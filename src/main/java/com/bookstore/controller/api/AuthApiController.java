@@ -1,9 +1,11 @@
 package com.bookstore.controller.api;
 
 import com.bookstore.dto.*;
+import com.bookstore.security.CustomUserDetails;
 import com.bookstore.service.AuthService;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -98,6 +100,72 @@ public class AuthApiController {
     public ResponseEntity<ApiResponse<PasswordStrengthDto>> checkPasswordStrengthGet(@RequestParam(value = "password", required = false) String password) {
         ApiResponse<PasswordStrengthDto> response = authService.checkPasswordStrength(password != null ? password : "");
         return ResponseEntity.ok(response);
+    }
+
+    /**
+     * Khởi tạo đặt lại / đổi mật khẩu, gửi OTP về email
+     * POST /api/auth/password-reset/init
+     */
+    @PostMapping("/password-reset/init")
+    public ResponseEntity<ApiResponse<String>> passwordResetInit(@Valid @RequestBody PasswordResetInitRequestDto request) {
+        ApiResponse<String> response = authService.initiatePasswordReset(request);
+        if (response.isSuccess()) {
+            return ResponseEntity.ok(response);
+        } else {
+            return ResponseEntity.badRequest().body(response);
+        }
+    }
+
+    /**
+     * Xác nhận OTP và đặt lại / đổi mật khẩu mới
+     * POST /api/auth/password-reset/verify
+     */
+    @PostMapping("/password-reset/verify")
+    public ResponseEntity<ApiResponse<String>> passwordResetVerify(@Valid @RequestBody VerifyOtpRequestDto request) {
+        ApiResponse<String> response = authService.verifyOtpAndResetPassword(request);
+        if (response.isSuccess()) {
+            return ResponseEntity.ok(response);
+        } else {
+            return ResponseEntity.badRequest().body(response);
+        }
+    }
+
+    /**
+     * Khởi tạo thay đổi thông tin cá nhân (Họ tên, SĐT), gửi OTP về email
+     * POST /api/auth/profile/init
+     */
+    @PostMapping("/profile/init")
+    public ResponseEntity<ApiResponse<String>> profileUpdateInit(
+            @AuthenticationPrincipal CustomUserDetails userDetails,
+            @Valid @RequestBody ProfileUpdateInitRequestDto request) {
+        if (userDetails == null) {
+            return ResponseEntity.status(401).body(ApiResponse.error("Vui lòng đăng nhập để thực hiện thao tác này!"));
+        }
+        ApiResponse<String> response = authService.initiateProfileUpdate(userDetails.getEmail(), request);
+        if (response.isSuccess()) {
+            return ResponseEntity.ok(response);
+        } else {
+            return ResponseEntity.badRequest().body(response);
+        }
+    }
+
+    /**
+     * Xác nhận OTP và cập nhật thông tin cá nhân
+     * POST /api/auth/profile/verify
+     */
+    @PostMapping("/profile/verify")
+    public ResponseEntity<ApiResponse<UserDto>> profileUpdateVerify(
+            @AuthenticationPrincipal CustomUserDetails userDetails,
+            @Valid @RequestBody VerifyOtpRequestDto request) {
+        if (userDetails == null) {
+            return ResponseEntity.status(401).body(ApiResponse.error("Vui lòng đăng nhập để thực hiện thao tác này!"));
+        }
+        ApiResponse<UserDto> response = authService.verifyOtpAndUpdateProfile(userDetails.getEmail(), request);
+        if (response.isSuccess()) {
+            return ResponseEntity.ok(response);
+        } else {
+            return ResponseEntity.badRequest().body(response);
+        }
     }
 }
 

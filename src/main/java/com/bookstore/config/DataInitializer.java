@@ -284,12 +284,16 @@ public class DataInitializer implements CommandLineRunner {
                     "  password_hash VARCHAR(255) NOT NULL," +
                     "  full_name VARCHAR(255)," +
                     "  phone VARCHAR(50)," +
+                    "  otp_type VARCHAR(50) DEFAULT 'REGISTER'," +
                     "  attempts INT DEFAULT 0," +
                     "  is_used BOOLEAN DEFAULT FALSE," +
                     "  created_at DATETIME NOT NULL," +
                     "  expires_at DATETIME NOT NULL" +
                     ")"
                 );
+                try {
+                    stmt.execute("ALTER TABLE otp_verifications ADD COLUMN IF NOT EXISTS otp_type VARCHAR(50) DEFAULT 'REGISTER'");
+                } catch (Exception ignored) {}
                 logger.info("Table otp_verifications verified/created for {}.", dbName);
                 return;
             }
@@ -303,6 +307,7 @@ public class DataInitializer implements CommandLineRunner {
                 "    password_hash VARCHAR(255) NOT NULL, " +
                 "    full_name NVARCHAR(255), " +
                 "    phone VARCHAR(50), " +
+                "    otp_type VARCHAR(50) DEFAULT 'REGISTER', " +
                 "    attempts INT DEFAULT 0, " +
                 "    is_used BIT DEFAULT 0, " +
                 "    created_at DATETIME2 NOT NULL, " +
@@ -311,6 +316,9 @@ public class DataInitializer implements CommandLineRunner {
                 "  CREATE INDEX idx_otp_email_created ON otp_verifications(email, created_at); " +
                 "END"
             );
+            try {
+                stmt.execute("IF NOT EXISTS (SELECT * FROM syscolumns WHERE id=OBJECT_ID('otp_verifications') AND name='otp_type') ALTER TABLE otp_verifications ADD otp_type VARCHAR(50) DEFAULT 'REGISTER';");
+            } catch (Exception ignored) {}
             logger.info("Table otp_verifications verified/created successfully.");
         } catch (Exception ex) {
             logger.warn("Could not verify/create otp_verifications table: {}", ex.getMessage());

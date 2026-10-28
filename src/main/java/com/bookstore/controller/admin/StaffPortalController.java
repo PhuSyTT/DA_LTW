@@ -159,6 +159,80 @@ public class StaffPortalController {
         return "redirect:/admin/fulfillment/orders/" + subOrderId;
     }
 
+    /**
+     * Cập nhật tiến độ đơn hàng dạng MVC Form (Đảm bảo các nút bấm hoạt động 100% không phụ thuộc JS)
+     */
+    @PostMapping("/admin/fulfillment/orders/{id}/status")
+    public String updateOrderStatusMvc(
+            @PathVariable("id") Long subOrderId,
+            @RequestParam("status") String status,
+            @RequestParam(name = "note", required = false) String note,
+            @RequestParam(name = "trackingNumber", required = false) String trackingNumber,
+            @AuthenticationPrincipal CustomUserDetails userDetails,
+            RedirectAttributes redirectAttributes) {
+        try {
+            User staff = userDetails != null ? userDetails.getUser() : null;
+            UpdateSubOrderStatusDto dto = new UpdateSubOrderStatusDto();
+            dto.setStatus(status.toUpperCase().trim());
+            dto.setNote(note != null && !note.isBlank() ? note.trim() : ("Cập nhật tiến độ: " + status));
+            if (trackingNumber != null && !trackingNumber.isBlank()) {
+                dto.setTrackingNumber(trackingNumber.trim());
+            }
+            fulfillmentService.updateSubOrderStatus(subOrderId, dto, staff);
+            redirectAttributes.addFlashAttribute("successMessage", "✅ Cập nhật trạng thái đơn hàng [" + status + "] thành công!");
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("errorMessage", "❌ Không thể cập nhật: " + e.getMessage());
+        }
+        return "redirect:/admin/fulfillment/orders/" + subOrderId;
+    }
+
+    /**
+     * Bàn giao vận chuyển & Gán tài xế dạng MVC Form
+     */
+    @PostMapping("/admin/fulfillment/orders/{id}/assign-driver")
+    public String assignDriverMvc(
+            @PathVariable("id") Long subOrderId,
+            @RequestParam(name = "driverId", required = false) Long driverId,
+            @RequestParam(name = "customShipperName", required = false) String customShipperName,
+            @RequestParam(name = "customShipperPhone", required = false) String customShipperPhone,
+            @RequestParam(name = "customLicensePlate", required = false) String customLicensePlate,
+            @RequestParam(name = "carrierName", required = false, defaultValue = "Đội xe Book4Life") String carrierName,
+            @RequestParam(name = "trackingNumber", required = false) String trackingNumber,
+            @RequestParam(name = "notes", required = false) String notes,
+            @AuthenticationPrincipal CustomUserDetails userDetails,
+            RedirectAttributes redirectAttributes) {
+        try {
+            User staff = userDetails != null ? userDetails.getUser() : null;
+            fulfillmentService.assignDriver(
+                    subOrderId, driverId, customShipperName, customShipperPhone,
+                    customLicensePlate, carrierName, trackingNumber, notes, staff
+            );
+            redirectAttributes.addFlashAttribute("successMessage", "✅ Phân công tài xế & bàn giao vận chuyển thành công!");
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("errorMessage", "❌ Lỗi phân công: " + e.getMessage());
+        }
+        return "redirect:/admin/fulfillment/orders/" + subOrderId;
+    }
+
+    /**
+     * Hủy đơn hàng và tự động hoàn trả tồn kho (FR-FUL-04)
+     */
+    @PostMapping("/admin/fulfillment/orders/{id}/cancel")
+    public String cancelOrderMvc(
+            @PathVariable("id") Long subOrderId,
+            @RequestParam(name = "reason", required = false, defaultValue = "Hủy bởi nhân viên chi nhánh") String reason,
+            @AuthenticationPrincipal CustomUserDetails userDetails,
+            RedirectAttributes redirectAttributes) {
+        try {
+            User staff = userDetails != null ? userDetails.getUser() : null;
+            fulfillmentService.cancelAndRestockSubOrder(subOrderId, reason, staff);
+            redirectAttributes.addFlashAttribute("successMessage", "✅ Hủy đơn hàng thành công và đã tự động hoàn lại tồn kho sách!");
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("errorMessage", "❌ Lỗi hủy đơn: " + e.getMessage());
+        }
+        return "redirect:/admin/fulfillment/orders/" + subOrderId;
+    }
+
     // =================================================================
     // NHÓM 6: DANH SÁCH MONG MUỐN & SĂN SÁCH (Wishlist & Restock Alert)
     // =================================================================

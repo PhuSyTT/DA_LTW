@@ -65,7 +65,7 @@ public class SecurityConfig {
                     "/blog", "/blog/**", "/about", "/contact", "/categories", "/categories/**",
                     "/cart", "/cart/**", "/checkout", "/checkout/**",
                     "/orders", "/orders/**", "/my-orders",
-                    "/recycle", "/thu-mua-sach", "/trade-in/**", "/my-trade-in", "/my-wishlist", "/login", "/register", "/error", "/api/**"
+                    "/recycle", "/thu-mua-sach", "/trade-in/**", "/my-trade-in", "/my-wishlist", "/login", "/register", "/profile", "/error", "/api/**"
                 ).permitAll()
                 .requestMatchers("/admin/users/**").hasAnyAuthority("ROLE_ADMIN", "ADMIN")
                 .requestMatchers("/admin/categories/**").hasAnyAuthority(

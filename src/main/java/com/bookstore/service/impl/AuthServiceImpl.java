@@ -107,7 +107,7 @@ public class AuthServiceImpl implements AuthService {
         // 6. Lưu vào Database (Phương án B) với thời hạn 5 phút
         LocalDateTime expiresAt = LocalDateTime.now().plusMinutes(5);
         OtpVerification otpRecord = new OtpVerification(
-                email, otpCode, passwordHash, fullName, request.getPhone(), expiresAt
+                email, otpCode, passwordHash, fullName, request.getPhone(), expiresAt, "REGISTER"
         );
         otpVerificationRepository.save(otpRecord);
 
@@ -141,7 +141,12 @@ public class AuthServiceImpl implements AuthService {
 
         // 2. Tìm bản ghi OTP mới nhất chưa sử dụng
         Optional<OtpVerification> otpOpt = otpVerificationRepository
-                .findTopByEmailAndIsUsedFalseOrderByCreatedAtDesc(email);
+                .findTopByEmailAndOtpTypeAndIsUsedFalseOrderByCreatedAtDesc(email, "REGISTER");
+
+        if (otpOpt.isEmpty()) {
+            otpOpt = otpVerificationRepository
+                    .findTopByEmailAndIsUsedFalseOrderByCreatedAtDesc(email);
+        }
 
         if (otpOpt.isEmpty()) {
             return ApiResponse.error("Không tìm thấy yêu cầu đăng ký cho email này hoặc mã đã hết hạn. Vui lòng đăng ký lại!");
@@ -305,6 +310,245 @@ public class AuthServiceImpl implements AuthService {
     public ApiResponse<PasswordStrengthDto> checkPasswordStrength(String password) {
         PasswordStrengthDto strength = PasswordStrengthDto.evaluate(password);
         return ApiResponse.success(strength, "Đánh giá độ bảo mật mật khẩu thành công");
+    }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public ApiResponse<String> initiatePasswordReset(PasswordResetInitRequestDto request) {
+        String email = request.getEmail();
+        String newPassword = request.getNewPassword();
+
+        // 1. Kiểm tra tài khoản có tồn tại không
+        Optional<User> userOpt = userRepository.findByEmail(email);
+        if (userOpt.isEmpty()) {
+            return ApiResponse.error("Không tìm thấy tài khoản liên kết với địa chỉ email " + email + "!");
+        }
+
+        // 2. Kiểm tra độ bảo mật mật khẩu mới (> 6 ký tự, có chữ cái, số, ký tự đặc biệt)
+        PasswordStrengthDto strength = PasswordStrengthDto.evaluate(newPassword);
+        if (!strength.isAcceptable()) {
+            return ApiResponse.error("Mật khẩu mới không đạt chuẩn bảo mật: Mật khẩu phải có độ dài lớn hơn 6 ký tự, bao gồm cả chữ cái, chữ số và ký tự đặc biệt!");
+        }
+
+        // 3. Cooldown 60s
+        Optional<OtpVerification> lastOtpOpt = otpVerificationRepository
+                .findTopByEmailAndOtpTypeOrderByCreatedAtDesc(email, "RESET_PASSWORD");
+        if (lastOtpOpt.isPresent()) {
+            OtpVerification lastOtp = lastOtpOpt.get();
+            if (lastOtp.getCreatedAt().isAfter(LocalDateTime.now().minusSeconds(60))) {
+                return ApiResponse.error("Vui lòng đợi 60 giây trước khi yêu cầu gửi lại mã OTP mới!");
+            }
+            if (!Boolean.TRUE.equals(lastOtp.getIsUsed())) {
+                lastOtp.setIsUsed(true);
+                otpVerificationRepository.save(lastOtp);
+            }
+        }
+
+        // 4. Rate limiting: max 5 lần / 15 phút
+        long recentRequests = otpVerificationRepository.countByEmailAndOtpTypeAndCreatedAtAfter(
+                email, "RESET_PASSWORD", LocalDateTime.now().minusMinutes(15));
+        if (recentRequests >= 5) {
+            return ApiResponse.error("Bạn đã yêu cầu gửi mã OTP quá nhiều lần. Vui lòng thử lại sau 15 phút!");
+        }
+
+        // 5. Sinh mã OTP 6 số
+        String otpCode = String.format("%06d", 100000 + secureRandom.nextInt(900000));
+        String passwordHash = passwordEncoder.encode(newPassword);
+        LocalDateTime expiresAt = LocalDateTime.now().plusMinutes(5);
+
+        OtpVerification otpRecord = new OtpVerification(
+                email, otpCode, passwordHash, null, null, expiresAt, "RESET_PASSWORD"
+        );
+        otpVerificationRepository.save(otpRecord);
+
+        // 6. Gửi email OTP
+        try {
+            emailService.sendOtp(email, otpCode, "đặt lại mật khẩu");
+        } catch (Exception ex) {
+            log.warn("Không thể gửi email OTP đặt lại mật khẩu tới {}: {}", email, ex.getMessage());
+        }
+
+        log.info("=================================================================");
+        log.info(">>> MÃ XÁC THỰC OTP ĐỔI MẬT KHẨU CHO [{}]: [{}] <<<", email, otpCode);
+        log.info("=================================================================");
+
+        return ApiResponse.success(
+                otpCode,
+                "Mã OTP đã được gửi đến email " + email + ". (Mã xác thực nhanh: " + otpCode + ")"
+        );
+    }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public ApiResponse<String> verifyOtpAndResetPassword(VerifyOtpRequestDto request) {
+        String email = request.getEmail();
+        String inputOtp = request.getOtp();
+
+        Optional<User> userOpt = userRepository.findByEmail(email);
+        if (userOpt.isEmpty()) {
+            return ApiResponse.error("Tài khoản không tồn tại!");
+        }
+
+        Optional<OtpVerification> otpOpt = otpVerificationRepository
+                .findTopByEmailAndOtpTypeAndIsUsedFalseOrderByCreatedAtDesc(email, "RESET_PASSWORD");
+
+        if (otpOpt.isEmpty()) {
+            return ApiResponse.error("Không tìm thấy yêu cầu đặt lại mật khẩu cho email này hoặc mã đã hết hạn. Vui lòng thử lại!");
+        }
+
+        OtpVerification otpRecord = otpOpt.get();
+
+        if (otpRecord.isExpired()) {
+            otpRecord.setIsUsed(true);
+            otpVerificationRepository.save(otpRecord);
+            return ApiResponse.error("Mã OTP đã hết hạn (quá 5 phút). Vui lòng yêu cầu mã xác nhận mới!");
+        }
+
+        if (otpRecord.getAttempts() >= 5) {
+            otpRecord.setIsUsed(true);
+            otpVerificationRepository.save(otpRecord);
+            return ApiResponse.error("Bạn đã nhập sai mã OTP quá 5 lần. Phiên xác thực bị hủy vì lý do an toàn!");
+        }
+
+        if (!otpRecord.getOtpCode().equals(inputOtp)) {
+            otpRecord.setAttempts(otpRecord.getAttempts() + 1);
+            otpVerificationRepository.save(otpRecord);
+            int remaining = 5 - otpRecord.getAttempts();
+            return ApiResponse.error("Mã xác nhận OTP không chính xác! Bạn còn " + remaining + " lần thử.");
+        }
+
+        // OTP hợp lệ -> Cập nhật mật khẩu mới
+        otpRecord.setIsUsed(true);
+        otpVerificationRepository.save(otpRecord);
+
+        User user = userOpt.get();
+        user.setPassword(otpRecord.getPasswordHash());
+        userRepository.save(user);
+
+        log.info("Đã cập nhật mật khẩu mới thành công cho tài khoản ID={}, Email={}", user.getId(), user.getEmail());
+        return ApiResponse.success("Đổi mật khẩu thành công! Bạn có thể đăng nhập ngay với mật khẩu mới.");
+    }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public ApiResponse<String> initiateProfileUpdate(String email, ProfileUpdateInitRequestDto request) {
+        Optional<User> userOpt = userRepository.findByEmail(email);
+        if (userOpt.isEmpty()) {
+            return ApiResponse.error("Tài khoản không tồn tại!");
+        }
+
+        if (request.getFullName() == null || request.getFullName().trim().isBlank()) {
+            return ApiResponse.error("Họ và tên không được để trống!");
+        }
+
+        // Cooldown 60s
+        Optional<OtpVerification> lastOtpOpt = otpVerificationRepository
+                .findTopByEmailAndOtpTypeOrderByCreatedAtDesc(email, "UPDATE_PROFILE");
+        if (lastOtpOpt.isPresent()) {
+            OtpVerification lastOtp = lastOtpOpt.get();
+            if (lastOtp.getCreatedAt().isAfter(LocalDateTime.now().minusSeconds(60))) {
+                return ApiResponse.error("Vui lòng đợi 60 giây trước khi yêu cầu gửi lại mã OTP mới!");
+            }
+            if (!Boolean.TRUE.equals(lastOtp.getIsUsed())) {
+                lastOtp.setIsUsed(true);
+                otpVerificationRepository.save(lastOtp);
+            }
+        }
+
+        // Rate limit: max 5 lần / 15 phút
+        long recentRequests = otpVerificationRepository.countByEmailAndOtpTypeAndCreatedAtAfter(
+                email, "UPDATE_PROFILE", LocalDateTime.now().minusMinutes(15));
+        if (recentRequests >= 5) {
+            return ApiResponse.error("Bạn đã yêu cầu gửi mã OTP quá nhiều lần. Vui lòng thử lại sau 15 phút!");
+        }
+
+        // Sinh mã OTP 6 số
+        String otpCode = String.format("%06d", 100000 + secureRandom.nextInt(900000));
+        LocalDateTime expiresAt = LocalDateTime.now().plusMinutes(5);
+
+        OtpVerification otpRecord = new OtpVerification(
+                email, otpCode, "", request.getFullName().trim(),
+                request.getPhone() != null ? request.getPhone().trim() : "",
+                expiresAt, "UPDATE_PROFILE"
+        );
+        otpVerificationRepository.save(otpRecord);
+
+        // Gửi email OTP
+        try {
+            emailService.sendOtp(email, otpCode, "thay đổi thông tin cá nhân");
+        } catch (Exception ex) {
+            log.warn("Không thể gửi email OTP cập nhật thông tin tới {}: {}", email, ex.getMessage());
+        }
+
+        log.info("=================================================================");
+        log.info(">>> MÃ XÁC THỰC OTP ĐỔI THÔNG TIN CÁ NHÂN CHO [{}]: [{}] <<<", email, otpCode);
+        log.info("=================================================================");
+
+        return ApiResponse.success(
+                otpCode,
+                "Mã OTP đã được gửi đến email " + email + ". (Mã xác thực nhanh: " + otpCode + ")"
+        );
+    }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public ApiResponse<UserDto> verifyOtpAndUpdateProfile(String email, VerifyOtpRequestDto request) {
+        Optional<User> userOpt = userRepository.findByEmail(email);
+        if (userOpt.isEmpty()) {
+            return ApiResponse.error("Tài khoản không tồn tại!");
+        }
+
+        String inputOtp = request.getOtp();
+        Optional<OtpVerification> otpOpt = otpVerificationRepository
+                .findTopByEmailAndOtpTypeAndIsUsedFalseOrderByCreatedAtDesc(email, "UPDATE_PROFILE");
+
+        if (otpOpt.isEmpty()) {
+            return ApiResponse.error("Không tìm thấy yêu cầu cập nhật thông tin hoặc mã OTP đã hết hạn. Vui lòng thử lại!");
+        }
+
+        OtpVerification otpRecord = otpOpt.get();
+
+        if (otpRecord.isExpired()) {
+            otpRecord.setIsUsed(true);
+            otpVerificationRepository.save(otpRecord);
+            return ApiResponse.error("Mã OTP đã hết hạn (quá 5 phút). Vui lòng yêu cầu mã xác nhận mới!");
+        }
+
+        if (otpRecord.getAttempts() >= 5) {
+            otpRecord.setIsUsed(true);
+            otpVerificationRepository.save(otpRecord);
+            return ApiResponse.error("Bạn đã nhập sai mã OTP quá 5 lần. Phiên xác thực bị hủy vì lý do an toàn!");
+        }
+
+        if (!otpRecord.getOtpCode().equals(inputOtp)) {
+            otpRecord.setAttempts(otpRecord.getAttempts() + 1);
+            otpVerificationRepository.save(otpRecord);
+            int remaining = 5 - otpRecord.getAttempts();
+            return ApiResponse.error("Mã xác nhận OTP không chính xác! Bạn còn " + remaining + " lần thử.");
+        }
+
+        // OTP hợp lệ -> Cập nhật thông tin cá nhân
+        otpRecord.setIsUsed(true);
+        otpVerificationRepository.save(otpRecord);
+
+        User user = userOpt.get();
+        user.setFullName(otpRecord.getFullName());
+        user.setPhone(otpRecord.getPhone());
+        User savedUser = userRepository.save(user);
+
+        log.info("Đã cập nhật thông tin cá nhân thành công cho ID={}, Email={}", savedUser.getId(), savedUser.getEmail());
+
+        UserDto dto = new UserDto();
+        dto.setId(savedUser.getId());
+        dto.setEmail(savedUser.getEmail());
+        dto.setFullName(savedUser.getFullName());
+        dto.setPhone(savedUser.getPhone());
+        if (savedUser.getRole() != null) {
+            dto.setRoleId(savedUser.getRole().getId());
+            dto.setRoleName(savedUser.getRole().getRoleName());
+        }
+
+        return ApiResponse.success(dto, "Cập nhật thông tin cá nhân thành công!");
     }
 }
 

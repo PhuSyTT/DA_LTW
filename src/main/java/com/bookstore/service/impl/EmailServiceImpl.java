@@ -38,13 +38,20 @@ public class EmailServiceImpl implements EmailService {
     @Override
     @Async
     public void sendRegistrationOtp(String toEmail, String otpCode) {
+        sendOtp(toEmail, otpCode, "đăng ký tài khoản");
+    }
+
+    @Override
+    @Async
+    public void sendOtp(String toEmail, String otpCode, String purposeText) {
         try {
+            String purpose = (purposeText != null && !purposeText.isBlank()) ? purposeText : "xác thực";
             // Định dạng mã OTP hiển thị 3 số cách 3 số: "123 456"
             String formattedOtp = (otpCode != null && otpCode.length() == 6)
                     ? otpCode.substring(0, 3) + " " + otpCode.substring(3, 6)
                     : otpCode;
 
-            String subject = "[" + appName + "] - " + otpCode + " là mã xác nhận đăng ký tài khoản của bạn";
+            String subject = "[" + appName + "] - " + otpCode + " là mã xác nhận " + purpose + " của bạn";
 
             MimeMessage message = mailSender.createMimeMessage();
             MimeMessageHelper helper = new MimeMessageHelper(message, true, StandardCharsets.UTF_8.name());
@@ -53,18 +60,18 @@ public class EmailServiceImpl implements EmailService {
             helper.setTo(toEmail);
             helper.setSubject(subject);
 
-            String htmlBody = buildOtpEmailHtml(formattedOtp);
+            String htmlBody = buildOtpEmailHtml(formattedOtp, purpose);
             helper.setText(htmlBody, true);
 
             mailSender.send(message);
-            log.info("Đã gửi thành công email chứa mã OTP xác thực tới: {}", toEmail);
+            log.info("Đã gửi thành công email chứa mã OTP xác thực ({}) tới: {}", purpose, toEmail);
         } catch (Exception ex) {
             log.error("Lỗi khi gửi email OTP tới {}: {}", toEmail, ex.getMessage());
             throw new RuntimeException("Không thể gửi email OTP qua máy chủ SMTP: " + ex.getMessage());
         }
     }
 
-    private String buildOtpEmailHtml(String formattedOtp) {
+    private String buildOtpEmailHtml(String formattedOtp, String purpose) {
         return "<!DOCTYPE html>"
                 + "<html lang=\"vi\">"
                 + "<head>"
@@ -86,8 +93,8 @@ public class EmailServiceImpl implements EmailService {
                 + "  <div class=\"card\">"
                 + "    <div class=\"header-brand\">" + appName + "</div>"
                 + "    <p>Xin chào,</p>"
-                + "    <p>Chúng tôi vừa nhận được yêu cầu đăng ký tài khoản tại <strong>[" + appName + "]</strong> liên kết với địa chỉ email này.</p>"
-                + "    <p>Để hoàn tất quá trình đăng ký, vui lòng nhập mã xác nhận dưới đây:</p>"
+                + "    <p>Chúng tôi vừa nhận được yêu cầu <strong>" + purpose + "</strong> tại <strong>[" + appName + "]</strong> liên kết với địa chỉ email này.</p>"
+                + "    <p>Để hoàn tất xác nhận, vui lòng nhập mã OTP dưới đây:</p>"
                 + "    <div class=\"otp-box\">"
                 + "      <div class=\"otp-code\">" + formattedOtp + "</div>"
                 + "      <div class=\"timer-badge\">⏱️ Mã này chỉ có hiệu lực trong vòng 5 phút.</div>"
@@ -95,7 +102,7 @@ public class EmailServiceImpl implements EmailService {
                 + "    <div class=\"security-alert\">"
                 + "      <strong>🔒 Lưu ý bảo mật:</strong><br>"
                 + "      • Tuyệt đối <strong>KHÔNG</strong> chia sẻ mã này cho bất kỳ ai, kể cả nhân viên hỗ trợ của chúng tôi.<br>"
-                + "      • Nếu bạn không yêu cầu tạo tài khoản, xin vui lòng bỏ qua và xóa email này."
+                + "      • Nếu bạn không yêu cầu thao tác này, xin vui lòng bỏ qua và đổi mật khẩu để bảo vệ tài khoản."
                 + "    </div>"
                 + "    <p style=\"font-size: 13px;\">Cần hỗ trợ? Truy cập <a href=\"#\" style=\"color: #835500; font-weight: 600;\">[Trung tâm trợ giúp]</a> hoặc phản hồi lại email này.</p>"
                 + "    <div class=\"footer\">"

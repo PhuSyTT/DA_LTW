@@ -256,4 +256,91 @@ class PasswordAndEmailValidationTest {
 
         assertTrue(ex.getMessage().contains("đã tồn tại"));
     }
+
+    // ==========================================
+    // 4. BẮT BUỘC XÁC THỰC OTP MỚI ĐƯỢC ĐỔI MẬT KHẨU HOẶC SỬA PROFILE
+    // ==========================================
+
+    @Test
+    @DisplayName("Đặt lại mật khẩu: Chỉ đổi mật khẩu trong DB khi xác nhận đúng mã OTP")
+    void testResetPassword_OnlyWithValidOtp() {
+        when(userRepository.findByEmail("user.book4life@gmail.com")).thenReturn(Optional.of(existingUser));
+
+        com.bookstore.dto.PasswordResetInitRequestDto initDto = new com.bookstore.dto.PasswordResetInitRequestDto(
+                "user.book4life@gmail.com", "NewPass@123"
+        );
+        ApiResponse<String> initRes = authService.initiatePasswordReset(initDto);
+        assertTrue(initRes.isSuccess());
+        String generatedOtp = initRes.getData();
+        assertNotNull(generatedOtp);
+
+        // Giả lập lưu OTP vào DB
+        com.bookstore.entity.OtpVerification otpEntity = new com.bookstore.entity.OtpVerification(
+                "user.book4life@gmail.com", generatedOtp, "$2a$10$newEncodedPass", null, null, java.time.LocalDateTime.now().plusMinutes(5), "RESET_PASSWORD"
+        );
+        when(otpVerificationRepository.findTopByEmailAndOtpTypeAndIsUsedFalseOrderByCreatedAtDesc(
+                "user.book4life@gmail.com", "RESET_PASSWORD"
+        )).thenReturn(Optional.of(otpEntity));
+        when(userRepository.save(any(User.class))).thenAnswer(i -> i.getArgument(0));
+
+        // 1. Thử xác thực với OTP SAI -> Thất bại, mật khẩu DB KHÔNG đổi
+        com.bookstore.dto.VerifyOtpRequestDto wrongOtpDto = new com.bookstore.dto.VerifyOtpRequestDto(
+                "user.book4life@gmail.com", "999999"
+        );
+        ApiResponse<String> failRes = authService.verifyOtpAndResetPassword(wrongOtpDto);
+        assertFalse(failRes.isSuccess());
+        assertNotEquals("$2a$10$newEncodedPass", existingUser.getPassword());
+
+        // 2. Xác thực với OTP ĐÚNG -> Thành công, mật khẩu DB được cập nhật mới
+        com.bookstore.dto.VerifyOtpRequestDto correctOtpDto = new com.bookstore.dto.VerifyOtpRequestDto(
+                "user.book4life@gmail.com", generatedOtp
+        );
+        ApiResponse<String> successRes = authService.verifyOtpAndResetPassword(correctOtpDto);
+        assertTrue(successRes.isSuccess());
+        assertEquals("$2a$10$newEncodedPass", existingUser.getPassword());
+        assertTrue(Boolean.TRUE.equals(otpEntity.getIsUsed()));
+        verify(userRepository, atLeastOnce()).save(existingUser);
+    }
+
+    @Test
+    @DisplayName("Thay đổi thông tin cá nhân: Chỉ cập nhật Họ tên & SĐT khi xác nhận đúng mã OTP")
+    void testUpdateProfile_OnlyWithValidOtp() {
+        when(userRepository.findByEmail("user.book4life@gmail.com")).thenReturn(Optional.of(existingUser));
+
+        com.bookstore.dto.ProfileUpdateInitRequestDto initDto = new com.bookstore.dto.ProfileUpdateInitRequestDto(
+                "Hoàng Độc Giả Mới", "0988776655"
+        );
+        ApiResponse<String> initRes = authService.initiateProfileUpdate("user.book4life@gmail.com", initDto);
+        assertTrue(initRes.isSuccess());
+        String generatedOtp = initRes.getData();
+        assertNotNull(generatedOtp);
+
+        com.bookstore.entity.OtpVerification otpEntity = new com.bookstore.entity.OtpVerification(
+                "user.book4life@gmail.com", generatedOtp, "", "Hoàng Độc Giả Mới", "0988776655", java.time.LocalDateTime.now().plusMinutes(5), "UPDATE_PROFILE"
+        );
+        when(otpVerificationRepository.findTopByEmailAndOtpTypeAndIsUsedFalseOrderByCreatedAtDesc(
+                "user.book4life@gmail.com", "UPDATE_PROFILE"
+        )).thenReturn(Optional.of(otpEntity));
+        when(userRepository.save(any(User.class))).thenAnswer(i -> i.getArgument(0));
+
+        // 1. Nhập OTP SAI -> Thất bại, họ tên và số điện thoại trong DB KHÔNG thay đổi
+        com.bookstore.dto.VerifyOtpRequestDto wrongOtpDto = new com.bookstore.dto.VerifyOtpRequestDto(
+                "user.book4life@gmail.com", "000000"
+        );
+        ApiResponse<UserDto> failRes = authService.verifyOtpAndUpdateProfile("user.book4life@gmail.com", wrongOtpDto);
+        assertFalse(failRes.isSuccess());
+        assertEquals("Hoàng Độc Giả", existingUser.getFullName());
+        assertNull(existingUser.getPhone());
+
+        // 2. Nhập OTP ĐÚNG -> Thành công, họ tên và số điện thoại được lưu vào DB
+        com.bookstore.dto.VerifyOtpRequestDto correctOtpDto = new com.bookstore.dto.VerifyOtpRequestDto(
+                "user.book4life@gmail.com", generatedOtp
+        );
+        ApiResponse<UserDto> successRes = authService.verifyOtpAndUpdateProfile("user.book4life@gmail.com", correctOtpDto);
+        assertTrue(successRes.isSuccess());
+        assertEquals("Hoàng Độc Giả Mới", existingUser.getFullName());
+        assertEquals("0988776655", existingUser.getPhone());
+        assertTrue(Boolean.TRUE.equals(otpEntity.getIsUsed()));
+        verify(userRepository, atLeastOnce()).save(existingUser);
+    }
 }

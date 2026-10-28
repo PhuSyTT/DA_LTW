@@ -154,21 +154,31 @@
                     <div class="p-3 d-grid gap-2">
                         
                         <!-- PENDING → CONFIRMED: Phê duyệt đơn hàng -->
-                        <button th:if="${order.status == 'PENDING'}"
-                                class="btn btn-success fw-bold py-2 shadow-sm"
-                                id="btn-confirm-order">
-                            <i class="fas fa-circle-check me-2"></i> 1. Phê Duyệt &amp; Tiếp Nhận Đơn Hàng
-                        </button>
+                        <form th:if="${order.status == 'PENDING'}"
+                              th:action="@{'/admin/fulfillment/orders/' + ${order.id} + '/status'}"
+                              method="post" class="d-grid mb-1">
+                            <input type="hidden" name="status" value="CONFIRMED">
+                            <input type="hidden" name="note" value="Nhân viên/Quản lý chi nhánh đã phê duyệt đơn hàng">
+                            <button type="submit" class="btn btn-success fw-bold py-2 shadow-sm" id="btn-confirm-order">
+                                <i class="fas fa-circle-check me-2"></i> 1. Phê Duyệt &amp; Tiếp Nhận Đơn Hàng
+                            </button>
+                        </form>
 
                         <!-- CONFIRMED / PENDING → PACKING -->
-                        <button th:if="${order.status == 'PENDING' or order.status == 'CONFIRMED'}"
-                                class="btn btn-info text-white fw-semibold"
-                                id="btn-start-packing">
-                            <i class="fas fa-boxes-stacked me-2"></i> 2. Bắt Đầu Xuất Kho &amp; Đóng Gói
-                        </button>
+                        <form th:if="${order.status == 'PENDING' or order.status == 'CONFIRMED'}"
+                              th:action="@{'/admin/fulfillment/orders/' + ${order.id} + '/status'}"
+                              method="post" class="d-grid mb-1">
+                            <input type="hidden" name="status" value="PACKING">
+                            <input type="hidden" name="note" value="Thủ kho bắt đầu nhặt sách trên kệ và đóng gói">
+                            <button type="submit" class="btn btn-info text-white fw-semibold py-2" id="btn-start-packing">
+                                <i class="fas fa-boxes-stacked me-2"></i> 2. Bắt Đầu Xuất Kho &amp; Đóng Gói
+                            </button>
+                        </form>
 
                         <!-- PACKING → SHIPPED: Sắp Xếp Tài Xế & Bàn Giao Vận Chuyển -->
-                        <div th:if="${order.status == 'PACKING'}" class="p-3 bg-light rounded border vstack gap-2">
+                        <form th:if="${order.status == 'PACKING'}"
+                              th:action="@{'/admin/fulfillment/orders/' + ${order.id} + '/assign-driver'}"
+                              method="post" class="p-3 bg-light rounded border vstack gap-2">
                             <div class="d-flex align-items-center justify-content-between mb-1">
                                 <span class="fw-bold small text-primary"><i class="fas fa-motorcycle me-1"></i> 3. Sắp Xếp Tài Xế &amp; Bàn Giao Vận Chuyển</span>
                                 <span class="badge bg-primary text-white" th:if="${availableDrivers != null and !#lists.isEmpty(availableDrivers)}" th:text="${#lists.size(availableDrivers)} + ' tài xế sẵn sàng'">3 tài xế sẵn sàng</span>
@@ -177,7 +187,7 @@
                             <!-- Chọn tài xế từ chi nhánh -->
                             <div>
                                 <label class="form-label small fw-semibold mb-1">Chọn tài xế chi nhánh:</label>
-                                <select id="driverSelect" class="form-select form-select-sm" onchange="onDriverSelectionChange()">
+                                <select id="driverSelect" name="driverId" class="form-select form-select-sm" onchange="onDriverSelectionChange()">
                                     <option value="">-- Chọn tài xế nội bộ --</option>
                                     <option th:each="d : ${availableDrivers}"
                                             th:value="${d.id}"
@@ -196,35 +206,35 @@
                             <div class="row g-2 mt-1">
                                 <div class="col-6">
                                     <label class="form-label text-muted small mb-0" style="font-size: 0.75rem;">Họ tên shipper</label>
-                                    <input type="text" id="shipperNameInput" class="form-control form-control-sm" placeholder="Họ và tên tài xế">
+                                    <input type="text" name="customShipperName" id="shipperNameInput" class="form-control form-control-sm" placeholder="Họ và tên tài xế">
                                 </div>
                                 <div class="col-6">
                                     <label class="form-label text-muted small mb-0" style="font-size: 0.75rem;">SĐT Shipper</label>
-                                    <input type="text" id="shipperPhoneInput" class="form-control form-control-sm" placeholder="Số điện thoại tài xế">
+                                    <input type="text" name="customShipperPhone" id="shipperPhoneInput" class="form-control form-control-sm" placeholder="Số điện thoại tài xế">
                                 </div>
                                 <div class="col-6">
                                     <label class="form-label text-muted small mb-0" style="font-size: 0.75rem;">Phương tiện / Biển số</label>
-                                    <input type="text" id="shipperVehicleInput" class="form-control form-control-sm" placeholder="Phương tiện / Biển số xe">
+                                    <input type="text" name="customLicensePlate" id="shipperVehicleInput" class="form-control form-control-sm" placeholder="Phương tiện / Biển số xe">
                                 </div>
                                 <div class="col-6">
                                     <label class="form-label text-muted small mb-0" style="font-size: 0.75rem;">Đơn vị vận chuyển</label>
-                                    <input type="text" id="shippingCarrierInput" class="form-control form-control-sm" placeholder="Đơn vị vận chuyển">
+                                    <input type="text" name="carrierName" id="shippingCarrierInput" class="form-control form-control-sm" placeholder="Đơn vị vận chuyển">
                                 </div>
                                 <div class="col-12">
                                     <label class="form-label text-muted small mb-0" style="font-size: 0.75rem;">Mã Vận Đơn Đối Tác (nếu có)</label>
-                                    <input type="text" id="trackingNumberInput" class="form-control form-control-sm"
+                                    <input type="text" name="trackingNumber" id="trackingNumberInput" class="form-control form-control-sm"
                                            placeholder="Mã vận đơn">
                                 </div>
                                 <div class="col-12">
                                     <label class="form-label text-muted small mb-0" style="font-size: 0.75rem;">Ghi chú điều phối / giao hàng</label>
-                                    <input type="text" id="deliveryNotesInput" class="form-control form-control-sm" placeholder="Ghi chú điều phối / giao hàng">
+                                    <input type="text" name="notes" id="deliveryNotesInput" class="form-control form-control-sm" placeholder="Ghi chú điều phối / giao hàng">
                                 </div>
                             </div>
 
-                            <button class="btn btn-primary btn-sm fw-semibold mt-2" id="btn-assign-driver">
+                            <button type="submit" class="btn btn-primary btn-sm fw-semibold mt-2" id="btn-assign-driver">
                                 <i class="fas fa-paper-plane me-2"></i> Xuất Kho &amp; Bàn Giao Vận Chuyển
                             </button>
-                        </div>
+                        </form>
 
                         <!-- SHIPPED: Thông tin tài xế đang giao + Nút Hoàn Thành + Đổi Tài Xế -->
                         <div th:if="${order.status == 'SHIPPED'}" class="vstack gap-2">
@@ -235,19 +245,25 @@
                                 <div th:if="${order.trackingNumber != null}">Mã vận đơn: <span class="font-monospace fw-bold" th:text="${order.trackingNumber}">B4L-123</span></div>
                             </div>
 
-                            <button class="btn btn-success fw-semibold" id="btn-complete">
-                                <i class="fas fa-circle-check me-2"></i> 4. Xác Nhận Giao Hàng Thành Công
-                            </button>
+                            <form th:action="@{'/admin/fulfillment/orders/' + ${order.id} + '/status'}"
+                                  method="post" class="d-grid mb-1">
+                                <input type="hidden" name="status" value="COMPLETED">
+                                <input type="hidden" name="note" value="Đơn hàng đã được giao thành công cho khách hàng">
+                                <button type="submit" class="btn btn-success fw-semibold py-2" id="btn-complete">
+                                    <i class="fas fa-circle-check me-2"></i> 4. Xác Nhận Giao Hàng Thành Công
+                                </button>
+                            </form>
 
                             <!-- Accordion đổi tài xế / cập nhật thông tin vận đơn -->
                             <details class="border rounded p-2 bg-light text-muted small">
                                 <summary class="fw-semibold text-secondary" style="cursor: pointer;">
                                     <i class="fas fa-arrows-rotate me-1"></i> Cập nhật / Đổi tài xế khác
                                 </summary>
-                                <div class="mt-2 vstack gap-2 pt-2 border-top">
+                                <form th:action="@{'/admin/fulfillment/orders/' + ${order.id} + '/assign-driver'}"
+                                      method="post" class="mt-2 vstack gap-2 pt-2 border-top">
                                     <div>
                                         <label class="form-label text-muted small mb-1">Chọn tài xế thay thế:</label>
-                                        <select id="reassignDriverSelect" class="form-select form-select-sm" onchange="onReassignDriverSelectionChange()">
+                                        <select id="reassignDriverSelect" name="driverId" class="form-select form-select-sm" onchange="onReassignDriverSelectionChange()">
                                             <option value="">-- Chọn tài xế nội bộ --</option>
                                             <option th:each="d : ${availableDrivers}"
                                                     th:value="${d.id}"
@@ -263,30 +279,32 @@
                                     </div>
                                     <div class="row g-2">
                                         <div class="col-6">
-                                            <input type="text" id="reassignShipperName" class="form-control form-control-sm" placeholder="Tên shipper" th:value="${order.shipperName}">
+                                            <input type="text" name="customShipperName" id="reassignShipperName" class="form-control form-control-sm" placeholder="Tên shipper" th:value="${order.shipperName}">
                                         </div>
                                         <div class="col-6">
-                                            <input type="text" id="reassignShipperPhone" class="form-control form-control-sm" placeholder="SĐT shipper" th:value="${order.shipperPhone}">
+                                            <input type="text" name="customShipperPhone" id="reassignShipperPhone" class="form-control form-control-sm" placeholder="SĐT shipper" th:value="${order.shipperPhone}">
                                         </div>
                                         <div class="col-6">
-                                            <input type="text" id="reassignShipperVehicle" class="form-control form-control-sm" placeholder="Phương tiện" th:value="${order.shipperVehicle}">
+                                            <input type="text" name="customLicensePlate" id="reassignShipperVehicle" class="form-control form-control-sm" placeholder="Phương tiện" th:value="${order.shipperVehicle}">
                                         </div>
                                         <div class="col-6">
-                                            <input type="text" id="reassignCarrier" class="form-control form-control-sm" placeholder="Đơn vị giao" th:value="${order.shippingCarrier}">
+                                            <input type="text" name="carrierName" id="reassignCarrier" class="form-control form-control-sm" placeholder="Đơn vị giao" th:value="${order.shippingCarrier}">
                                         </div>
                                         <div class="col-12">
-                                            <input type="text" id="reassignTrackingNumber" class="form-control form-control-sm" placeholder="Mã vận đơn" th:value="${order.trackingNumber}">
+                                            <input type="text" name="trackingNumber" id="reassignTrackingNumber" class="form-control form-control-sm" placeholder="Mã vận đơn" th:value="${order.trackingNumber}">
                                         </div>
                                     </div>
-                                    <button class="btn btn-warning btn-sm fw-semibold mt-1" id="btn-reassign-driver">
+                                    <input type="hidden" name="notes" value="Cập nhật lại thông tin tài xế">
+                                    <button type="submit" class="btn btn-warning btn-sm fw-semibold mt-1" id="btn-reassign-driver">
                                         <i class="fas fa-sync me-1"></i> Cập Nhật Thông Tin Vận Chuyển
                                     </button>
-                                </div>
+                                </form>
                             </details>
                         </div>
 
                         <!-- Cancel Button (FR-FUL-04) -->
-                        <button class="btn btn-outline-danger btn-sm mt-2" id="btn-cancel">
+                        <button type="button" class="btn btn-outline-danger btn-sm mt-2" id="btn-cancel"
+                                data-bs-toggle="modal" data-bs-target="#cancelModal">
                             <i class="fas fa-ban me-2"></i> Hủy Đơn &amp; Hoàn Tồn Kho Sách
                         </button>
                     </div>
@@ -372,26 +390,28 @@
     <div class="modal fade" id="cancelModal" tabindex="-1" aria-hidden="true">
         <div class="modal-dialog">
             <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title text-danger">⚠️ Hủy Đơn Hàng &amp; Hoàn Kho Tự Động</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-                </div>
-                <div class="modal-body">
-                    <div class="alert alert-warning small">
-                        Tồn kho của tất cả mặt hàng trong đơn sẽ được <strong>hoàn trả tự động</strong> sau khi hủy.
+                <form th:action="@{'/admin/fulfillment/orders/' + ${order.id} + '/cancel'}" method="post">
+                    <div class="modal-header">
+                        <h5 class="modal-title text-danger">⚠️ Hủy Đơn Hàng &amp; Hoàn Kho Tự Động</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                     </div>
-                    <div class="mb-3">
-                        <label class="form-label fw-semibold small">Lý Do Hủy</label>
-                        <textarea id="cancelReasonDetail" class="form-control form-control-sm" rows="3"
-                                  placeholder="Lý do hủy đơn hàng"></textarea>
+                    <div class="modal-body">
+                        <div class="alert alert-warning small">
+                            Tồn kho của tất cả mặt hàng trong đơn sẽ được <strong>hoàn trả tự động</strong> sau khi hủy.
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label fw-semibold small">Lý Do Hủy</label>
+                            <textarea name="reason" id="cancelReasonDetail" class="form-control form-control-sm" rows="3"
+                                      placeholder="Lý do hủy đơn hàng"></textarea>
+                        </div>
                     </div>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-sm btn-secondary" data-bs-dismiss="modal">Đóng</button>
-                    <button type="button" class="btn btn-sm btn-danger" id="confirmDetailCancelBtn">
-                        Xác Nhận Hủy &amp; Hoàn Kho
-                    </button>
-                </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-sm btn-secondary" data-bs-dismiss="modal">Đóng</button>
+                        <button type="submit" class="btn btn-sm btn-danger" id="confirmDetailCancelBtn">
+                            Xác Nhận Hủy &amp; Hoàn Kho
+                        </button>
+                    </div>
+                </form>
             </div>
         </div>
     </div>

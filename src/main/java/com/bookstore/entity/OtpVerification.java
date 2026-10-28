@@ -32,6 +32,9 @@ public class OtpVerification {
     @Column(nullable = false)
     private Integer attempts = 0;
 
+    @Column(name = "otp_type", length = 50)
+    private String otpType = "REGISTER";
+
     @Column(name = "is_used", nullable = false)
     private Boolean isUsed = false;
 
@@ -45,6 +48,10 @@ public class OtpVerification {
     }
 
     public OtpVerification(String email, String otpCode, String passwordHash, String fullName, String phone, LocalDateTime expiresAt) {
+        this(email, otpCode, passwordHash, fullName, phone, expiresAt, "REGISTER");
+    }
+
+    public OtpVerification(String email, String otpCode, String passwordHash, String fullName, String phone, LocalDateTime expiresAt, String otpType) {
         this.email = email;
         this.otpCode = otpCode;
         this.passwordHash = passwordHash;
@@ -54,6 +61,7 @@ public class OtpVerification {
         this.isUsed = false;
         this.createdAt = LocalDateTime.now();
         this.expiresAt = expiresAt;
+        this.otpType = (otpType != null && !otpType.isBlank()) ? otpType : "REGISTER";
     }
 
     public boolean isExpired() {
@@ -142,6 +150,14 @@ public class OtpVerification {
 
     public void setExpiresAt(LocalDateTime expiresAt) {
         this.expiresAt = expiresAt;
+    }
+
+    public String getOtpType() {
+        return otpType;
+    }
+
+    public void setOtpType(String otpType) {
+        this.otpType = otpType;
     }
 }
 

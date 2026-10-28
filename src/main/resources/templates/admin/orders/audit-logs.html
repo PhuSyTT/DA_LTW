@@ -103,11 +103,11 @@
                         <td class="text-center">
                             <div class="btn-group btn-group-sm">
                                 <a th:if="${log.subOrderId != null}" th:href="@{'/admin/fulfillment/orders/' + ${log.subOrderId}}"
-                                   class="btn btn-sm btn-outline-success fw-semibold" title="Mở trang Xử Lý &amp; Đổi Trạng Thái đơn hàng này">
-                                    <i class="fas fa-boxes-packing me-1"></i> Xử Lý Đơn
+                                   class="btn btn-sm btn-primary fw-semibold" title="Bấm để Cập Nhật &amp; Đổi Trạng Thái đơn hàng này">
+                                    <i class="fas fa-arrows-rotate me-1"></i> Đổi Trạng Thái
                                 </a>
                                 <a th:href="@{'/orders/' + ${log.subOrderId} + '/timeline'}" target="_blank"
-                                   class="btn btn-sm btn-outline-primary" title="Xem Timeline Đơn">
+                                   class="btn btn-sm btn-outline-secondary" title="Xem Timeline Tiến Độ Khách Hàng">
                                     <i class="fas fa-route"></i>
                                 </a>
                             </div>

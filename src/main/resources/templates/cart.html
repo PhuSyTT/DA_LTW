@@ -197,11 +197,12 @@
                                 <span sec:authentication="principal.roleName">Admin HQ</span>
                             </a>
 
-                            <span sec:authorize="hasAnyAuthority('ROLE_CUSTOMER', 'CUSTOMER')" 
-                                  class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-secondary-container text-on-secondary-container text-xs font-bold">
+                            <a th:href="@{/profile}" sec:authorize="hasAnyAuthority('ROLE_CUSTOMER', 'CUSTOMER')" 
+                               class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-secondary-container text-on-secondary-container text-xs font-bold hover:shadow-md transition-all cursor-pointer"
+                               title="Thông tin cá nhân &amp; Đổi mật khẩu qua OTP">
                                 <span class="material-symbols-outlined text-[16px]">account_circle</span>
                                 <span sec:authentication="principal.fullName">Độc Giả</span>
-                            </span>
+                            </a>
 
                             <a th:href="@{/logout}" href="/logout" title="Đăng xuất" class="p-2 rounded-xl hover:bg-error-container text-outline hover:text-error transition-colors">
                                 <span class="material-symbols-outlined text-[20px]">logout</span>

@@ -438,7 +438,7 @@
                         Ghi nhớ đăng nhập
                     </label>
                 </div>
-                <a href="javascript:void(0)" onclick="openRegisterModal()" class="forgot-link">
+                <a href="javascript:void(0)" onclick="openForgotPasswordModal()" class="forgot-link">
                     Quên mật khẩu?
                 </a>
             </div>
@@ -657,6 +657,121 @@
 
                         <button type="button" onclick="loginWithCreatedAccount()" class="btn-terracotta-cta">
                             <span>Đăng Nhập Ngay Vào Hệ Thống</span>
+                            <i class="bi bi-box-arrow-in-right fs-5"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- =================================================================
+         MODAL QUÊN MẬT KHẨU / ĐẶT LẠI MẬT KHẨU BẰNG OTP
+         ================================================================= -->
+    <div class="modal fade" id="forgotPasswordModal" tabindex="-1" aria-labelledby="forgotModalLabel" aria-hidden="true" data-bs-backdrop="static">
+        <div class="modal-dialog modal-dialog-centered" style="max-width: 480px;">
+            <div class="modal-content modal-glass-content border-0 p-2">
+                
+                <!-- Modal Header -->
+                <div class="modal-header border-0 pb-1">
+                    <div class="d-flex align-items-center gap-2">
+                        <div class="p-2 rounded-3 text-white" style="background: var(--accent-terracotta);">
+                            <i class="bi bi-key-fill fs-6"></i>
+                        </div>
+                        <div>
+                            <h5 class="modal-title fw-bold fs-6 mb-0" style="color: var(--text-main);" id="forgotModalLabel">Đặt Lại Mật Khẩu</h5>
+                            <span class="text-muted small" style="font-size: 0.725rem;">Bắt buộc xác thực OTP gửi về Email để đổi mật khẩu</span>
+                        </div>
+                    </div>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Đóng" onclick="clearForgotIntervals()"></button>
+                </div>
+
+                <!-- Modal Body -->
+                <div class="modal-body pt-1">
+                    <!-- Alert Box -->
+                    <div id="forgotAlertBox" class="alert alert-danger d-none d-flex align-items-center gap-2 py-2 px-2.5 rounded-3 mb-2 small" role="alert">
+                        <i id="forgotAlertIcon" class="bi bi-exclamation-triangle-fill fs-6 text-danger"></i>
+                        <div id="forgotAlertMessage" class="flex-grow-1" style="font-size: 0.775rem;"></div>
+                    </div>
+
+                    <!-- Step 1: Nhập Email và Mật khẩu mới -->
+                    <div id="forgotStep1">
+                        <div class="mb-2.5">
+                            <label class="form-label small fw-bold mb-1" style="color: var(--text-main);">Email tài khoản</label>
+                            <div class="input-group input-group-sm">
+                                <span class="input-group-text bg-light border-end-0"><i class="bi bi-envelope text-muted"></i></span>
+                                <input type="email" id="forgotEmail" class="form-control border-start-0" placeholder="Địa chỉ Email">
+                            </div>
+                        </div>
+
+                        <div class="mb-2">
+                            <label class="form-label small fw-bold mb-1" style="color: var(--text-main);">Mật khẩu mới</label>
+                            <div class="input-group input-group-sm">
+                                <span class="input-group-text bg-light border-end-0"><i class="bi bi-shield-lock text-muted"></i></span>
+                                <input type="password" id="forgotNewPassword" class="form-control border-start-0" placeholder="Mật khẩu mới" oninput="checkForgotPwdStrength()">
+                            </div>
+                            
+                            <!-- Tiêu chuẩn mật khẩu -->
+                            <div class="p-2 bg-light rounded-2 mt-1.5 small text-muted" style="font-size: 0.72rem;">
+                                <div class="fw-bold mb-1 text-dark">Tiêu chuẩn bảo mật:</div>
+                                <div id="fgReqLen"><i class="bi bi-x-circle text-danger me-1"></i>Độ dài trên 6 ký tự</div>
+                                <div id="fgReqLetter"><i class="bi bi-x-circle text-danger me-1"></i>Chứa ít nhất 1 chữ cái</div>
+                                <div id="fgReqDigit"><i class="bi bi-x-circle text-danger me-1"></i>Chứa ít nhất 1 chữ số (0-9)</div>
+                                <div id="fgReqSpecial"><i class="bi bi-x-circle text-danger me-1"></i>Chứa ít nhất 1 ký tự đặc biệt (!@#$%^&*...)</div>
+                            </div>
+                        </div>
+
+                        <button type="button" id="btnForgotStep1" onclick="handleForgotStep1Submit()" class="btn-terracotta-cta mt-2">
+                            <span id="forgotStep1BtnText">Gửi Mã OTP Xác Nhận</span>
+                            <i class="bi bi-send-fill fs-6"></i>
+                        </button>
+                    </div>
+
+                    <!-- Step 2: Nhập OTP -->
+                    <div id="forgotStep2" class="d-none">
+                        <div class="p-2.5 rounded-3 mb-2.5 border" style="background: rgba(108, 198, 203, 0.08); border-color: rgba(108, 198, 203, 0.25) !important;">
+                            <div class="small text-muted" style="font-size: 0.75rem;">Mã OTP 6 số đã được gửi tới:</div>
+                            <div class="fw-bold text-dark font-monospace" id="forgotTargetEmail">email@example.com</div>
+                            <div class="d-flex align-items-center justify-content-between mt-1 text-xs">
+                                <span class="text-muted small">Thời gian hiệu lực:</span>
+                                <span id="forgotOtpTimer" class="fw-bold text-danger font-monospace small">05:00</span>
+                            </div>
+                        </div>
+
+                        <!-- Hộp hỗ trợ OTP dự phòng -->
+                        <div id="forgotOtpFallbackBox" class="p-2 rounded-2 mb-2 bg-warning-subtle border border-warning text-dark small d-none" style="font-size: 0.75rem;">
+                            <div class="d-flex align-items-center justify-content-between">
+                                <div><i class="bi bi-info-circle-fill text-warning me-1"></i>Mã OTP xác thực: <strong class="font-monospace text-danger fs-6" id="forgotDisplayCode">123456</strong></div>
+                                <button type="button" class="btn btn-xs btn-outline-dark py-0 px-2 fw-semibold" onclick="autoFillForgotOtp()">Tự động điền</button>
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label small fw-bold mb-1" style="color: var(--text-main);">Nhập mã xác thực OTP (6 chữ số)</label>
+                            <input type="text" id="forgotOtpInput" maxlength="6" class="form-control text-center font-monospace fw-bold fs-4 tracking-wider" placeholder="000000">
+                        </div>
+
+                        <button type="button" id="btnForgotStep2" onclick="handleForgotStep2Submit()" class="btn-terracotta-cta mb-2">
+                            <span id="forgotStep2BtnText">Xác Nhận OTP &amp; Đổi Mật Khẩu</span>
+                            <i class="bi bi-check-circle-fill fs-6"></i>
+                        </button>
+
+                        <div class="text-center">
+                            <button type="button" id="btnForgotResend" onclick="handleForgotStep1Submit(true)" class="btn btn-link text-decoration-none small text-muted p-0" style="font-size: 0.75rem;">
+                                <i class="bi bi-arrow-repeat me-1"></i>Chưa nhận được? Gửi lại mã OTP <span id="forgotResendCd"></span>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Step 3: Hoàn tất -->
+                    <div id="forgotStep3" class="d-none text-center py-3">
+                        <div class="rounded-circle text-white d-inline-flex align-items-center justify-content-center mb-2" style="width: 52px; height: 52px; background: #22c55e;">
+                            <i class="bi bi-check2 fs-3"></i>
+                        </div>
+                        <h6 class="fw-bold text-dark mb-1">Đổi Mật Khẩu Thành Công!</h6>
+                        <p class="text-muted small mb-3" style="font-size: 0.775rem;">Mật khẩu của bạn đã được cập nhật trong hệ thống. Hãy đăng nhập với mật khẩu mới.</p>
+                        <button type="button" onclick="loginAfterPasswordReset()" class="btn-terracotta-cta">
+                            <span>Đăng Nhập Ngay</span>
                             <i class="bi bi-box-arrow-in-right fs-5"></i>
                         </button>
                     </div>
@@ -1199,6 +1314,241 @@
         function loginWithCreatedAccount() {
             closeRegisterModal();
             fillRole(pendingRegistration.email, pendingRegistration.password);
+            const form = document.getElementById('loginForm');
+            if (form) {
+                form.submit();
+            }
+        }
+
+        // ==========================================
+        // FORGOT PASSWORD MODAL LOGIC
+        // ==========================================
+        let forgotModal = null;
+        let forgotOtpInterval = null;
+        let forgotResendInterval = null;
+        let forgotOtpSec = 300;
+        let forgotResendSec = 60;
+        let pendingForgotEmail = '';
+        let pendingForgotNewPwd = '';
+
+        function openForgotPasswordModal() {
+            if (!forgotModal) {
+                forgotModal = new bootstrap.Modal(document.getElementById('forgotPasswordModal'));
+            }
+            document.getElementById('forgotStep1').classList.remove('d-none');
+            document.getElementById('forgotStep2').classList.add('d-none');
+            document.getElementById('forgotStep3').classList.add('d-none');
+            document.getElementById('forgotEmail').value = '';
+            document.getElementById('forgotNewPassword').value = '';
+            document.getElementById('forgotOtpInput').value = '';
+            checkForgotPwdStrength();
+            hideForgotAlert();
+            forgotModal.show();
+        }
+
+        function closeForgotPasswordModal() {
+            if (forgotModal) forgotModal.hide();
+            clearForgotIntervals();
+            hideForgotAlert();
+        }
+
+        function clearForgotIntervals() {
+            if (forgotOtpInterval) clearInterval(forgotOtpInterval);
+            if (forgotResendInterval) clearInterval(forgotResendInterval);
+        }
+
+        function showForgotAlert(msg, isError = true) {
+            const box = document.getElementById('forgotAlertBox');
+            const icon = document.getElementById('forgotAlertIcon');
+            const text = document.getElementById('forgotAlertMessage');
+            box.classList.remove('d-none', 'alert-danger', 'alert-success');
+            if (isError) {
+                box.classList.add('alert-danger');
+                icon.className = 'bi bi-exclamation-triangle-fill fs-6 text-danger';
+            } else {
+                box.classList.add('alert-success');
+                icon.className = 'bi bi-check-circle-fill fs-6 text-success';
+            }
+            text.innerText = msg;
+        }
+
+        function hideForgotAlert() {
+            document.getElementById('forgotAlertBox')?.classList.add('d-none');
+        }
+
+        function checkForgotPwdStrength() {
+            const pwd = document.getElementById('forgotNewPassword')?.value || '';
+            const hasLen = pwd.length > 6;
+            const hasLetter = /[a-zA-Z]/.test(pwd);
+            const hasDigit = /[0-9]/.test(pwd);
+            const hasSpecial = /[^a-zA-Z0-9]/.test(pwd);
+
+            updateForgotReqBadge('fgReqLen', hasLen);
+            updateForgotReqBadge('fgReqLetter', hasLetter);
+            updateForgotReqBadge('fgReqDigit', hasDigit);
+            updateForgotReqBadge('fgReqSpecial', hasSpecial);
+
+            return hasLen && hasLetter && hasDigit && hasSpecial;
+        }
+
+        function updateForgotReqBadge(id, valid) {
+            const el = document.getElementById(id);
+            if (!el) return;
+            if (valid) {
+                el.innerHTML = '<i class="bi bi-check-circle-fill text-success me-1"></i>' + el.innerText.trim();
+                el.classList.add('text-success');
+                el.classList.remove('text-danger', 'text-muted');
+            } else {
+                el.innerHTML = '<i class="bi bi-x-circle text-danger me-1"></i>' + el.innerText.trim();
+                el.classList.add('text-muted');
+                el.classList.remove('text-success');
+            }
+        }
+
+        function autoFillForgotOtp() {
+            const code = document.getElementById('forgotDisplayCode')?.innerText;
+            if (code) {
+                document.getElementById('forgotOtpInput').value = code.trim();
+            }
+        }
+
+        async function handleForgotStep1Submit(isResend = false) {
+            hideForgotAlert();
+            const email = isResend ? pendingForgotEmail : document.getElementById('forgotEmail')?.value?.trim();
+            const newPassword = isResend ? pendingForgotNewPwd : document.getElementById('forgotNewPassword')?.value;
+
+            if (!email) {
+                showForgotAlert('Vui lòng nhập địa chỉ Email!');
+                return;
+            }
+            if (!isResend && !checkForgotPwdStrength()) {
+                showForgotAlert('Mật khẩu mới chưa đạt tiêu chuẩn bảo mật (phải trên 6 ký tự, có chữ, số và ký tự đặc biệt)!');
+                return;
+            }
+
+            const btn = document.getElementById(isResend ? 'btnForgotResend' : 'btnForgotStep1');
+            const btnText = document.getElementById('forgotStep1BtnText');
+            btn.disabled = true;
+            if (btnText && !isResend) btnText.innerText = 'Đang gửi mã OTP...';
+
+            try {
+                const res = await fetch('/api/auth/password-reset/init', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email, newPassword })
+                });
+                const result = await res.json();
+
+                if (res.ok && result.success) {
+                    pendingForgotEmail = email;
+                    pendingForgotNewPwd = newPassword;
+                    document.getElementById('forgotTargetEmail').innerText = email;
+
+                    if (result.displayOtp) {
+                        document.getElementById('forgotDisplayCode').innerText = result.displayOtp;
+                        document.getElementById('forgotOtpFallbackBox').classList.remove('d-none');
+                    }
+
+                    document.getElementById('forgotStep1').classList.add('d-none');
+                    document.getElementById('forgotStep2').classList.remove('d-none');
+
+                    startForgotOtpCountdown(300);
+                    startForgotResendCooldown(60);
+                    showForgotAlert('Mã xác thực OTP đã được gửi đến email của bạn!', false);
+                } else {
+                    showForgotAlert(result.message || 'Không thể gửi mã OTP đặt lại mật khẩu!');
+                }
+            } catch (err) {
+                showForgotAlert('Lỗi kết nối máy chủ: ' + err.message);
+            } finally {
+                btn.disabled = false;
+                if (btnText && !isResend) btnText.innerText = 'Gửi Mã OTP Xác Nhận';
+            }
+        }
+
+        function startForgotOtpCountdown(seconds) {
+            if (forgotOtpInterval) clearInterval(forgotOtpInterval);
+            forgotOtpSec = seconds;
+            updateForgotTimerDisplay();
+
+            forgotOtpInterval = setInterval(() => {
+                forgotOtpSec--;
+                if (forgotOtpSec <= 0) {
+                    clearInterval(forgotOtpInterval);
+                    document.getElementById('forgotOtpTimer').innerText = '00:00 (Hết hạn)';
+                    showForgotAlert('Mã OTP này đã hết hạn 5 phút. Vui lòng gửi lại mã OTP!');
+                } else {
+                    updateForgotTimerDisplay();
+                }
+            }, 1000);
+        }
+
+        function updateForgotTimerDisplay() {
+            const m = Math.floor(forgotOtpSec / 60);
+            const s = forgotOtpSec % 60;
+            document.getElementById('forgotOtpTimer').innerText = 
+                `${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
+        }
+
+        function startForgotResendCooldown(seconds) {
+            if (forgotResendInterval) clearInterval(forgotResendInterval);
+            forgotResendSec = seconds;
+            const btn = document.getElementById('btnForgotResend');
+            const cd = document.getElementById('forgotResendCd');
+            btn.disabled = true;
+            cd.innerText = ` (${forgotResendSec}s)`;
+
+            forgotResendInterval = setInterval(() => {
+                forgotResendSec--;
+                if (forgotResendSec <= 0) {
+                    clearInterval(forgotResendInterval);
+                    btn.disabled = false;
+                    cd.innerText = '';
+                } else {
+                    cd.innerText = ` (${forgotResendSec}s)`;
+                }
+            }, 1000);
+        }
+
+        async function handleForgotStep2Submit() {
+            hideForgotAlert();
+            const otpCode = document.getElementById('forgotOtpInput')?.value?.trim();
+            if (!otpCode || otpCode.length !== 6) {
+                showForgotAlert('Vui lòng nhập đúng mã OTP gồm 6 chữ số!');
+                return;
+            }
+
+            const btn = document.getElementById('btnForgotStep2');
+            const btnText = document.getElementById('forgotStep2BtnText');
+            btn.disabled = true;
+            btnText.innerText = 'Đang xác thực OTP...';
+
+            try {
+                const res = await fetch('/api/auth/password-reset/verify', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email: pendingForgotEmail, otpCode })
+                });
+                const result = await res.json();
+
+                if (res.ok && result.success) {
+                    clearForgotIntervals();
+                    document.getElementById('forgotStep2').classList.add('d-none');
+                    document.getElementById('forgotStep3').classList.remove('d-none');
+                } else {
+                    showForgotAlert(result.message || 'Mã OTP không hợp lệ hoặc đã hết hạn!');
+                }
+            } catch (err) {
+                showForgotAlert('Lỗi kết nối máy chủ: ' + err.message);
+            } finally {
+                btn.disabled = false;
+                btnText.innerText = 'Xác Nhận OTP & Đổi Mật Khẩu';
+            }
+        }
+
+        function loginAfterPasswordReset() {
+            closeForgotPasswordModal();
+            fillRole(pendingForgotEmail, pendingForgotNewPwd);
             const form = document.getElementById('loginForm');
             if (form) {
                 form.submit();

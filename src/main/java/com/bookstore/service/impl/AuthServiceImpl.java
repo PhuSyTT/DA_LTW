@@ -111,20 +111,21 @@ public class AuthServiceImpl implements AuthService {
         );
         otpVerificationRepository.save(otpRecord);
 
-        // 7. Gửi email qua SMTP Gmail
+        // 7. Gửi email qua SMTP Gmail thực tế đến hòm thư người dùng
         try {
             emailService.sendRegistrationOtp(email, otpCode);
         } catch (Exception ex) {
-            log.warn("Không thể gửi email OTP qua SMTP tới {}: {}", email, ex.getMessage());
+            log.error("Không thể gửi email OTP qua SMTP tới {}: {}", email, ex.getMessage());
+            return ApiResponse.error("Không thể gửi mã xác nhận đến email [" + email + "]. Vui lòng kiểm tra lại địa chỉ email hoặc thử lại sau!");
         }
 
         log.info("=================================================================");
-        log.info(">>> MÃ XÁC THỰC OTP ĐĂNG KÝ CHO [{}]: [{}] <<<", email, otpCode);
+        log.info(">>> MÃ XÁC THỰC OTP ĐÃ GỬI THỰC TẾ TỚI EMAIL [{}]: [{}] <<<", email, otpCode);
         log.info("=================================================================");
 
         return ApiResponse.success(
-                otpCode,
-                "Mã OTP đã được gửi đến email " + email + ". (Mã xác thực nhanh: " + otpCode + ")"
+                null,
+                "Mã xác thực OTP gồm 6 chữ số đã được gửi trực tiếp đến hộp thư " + email + ". Vui lòng kiểm tra email (hoặc thư mục Spam) để lấy mã xác nhận!"
         );
     }
 
@@ -361,20 +362,21 @@ public class AuthServiceImpl implements AuthService {
         );
         otpVerificationRepository.save(otpRecord);
 
-        // 6. Gửi email OTP
+        // 6. Gửi email OTP thực tế
         try {
             emailService.sendOtp(email, otpCode, "đặt lại mật khẩu");
         } catch (Exception ex) {
-            log.warn("Không thể gửi email OTP đặt lại mật khẩu tới {}: {}", email, ex.getMessage());
+            log.error("Không thể gửi email OTP đặt lại mật khẩu tới {}: {}", email, ex.getMessage());
+            return ApiResponse.error("Không thể gửi mã xác nhận đến email [" + email + "]. Vui lòng kiểm tra lại địa chỉ email hoặc thử lại sau!");
         }
 
         log.info("=================================================================");
-        log.info(">>> MÃ XÁC THỰC OTP ĐỔI MẬT KHẨU CHO [{}]: [{}] <<<", email, otpCode);
+        log.info(">>> MÃ XÁC THỰC OTP ĐỔI MẬT KHẨU ĐÃ GỬI THỰC TẾ TỚI EMAIL [{}]: [{}] <<<", email, otpCode);
         log.info("=================================================================");
 
         return ApiResponse.success(
-                otpCode,
-                "Mã OTP đã được gửi đến email " + email + ". (Mã xác thực nhanh: " + otpCode + ")"
+                null,
+                "Mã xác thực OTP đặt lại mật khẩu đã được gửi đến email " + email + ". Vui lòng kiểm tra email của bạn để lấy mã!"
         );
     }
 
@@ -473,20 +475,21 @@ public class AuthServiceImpl implements AuthService {
         );
         otpVerificationRepository.save(otpRecord);
 
-        // Gửi email OTP
+        // Gửi email OTP thực tế
         try {
             emailService.sendOtp(email, otpCode, "thay đổi thông tin cá nhân");
         } catch (Exception ex) {
-            log.warn("Không thể gửi email OTP cập nhật thông tin tới {}: {}", email, ex.getMessage());
+            log.error("Không thể gửi email OTP cập nhật thông tin tới {}: {}", email, ex.getMessage());
+            return ApiResponse.error("Không thể gửi mã xác nhận đến email [" + email + "]. Vui lòng thử lại sau!");
         }
 
         log.info("=================================================================");
-        log.info(">>> MÃ XÁC THỰC OTP ĐỔI THÔNG TIN CÁ NHÂN CHO [{}]: [{}] <<<", email, otpCode);
+        log.info(">>> MÃ XÁC THỰC OTP ĐỔI THÔNG TIN CÁ NHÂN ĐÃ GỬI THỰC TẾ TỚI EMAIL [{}]: [{}] <<<", email, otpCode);
         log.info("=================================================================");
 
         return ApiResponse.success(
-                otpCode,
-                "Mã OTP đã được gửi đến email " + email + ". (Mã xác thực nhanh: " + otpCode + ")"
+                null,
+                "Mã xác thực OTP cập nhật thông tin cá nhân đã được gửi đến email " + email + ". Vui lòng kiểm tra email của bạn để lấy mã!"
         );
     }
 

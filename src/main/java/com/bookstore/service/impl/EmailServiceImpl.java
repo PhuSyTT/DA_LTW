@@ -36,13 +36,11 @@ public class EmailServiceImpl implements EmailService {
     }
 
     @Override
-    @Async
     public void sendRegistrationOtp(String toEmail, String otpCode) {
         sendOtp(toEmail, otpCode, "đăng ký tài khoản");
     }
 
     @Override
-    @Async
     public void sendOtp(String toEmail, String otpCode, String purposeText) {
         try {
             String purpose = (purposeText != null && !purposeText.isBlank()) ? purposeText : "xác thực";

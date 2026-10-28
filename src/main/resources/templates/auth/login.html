@@ -584,25 +584,16 @@
 
                     <!-- STEP 2: OTP Verification Form -->
                     <div id="step2Container" class="d-none">
-                        <div class="alert alert-warning py-1.5 px-2.5 rounded-3 small mb-2" style="font-size: 0.775rem;">
-                            Mã OTP 6 số đã được gửi đến: <strong id="step2TargetEmail" style="color: var(--accent-terracotta);"></strong>.
-                            Vui lòng kiểm tra hộp thư đến (và thư mục Spam).
-                        </div>
-
-                        <!-- Hộp hiển thị mã OTP xác thực nhanh & dự phòng không nhận được mail -->
-                        <div class="alert alert-info py-2 px-2.5 rounded-3 small mb-2.5 border border-info-subtle">
-                            <div class="d-flex align-items-center justify-content-between flex-wrap gap-1">
+                        <div class="alert alert-success-subtle border border-success-subtle py-2 px-3 rounded-3 small mb-2.5">
+                            <div class="d-flex align-items-center gap-2">
+                                <i class="bi bi-envelope-check-fill text-success fs-5"></i>
                                 <div>
-                                    <i class="bi bi-key-fill text-primary me-1"></i>
-                                    <span class="fw-semibold">Mã xác thực OTP:</span>
-                                    <strong class="fs-6 font-monospace text-primary px-1.5 py-0.5 bg-white rounded border ms-1" id="otpDisplayCode">------</strong>
+                                    <div class="text-muted" style="font-size: 0.75rem;">Mã OTP thực tế 6 số đã được gửi trực tiếp đến:</div>
+                                    <strong class="font-monospace text-dark fs-6" id="step2TargetEmail"></strong>
                                 </div>
-                                <button type="button" class="btn btn-sm btn-primary py-0.5 px-2 rounded-pill" onclick="autoFillOtp()" style="font-size: 0.72rem;">
-                                    <i class="bi bi-magic me-1"></i>Tự động điền mã
-                                </button>
                             </div>
-                            <div class="text-muted mt-1" style="font-size: 0.68rem;">
-                                <i class="bi bi-envelope-check me-1 text-success"></i>Email đã phát đi qua Google SMTP. Nếu mạng chậm hoặc mail vào Spam, bạn có thể bấm <strong>"Tự động điền mã"</strong> ở trên để tiếp tục ngay!
+                            <div class="text-muted mt-2 border-top pt-1.5" style="font-size: 0.72rem; line-height: 1.5;">
+                                <i class="bi bi-info-circle me-1 text-primary"></i>Vui lòng mở hộp thư email của bạn để lấy mã xác thực. Nếu chưa thấy trong <strong>Hộp thư đến</strong>, vui lòng kiểm tra thêm thư mục <strong>Thư rác (Spam)</strong> hoặc tab <strong>Quảng cáo</strong>.
                             </div>
                         </div>
 
@@ -729,20 +720,20 @@
 
                     <!-- Step 2: Nhập OTP -->
                     <div id="forgotStep2" class="d-none">
-                        <div class="p-2.5 rounded-3 mb-2.5 border" style="background: rgba(108, 198, 203, 0.08); border-color: rgba(108, 198, 203, 0.25) !important;">
-                            <div class="small text-muted" style="font-size: 0.75rem;">Mã OTP 6 số đã được gửi tới:</div>
-                            <div class="fw-bold text-dark font-monospace" id="forgotTargetEmail">email@example.com</div>
-                            <div class="d-flex align-items-center justify-content-between mt-1 text-xs">
+                        <div class="alert alert-success-subtle border border-success-subtle py-2 px-3 rounded-3 small mb-2.5">
+                            <div class="d-flex align-items-center gap-2">
+                                <i class="bi bi-envelope-check-fill text-success fs-5"></i>
+                                <div>
+                                    <div class="text-muted" style="font-size: 0.75rem;">Mã OTP đặt lại mật khẩu đã được gửi đến:</div>
+                                    <strong class="font-monospace text-dark fs-6" id="forgotTargetEmail">email@example.com</strong>
+                                </div>
+                            </div>
+                            <div class="d-flex align-items-center justify-content-between mt-2 pt-1 border-top text-xs">
                                 <span class="text-muted small">Thời gian hiệu lực:</span>
                                 <span id="forgotOtpTimer" class="fw-bold text-danger font-monospace small">05:00</span>
                             </div>
-                        </div>
-
-                        <!-- Hộp hỗ trợ OTP dự phòng -->
-                        <div id="forgotOtpFallbackBox" class="p-2 rounded-2 mb-2 bg-warning-subtle border border-warning text-dark small d-none" style="font-size: 0.75rem;">
-                            <div class="d-flex align-items-center justify-content-between">
-                                <div><i class="bi bi-info-circle-fill text-warning me-1"></i>Mã OTP xác thực: <strong class="font-monospace text-danger fs-6" id="forgotDisplayCode">123456</strong></div>
-                                <button type="button" class="btn btn-xs btn-outline-dark py-0 px-2 fw-semibold" onclick="autoFillForgotOtp()">Tự động điền</button>
+                            <div class="text-muted mt-1" style="font-size: 0.72rem;">
+                                <i class="bi bi-info-circle me-1 text-primary"></i>Vui lòng mở ứng dụng Email để lấy mã 6 chữ số (kiểm tra cả mục Thư rác/Spam).
                             </div>
                         </div>
 

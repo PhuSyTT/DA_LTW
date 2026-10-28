@@ -208,7 +208,7 @@ class PasswordAndEmailValidationTest {
     }
 
     @Test
-    @DisplayName("Đăng ký tài khoản thành công với mật khẩu chuẩn > 6 ký tự, trả về mã OTP")
+    @DisplayName("Đăng ký tài khoản thành công với mật khẩu chuẩn > 6 ký tự, gửi mã OTP thực tế qua email")
     void testInitiateRegistration_SuccessWithOtp() {
         when(userRepository.existsByEmail("unique@gmail.com")).thenReturn(false);
 
@@ -216,9 +216,11 @@ class PasswordAndEmailValidationTest {
         ApiResponse<String> res = authService.initiateRegistration(validDto);
 
         assertTrue(res.isSuccess());
-        assertNotNull(res.getData(), "Phải trả về mã OTP để hỗ trợ dự phòng không nhận được mail");
-        assertEquals(6, res.getData().length(), "Mã OTP phải có 6 chữ số");
-        verify(otpVerificationRepository, times(1)).save(any());
+        org.mockito.ArgumentCaptor<com.bookstore.entity.OtpVerification> captor = org.mockito.ArgumentCaptor.forClass(com.bookstore.entity.OtpVerification.class);
+        verify(otpVerificationRepository, times(1)).save(captor.capture());
+        assertNotNull(captor.getValue().getOtpCode(), "Mã OTP phải được tạo và lưu vào hệ thống");
+        assertEquals(6, captor.getValue().getOtpCode().length(), "Mã OTP phải có 6 chữ số");
+        verify(emailService, times(1)).sendRegistrationOtp(eq("unique@gmail.com"), anyString());
     }
 
     @Test
@@ -271,8 +273,12 @@ class PasswordAndEmailValidationTest {
         );
         ApiResponse<String> initRes = authService.initiatePasswordReset(initDto);
         assertTrue(initRes.isSuccess());
-        String generatedOtp = initRes.getData();
+
+        org.mockito.ArgumentCaptor<com.bookstore.entity.OtpVerification> captor = org.mockito.ArgumentCaptor.forClass(com.bookstore.entity.OtpVerification.class);
+        verify(otpVerificationRepository, times(1)).save(captor.capture());
+        String generatedOtp = captor.getValue().getOtpCode();
         assertNotNull(generatedOtp);
+        assertEquals(6, generatedOtp.length());
 
         // Giả lập lưu OTP vào DB
         com.bookstore.entity.OtpVerification otpEntity = new com.bookstore.entity.OtpVerification(
@@ -312,8 +318,12 @@ class PasswordAndEmailValidationTest {
         );
         ApiResponse<String> initRes = authService.initiateProfileUpdate("user.book4life@gmail.com", initDto);
         assertTrue(initRes.isSuccess());
-        String generatedOtp = initRes.getData();
+
+        org.mockito.ArgumentCaptor<com.bookstore.entity.OtpVerification> captor = org.mockito.ArgumentCaptor.forClass(com.bookstore.entity.OtpVerification.class);
+        verify(otpVerificationRepository, times(1)).save(captor.capture());
+        String generatedOtp = captor.getValue().getOtpCode();
         assertNotNull(generatedOtp);
+        assertEquals(6, generatedOtp.length());
 
         com.bookstore.entity.OtpVerification otpEntity = new com.bookstore.entity.OtpVerification(
                 "user.book4life@gmail.com", generatedOtp, "", "Hoàng Độc Giả Mới", "0988776655", java.time.LocalDateTime.now().plusMinutes(5), "UPDATE_PROFILE"

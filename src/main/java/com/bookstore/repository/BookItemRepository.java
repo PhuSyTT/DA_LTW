@@ -62,6 +62,15 @@ public interface BookItemRepository extends JpaRepository<BookItem, Long> {
     @Query("SELECT COUNT(b) FROM BookItem b WHERE (:branchId IS NULL OR b.branch.id = :branchId) AND b.status = 'AVAILABLE'")
     long countAvailableItems(@Param("branchId") Long branchId);
 
+    @Query("SELECT COALESCE(SUM(b.stockQuantity), 0) FROM BookItem b WHERE (:branchId IS NULL OR b.branch.id = :branchId) AND b.status = 'AVAILABLE' AND b.stockQuantity > 0")
+    long sumAvailableStock(@Param("branchId") Long branchId);
+
+    @Query("SELECT COALESCE(SUM(b.stockQuantity), 0) FROM BookItem b WHERE b.book.id = :bookId AND b.status = 'AVAILABLE' AND b.stockQuantity > 0")
+    long sumAvailableStockByBookId(@Param("bookId") Long bookId);
+
+    @Query("SELECT COALESCE(SUM(b.stockQuantity), 0) FROM BookItem b WHERE b.book.id = :bookId AND (:branchId IS NULL OR b.branch.id = :branchId) AND b.status = 'AVAILABLE' AND b.stockQuantity > 0")
+    long sumAvailableStockByBookIdAndBranch(@Param("bookId") Long bookId, @Param("branchId") Long branchId);
+
     @Query("SELECT COUNT(b) FROM BookItem b WHERE (:branchId IS NULL OR b.branch.id = :branchId) AND b.conditionGrade = :grade AND b.status = 'AVAILABLE'")
     long countAvailableByGrade(@Param("branchId") Long branchId, @Param("grade") String grade);
 }

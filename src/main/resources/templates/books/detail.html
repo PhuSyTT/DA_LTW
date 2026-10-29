@@ -264,11 +264,12 @@
                         <span>Tồn Kho Theo Chi Nhánh &amp; Giá Bán</span>
                     </h3>
 
-                    <div th:if="${#lists.isEmpty(book.branchStocks)}" class="p-4 rounded-xl bg-surface-container text-xs text-on-surface-variant italic">
+                    <div th:if="${#lists.isEmpty(book.branchStocks) or book.totalInventory == 0}" class="p-4 rounded-xl bg-surface-container text-xs text-on-surface-variant italic">
                         Hiện tại đầu sách này tạm thời hết hàng trên toàn chuỗi.
                     </div>
 
                     <div th:each="bs, iter : ${book.branchStocks}"
+                         th:if="${bs.status == 'AVAILABLE' and bs.stockQuantity != null and bs.stockQuantity > 0}"
                          th:data-item-id="${bs.bookItemId}"
                          th:data-is-best="${bs.isBestPrice}"
                          th:data-price="${bs.sellingPrice}"
@@ -311,6 +312,7 @@
 
                     <div class="flex flex-wrap items-center gap-3">
                         <button type="button" 
+                                th:if="${book.totalInventory != null and book.totalInventory > 0}"
                                 th:data-book-id="${book.id}" 
                                 th:data-book-title="${book.title}" 
                                 onclick="handleAddToCart(this.dataset.bookId, this.dataset.bookTitle)" 
@@ -319,6 +321,7 @@
                             <span>Thêm Vào Giỏ Hàng</span>
                         </button>
                         <button type="button" 
+                                th:if="${book.totalInventory != null and book.totalInventory > 0}"
                                 th:data-book-id="${book.id}" 
                                 th:data-book-title="${book.title}" 
                                 onclick="handleBuyNow(this.dataset.bookId, this.dataset.bookTitle)" 
@@ -326,6 +329,10 @@
                             <span class="material-symbols-outlined text-[20px]">bolt</span>
                             <span>Mua Ngay</span>
                         </button>
+                        <span th:if="${book.totalInventory == null or book.totalInventory == 0}" class="px-6 py-3 rounded-xl bg-error-container text-on-error-container text-xs font-bold inline-flex items-center gap-1.5 shadow-sm">
+                            <span class="material-symbols-outlined text-[18px]">block</span>
+                            <span>Tạm Hết Hàng Toàn Chuỗi</span>
+                        </span>
                         <!-- Nút Thêm vào Danh sách yêu thích theo tài khoản -->
                         <button type="button" 
                                 id="btnWishlist"

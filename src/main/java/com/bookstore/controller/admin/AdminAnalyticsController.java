@@ -73,7 +73,7 @@ public class AdminAnalyticsController {
         // 1. KPI Cards
         BigDecimal totalRevenue = subOrderRepository.sumCompletedRevenue(effectiveBranchId);
         long completedOrders = subOrderRepository.countCompletedOrders(effectiveBranchId);
-        long totalInventory = bookItemRepository.countAvailableItems(effectiveBranchId);
+        long totalInventory = bookItemRepository.sumAvailableStock(effectiveBranchId);
         BigDecimal tradeInSpending = tradeInRequestRepository.sumTradeInSpending(effectiveBranchId);
 
         // 2. Phân bổ tồn kho theo độ cũ (Condition Grade)

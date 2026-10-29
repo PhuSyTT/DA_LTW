@@ -27,7 +27,7 @@
                 </div>
                 <div class="stat-info">
                     <h3 th:text="${totalInventory}">10</h3>
-                    <p>Mặt Hàng Thực Tế Tại Kho</p>
+                    <p>Tồn Kho Sẵn Sàng Bán (Toàn Chuỗi)</p>
                 </div>
             </div>
         </div>
@@ -135,11 +135,11 @@
                         125.000 ₫
                     </td>
                     <td class="text-center">
-                        <span th:if="${book.inventoryCount > 0}" class="badge bg-success-subtle text-success border border-success-subtle px-2 py-1">
-                            <i class="fas fa-check me-1"></i> <span th:text="${book.inventoryCount}">3</span> bản ghi
+                        <span th:if="${book.inventoryCount > 0}" class="badge bg-success-subtle text-success border border-success-subtle px-2.5 py-1">
+                            <i class="fas fa-boxes-stacked me-1"></i> <strong th:text="${book.inventoryCount}">3</strong> cuốn
                         </span>
-                        <span th:if="${book.inventoryCount == 0}" class="badge bg-light text-secondary border px-2 py-1">
-                            Chưa nhập kho
+                        <span th:if="${book.inventoryCount == 0}" class="badge bg-danger-subtle text-danger border border-danger-subtle px-2.5 py-1">
+                            <i class="fas fa-times-circle me-1"></i> Hết hàng toàn chuỗi
                         </span>
                     </td>
                     <td class="text-end">

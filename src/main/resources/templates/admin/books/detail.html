@@ -98,7 +98,10 @@
                     <h6 class="fw-bold mb-0 text-dark d-flex align-items-center gap-2">
                         <i class="fas fa-store text-success"></i> Phân Bổ Tồn Kho Thực Tế Tại Các Chi Nhánh
                     </h6>
-                    <span class="badge bg-secondary-subtle text-secondary border">Mặt hàng sách cũ (Book Items)</span>
+                    <div class="d-flex align-items-center gap-2">
+                        <span class="badge bg-success-subtle text-success border border-success-subtle" th:text="'Sẵn sàng bán: ' + ${book.totalInventory} + ' cuốn'">Sẵn sàng bán: 3 cuốn</span>
+                        <span class="badge bg-secondary-subtle text-secondary border">Mặt hàng sách cũ (Book Items)</span>
+                    </div>
                 </div>
                 <div class="table-responsive">
                     <table class="table custom-table mb-0 align-middle">

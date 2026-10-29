@@ -93,6 +93,7 @@ public class MasterDataServiceImpl implements MasterDataService {
         List<BookItem> items = bookItemRepository.findByBookId(id);
 
         long totalStock = items.stream()
+                .filter(item -> "AVAILABLE".equalsIgnoreCase(item.getStatus()) && item.getStockQuantity() != null && item.getStockQuantity() > 0)
                 .mapToLong(BookItem::getStockQuantity)
                 .sum();
 
@@ -230,11 +231,17 @@ public class MasterDataServiceImpl implements MasterDataService {
 
     @Override
     public long getTotalInventoryCount() {
-        return bookItemRepository.count();
+        return bookItemRepository.sumAvailableStock(null);
     }
 
     private BookDto mapToDto(Book book) {
-        long inventoryCount = (book.getBookItems() != null) ? book.getBookItems().size() : 0;
+        long inventoryCount = (book.getBookItems() != null && !book.getBookItems().isEmpty())
+                ? book.getBookItems().stream()
+                        .filter(bi -> "AVAILABLE".equalsIgnoreCase(bi.getStatus()) && bi.getStockQuantity() != null && bi.getStockQuantity() > 0)
+                        .mapToLong(BookItem::getStockQuantity)
+                        .sum()
+                : bookItemRepository.sumAvailableStockByBookId(book.getId());
+
         return BookDto.builder()
                 .id(book.getId())
                 .title(book.getTitle())

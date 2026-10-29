@@ -70,44 +70,72 @@ class UserServiceTest {
     }
 
     @Test
-    @DisplayName("Tài khoản đã có đơn hàng -> Tự động chuyển sang KHÓA VÔ HIỆU HÓA thay vì xóa cứng")
-    void testDeleteUserWithOrdersSafelyDeactivates() {
+    @DisplayName("Xóa tài khoản thành công và cascade toàn bộ dữ liệu phụ thuộc")
+    void testDeleteUserCascadedDataAndUserSuccessfully() {
         User user = new User();
         user.setId(5L);
         user.setEmail("customer@gmail.com");
         user.setIsActive(true);
 
         when(userRepository.findById(5L)).thenReturn(Optional.of(user));
-        when(masterOrderRepository.existsByUserId(5L)).thenReturn(true);
 
-        IllegalStateException ex = assertThrows(IllegalStateException.class, () -> {
+        assertDoesNotThrow(() -> {
             userService.deleteUser(5L);
         });
 
-        assertTrue(ex.getMessage().contains("KHÓA VÔ HIỆU HÓA"));
-        assertFalse(user.getIsActive());
-        verify(userRepository).save(user);
-        verify(userRepository, never()).delete(any());
+        verify(wishlistRepository).deleteByUserId(5L);
+        verify(userRepository).delete(user);
+        verify(userRepository).flush();
     }
 
     @Test
-    @DisplayName("Tài khoản mới không có dữ liệu ràng buộc -> Xóa cứng thành công")
-    void testDeleteNewUserSuccessfully() {
-        User user = new User();
-        user.setId(99L);
-        user.setEmail("newuser@gmail.com");
-        user.setIsActive(true);
+    @DisplayName("Xóa tài khoản có DataSource -> Thực thi toàn bộ lệnh cascade SQL trên database")
+    void testDeleteUserWithDataSourceExecutesCascadeSql() {
+        java.util.concurrent.atomic.AtomicBoolean committed = new java.util.concurrent.atomic.AtomicBoolean(false);
 
-        when(userRepository.findById(99L)).thenReturn(Optional.of(user));
-        when(masterOrderRepository.existsByUserId(99L)).thenReturn(false);
-        when(reviewRepository.existsByUserId(99L)).thenReturn(false);
-        when(tradeInRequestRepository.existsByUserId(99L)).thenReturn(false);
+        java.sql.Connection fakeConn = (java.sql.Connection) java.lang.reflect.Proxy.newProxyInstance(
+                getClass().getClassLoader(),
+                new Class<?>[]{java.sql.Connection.class},
+                (proxy, method, args) -> {
+                    if ("commit".equals(method.getName())) {
+                        committed.set(true);
+                    }
+                    if ("prepareStatement".equals(method.getName())) {
+                        return java.lang.reflect.Proxy.newProxyInstance(
+                                getClass().getClassLoader(),
+                                new Class<?>[]{java.sql.PreparedStatement.class},
+                                (psProxy, psMethod, psArgs) -> {
+                                    if ("executeUpdate".equals(psMethod.getName())) return 1;
+                                    return null;
+                                }
+                        );
+                    }
+                    if ("getAutoCommit".equals(method.getName())) return true;
+                    return null;
+                }
+        );
+
+        javax.sql.DataSource fakeDs = (javax.sql.DataSource) java.lang.reflect.Proxy.newProxyInstance(
+                getClass().getClassLoader(),
+                new Class<?>[]{javax.sql.DataSource.class},
+                (proxy, method, args) -> {
+                    if ("getConnection".equals(method.getName())) return fakeConn;
+                    return null;
+                }
+        );
+
+        userService.setDataSource(fakeDs);
+
+        User user = new User();
+        user.setId(7L);
+        user.setEmail("user7@gmail.com");
+        when(userRepository.findById(7L)).thenReturn(Optional.of(user));
 
         assertDoesNotThrow(() -> {
-            userService.deleteUser(99L);
+            userService.deleteUser(7L);
         });
 
-        verify(wishlistRepository).deleteByUserId(99L);
+        assertTrue(committed.get());
         verify(userRepository).delete(user);
         verify(userRepository).flush();
     }

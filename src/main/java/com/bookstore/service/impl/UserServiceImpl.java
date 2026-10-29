@@ -13,6 +13,10 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import javax.sql.DataSource;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.SQLException;
 import java.time.LocalDateTime;
 import java.util.Comparator;
 import java.util.List;
@@ -26,6 +30,7 @@ public class UserServiceImpl implements UserService {
     private final RoleRepository roleRepository;
     private final BranchRepository branchRepository;
     private final PasswordEncoder passwordEncoder;
+    private DataSource dataSource;
     private com.bookstore.repository.MasterOrderRepository masterOrderRepository;
     private com.bookstore.repository.ReviewRepository reviewRepository;
     private com.bookstore.repository.TradeInRequestRepository tradeInRequestRepository;
@@ -39,6 +44,11 @@ public class UserServiceImpl implements UserService {
         this.roleRepository = roleRepository;
         this.branchRepository = branchRepository;
         this.passwordEncoder = passwordEncoder;
+    }
+
+    @org.springframework.beans.factory.annotation.Autowired(required = false)
+    public void setDataSource(DataSource dataSource) {
+        this.dataSource = dataSource;
     }
 
     @org.springframework.beans.factory.annotation.Autowired(required = false)
@@ -194,6 +204,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    @Transactional
     public void deleteUser(Long id) {
         User user = userRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Không tìm thấy người dùng ID: " + id));
@@ -202,30 +213,83 @@ public class UserServiceImpl implements UserService {
             throw new IllegalArgumentException("Không được phép xóa tài khoản Quản trị viên tối cao (Super Admin)!");
         }
 
-        // Kiểm tra nếu tài khoản có dữ liệu ràng buộc quan trọng (đơn hàng, đánh giá, thu cũ đổi mới)
-        boolean hasOrders = masterOrderRepository != null && masterOrderRepository.existsByUserId(id);
-        boolean hasReviews = reviewRepository != null && reviewRepository.existsByUserId(id);
-        boolean hasTradeIns = tradeInRequestRepository != null && tradeInRequestRepository.existsByUserId(id);
-
-        if (hasOrders || hasReviews || hasTradeIns) {
-            user.setIsActive(false);
-            userRepository.save(user);
-            StringBuilder sb = new StringBuilder();
-            if (hasOrders) sb.append("đơn hàng");
-            if (hasReviews) sb.append(sb.length() > 0 ? ", " : "").append("đánh giá sản phẩm");
-            if (hasTradeIns) sb.append(sb.length() > 0 ? ", " : "").append("yêu cầu thu cũ");
-            throw new IllegalStateException("Tài khoản [" + user.getEmail() + "] đã phát sinh dữ liệu (" + sb + ") trong hệ thống. Để bảo toàn chứng từ kế toán và toàn vẹn dữ liệu, hệ thống đã tự động chuyển sang trạng thái [KHÓA VÔ HIỆU HÓA] thay vì xóa hoàn toàn!");
-        }
-
-        // Xóa dữ liệu phụ trợ tạm thời nếu có (danh sách yêu thích)
-        if (wishlistRepository != null) {
-            try {
-                wishlistRepository.deleteByUserId(id);
-            } catch (Exception ignored) {}
+        // Xóa sạch toàn bộ dữ liệu ràng buộc liên quan (đơn hàng, đánh giá, yêu cầu thu cũ, wishlist, chat...)
+        if (dataSource != null) {
+            cascadeDeleteUserData(id);
+        } else {
+            if (wishlistRepository != null) {
+                try { wishlistRepository.deleteByUserId(id); } catch (Exception ignored) {}
+            }
         }
 
         userRepository.delete(user);
         userRepository.flush();
+    }
+
+    private void cascadeDeleteUserData(Long userId) {
+        try (Connection conn = dataSource.getConnection()) {
+            boolean originalAutoCommit = conn.getAutoCommit();
+            conn.setAutoCommit(false);
+            try {
+                // 1. Xóa danh sách yêu thích
+                executeSql(conn, "DELETE FROM wishlists WHERE user_id = ?", userId);
+
+                // 2. Xóa các đánh giá sách do người dùng viết
+                executeSql(conn, "DELETE FROM reviews WHERE user_id = ?", userId);
+
+                // 3. Xóa tin nhắn AI chat & tin nhắn chat nội bộ nếu có
+                executeSql(conn, "DELETE FROM ai_chat_messages WHERE user_id = ?", userId);
+                executeSql(conn, "DELETE FROM chat_messages WHERE sender_id = ? OR receiver_id = ?", userId, userId);
+
+                // 4. Xóa ảnh và yêu cầu thu cũ đổi mới của người dùng
+                executeSql(conn, "DELETE FROM trade_in_images WHERE trade_in_request_id IN (SELECT id FROM trade_in_requests WHERE user_id = ?)", userId);
+                executeSql(conn, "DELETE FROM trade_in_requests WHERE user_id = ?", userId);
+                executeSql(conn, "UPDATE trade_in_requests SET reviewed_by_staff_id = NULL WHERE reviewed_by_staff_id = ?", userId);
+
+                // 5. Gỡ liên kết người yêu cầu chuyển kho (nếu tài khoản là nhân viên)
+                executeSql(conn, "UPDATE stock_transfers SET requested_by_user_id = NULL WHERE requested_by_user_id = ?", userId);
+
+                // 6. Gỡ người cập nhật lịch sử trạng thái & xóa lịch sử trạng thái của các đơn hàng thuộc về người dùng này
+                executeSql(conn, "UPDATE order_status_history SET updated_by_user_id = NULL WHERE updated_by_user_id = ?", userId);
+                executeSql(conn, "DELETE FROM order_status_history WHERE master_order_id IN (SELECT id FROM master_orders WHERE user_id = ?)", userId);
+
+                // 7. Xóa lịch sử sử dụng mã coupon liên quan đến người dùng hoặc đơn hàng của người dùng
+                executeSql(conn, "DELETE FROM coupon_usages WHERE user_id = ? OR master_order_id IN (SELECT id FROM master_orders WHERE user_id = ?)", userId, userId);
+
+                // 8. Xóa chi tiết mặt hàng đơn hàng con (sub_order_items)
+                executeSql(conn, "DELETE FROM sub_order_items WHERE sub_order_id IN (SELECT id FROM sub_orders WHERE master_order_id IN (SELECT id FROM master_orders WHERE user_id = ?))", userId);
+
+                // 9. Xóa đơn hàng con (sub_orders)
+                executeSql(conn, "DELETE FROM sub_orders WHERE master_order_id IN (SELECT id FROM master_orders WHERE user_id = ?)", userId);
+
+                // 10. Xóa đơn hàng tổng (master_orders)
+                executeSql(conn, "DELETE FROM master_orders WHERE user_id = ?", userId);
+
+                conn.commit();
+            } catch (Exception e) {
+                conn.rollback();
+                throw new RuntimeException("Lỗi khi xóa dữ liệu liên kết của người dùng: " + e.getMessage(), e);
+            } finally {
+                conn.setAutoCommit(originalAutoCommit);
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException("Lỗi kết nối CSDL khi xóa dữ liệu người dùng: " + e.getMessage(), e);
+        }
+    }
+
+    private void executeSql(Connection conn, String sql, Object... params) {
+        try (PreparedStatement ps = conn.prepareStatement(sql)) {
+            for (int i = 0; i < params.length; i++) {
+                ps.setObject(i + 1, params[i]);
+            }
+            ps.executeUpdate();
+        } catch (SQLException ex) {
+            String msg = (ex.getMessage() != null) ? ex.getMessage().toLowerCase() : "";
+            // Bỏ qua nếu bảng không tồn tại trong CSDL
+            if (!msg.contains("doesn't exist") && !msg.contains("not found") && !msg.contains("invalid object name")) {
+                throw new RuntimeException("Lỗi thực thi [" + sql + "]: " + ex.getMessage(), ex);
+            }
+        }
     }
 
     private UserDto mapToDto(User user) {

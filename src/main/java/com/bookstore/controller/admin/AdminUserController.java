@@ -76,24 +76,11 @@ public class AdminUserController {
     public String deleteUser(@PathVariable Long id, RedirectAttributes redirectAttributes) {
         try {
             userService.deleteUser(id);
-            redirectAttributes.addFlashAttribute("successMessage", "Đã xóa tài khoản vĩnh viễn khỏi hệ thống thành công!");
-        } catch (IllegalStateException e) {
-            redirectAttributes.addFlashAttribute("warningMessage", e.getMessage());
+            redirectAttributes.addFlashAttribute("successMessage", "Đã xóa vĩnh viễn tài khoản cùng toàn bộ lịch sử đơn hàng, đánh giá và dữ liệu liên quan thành công!");
+        } catch (IllegalArgumentException e) {
+            redirectAttributes.addFlashAttribute("errorMessage", e.getMessage());
         } catch (Exception e) {
-            String msg = (e.getMessage() != null) ? e.getMessage().toLowerCase() : "";
-            if (e instanceof org.springframework.dao.DataIntegrityViolationException
-                    || msg.contains("foreign key")
-                    || msg.contains("constraint")
-                    || msg.contains("parent row")
-                    || msg.contains("referenced")) {
-                try {
-                    userService.deactivateUser(id);
-                } catch (Exception ignored) {}
-                redirectAttributes.addFlashAttribute("warningMessage",
-                        "Tài khoản này có dữ liệu ràng buộc (đơn hàng, đánh giá, kiểm toán) trong hệ thống nên không thể xóa cứng. Hệ thống đã tự động KHÓA VÔ HIỆU HÓA tài khoản để bảo toàn toàn vẹn dữ liệu!");
-            } else {
-                redirectAttributes.addFlashAttribute("errorMessage", "Không thể xóa: " + e.getMessage());
-            }
+            redirectAttributes.addFlashAttribute("errorMessage", "Không thể xóa tài khoản: " + e.getMessage());
         }
         return "redirect:/admin/users";
     }

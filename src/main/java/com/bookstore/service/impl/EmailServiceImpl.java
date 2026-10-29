@@ -2,6 +2,7 @@ package com.bookstore.service.impl;
 
 import com.bookstore.entity.User;
 import com.bookstore.service.EmailService;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.mail.internet.MimeMessage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -11,9 +12,18 @@ import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
+import java.net.URI;
+import java.net.http.HttpClient;
+import java.net.http.HttpRequest;
+import java.net.http.HttpResponse;
 import java.nio.charset.StandardCharsets;
+import java.time.Duration;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 @Service
 public class EmailServiceImpl implements EmailService {
@@ -30,6 +40,9 @@ public class EmailServiceImpl implements EmailService {
 
     @Value("${support.hotline.email:book4lifeute@gmail.com}")
     private String hotlineEmail;
+
+    @Value("${brevo.api.key:${BREVO_API_KEY:}}")
+    private String brevoApiKey;
 
     public EmailServiceImpl(JavaMailSender mailSender) {
         this.mailSender = mailSender;
@@ -52,22 +65,28 @@ public class EmailServiceImpl implements EmailService {
                     : otpCode;
 
             String subject = "[" + appName + "] - " + otpCode + " là mã xác nhận " + purpose + " của bạn";
+            String htmlBody = buildOtpEmailHtml(formattedOtp, purpose);
 
+            // Ưu tiên 1: Gửi qua Brevo REST API (Cổng HTTPS 443 - 100% không bị Render chặn)
+            if (sendViaBrevoHttpApi(toEmail, subject, htmlBody)) {
+                log.info("Đã gửi thành công email chứa mã OTP xác thực ({}) qua Brevo REST API (HTTPS/443) tới: {}", purpose, toEmail);
+                return;
+            }
+
+            // Ưu tiên 2: Gửi qua JavaMailSender (SMTP)
             MimeMessage message = mailSender.createMimeMessage();
             MimeMessageHelper helper = new MimeMessageHelper(message, true, StandardCharsets.UTF_8.name());
 
             helper.setFrom(fromEmail, appName);
             helper.setTo(toEmail);
             helper.setSubject(subject);
-
-            String htmlBody = buildOtpEmailHtml(formattedOtp, purpose);
             helper.setText(htmlBody, true);
 
             mailSender.send(message);
-            log.info("Đã gửi thành công email chứa mã OTP xác thực ({}) tới: {}", purpose, toEmail);
+            log.info("Đã gửi thành công email chứa mã OTP xác thực ({}) qua SMTP tới: {}", purpose, toEmail);
         } catch (Exception ex) {
             log.error("Lỗi khi gửi email OTP tới {}: {}", toEmail, ex.getMessage());
-            throw new RuntimeException("Không thể gửi email OTP qua máy chủ SMTP: " + ex.getMessage());
+            throw new RuntimeException("Không thể gửi email OTP qua máy chủ SMTP/API: " + ex.getMessage());
         }
     }
 
@@ -126,6 +145,15 @@ public class EmailServiceImpl implements EmailService {
             String previewText = customerQuery.length() > 50 ? customerQuery.substring(0, 47) + "..." : customerQuery;
             String subject = "[" + appName + " Hotline] - Yêu cầu hỗ trợ từ " + customerName + ": \"" + previewText + "\"";
 
+            String htmlBody = buildSupportQueryEmailHtml(customerQuery, customerName, customerEmail, customerPhone, userRole, sessionId);
+
+            // Ưu tiên 1: Gửi qua Brevo REST API (Cổng HTTPS 443)
+            if (sendViaBrevoHttpApi(hotlineEmail, subject, htmlBody)) {
+                log.info("Đã chuyển tiếp thành công câu hỏi của khách hàng [{}] tới hotline email qua Brevo REST API (HTTPS/443)", customerName);
+                return;
+            }
+
+            // Ưu tiên 2: Fallback qua JavaMailSender (SMTP)
             MimeMessage message = mailSender.createMimeMessage();
             MimeMessageHelper helper = new MimeMessageHelper(message, true, StandardCharsets.UTF_8.name());
 
@@ -135,8 +163,6 @@ public class EmailServiceImpl implements EmailService {
                 helper.setReplyTo(user.getEmail());
             }
             helper.setSubject(subject);
-
-            String htmlBody = buildSupportQueryEmailHtml(customerQuery, customerName, customerEmail, customerPhone, userRole, sessionId);
             helper.setText(htmlBody, true);
 
             mailSender.send(message);
@@ -203,15 +229,21 @@ public class EmailServiceImpl implements EmailService {
     public void sendRestockAlertEmail(String toEmail, String customerName, String bookTitle, String authorName, String branchName, java.math.BigDecimal price, String grade, Long bookId) {
         try {
             String subject = "[" + appName + "] - Sách bạn quan tâm đã có hàng: \"" + bookTitle + "\"";
+            String htmlBody = buildRestockAlertEmailHtml(customerName, bookTitle, authorName, branchName, price, grade, bookId);
 
+            // Ưu tiên 1: Gửi qua Brevo REST API (Cổng HTTPS 443)
+            if (sendViaBrevoHttpApi(toEmail, subject, htmlBody)) {
+                log.info("Đã gửi thành công email Restock Alert qua Brevo REST API (HTTPS/443) tới: {} cho cuốn '{}'", toEmail, bookTitle);
+                return;
+            }
+
+            // Ưu tiên 2: Fallback qua JavaMailSender (SMTP)
             MimeMessage message = mailSender.createMimeMessage();
             MimeMessageHelper helper = new MimeMessageHelper(message, true, StandardCharsets.UTF_8.name());
 
             helper.setFrom(fromEmail, appName);
             helper.setTo(toEmail);
             helper.setSubject(subject);
-
-            String htmlBody = buildRestockAlertEmailHtml(customerName, bookTitle, authorName, branchName, price, grade, bookId);
             helper.setText(htmlBody, true);
 
             mailSender.send(message);
@@ -291,21 +323,82 @@ public class EmailServiceImpl implements EmailService {
         try {
             String safeName = (customerName != null && !customerName.isBlank()) ? customerName : "Bạn đọc yêu quý";
             String subject = "[" + appName + "] - Chào mừng " + safeName + " gia nhập Chuỗi Nhà Sách Book4Life!";
+            String htmlBody = buildWelcomeEmailHtml(safeName, toEmail);
 
+            // Ưu tiên 1: Gửi qua Brevo REST API (Cổng HTTPS 443)
+            if (sendViaBrevoHttpApi(toEmail, subject, htmlBody)) {
+                log.info("Đã gửi thành công email Chào mừng tài khoản mới qua Brevo REST API (HTTPS/443) tới: {}", toEmail);
+                return;
+            }
+
+            // Ưu tiên 2: Fallback qua JavaMailSender (SMTP)
             MimeMessage message = mailSender.createMimeMessage();
             MimeMessageHelper helper = new MimeMessageHelper(message, true, StandardCharsets.UTF_8.name());
 
             helper.setFrom(fromEmail, appName);
             helper.setTo(toEmail);
             helper.setSubject(subject);
-
-            String htmlBody = buildWelcomeEmailHtml(safeName, toEmail);
             helper.setText(htmlBody, true);
 
             mailSender.send(message);
             log.info("Đã gửi thành công email Chào mừng tài khoản mới tới: {}", toEmail);
         } catch (Exception ex) {
             log.error("Lỗi khi gửi email Chào mừng tài khoản mới tới {}: {}", toEmail, ex.getMessage());
+        }
+    }
+
+    /**
+     * Gửi email trực tiếp qua Brevo REST API (HTTPS - Cổng 443)
+     * Vĩnh viễn không bị Render hay bất kỳ nhà cung cấp Cloud nào chặn cổng SMTP!
+     */
+    private boolean sendViaBrevoHttpApi(String toEmail, String subject, String htmlContent) {
+        if (brevoApiKey == null || brevoApiKey.isBlank()) {
+            return false;
+        }
+        try {
+            HttpClient client = HttpClient.newBuilder()
+                    .connectTimeout(Duration.ofSeconds(10))
+                    .build();
+
+            Map<String, Object> payload = new HashMap<>();
+
+            Map<String, String> sender = new HashMap<>();
+            sender.put("name", appName);
+            sender.put("email", fromEmail);
+            payload.put("sender", sender);
+
+            List<Map<String, String>> toList = new ArrayList<>();
+            Map<String, String> recipient = new HashMap<>();
+            recipient.put("email", toEmail);
+            toList.add(recipient);
+            payload.put("to", toList);
+
+            payload.put("subject", subject);
+            payload.put("htmlContent", htmlContent);
+
+            ObjectMapper mapper = new ObjectMapper();
+            String jsonBody = mapper.writeValueAsString(payload);
+
+            HttpRequest request = HttpRequest.newBuilder()
+                    .uri(URI.create("https://api.brevo.com/v3/smtp/email"))
+                    .header("accept", "application/json")
+                    .header("api-key", brevoApiKey.trim())
+                    .header("content-type", "application/json")
+                    .timeout(Duration.ofSeconds(15))
+                    .POST(HttpRequest.BodyPublishers.ofString(jsonBody, StandardCharsets.UTF_8))
+                    .build();
+
+            HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
+            if (response.statusCode() == 200 || response.statusCode() == 201) {
+                log.info("Đã gửi email thành công qua Brevo REST API (HTTPS cổng 443) tới: {}", toEmail);
+                return true;
+            } else {
+                log.warn("Brevo REST API (Cổng 443) phản hồi mã lỗi [{}]: {}", response.statusCode(), response.body());
+                return false;
+            }
+        } catch (Exception ex) {
+            log.error("Lỗi khi kết nối tới Brevo REST API qua cổng 443: {}", ex.getMessage());
+            return false;
         }
     }
 

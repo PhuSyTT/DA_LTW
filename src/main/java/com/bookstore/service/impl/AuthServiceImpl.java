@@ -204,6 +204,13 @@ public class AuthServiceImpl implements AuthService {
         User savedUser = userRepository.save(newUser);
         log.info("Đã tạo mới thành công tài khoản người dùng: ID={}, Email={}", savedUser.getId(), savedUser.getEmail());
 
+        // Gửi email chào mừng tới chính email người dùng vừa đăng ký thành công
+        try {
+            emailService.sendWelcomeEmail(savedUser.getEmail(), savedUser.getFullName());
+        } catch (Exception ex) {
+            log.warn("Không thể gửi email chào mừng tới {}: {}", savedUser.getEmail(), ex.getMessage());
+        }
+
         // 9. Sinh mã JWT Token để tự động đăng nhập luôn
         String jwtToken = jwtTokenProvider.generateToken(savedUser);
 
@@ -623,6 +630,13 @@ public class AuthServiceImpl implements AuthService {
             user.setCreatedAt(LocalDateTime.now());
             user = userRepository.save(user);
             log.info("Tự động tạo mới tài khoản Độc giả từ Google Sign-In: ID={}, Email={}", user.getId(), user.getEmail());
+
+            // Gửi email chào mừng thành viên mới đăng ký qua Google
+            try {
+                emailService.sendWelcomeEmail(user.getEmail(), user.getFullName());
+            } catch (Exception ex) {
+                log.warn("Không thể gửi email chào mừng tới {}: {}", user.getEmail(), ex.getMessage());
+            }
         }
 
         // 3. Đăng nhập vào phiên Spring Security (Session)

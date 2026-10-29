@@ -8,4 +8,5 @@ public interface EmailService {
     void sendOtp(String toEmail, String otpCode, String purposeText);
     void sendCustomerSupportQuery(String customerQuery, User user, String sessionId);
     void sendRestockAlertEmail(String toEmail, String customerName, String bookTitle, String authorName, String branchName, BigDecimal price, String grade, Long bookId);
+    void sendWelcomeEmail(String toEmail, String customerName);
 }

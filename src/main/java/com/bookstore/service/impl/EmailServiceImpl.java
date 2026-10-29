@@ -284,5 +284,68 @@ public class EmailServiceImpl implements EmailService {
                 + "</body>"
                 + "</html>";
     }
-}
 
+    @Override
+    @Async
+    public void sendWelcomeEmail(String toEmail, String customerName) {
+        try {
+            String safeName = (customerName != null && !customerName.isBlank()) ? customerName : "Bạn đọc yêu quý";
+            String subject = "[" + appName + "] - Chào mừng " + safeName + " gia nhập Chuỗi Nhà Sách Book4Life!";
+
+            MimeMessage message = mailSender.createMimeMessage();
+            MimeMessageHelper helper = new MimeMessageHelper(message, true, StandardCharsets.UTF_8.name());
+
+            helper.setFrom(fromEmail, appName);
+            helper.setTo(toEmail);
+            helper.setSubject(subject);
+
+            String htmlBody = buildWelcomeEmailHtml(safeName, toEmail);
+            helper.setText(htmlBody, true);
+
+            mailSender.send(message);
+            log.info("Đã gửi thành công email Chào mừng tài khoản mới tới: {}", toEmail);
+        } catch (Exception ex) {
+            log.error("Lỗi khi gửi email Chào mừng tài khoản mới tới {}: {}", toEmail, ex.getMessage());
+        }
+    }
+
+    private String buildWelcomeEmailHtml(String customerName, String customerEmail) {
+        return "<!DOCTYPE html>"
+                + "<html lang=\"vi\">"
+                + "<head><meta charset=\"UTF-8\">"
+                + "<style>"
+                + "  body { font-family: 'Segoe UI', Arial, sans-serif; background-color: #FAF9F6; margin: 0; padding: 24px; color: #2D261E; }"
+                + "  .card { max-width: 580px; margin: 0 auto; background: #ffffff; border-radius: 16px; border: 1px solid #E8E0D5; padding: 36px 32px; box-shadow: 0 4px 20px rgba(0,0,0,0.06); }"
+                + "  .header-brand { font-size: 22px; font-weight: 800; color: #835500; letter-spacing: 0.5px; margin-bottom: 8px; text-transform: uppercase; }"
+                + "  .header-sub { font-size: 13px; color: #7F8C8D; margin-bottom: 24px; border-bottom: 1px solid #EFEFEF; padding-bottom: 16px; }"
+                + "  p { line-height: 1.6; font-size: 14px; margin: 0 0 14px 0; }"
+                + "  .feature-box { background: #FFF9F0; border-left: 4px solid #835500; border-radius: 8px; padding: 18px 20px; margin: 20px 0; font-size: 13px; line-height: 1.8; color: #2D261E; }"
+                + "  .btn-explore { display: inline-block; background: #835500; color: #ffffff !important; text-decoration: none; padding: 12px 32px; border-radius: 8px; font-weight: 700; font-size: 14px; margin: 20px 0; text-align: center; box-shadow: 0 4px 12px rgba(131,85,0,0.25); }"
+                + "  .footer { border-top: 1px solid #EFEFEF; padding-top: 20px; margin-top: 28px; font-size: 12px; color: #7F8C8D; line-height: 1.6; text-align: center; }"
+                + "</style>"
+                + "</head>"
+                + "<body>"
+                + "  <div class=\"card\">"
+                + "    <div class=\"header-brand\">📚 " + appName + " • Chào Mừng Độc Giả Mới</div>"
+                + "    <div class=\"header-sub\">Tài khoản của bạn đã được kích hoạt thành công trên hệ thống</div>"
+                + "    <p>Xin chào <strong>" + customerName + "</strong>,</p>"
+                + "    <p>Chúc mừng bạn đã tạo thành công tài khoản Độc giả tại <strong>[" + appName + "]</strong> với địa chỉ email: <strong>" + customerEmail + "</strong>.</p>"
+                + "    <div class=\"feature-box\">"
+                + "      <strong>✨ Các đặc quyền của bạn tại Book4Life:</strong><br/>"
+                + "      • 📖 <strong>Khám phá hàng ngàn cuốn sách cũ tuyển chọn</strong> với giá tiết kiệm từ 30% - 70%.<br/>"
+                + "      • 🔄 <strong>Chương trình Thu Cũ Đổi Mới (Trade-in):</strong> Định giá AI tự động, thanh lý sách cũ đổi sách mới.<br/>"
+                + "      • 🔔 <strong>Săn Sách Wishlist:</strong> Nhận thông báo email ngay khi cuốn sách bạn mong muốn có hàng.<br/>"
+                + "      • 🤖 <strong>Trợ lý ảo CSKH 24/7:</strong> Hỗ trợ tư vấn sách và tra cứu đơn hàng tức thì."
+                + "    </div>"
+                + "    <div style=\"text-align: center;\">"
+                + "      <a href=\"http://localhost:8080/\" class=\"btn-explore\">🚀 Bắt Đầu Khám Phá Sách Ngay</a>"
+                + "    </div>"
+                + "    <div class=\"footer\">"
+                + "      Email này được gửi tự động từ <strong>" + appName + "</strong> tới <strong>" + customerEmail + "</strong>.<br/>"
+                + "      Chúc bạn có những trải nghiệm đọc sách tuyệt vời cùng chúng tôi!"
+                + "    </div>"
+                + "  </div>"
+                + "</body>"
+                + "</html>";
+    }
+}

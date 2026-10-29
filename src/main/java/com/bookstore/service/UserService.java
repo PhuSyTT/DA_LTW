@@ -12,5 +12,6 @@ public interface UserService {
     UserDto createUser(UserDto userDto);
     UserDto updateUser(Long id, UserDto userDto);
     void toggleUserStatus(Long id);
+    void deactivateUser(Long id);
     void deleteUser(Long id);
 }

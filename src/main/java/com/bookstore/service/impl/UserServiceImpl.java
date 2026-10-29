@@ -27,6 +27,9 @@ public class UserServiceImpl implements UserService {
     private final BranchRepository branchRepository;
     private final PasswordEncoder passwordEncoder;
     private com.bookstore.repository.MasterOrderRepository masterOrderRepository;
+    private com.bookstore.repository.ReviewRepository reviewRepository;
+    private com.bookstore.repository.TradeInRequestRepository tradeInRequestRepository;
+    private com.bookstore.repository.WishlistRepository wishlistRepository;
 
     public UserServiceImpl(UserRepository userRepository,
                            RoleRepository roleRepository,
@@ -41,6 +44,21 @@ public class UserServiceImpl implements UserService {
     @org.springframework.beans.factory.annotation.Autowired(required = false)
     public void setMasterOrderRepository(com.bookstore.repository.MasterOrderRepository masterOrderRepository) {
         this.masterOrderRepository = masterOrderRepository;
+    }
+
+    @org.springframework.beans.factory.annotation.Autowired(required = false)
+    public void setReviewRepository(com.bookstore.repository.ReviewRepository reviewRepository) {
+        this.reviewRepository = reviewRepository;
+    }
+
+    @org.springframework.beans.factory.annotation.Autowired(required = false)
+    public void setTradeInRequestRepository(com.bookstore.repository.TradeInRequestRepository tradeInRequestRepository) {
+        this.tradeInRequestRepository = tradeInRequestRepository;
+    }
+
+    @org.springframework.beans.factory.annotation.Autowired(required = false)
+    public void setWishlistRepository(com.bookstore.repository.WishlistRepository wishlistRepository) {
+        this.wishlistRepository = wishlistRepository;
     }
 
     @Override
@@ -168,6 +186,14 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    public void deactivateUser(Long id) {
+        userRepository.findById(id).ifPresent(user -> {
+            user.setIsActive(false);
+            userRepository.save(user);
+        });
+    }
+
+    @Override
     public void deleteUser(Long id) {
         User user = userRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Không tìm thấy người dùng ID: " + id));
@@ -176,11 +202,26 @@ public class UserServiceImpl implements UserService {
             throw new IllegalArgumentException("Không được phép xóa tài khoản Quản trị viên tối cao (Super Admin)!");
         }
 
-        // Kiểm tra nếu tài khoản đã từng phát sinh đơn hàng trong hệ thống
-        if (masterOrderRepository != null && masterOrderRepository.existsByUserId(id)) {
+        // Kiểm tra nếu tài khoản có dữ liệu ràng buộc quan trọng (đơn hàng, đánh giá, thu cũ đổi mới)
+        boolean hasOrders = masterOrderRepository != null && masterOrderRepository.existsByUserId(id);
+        boolean hasReviews = reviewRepository != null && reviewRepository.existsByUserId(id);
+        boolean hasTradeIns = tradeInRequestRepository != null && tradeInRequestRepository.existsByUserId(id);
+
+        if (hasOrders || hasReviews || hasTradeIns) {
             user.setIsActive(false);
             userRepository.save(user);
-            throw new IllegalStateException("Tài khoản [" + user.getEmail() + "] đã có lịch sử đơn hàng trong hệ thống. Để bảo toàn hóa đơn và kiểm toán, hệ thống đã tự động chuyển sang trạng thái [KHÓA VÔ HIỆU HÓA] thay vì xóa hoàn toàn!");
+            StringBuilder sb = new StringBuilder();
+            if (hasOrders) sb.append("đơn hàng");
+            if (hasReviews) sb.append(sb.length() > 0 ? ", " : "").append("đánh giá sản phẩm");
+            if (hasTradeIns) sb.append(sb.length() > 0 ? ", " : "").append("yêu cầu thu cũ");
+            throw new IllegalStateException("Tài khoản [" + user.getEmail() + "] đã phát sinh dữ liệu (" + sb + ") trong hệ thống. Để bảo toàn chứng từ kế toán và toàn vẹn dữ liệu, hệ thống đã tự động chuyển sang trạng thái [KHÓA VÔ HIỆU HÓA] thay vì xóa hoàn toàn!");
+        }
+
+        // Xóa dữ liệu phụ trợ tạm thời nếu có (danh sách yêu thích)
+        if (wishlistRepository != null) {
+            try {
+                wishlistRepository.deleteByUserId(id);
+            } catch (Exception ignored) {}
         }
 
         userRepository.delete(user);

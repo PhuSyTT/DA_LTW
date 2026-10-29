@@ -14,6 +14,8 @@ public interface TradeInRequestRepository extends JpaRepository<TradeInRequest, 
 
     Optional<TradeInRequest> findByRequestCode(String requestCode);
 
+    boolean existsByUserId(Long userId);
+
     List<TradeInRequest> findByUserIdOrderByCreatedAtDesc(Long userId);
 
     List<TradeInRequest> findByTargetBranchIdOrderByCreatedAtDesc(Long targetBranchId);

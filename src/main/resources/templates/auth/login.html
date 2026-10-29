@@ -370,6 +370,13 @@
             color: #202124;
             transform: translateY(-1px);
         }
+        .hover-shadow:hover {
+            box-shadow: 0 4px 14px rgba(60, 64, 67, 0.16) !important;
+            border-color: #1a73e8 !important;
+            background-color: #f8fafd !important;
+            transform: translateY(-1px);
+            cursor: pointer;
+        }
     </style>
 </head>
 <body>
@@ -559,7 +566,7 @@
                             </div>
                             <!-- Cảnh báo trạng thái trùng lặp email -->
                             <div id="emailCheckFeedback" class="mt-1 d-none" style="font-size: 0.72rem;"></div>
-                            <div class="text-muted mt-0.5" style="font-size: 0.7rem;">Mã OTP 6 số sẽ được gửi đến email này qua Google SMTP.</div>
+                            <div class="text-muted mt-0.5" style="font-size: 0.7rem;">Mã OTP 6 số sẽ được gửi đến email này để xác nhận tài khoản.</div>
                         </div>
 
                         <div class="mb-2">
@@ -810,64 +817,113 @@
     </div>
 
     <!-- =================================================================
-         MODAL ĐĂNG NHẬP / ĐĂNG KÝ TRỰC TIẾP BẰNG TÀI KHOẢN GOOGLE
+         MODAL CHỌN TÀI KHOẢN GOOGLE (GOOGLE ACCOUNT CHOOSER CHUẨN UI)
          ================================================================= -->
     <div class="modal fade" id="googleAuthModal" tabindex="-1" aria-labelledby="googleModalLabel" aria-hidden="true">
-        <div class="modal-dialog modal-dialog-centered" style="max-width: 440px;">
-            <div class="modal-content border-0 p-3 shadow-lg" style="border-radius: 20px; background: #ffffff;">
-                <div class="modal-header border-0 pb-1 pt-1 d-flex justify-content-between align-items-center">
-                    <div class="d-flex align-items-center gap-2">
-                        <svg width="24" height="24" viewBox="0 0 24 24">
+        <div class="modal-dialog modal-dialog-centered" style="max-width: 420px;">
+            <div class="modal-content border-0 shadow-lg" style="border-radius: 24px; background: #ffffff; overflow: hidden;">
+                <!-- Header Google -->
+                <div class="p-4 pb-2 text-center border-bottom bg-light bg-opacity-50">
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                        <svg width="28" height="28" viewBox="0 0 24 24">
                             <path fill="#4285F4" d="M23.745 12.27c0-.7-.06-1.4-.19-2.07H12v4.51h6.6c-.29 1.52-1.14 2.8-2.4 3.65v3.03h3.88c2.27-2.09 3.665-5.17 3.665-9.12z"/>
                             <path fill="#34A853" d="M12 24c3.24 0 5.95-1.08 7.93-2.91l-3.88-3.03c-1.08.72-2.45 1.16-4.05 1.16-3.12 0-5.77-2.1-6.72-4.93H1.24v3.13C3.26 21.43 7.31 24 12 24z"/>
                             <path fill="#FBBC05" d="M5.28 14.29c-.25-.72-.38-1.49-.38-2.29s.13-1.57.38-2.29V6.58H1.24C.45 8.15 0 9.99 0 12s.45 3.85 1.24 5.42l4.04-3.13z"/>
                             <path fill="#EA4335" d="M12 4.75c1.77 0 3.35.61 4.6 1.8l3.42-3.42C17.95 1.19 15.24 0 12 0 7.31 0 3.26 2.57 1.24 6.58l4.04 3.13c.95-2.83 3.6-4.96 6.72-4.96z"/>
                         </svg>
-                        <h6 class="modal-title fw-bold fs-6 mb-0 text-dark">Đăng Nhập Trực Tiếp Bằng Google</h6>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Đóng"></button>
                     </div>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Đóng"></button>
+                    <h5 class="fw-bold text-dark mb-1 fs-5">Chọn một tài khoản</h5>
+                    <p class="text-muted small mb-0" style="font-size: 0.8rem;">
+                        để tiếp tục đăng nhập vào <strong>Book4Life</strong>
+                    </p>
                 </div>
 
-                <div class="modal-body px-1 py-2">
-                    <p class="text-muted small mb-3" style="font-size: 0.775rem;">
-                        Tiếp tục tới <strong>Book4Life - Chuỗi Nhà Sách</strong>. Đăng nhập an toàn &amp; tức thì mà không cần nhớ mật khẩu hay chờ mã OTP.
-                    </p>
-
+                <div class="modal-body p-3">
                     <!-- Alert Box trong Google Modal -->
                     <div id="googleAlertBox" class="alert d-none small py-1.5 px-2.5 rounded-3 mb-2.5 d-flex align-items-center gap-2">
                         <i class="bi bi-info-circle-fill fs-6" id="googleAlertIcon"></i>
                         <span id="googleAlertMessage"></span>
                     </div>
 
-                    <!-- Lựa chọn tài khoản Google cá nhân -->
-                    <div class="list-group mb-3">
-                        <button type="button" onclick="submitGoogleAuth('dinhsy06112006@gmail.com', 'Đinh Phú Sỹ')" class="list-group-item list-group-item-action d-flex align-items-center gap-3 py-2.5 px-3 rounded-3 border mb-2 shadow-xs">
-                            <div class="rounded-circle bg-primary text-white d-flex align-items-center justify-content-center fw-bold" style="width: 38px; height: 38px; font-size: 1rem;">
+                    <!-- Danh sách các tài khoản Google đăng nhập trên máy (Click là Đăng nhập ngay) -->
+                    <div class="list-group list-group-flush mb-2" id="googleAccountList">
+                        <!-- Tài khoản chính: Đinh Phú Sỹ -->
+                        <button type="button" onclick="submitGoogleAuth('dinhsy06112006@gmail.com', 'Đinh Phú Sỹ')" 
+                                class="list-group-item list-group-item-action d-flex align-items-center gap-3 py-3 px-3 rounded-3 border mb-2 text-start position-relative hover-shadow"
+                                style="border-color: #e0e0e0; transition: all 0.2s;">
+                            <div class="rounded-circle text-white d-flex align-items-center justify-content-center fw-bold shadow-sm flex-shrink-0" 
+                                 style="width: 42px; height: 42px; font-size: 1.1rem; background: linear-gradient(135deg, #1a73e8, #4285F4);">
                                 S
                             </div>
-                            <div class="text-start flex-grow-1 overflow-hidden">
-                                <div class="fw-bold text-dark text-truncate" style="font-size: 0.85rem;">Đinh Phú Sỹ</div>
-                                <div class="text-muted text-truncate" style="font-size: 0.75rem;">dinhsy06112006@gmail.com</div>
+                            <div class="flex-grow-1 overflow-hidden">
+                                <div class="d-flex align-items-center gap-2">
+                                    <strong class="text-dark text-truncate" style="font-size: 0.9rem;">Đinh Phú Sỹ</strong>
+                                    <span class="badge bg-success-subtle text-success border border-success-subtle px-1.5 py-0.5 rounded-pill" style="font-size: 0.65rem;">Đang trên máy</span>
+                                </div>
+                                <div class="text-muted text-truncate" style="font-size: 0.78rem;">dinhsy06112006@gmail.com</div>
                             </div>
-                            <i class="bi bi-arrow-right text-muted"></i>
+                            <i class="bi bi-chevron-right text-muted fs-6"></i>
+                        </button>
+
+                        <!-- Tài khoản phụ: Book4Life Store -->
+                        <button type="button" onclick="submitGoogleAuth('book4lifeute@gmail.com', 'Book4Life Official')" 
+                                class="list-group-item list-group-item-action d-flex align-items-center gap-3 py-3 px-3 rounded-3 border mb-2 text-start position-relative hover-shadow"
+                                style="border-color: #e0e0e0; transition: all 0.2s;">
+                            <div class="rounded-circle text-white d-flex align-items-center justify-content-center fw-bold shadow-sm flex-shrink-0" 
+                                 style="width: 42px; height: 42px; font-size: 1.1rem; background: linear-gradient(135deg, #e27d60, #d96b4d);">
+                                B
+                            </div>
+                            <div class="flex-grow-1 overflow-hidden">
+                                <div class="d-flex align-items-center gap-2">
+                                    <strong class="text-dark text-truncate" style="font-size: 0.9rem;">Book4Life Store</strong>
+                                    <span class="badge bg-secondary-subtle text-secondary px-1.5 py-0.5 rounded-pill" style="font-size: 0.65rem;">Quản trị</span>
+                                </div>
+                                <div class="text-muted text-truncate" style="font-size: 0.78rem;">book4lifeute@gmail.com</div>
+                            </div>
+                            <i class="bi bi-chevron-right text-muted fs-6"></i>
+                        </button>
+
+                        <!-- Tùy chọn: Sử dụng tài khoản khác -->
+                        <button type="button" onclick="toggleCustomGoogleBox()" 
+                                class="list-group-item list-group-item-action d-flex align-items-center gap-3 py-2.5 px-3 rounded-3 border mb-2 text-start"
+                                style="border-color: #e8eaed; transition: all 0.2s;">
+                            <div class="rounded-circle bg-light text-secondary d-flex align-items-center justify-content-center flex-shrink-0" 
+                                 style="width: 42px; height: 42px; font-size: 1.1rem; border: 1px dashed #c0c0c0;">
+                                <i class="bi bi-person-plus-fill"></i>
+                            </div>
+                            <div class="flex-grow-1">
+                                <div class="fw-semibold text-secondary" style="font-size: 0.85rem;">Sử dụng một tài khoản khác</div>
+                                <div class="text-muted" style="font-size: 0.72rem;">Đăng nhập bằng tài khoản Gmail khác của bạn</div>
+                            </div>
+                            <i class="bi bi-plus-lg text-muted"></i>
                         </button>
                     </div>
 
-                    <!-- Hoặc nhập tài khoản Gmail khác -->
-                    <div class="border-top pt-2.5">
-                        <label class="form-label small fw-bold text-secondary mb-1" style="font-size: 0.75rem;">Hoặc đăng nhập bằng tài khoản Google khác:</label>
+                    <!-- Khung nhập Gmail khác (Mặc định ẩn, chỉ mở khi bấm 'Sử dụng một tài khoản khác') -->
+                    <div id="customGoogleBox" class="d-none border rounded-3 p-3 bg-light bg-opacity-75 mt-2">
+                        <label class="form-label small fw-bold text-dark mb-1" style="font-size: 0.75rem;">Nhập địa chỉ Gmail của bạn:</label>
                         <div class="input-group input-group-sm mb-2">
-                            <span class="input-group-text bg-light"><i class="bi bi-google text-danger"></i></span>
-                            <input type="email" id="customGoogleEmail" class="form-control" placeholder="tenban@gmail.com">
+                            <span class="input-group-text bg-white"><i class="bi bi-envelope-at text-danger"></i></span>
+                            <input type="email" id="customGoogleEmail" class="form-control" placeholder="tenban@gmail.com" onkeydown="if(event.key==='Enter'){event.preventDefault();submitCustomGoogleAuth();}">
                         </div>
-                        <div class="input-group input-group-sm mb-3">
-                            <span class="input-group-text bg-light"><i class="bi bi-person text-primary"></i></span>
-                            <input type="text" id="customGoogleName" class="form-control" placeholder="Họ và tên hiển thị (tùy chọn)">
+                        <div class="input-group input-group-sm mb-2.5">
+                            <span class="input-group-text bg-white"><i class="bi bi-person text-primary"></i></span>
+                            <input type="text" id="customGoogleName" class="form-control" placeholder="Họ và tên hiển thị (tùy chọn)" onkeydown="if(event.key==='Enter'){event.preventDefault();submitCustomGoogleAuth();}">
                         </div>
-                        <button type="button" id="btnSubmitCustomGoogle" onclick="submitCustomGoogleAuth()" class="btn btn-dark btn-sm w-100 py-2 fw-semibold rounded-3 d-flex align-items-center justify-content-center gap-2">
-                            <span id="customGoogleBtnText">Đăng Nhập Với Tài Khoản Này</span>
-                            <i class="bi bi-check-circle-fill"></i>
-                        </button>
+                        <div class="d-flex gap-2">
+                            <button type="button" id="btnSubmitCustomGoogle" onclick="submitCustomGoogleAuth()" class="btn btn-dark btn-sm flex-grow-1 py-1.5 fw-semibold rounded-2 d-flex align-items-center justify-content-center gap-1.5">
+                                <span id="customGoogleBtnText">Tiếp tục đăng nhập</span>
+                                <i class="bi bi-arrow-right-short fs-6"></i>
+                            </button>
+                            <button type="button" onclick="toggleCustomGoogleBox()" class="btn btn-outline-secondary btn-sm rounded-2 px-2.5">
+                                Hủy
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="text-center text-muted mt-3" style="font-size: 0.7rem; line-height: 1.4;">
+                        Để tiếp tục, Google sẽ xác thực và liên kết với tài khoản Book4Life của bạn. Bỏ qua hoàn toàn mật khẩu &amp; mã OTP.
                     </div>
                 </div>
             </div>
@@ -1714,6 +1770,16 @@
             }
         }
 
+        function toggleCustomGoogleBox() {
+            const box = document.getElementById('customGoogleBox');
+            if (!box) return;
+            box.classList.toggle('d-none');
+            if (!box.classList.contains('d-none')) {
+                const input = document.getElementById('customGoogleEmail');
+                if (input) input.focus();
+            }
+        }
+
         function submitCustomGoogleAuth() {
             const emailInput = document.getElementById('customGoogleEmail');
             const nameInput = document.getElementById('customGoogleName');
@@ -1733,7 +1799,7 @@
 
             submitGoogleAuth(email, name).finally(() => {
                 if (btn) btn.disabled = false;
-                if (btnText) btnText.innerText = 'Đăng Nhập Với Tài Khoản Này';
+                if (btnText) btnText.innerText = 'Tiếp tục đăng nhập';
             });
         }
     </script>

@@ -25,7 +25,7 @@ public class EmailServiceImpl implements EmailService {
     @Value("${app.name:Book4Life}")
     private String appName;
 
-    @Value("${spring.mail.username:book4lifeute@gmail.com}")
+    @Value("${mail.from.email:book4lifeute@gmail.com}")
     private String fromEmail;
 
     @Value("${support.hotline.email:book4lifeute@gmail.com}")

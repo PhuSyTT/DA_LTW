@@ -565,6 +565,12 @@
                                 <span id="step1BtnText">Gửi Mã Xác Nhận OTP Qua Email</span>
                                 <i class="bi bi-send-fill fs-6"></i>
                             </button>
+                            <div class="text-center mt-2" style="font-size: 0.72rem;">
+                                <span class="text-muted">Đã nhận được mã OTP trong email?</span>
+                                <a href="javascript:void(0)" onclick="openOtpDirectly()" class="fw-bold text-decoration-underline ms-1" style="color: var(--accent-terracotta);">
+                                    Nhập mã xác nhận ngay
+                                </a>
+                            </div>
                         </div>
 
                         <!-- Khối Xác Thực OTP (Mở rộng ngay trên cùng trang, không hiệu ứng chuyển trang) -->
@@ -1154,6 +1160,10 @@
                     showAlert(result.message || 'Mã xác nhận 6 số đã được gửi trực tiếp tới email của bạn qua Google Mail!', false);
                 } else {
                     showAlert(result.message || 'Có lỗi xảy ra khi yêu cầu mã OTP!');
+                    // Nếu đã gửi trước đó (chờ 60s cooldown), tự động mở ô nhập OTP để người dùng không bị kẹt
+                    if (result.message && result.message.includes('60 giây')) {
+                        goToStep2(email);
+                    }
                 }
             } catch (err) {
                 showAlert('Lỗi kết nối máy chủ: ' + err.message);
@@ -1161,6 +1171,21 @@
                 btn.disabled = false;
                 btnText.innerText = 'Gửi Mã Xác Nhận OTP Qua Email';
             }
+        }
+
+        function openOtpDirectly() {
+            const email = document.getElementById('regEmail').value.trim();
+            if (!email) {
+                showAlert('Vui lòng nhập địa chỉ Email trước khi nhập mã xác thực!');
+                document.getElementById('regEmail').focus();
+                return;
+            }
+            pendingRegistration.email = email;
+            pendingRegistration.password = document.getElementById('regPassword').value;
+            pendingRegistration.fullName = document.getElementById('regFullName').value.trim();
+            pendingRegistration.phone = document.getElementById('regPhone').value.trim();
+            goToStep2(email);
+            showAlert('Vui lòng kiểm tra hộp thư email ' + email + ' và nhập mã xác thực OTP 6 số bên dưới:', false);
         }
 
         async function handleVerifyOtp(e) {

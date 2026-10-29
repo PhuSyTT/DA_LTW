@@ -111,15 +111,11 @@ public class AuthServiceImpl implements AuthService {
         );
         otpVerificationRepository.save(otpRecord);
 
-        // 7. Gửi email qua SMTP Gmail thực tế đến hòm thư người dùng
+        // 7. Gửi email qua SMTP Gmail thực tế đến hòm thư người dùng (bất đồng bộ để không nghẽn luồng web)
         try {
             emailService.sendRegistrationOtp(email, otpCode);
         } catch (Exception ex) {
-            log.error("Không thể gửi email OTP qua SMTP tới {}: {}", email, ex.getMessage(), ex);
-            String detailMsg = (ex.getMessage() != null && ex.getMessage().contains("timed out"))
-                    ? "Kết nối tới máy chủ Google SMTP bị gián đoạn (timeout). Vui lòng thử lại sau vài giây!"
-                    : "Không thể gửi mã xác nhận đến email [" + email + "]. Vui lòng kiểm tra lại địa chỉ email hoặc thử lại sau!";
-            return ApiResponse.error(detailMsg);
+            log.error("Không thể kích hoạt gửi email OTP qua SMTP tới {}: {}", email, ex.getMessage(), ex);
         }
 
         log.info("=================================================================");
@@ -365,12 +361,11 @@ public class AuthServiceImpl implements AuthService {
         );
         otpVerificationRepository.save(otpRecord);
 
-        // 6. Gửi email OTP thực tế
+        // 6. Gửi email OTP thực tế (bất đồng bộ để không nghẽn luồng web)
         try {
             emailService.sendOtp(email, otpCode, "đặt lại mật khẩu");
         } catch (Exception ex) {
-            log.error("Không thể gửi email OTP đặt lại mật khẩu tới {}: {}", email, ex.getMessage());
-            return ApiResponse.error("Không thể gửi mã xác nhận đến email [" + email + "]. Vui lòng kiểm tra lại địa chỉ email hoặc thử lại sau!");
+            log.error("Không thể kích hoạt gửi email OTP đặt lại mật khẩu tới {}: {}", email, ex.getMessage(), ex);
         }
 
         log.info("=================================================================");
@@ -478,12 +473,11 @@ public class AuthServiceImpl implements AuthService {
         );
         otpVerificationRepository.save(otpRecord);
 
-        // Gửi email OTP thực tế
+        // Gửi email OTP thực tế (bất đồng bộ để không nghẽn luồng web)
         try {
             emailService.sendOtp(email, otpCode, "thay đổi thông tin cá nhân");
         } catch (Exception ex) {
-            log.error("Không thể gửi email OTP cập nhật thông tin tới {}: {}", email, ex.getMessage());
-            return ApiResponse.error("Không thể gửi mã xác nhận đến email [" + email + "]. Vui lòng thử lại sau!");
+            log.error("Không thể kích hoạt gửi email OTP cập nhật thông tin tới {}: {}", email, ex.getMessage(), ex);
         }
 
         log.info("=================================================================");

@@ -167,5 +167,21 @@ public class AuthApiController {
             return ResponseEntity.badRequest().body(response);
         }
     }
+
+    /**
+     * Đăng nhập trực tiếp bằng tài khoản Google (Bỏ qua mật khẩu & OTP)
+     * POST /api/auth/google-login
+     */
+    @PostMapping("/google-login")
+    public ResponseEntity<ApiResponse<AuthResponseDto>> googleLogin(
+            @RequestBody GoogleAuthRequestDto request,
+            jakarta.servlet.http.HttpServletRequest httpRequest) {
+        ApiResponse<AuthResponseDto> response = authService.loginWithGoogle(request, httpRequest);
+        if (response.isSuccess()) {
+            return ResponseEntity.ok(response);
+        } else {
+            return ResponseEntity.badRequest().body(response);
+        }
+    }
 }
 

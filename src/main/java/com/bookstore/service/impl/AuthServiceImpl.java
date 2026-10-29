@@ -7,12 +7,16 @@ import com.bookstore.entity.User;
 import com.bookstore.repository.OtpVerificationRepository;
 import com.bookstore.repository.RoleRepository;
 import com.bookstore.repository.UserRepository;
+import com.bookstore.security.CustomUserDetails;
 import com.bookstore.security.JwtTokenProvider;
 import com.bookstore.service.AuthService;
 import com.bookstore.service.EmailService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.web.context.HttpSessionSecurityContextRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -549,6 +553,103 @@ public class AuthServiceImpl implements AuthService {
         }
 
         return ApiResponse.success(dto, "Cập nhật thông tin cá nhân thành công!");
+    }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public ApiResponse<AuthResponseDto> loginWithGoogle(GoogleAuthRequestDto request, jakarta.servlet.http.HttpServletRequest httpRequest) {
+        if (request == null) {
+            return ApiResponse.error("Dữ liệu đăng nhập Google không hợp lệ!");
+        }
+
+        String email = request.getEmail();
+        String fullName = request.getFullName();
+        String avatarUrl = request.getAvatarUrl();
+
+        // 1. Nếu có credential JWT từ Google Identity Services (GIS), giải mã payload:
+        if (request.getCredential() != null && !request.getCredential().isBlank()) {
+            try {
+                String[] parts = request.getCredential().split("\\.");
+                if (parts.length >= 2) {
+                    String payloadJson = new String(java.util.Base64.getUrlDecoder().decode(parts[1]), java.nio.charset.StandardCharsets.UTF_8);
+                    com.fasterxml.jackson.databind.JsonNode node = new com.fasterxml.jackson.databind.ObjectMapper().readTree(payloadJson);
+                    if (node.has("email")) {
+                        email = node.get("email").asText();
+                    }
+                    if (node.has("name") && (fullName == null || fullName.isBlank())) {
+                        fullName = node.get("name").asText();
+                    }
+                    if (node.has("picture") && (avatarUrl == null || avatarUrl.isBlank())) {
+                        avatarUrl = node.get("picture").asText();
+                    }
+                }
+            } catch (Exception ex) {
+                log.warn("Không thể giải mã Google Credential JWT: {}", ex.getMessage());
+            }
+        }
+
+        if (email == null || email.trim().isEmpty()) {
+            return ApiResponse.error("Không tìm thấy thông tin email từ tài khoản Google!");
+        }
+
+        String cleanEmail = email.trim().toLowerCase();
+
+        // 2. Tìm hoặc tự động tạo tài khoản người dùng
+        Optional<User> userOpt = userRepository.findByEmail(cleanEmail);
+        User user;
+        if (userOpt.isPresent()) {
+            user = userOpt.get();
+            if (Boolean.FALSE.equals(user.getIsActive())) {
+                return ApiResponse.error("Tài khoản Google [" + cleanEmail + "] đã bị vô hiệu hóa hoặc khóa an toàn. Vui lòng liên hệ ban quản trị!");
+            }
+            if (avatarUrl != null && !avatarUrl.isBlank() && (user.getAvatarUrl() == null || user.getAvatarUrl().isBlank())) {
+                user.setAvatarUrl(avatarUrl);
+                userRepository.save(user);
+            }
+        } else {
+            // Tự động cấp tài khoản Độc giả (ROLE_CUSTOMER) - Xác thực từ Google không cần nhập lại OTP
+            Role customerRole = roleRepository.findByRoleName("ROLE_CUSTOMER")
+                    .orElseGet(() -> roleRepository.findById(5L)
+                            .orElseGet(() -> roleRepository.save(new Role(null, "ROLE_CUSTOMER", "Khách hàng"))));
+
+            user = new User();
+            user.setEmail(cleanEmail);
+            user.setFullName((fullName != null && !fullName.isBlank()) ? fullName.trim() : cleanEmail.split("@")[0]);
+            user.setPhone("");
+            user.setAvatarUrl((avatarUrl != null && !avatarUrl.isBlank()) ? avatarUrl : "https://lh3.googleusercontent.com/a/default-user=s96-c");
+            user.setPassword(passwordEncoder.encode(java.util.UUID.randomUUID().toString())); // Khóa bảo mật ngẫu nhiên
+            user.setRole(customerRole);
+            user.setIsActive(true);
+            user.setCreatedAt(LocalDateTime.now());
+            user = userRepository.save(user);
+            log.info("Tự động tạo mới tài khoản Độc giả từ Google Sign-In: ID={}, Email={}", user.getId(), user.getEmail());
+        }
+
+        // 3. Đăng nhập vào phiên Spring Security (Session)
+        CustomUserDetails userDetails = new CustomUserDetails(user);
+        UsernamePasswordAuthenticationToken authentication =
+                new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
+        SecurityContextHolder.getContext().setAuthentication(authentication);
+
+        if (httpRequest != null) {
+            jakarta.servlet.http.HttpSession session = httpRequest.getSession(true);
+            session.setAttribute(HttpSessionSecurityContextRepository.SPRING_SECURITY_CONTEXT_KEY, SecurityContextHolder.getContext());
+        }
+
+        // 4. Sinh mã JWT Token để lưu trữ frontend
+        String jwtToken = jwtTokenProvider.generateToken(user);
+        String roleName = (user.getRole() != null) ? user.getRole().getRoleName() : "ROLE_CUSTOMER";
+
+        AuthResponseDto responseDto = new AuthResponseDto(
+                jwtToken,
+                user.getId(),
+                user.getEmail(),
+                user.getFullName(),
+                roleName,
+                "Đăng nhập trực tiếp bằng tài khoản Google thành công!"
+        );
+
+        return ApiResponse.success(responseDto, "Đăng nhập trực tiếp bằng Google thành công!");
     }
 }
 

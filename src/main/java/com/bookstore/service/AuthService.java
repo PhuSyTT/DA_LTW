@@ -30,5 +30,8 @@ public interface AuthService {
 
     // Bước 2: Xác thực mã OTP và cập nhật thông tin cá nhân
     ApiResponse<UserDto> verifyOtpAndUpdateProfile(String email, VerifyOtpRequestDto request);
+
+    // Đăng nhập / Đăng ký trực tiếp bằng tài khoản Google (Bỏ qua mật khẩu & OTP)
+    ApiResponse<AuthResponseDto> loginWithGoogle(GoogleAuthRequestDto request, jakarta.servlet.http.HttpServletRequest httpRequest);
 }
 

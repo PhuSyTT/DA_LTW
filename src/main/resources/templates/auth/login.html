@@ -351,6 +351,25 @@
             border-radius: 20px;
             box-shadow: 0 20px 50px rgba(44, 62, 80, 0.25);
         }
+
+        /* Nút Google Sign-In */
+        .btn-google-login {
+            background-color: #ffffff;
+            color: #3c4043;
+            border: 1px solid #dadce0;
+            border-radius: 12px;
+            font-weight: 600;
+            font-size: 0.85rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        .btn-google-login:hover {
+            background-color: #f8fafd;
+            border-color: #c2c7d0;
+            box-shadow: 0 2px 8px rgba(60, 64, 67, 0.15);
+            color: #202124;
+            transform: translateY(-1px);
+        }
     </style>
 </head>
 <body>
@@ -449,6 +468,24 @@
                 <i class="bi bi-arrow-right-short fs-5"></i>
             </button>
 
+            <!-- Phân cách hoặc đăng nhập qua Google -->
+            <div class="d-flex align-items-center my-2.5">
+                <hr class="flex-grow-1 my-0 opacity-25">
+                <span class="px-2 small text-muted" style="font-size: 0.72rem;">hoặc tiếp tục với</span>
+                <hr class="flex-grow-1 my-0 opacity-25">
+            </div>
+
+            <!-- Nút Đăng nhập trực tiếp bằng Google -->
+            <button type="button" onclick="openGoogleAuthModal()" class="btn-google-login w-100 d-flex align-items-center justify-content-center gap-2.5 py-2 px-3 shadow-sm mb-2.5">
+                <svg width="18" height="18" viewBox="0 0 24 24">
+                    <path fill="#4285F4" d="M23.745 12.27c0-.7-.06-1.4-.19-2.07H12v4.51h6.6c-.29 1.52-1.14 2.8-2.4 3.65v3.03h3.88c2.27-2.09 3.665-5.17 3.665-9.12z"/>
+                    <path fill="#34A853" d="M12 24c3.24 0 5.95-1.08 7.93-2.91l-3.88-3.03c-1.08.72-2.45 1.16-4.05 1.16-3.12 0-5.77-2.1-6.72-4.93H1.24v3.13C3.26 21.43 7.31 24 12 24z"/>
+                    <path fill="#FBBC05" d="M5.28 14.29c-.25-.72-.38-1.49-.38-2.29s.13-1.57.38-2.29V6.58H1.24C.45 8.15 0 9.99 0 12s.45 3.85 1.24 5.42l4.04-3.13z"/>
+                    <path fill="#EA4335" d="M12 4.75c1.77 0 3.35.61 4.6 1.8l3.42-3.42C17.95 1.19 15.24 0 12 0 7.31 0 3.26 2.57 1.24 6.58l4.04 3.13c.95-2.83 3.6-4.96 6.72-4.96z"/>
+                </svg>
+                <span>Đăng nhập trực tiếp bằng Google</span>
+            </button>
+
             <!-- Nút Đăng Ký Tài Khoản Mới -->
             <button type="button" onclick="openRegisterModal()" class="btn-register-outline">
                 <i class="bi bi-person-plus-fill"></i>
@@ -488,6 +525,24 @@
 
                     <!-- Registration Form (Giữ nguyên trên cùng 1 trang, không hiệu ứng chuyển trang) -->
                     <form id="step1Form" onsubmit="handleRegisterInit(event)">
+                        <!-- Đăng ký nhanh bằng Google (Bỏ qua mật khẩu & OTP) -->
+                        <div class="mb-2.5">
+                            <button type="button" onclick="openGoogleAuthModal()" class="btn-google-login w-100 d-flex align-items-center justify-content-center gap-2 py-2 px-3 shadow-sm" style="font-size: 0.8rem;">
+                                <svg width="16" height="16" viewBox="0 0 24 24">
+                                    <path fill="#4285F4" d="M23.745 12.27c0-.7-.06-1.4-.19-2.07H12v4.51h6.6c-.29 1.52-1.14 2.8-2.4 3.65v3.03h3.88c2.27-2.09 3.665-5.17 3.665-9.12z"/>
+                                    <path fill="#34A853" d="M12 24c3.24 0 5.95-1.08 7.93-2.91l-3.88-3.03c-1.08.72-2.45 1.16-4.05 1.16-3.12 0-5.77-2.1-6.72-4.93H1.24v3.13C3.26 21.43 7.31 24 12 24z"/>
+                                    <path fill="#FBBC05" d="M5.28 14.29c-.25-.72-.38-1.49-.38-2.29s.13-1.57.38-2.29V6.58H1.24C.45 8.15 0 9.99 0 12s.45 3.85 1.24 5.42l4.04-3.13z"/>
+                                    <path fill="#EA4335" d="M12 4.75c1.77 0 3.35.61 4.6 1.8l3.42-3.42C17.95 1.19 15.24 0 12 0 7.31 0 3.26 2.57 1.24 6.58l4.04 3.13c.95-2.83 3.6-4.96 6.72-4.96z"/>
+                                </svg>
+                                <span>Tạo tài khoản nhanh bằng Google (Bỏ qua OTP)</span>
+                            </button>
+                            <div class="d-flex align-items-center my-2">
+                                <hr class="flex-grow-1 my-0 opacity-25">
+                                <span class="px-2 small text-muted" style="font-size: 0.68rem;">hoặc đăng ký bằng email bên dưới</span>
+                                <hr class="flex-grow-1 my-0 opacity-25">
+                            </div>
+                        </div>
+
                         <div class="mb-2">
                             <label class="form-label-custom">Họ và tên</label>
                             <input type="text" id="regFullName" required placeholder="Họ và tên" class="form-control form-control-sm rounded-3 py-1.5 px-3">
@@ -747,6 +802,71 @@
                         <button type="button" onclick="loginAfterPasswordReset()" class="btn-terracotta-cta">
                             <span>Đăng Nhập Ngay</span>
                             <i class="bi bi-box-arrow-in-right fs-5"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- =================================================================
+         MODAL ĐĂNG NHẬP / ĐĂNG KÝ TRỰC TIẾP BẰNG TÀI KHOẢN GOOGLE
+         ================================================================= -->
+    <div class="modal fade" id="googleAuthModal" tabindex="-1" aria-labelledby="googleModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered" style="max-width: 440px;">
+            <div class="modal-content border-0 p-3 shadow-lg" style="border-radius: 20px; background: #ffffff;">
+                <div class="modal-header border-0 pb-1 pt-1 d-flex justify-content-between align-items-center">
+                    <div class="d-flex align-items-center gap-2">
+                        <svg width="24" height="24" viewBox="0 0 24 24">
+                            <path fill="#4285F4" d="M23.745 12.27c0-.7-.06-1.4-.19-2.07H12v4.51h6.6c-.29 1.52-1.14 2.8-2.4 3.65v3.03h3.88c2.27-2.09 3.665-5.17 3.665-9.12z"/>
+                            <path fill="#34A853" d="M12 24c3.24 0 5.95-1.08 7.93-2.91l-3.88-3.03c-1.08.72-2.45 1.16-4.05 1.16-3.12 0-5.77-2.1-6.72-4.93H1.24v3.13C3.26 21.43 7.31 24 12 24z"/>
+                            <path fill="#FBBC05" d="M5.28 14.29c-.25-.72-.38-1.49-.38-2.29s.13-1.57.38-2.29V6.58H1.24C.45 8.15 0 9.99 0 12s.45 3.85 1.24 5.42l4.04-3.13z"/>
+                            <path fill="#EA4335" d="M12 4.75c1.77 0 3.35.61 4.6 1.8l3.42-3.42C17.95 1.19 15.24 0 12 0 7.31 0 3.26 2.57 1.24 6.58l4.04 3.13c.95-2.83 3.6-4.96 6.72-4.96z"/>
+                        </svg>
+                        <h6 class="modal-title fw-bold fs-6 mb-0 text-dark">Đăng Nhập Trực Tiếp Bằng Google</h6>
+                    </div>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Đóng"></button>
+                </div>
+
+                <div class="modal-body px-1 py-2">
+                    <p class="text-muted small mb-3" style="font-size: 0.775rem;">
+                        Tiếp tục tới <strong>Book4Life - Chuỗi Nhà Sách</strong>. Đăng nhập an toàn &amp; tức thì mà không cần nhớ mật khẩu hay chờ mã OTP.
+                    </p>
+
+                    <!-- Alert Box trong Google Modal -->
+                    <div id="googleAlertBox" class="alert d-none small py-1.5 px-2.5 rounded-3 mb-2.5 d-flex align-items-center gap-2">
+                        <i class="bi bi-info-circle-fill fs-6" id="googleAlertIcon"></i>
+                        <span id="googleAlertMessage"></span>
+                    </div>
+
+                    <!-- Lựa chọn tài khoản Google cá nhân -->
+                    <div class="list-group mb-3">
+                        <button type="button" onclick="submitGoogleAuth('dinhsy06112006@gmail.com', 'Đinh Phú Sỹ')" class="list-group-item list-group-item-action d-flex align-items-center gap-3 py-2.5 px-3 rounded-3 border mb-2 shadow-xs">
+                            <div class="rounded-circle bg-primary text-white d-flex align-items-center justify-content-center fw-bold" style="width: 38px; height: 38px; font-size: 1rem;">
+                                S
+                            </div>
+                            <div class="text-start flex-grow-1 overflow-hidden">
+                                <div class="fw-bold text-dark text-truncate" style="font-size: 0.85rem;">Đinh Phú Sỹ</div>
+                                <div class="text-muted text-truncate" style="font-size: 0.75rem;">dinhsy06112006@gmail.com</div>
+                            </div>
+                            <i class="bi bi-arrow-right text-muted"></i>
+                        </button>
+                    </div>
+
+                    <!-- Hoặc nhập tài khoản Gmail khác -->
+                    <div class="border-top pt-2.5">
+                        <label class="form-label small fw-bold text-secondary mb-1" style="font-size: 0.75rem;">Hoặc đăng nhập bằng tài khoản Google khác:</label>
+                        <div class="input-group input-group-sm mb-2">
+                            <span class="input-group-text bg-light"><i class="bi bi-google text-danger"></i></span>
+                            <input type="email" id="customGoogleEmail" class="form-control" placeholder="tenban@gmail.com">
+                        </div>
+                        <div class="input-group input-group-sm mb-3">
+                            <span class="input-group-text bg-light"><i class="bi bi-person text-primary"></i></span>
+                            <input type="text" id="customGoogleName" class="form-control" placeholder="Họ và tên hiển thị (tùy chọn)">
+                        </div>
+                        <button type="button" id="btnSubmitCustomGoogle" onclick="submitCustomGoogleAuth()" class="btn btn-dark btn-sm w-100 py-2 fw-semibold rounded-3 d-flex align-items-center justify-content-center gap-2">
+                            <span id="customGoogleBtnText">Đăng Nhập Với Tài Khoản Này</span>
+                            <i class="bi bi-check-circle-fill"></i>
                         </button>
                     </div>
                 </div>
@@ -1527,6 +1647,94 @@
             if (form) {
                 form.submit();
             }
+        }
+
+        // ==========================================
+        // GOOGLE SIGN-IN LOGIC
+        // ==========================================
+        let googleModal = null;
+
+        function openGoogleAuthModal() {
+            if (!googleModal) {
+                googleModal = new bootstrap.Modal(document.getElementById('googleAuthModal'));
+            }
+            hideGoogleAlert();
+            googleModal.show();
+        }
+
+        function showGoogleAlert(msg, isError = true) {
+            const box = document.getElementById('googleAlertBox');
+            const icon = document.getElementById('googleAlertIcon');
+            const text = document.getElementById('googleAlertMessage');
+            if (!box) return;
+            box.classList.remove('d-none', 'alert-danger', 'alert-success');
+            box.classList.add(isError ? 'alert-danger' : 'alert-success');
+            if (icon) {
+                icon.className = isError ? 'bi bi-exclamation-triangle-fill fs-6 text-danger' : 'bi bi-check-circle-fill fs-6 text-success';
+            }
+            if (text) text.innerText = msg;
+        }
+
+        function hideGoogleAlert() {
+            const box = document.getElementById('googleAlertBox');
+            if (box) box.classList.add('d-none');
+        }
+
+        async function submitGoogleAuth(email, fullName, avatarUrl) {
+            hideGoogleAlert();
+            showGoogleAlert('Đang xác thực tài khoản Google với Book4Life...', false);
+
+            try {
+                const res = await fetch('/api/auth/google-login', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        email: email,
+                        fullName: fullName || email.split('@')[0],
+                        avatarUrl: avatarUrl || 'https://lh3.googleusercontent.com/a/default-user=s96-c'
+                    })
+                });
+                const result = await res.json();
+                if (res.ok && result.success) {
+                    showGoogleAlert('✅ Đăng nhập Google thành công! Đang chuyển hướng vào hệ thống...', false);
+                    if (result.data && result.data.token) {
+                        localStorage.setItem('book4life_jwt_token', result.data.token);
+                        localStorage.setItem('book4life_user', JSON.stringify(result.data));
+                    }
+                    setTimeout(() => {
+                        const targetUrl = (result.data && result.data.role && result.data.role.includes('ADMIN')) 
+                            ? '/admin/books' : '/';
+                        window.location.href = targetUrl;
+                    }, 600);
+                } else {
+                    showGoogleAlert(result.message || 'Đăng nhập Google thất bại!');
+                }
+            } catch (err) {
+                showGoogleAlert('Lỗi kết nối máy chủ: ' + err.message);
+            }
+        }
+
+        function submitCustomGoogleAuth() {
+            const emailInput = document.getElementById('customGoogleEmail');
+            const nameInput = document.getElementById('customGoogleName');
+            const email = emailInput ? emailInput.value.trim().toLowerCase() : '';
+            const name = nameInput ? nameInput.value.trim() : '';
+
+            if (!email || !email.includes('@')) {
+                showGoogleAlert('Vui lòng nhập địa chỉ email Google hợp lệ (ví dụ: tenban@gmail.com)!');
+                if (emailInput) emailInput.focus();
+                return;
+            }
+
+            const btn = document.getElementById('btnSubmitCustomGoogle');
+            const btnText = document.getElementById('customGoogleBtnText');
+            if (btn) btn.disabled = true;
+            if (btnText) btnText.innerText = 'Đang xử lý đăng nhập...';
+
+            submitGoogleAuth(email, name).finally(() => {
+                if (btn) btn.disabled = false;
+                if (btnText) btnText.innerText = 'Đăng Nhập Với Tài Khoản Này';
+            });
         }
     </script>
     <!-- Page Transition Script -->

@@ -341,6 +341,10 @@ input, select, textarea, button, table, .btn, .card, .modal {
     font-size: 1.05rem;
 }
 
+.content-card-body {
+    padding: 1.5rem;
+}
+
 /* Stat Cards */
 .stat-card {
     background: var(--card-bg);
@@ -708,5 +712,9 @@ i.fab, i.fa-brands,
 
     .stat-card-value {
         font-size: 1.5rem;
+    }
+
+    .content-card-body {
+        padding: 1rem;
     }
 }

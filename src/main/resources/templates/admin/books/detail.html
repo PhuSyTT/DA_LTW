@@ -24,7 +24,7 @@
         <!-- Left: Book Master Info -->
         <div class="col-12 col-xl-4">
             <div class="content-card h-100">
-                <div class="content-card-body text-center">
+                <div class="content-card-body p-4 text-center">
                     <img th:src="${book.coverImageUrl} ?: 'https://images.unsplash.com/photo-1544716278-ca5e3f4abd8c?w=300&q=80'"
                          alt="Bìa sách"
                          style="width: 140px; height: 190px; object-fit: cover; border-radius: 8px; box-shadow: 0 4px 15px rgba(0,0,0,0.12);"
@@ -42,19 +42,19 @@
                     </div>
 
                     <div class="border-top pt-3 text-start">
-                        <div class="d-flex flex-wrap justify-content-between align-items-center py-2 border-bottom gap-2">
+                        <div class="d-flex flex-wrap justify-content-between align-items-center py-2 px-1 border-bottom gap-2">
                             <span class="text-muted">Giá bìa niêm yết:</span>
                             <span class="fw-bold text-dark text-end" th:text="${#numbers.formatDecimal(book.originalPrice, 0, 'COMMA', 0, 'POINT')} + ' ₫'">125.000 ₫</span>
                         </div>
-                        <div class="d-flex flex-wrap justify-content-between align-items-center py-2 border-bottom gap-2">
+                        <div class="d-flex flex-wrap justify-content-between align-items-center py-2 px-1 border-bottom gap-2">
                             <span class="text-muted">Nhà xuất bản:</span>
                             <span class="fw-semibold text-dark text-end" th:text="${book.publisher} ?: 'Đang cập nhật'">NXB Trẻ</span>
                         </div>
-                        <div class="d-flex flex-wrap justify-content-between align-items-center py-2 border-bottom gap-2">
+                        <div class="d-flex flex-wrap justify-content-between align-items-center py-2 px-1 border-bottom gap-2">
                             <span class="text-muted">Năm phát hành:</span>
                             <span class="fw-semibold text-dark text-end" th:text="${book.publishYear} ?: 'Đang cập nhật'">2020</span>
                         </div>
-                        <div class="d-flex flex-wrap justify-content-between align-items-center py-2 gap-2">
+                        <div class="d-flex flex-wrap justify-content-between align-items-center py-2 px-1 gap-2">
                             <span class="text-muted">Tổng tồn kho toàn chuỗi:</span>
                             <span class="badge bg-success fs-6 text-end" th:text="${book.totalInventory} + ' cuốn'">3 cuốn</span>
                         </div>
@@ -72,7 +72,7 @@
                         <i class="fas fa-align-left me-2"></i> Tóm Tắt & Nội Dung Sách
                     </h6>
                 </div>
-                <div class="content-card-body">
+                <div class="content-card-body p-4">
                     <p class="text-secondary leading-relaxed mb-0" style="white-space: pre-line;"
                        th:text="${book.description} ?: 'Chưa có thông tin mô tả chi tiết cho đầu sách này.'">
                         Mô tả chi tiết tác phẩm...
@@ -87,7 +87,7 @@
                         <i class="fas fa-feather-pointed me-2"></i> Tiểu Sử Tác Giả: <span th:text="${book.authorName}">Tên tác giả</span>
                     </h6>
                 </div>
-                <div class="content-card-body">
+                <div class="content-card-body p-4">
                     <p class="text-muted small mb-0" th:text="${book.authorBio}">Tiểu sử tác giả...</p>
                 </div>
             </div>

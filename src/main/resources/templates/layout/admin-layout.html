@@ -16,10 +16,19 @@
     <!-- Cropper.js CSS for Book Cover and Image Cropping -->
     <link href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.6.1/cropper.min.css" rel="stylesheet">
     <!-- Custom Admin Styles -->
-    <link th:href="@{/css/admin-styles.css}" rel="stylesheet">
+    <link th:href="@{/css/admin-styles.css(v='2.2')}" rel="stylesheet">
     <!-- Page Transition Styles -->
     <th:block th:replace="~{fragments/page-transition :: transitionStyles}"></th:block>
     <style>
+        .content-card-body {
+            padding: 1.5rem !important;
+        }
+        @media (max-width: 575.98px) {
+            .content-card-body {
+                padding: 1rem !important;
+            }
+        }
+
         body, input, button, select, textarea, optgroup, p, span, h1, h2, h3, h4, h5, h6, a, label, table, th, td, div {
             font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
         }

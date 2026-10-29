@@ -33,7 +33,7 @@
         <div class="col-12 col-xl-5">
             <!-- Physical SKU Card -->
             <div class="content-card mb-4">
-                <div class="content-card-body text-center">
+                <div class="content-card-body p-4 text-center">
                     <!-- Barcode Box -->
                     <div class="p-3 bg-light rounded-3 border mb-3">
                         <div class="font-monospace fs-4 fw-bold text-dark letter-spacing-1" th:text="${item.skuBarcode}">
@@ -66,18 +66,18 @@
 
                     <!-- Price Comparison -->
                     <div class="border-top pt-3 text-start">
-                        <div class="d-flex flex-wrap justify-content-between align-items-center py-2 border-bottom gap-2">
+                        <div class="d-flex flex-wrap justify-content-between align-items-center py-2 px-1 border-bottom gap-2">
                             <span class="text-muted">Chi nhánh lưu trữ:</span>
                             <span class="fw-bold text-dark text-end" th:text="${item.branchName} + ' (' + ${item.branchCity} + ')'">Chi nhánh Quận 1</span>
                         </div>
-                        <div class="d-flex flex-wrap justify-content-between align-items-center py-2 border-bottom gap-2">
+                        <div class="d-flex flex-wrap justify-content-between align-items-center py-2 px-1 border-bottom gap-2">
                             <span class="text-muted">Giá bán sách cũ:</span>
                             <span class="fw-bold text-danger fs-5"
                                   th:text="${#numbers.formatDecimal(item.sellingPrice, 0, 'COMMA', 0, 'POINT')} + ' ₫'">
                                 55.000 ₫
                             </span>
                         </div>
-                        <div class="d-flex flex-wrap justify-content-between align-items-center py-2 border-bottom gap-2">
+                        <div class="d-flex flex-wrap justify-content-between align-items-center py-2 px-1 border-bottom gap-2">
                             <span class="text-muted">Giá bìa niêm yết (Master):</span>
                             <span class="text-muted text-decoration-line-through"
                                   th:if="${item.bookOriginalPrice != null}"
@@ -85,18 +85,18 @@
                                 125.000 ₫
                             </span>
                         </div>
-                        <div class="d-flex flex-wrap justify-content-between align-items-center py-2 border-bottom gap-2">
+                        <div class="d-flex flex-wrap justify-content-between align-items-center py-2 px-1 border-bottom gap-2">
                             <span class="text-muted">Mức tiết kiệm cho độc giả:</span>
                             <span class="badge bg-success-subtle text-success border border-success-subtle px-2 py-1 fw-bold"
                                   th:text="'Tiết kiệm ' + ${item.discountPercent} + '%'">
                                 Tiết kiệm 56%
                             </span>
                         </div>
-                        <div class="d-flex flex-wrap justify-content-between align-items-center py-2 border-bottom gap-2">
+                        <div class="d-flex flex-wrap justify-content-between align-items-center py-2 px-1 border-bottom gap-2">
                             <span class="text-muted">Số lượng tồn kho:</span>
                             <span class="fw-bold text-dark" th:text="${item.stockQuantity} + ' cuốn'">1 cuốn</span>
                         </div>
-                        <div class="d-flex flex-wrap justify-content-between align-items-center py-2 border-bottom gap-2">
+                        <div class="d-flex flex-wrap justify-content-between align-items-center py-2 px-1 border-bottom gap-2">
                             <span class="text-muted">Ngày nhập kho:</span>
                             <span class="fw-semibold text-dark"
                                   th:text="${#temporals.format(item.importDate, 'dd/MM/yyyy HH:mm')}">20/09/2026 10:30</span>
@@ -112,7 +112,7 @@
                         <i class="fas fa-layer-group me-2"></i> Quản Lý Vị Trí Kệ Sách (Shelf Location)
                     </h6>
                 </div>
-                <div class="content-card-body">
+                <div class="content-card-body p-4">
                     <form th:action="@{/admin/inventory/{id}/shelf-location(id=${item.id})}" method="post">
                         <div class="mb-3">
                             <label for="shelfInput" class="form-label text-muted small mb-1">Vị trí kệ hiện tại:</label>
@@ -143,7 +143,7 @@
                     <span class="badge bg-secondary-subtle text-secondary"
                           th:text="${#lists.size(item.images)} + ' ảnh'">3 ảnh</span>
                 </div>
-                <div class="content-card-body">
+                <div class="content-card-body p-4">
                     <p class="text-muted small mb-3">
                         Nhân viên kiểm duyệt đã chụp ảnh thực tế độ nét cao của cuốn sách này tại chi nhánh. Bấm vào ảnh để phóng to kiểm tra vết ố, nếp gãy hoặc tình trạng giấy.
                     </p>
@@ -187,7 +187,7 @@
                         <i class="fas fa-clipboard-check text-warning me-2"></i> Biên Bản Thẩm Định & Ghi Chú Tình Trạng
                     </h6>
                 </div>
-                <div class="content-card-body">
+                <div class="content-card-body p-4">
                     <div class="p-3 bg-light rounded-3 border">
                         <p class="mb-0 text-dark leading-relaxed" style="white-space: pre-line;"
                            th:text="${item.conditionNote} ?: 'Không có ghi chú khuyết điểm đặc biệt. Sách ở tình trạng nguyên bản.'">
@@ -204,7 +204,7 @@
                         <i class="fas fa-sliders text-secondary me-2"></i> Cập Nhật Trạng Thái Mặt Hàng
                     </h6>
                 </div>
-                <div class="content-card-body">
+                <div class="content-card-body p-4">
                     <div class="d-flex gap-2 flex-wrap">
                         <form th:action="@{/admin/inventory/{id}/status(id=${item.id})}" method="post" class="d-inline">
                             <input type="hidden" name="status" value="AVAILABLE">

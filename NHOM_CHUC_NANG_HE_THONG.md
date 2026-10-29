@@ -12,6 +12,7 @@
 6. [HẠ TẦNG EMAIL GIAO DỊCH ĐA KÊNH & KHẢ NĂNG TƯƠNG THÍCH CLOUD](#6-hạ-tầng-email-giao-dịch-đa-kênh--khả-năng-tương-thích-cloud)
 7. [BẢNG ĐỐI SOÁT MÃ CHỨC NĂNG THEO SRS CHUẨN HÓA (REQUIREMENTS MATRIX)](#7-bảng-đối-soát-mã-chức-năng-theo-srs-chuẩn-hóa-requirements-matrix)
 8. [NGĂN XẾP CÔNG NGHỆ & TỐI ƯU HIỆU NĂNG TRIỂN KHAI](#8-ngăn-xếp-công-nghệ--tối-ưu-hiệu-năng-triển-khai)
+9. [KỊCH BẢN & TRÌNH TỰ QUAY CLIP GIỚI THIỆU HỆ THỐNG (DEMO STORYBOARD)](#9-kịch-bản--trình-tự-quay-clip-giới-thiệu-hệ-thống-demo-storyboard)
 
 ---
 
@@ -67,7 +68,7 @@ flowchart TD
 > **Mục tiêu:** Mang lại trải nghiệm tìm kiếm minh bạch, quy trình mua sắm tiện lợi và khả năng tương tác hai chiều (Mua B2C & Bán C2B).
 
 ### 3.1. Tìm kiếm & Khám phá Sách cũ Trực quan
-* **Tra cứu theo chi nhánh:** Xem chính xác cuốn sách đang có mặt tại cửa hàng nào trong chuỗi (Chi nhánh Quận 1, Quận 5, Thủ Đức, v.v.).
+* **Tra cứu theo chi nhánh & Đồng bộ tồn kho:** Xem chính xác cuốn sách đang có mặt tại cửa hàng nào trong chuỗi (Chi nhánh Quận 1, Quận 5, Thủ Đức, Hoàn Kiếm, v.v.). Hệ thống chỉ hiển thị các chi nhánh **thực tế còn sách sẵn sàng bán (`AVAILABLE` và `stockQuantity > 0`)**. Tự động gắn huy hiệu **"GIÁ TỐT NHẤT ⭐"** cho cơ sở có mức giá ưu đãi nhất.
 * **Thang đo độ cũ minh bạch (Grading Scale):**
   * `LIKE_NEW` (99% - Như mới, bìa phẳng phiu, không tỳ vết).
   * `VERY_GOOD` (90% - Rất tốt, gáy nguyên vẹn, giấy sáng).
@@ -80,6 +81,7 @@ flowchart TD
 * **Hình thức nhận sách đa dạng:**
   * **Giao tận nơi (COD):** Tự động tính phí vận chuyển theo Tỉnh/Thành phố dựa trên địa chỉ khách chọn.
   * **Giữ sách tại quầy (Click & Collect):** Độc giả đặt trước và ghé chi nhánh gần nhất nhận sách trong 48 giờ hoàn toàn miễn phí vận chuyển.
+* **Đăng nhập Google trực tiếp chuẩn OAuth2:** Loại bỏ hoàn toàn tài khoản gợi ý cứng; độc giả nhập tài khoản Google cá nhân và hoàn tất xác thực trong 1-click mà không cần mật khẩu hay mã OTP.
 * **Tối ưu form điền thông tin:** Sử dụng placeholder mờ hiển thị tên trường rõ ràng (Họ và tên, Số điện thoại, Địa chỉ, Ghi chú), không để dữ liệu mẫu gây nhầm lẫn.
 
 ### 3.3. Quy trình Thu Cũ Đổi Mới (C2B Trade-in / Buy-back)
@@ -132,6 +134,7 @@ Quy trình khép kín 4 bước rõ ràng:
 
 ### 5.1. Quản trị Dữ liệu Gốc Tập trung (Master Data Management - MDM)
 * Chuẩn hóa danh mục thống nhất: Tác giả, Thể loại và Đầu sách gốc toàn chuỗi.
+* **Thống nhất tồn kho toàn chuỗi với chi nhánh:** Số lượng tồn kho toàn chuỗi hiển thị ở Master Data và Analytics được tính bằng tổng số lượng sách `AVAILABLE` có thực tế tại tất cả các chi nhánh cộng lại (`sumAvailableStock`), đảm bảo tính nhất quán tuyệt đối giữa dữ liệu quản trị chuỗi và kho hàng cơ sở.
 * Tự động kiểm tra trùng lặp ISBN khi nhập liệu và công cụ tự sinh mã ISBN-13 chuẩn quốc tế.
 
 ### 5.2. Động cơ Định tuyến & Tách đơn Tự động (Order Routing & Splitting Engine)
@@ -280,3 +283,213 @@ Quy trình khép kín 4 bước rõ ràng:
 * **Bộ nhớ đệm trình duyệt (Browser Cache Control):** Cấu hình `max-age=7d` lưu đệm ảnh, CSS, Javascript trên máy người dùng trong 7 ngày.
 * **Cơ chế Tự động chống ngủ đông (Keep-Alive Self-Ping Service):** Tự động gửi tín hiệu ping định kỳ mỗi 12 phút tới `/api/ping`, ngăn ngừa Render Free Server rơi vào trạng thái ngủ đông (cold sleep).
 * **Bộ Kiểm Thử Tự Động (Automated Test Suite):** 84 bài kiểm thử tích hợp (Unit & Integration Tests) bao phủ toàn diện tính năng giỏ hàng, POS, Trade-in, Wishlist, Order Splitting, Audit Trail, và Cascade Deletion User.
+
+---
+
+## 9. KỊCH BẢN & TRÌNH TỰ QUAY CLIP GIỚI THIỆU HỆ THỐNG (DEMO STORYBOARD)
+
+> **Mục tiêu:** Cung cấp kịch bản chuẩn từng phân cảnh (Scene-by-scene Storyboard) với đầy đủ **URL truy cập**, **Tài khoản đăng nhập**, **Thao tác chuột**, **Lời bình thuyết minh mẫu (Voiceover)** và **Điểm nhấn công nghệ cần làm nổi bật** khi quay video báo cáo/bảo vệ đồ án.
+
+### 9.1. Bảng Tổng Hợp Tài Khoản Phục Vụ Quay Demo
+| Vai trò (Role) | Email đăng nhập | Mật khẩu mặc định | Mục đích sử dụng khi quay clip |
+| :--- | :--- | :--- | :--- |
+| **Super Admin** | `admin.book4life@gmail.com` | `1234@abc` | Demo Dashboard Analytics, Quản trị Dữ liệu gốc MDM, Cấu hình Voucher, Nhật ký Audit Trail, Xóa tài khoản Cascade. |
+| **Branch Manager** | `manage.book4life@gmail.com` | `1234@abc` | Demo Quản lý vận hành chi nhánh (Hà Nội), Điều phối đơn hàng, Tạo phiếu luân chuyển kho liên chi nhánh. |
+| **Warehouse / Appraiser** | `warehouse.book4life@gmail.com` | `1234@abc` | Demo Thẩm định sách cũ Trade-in (soi 6 ảnh, chốt Grade & giá mua, tạo phiếu chi), Quản lý kệ sách SKU, Đóng gói đơn hàng. |
+| **Cashier (POS)** | `cashier.book4life@gmail.com` | `1234@abc` | Demo Bán lẻ tại quầy POS, quét Barcode, áp mã giảm giá và in hóa đơn tự động trừ kho. |
+| **Customer / Độc giả** | `user.book4life@gmail.com` | `1234@abc` | Demo Mua sách đa chi nhánh, Click & Collect, Săn sách Wishlist, Gửi sách cũ cần bán, Đánh giá 5 sao, Chat cùng Gemini AI. |
+
+---
+
+### 9.2. PHẦN I: KỊCH BẢN QUAY CỔNG TRẢI NGHIỆM NGƯỜI DÙNG (CUSTOMER PORTAL)
+*Thời lượng đề xuất: 3 - 4 phút*
+
+#### Cảnh 1: Trang chủ & Khám phá Sách theo Chi nhánh & Độ mới (Grading)
+* **URL:** `/` hoặc `/books`
+* **Thao tác quay:**
+  1. Lướt qua Banner trang chủ với giao diện hiện đại phong cách Vintage Retro.
+  2. Tại thanh tìm kiếm, gõ từ khóa tựa sách (ví dụ: *"Nhà Giả Kim"* hoặc *"Kinh Điển"*).
+  3. Sử dụng bộ lọc thể loại bên cột trái (Văn học, Kinh tế, Kỹ năng sống...) và bấm chọn các chuẩn phân loại: *Bản Hiếm, Như Mới (99%), Rất Tốt (85%), Tốt (80%)*.
+* **Lời bình thuyết minh mẫu (Voiceover):**
+  > *"Kính thưa quý thầy cô, điểm khác biệt lớn nhất của Book4Life so với các sàn thương mại điện tử thông thường là mô hình sách cũ đa chi nhánh. Độc giả không chỉ tìm thấy các đầu sách tuyển chọn mà còn có thể xem chi tiết độ mới thực tế theo thang đo chuẩn 4 cấp độ và biết chính xác cuốn sách đang nằm tại chi nhánh nào."*
+* **Điểm nhấn kỹ thuật:** Lọc động thời gian thực (Server-side JPA Specification), phân trang bất đồng bộ, bộ nhớ đệm HTTP Cache 7 ngày.
+
+#### Cảnh 2: Chi tiết Sách & Đồng Bộ Tồn Kho Thực Tế
+* **URL:** `/books/6` (hoặc click vào bất kỳ cuốn sách nào)
+* **Thao tác quay:**
+  1. Cuộn xem ảnh bìa phóng to, phần tóm tắt nội dung và tiểu sử tác giả.
+  2. Di chuyển đến mục **"Tồn Kho Theo Chi Nhánh & Giá Bán"**:
+     * Chỉ ra huy hiệu **"GIÁ TỐT NHẤT ⭐"** màu vàng nổi bật tại chi nhánh có giá bán mềm nhất.
+     * Click chuyển đổi giữa các chi nhánh: Chi nhánh Quận 1 (còn X cuốn), Chi nhánh Hoàn Kiếm (còn Y cuốn).
+     * Làm nổi bật sự đồng bộ: Khách hàng chỉ nhìn thấy các chi nhánh **thực tế còn sách sẵn sàng bán (`status = AVAILABLE`)**, không bị hiển thị sách ảo hoặc sách đã bán.
+* **Lời bình thuyết minh:**
+  > *"Tại trang chi tiết sách, hệ thống hiển thị trực quan tồn kho vật lý tại từng cơ sở. Độc giả có thể chủ động chọn mua cuốn sách tại chi nhánh gần mình nhất hoặc chi nhánh có giá ưu đãi nhất. Tồn kho toàn chuỗi được đồng bộ toán học chính xác 100% với số lượng thực tế tại các chi nhánh."*
+
+#### Cảnh 3: Đăng Ký Tài Khoản OTP Email 443 & Đăng Nhập Google 1-Click
+* **URL:** `/login`
+* **Thao tác quay:**
+  1. **Đăng ký với Email OTP:** Bấm *"Đăng Ký Tài Khoản Mới"*. Nhập thông tin, mật khẩu có chỉ báo độ mạnh bảo mật. Bấm gửi OTP $\rightarrow$ Mở hộp thư email thực tế của bạn trên trình duyệt để thấy email OTP 6 số từ Book4Life gửi về tức thì $\rightarrow$ Nhập mã 6 số $\rightarrow$ Thông báo thành công và email Chào mừng được gửi về.
+  2. **Đăng nhập Google trực tiếp:** Bấm nút *"Đăng nhập trực tiếp bằng Google"* $\rightarrow$ Modal mở ra sạch sẽ không có tài khoản rác $\rightarrow$ Nhập Gmail của bạn và bấm *"Tiếp Tục Với Tài Khoản Google"* $\rightarrow$ Đăng nhập ngay tức thì không cần mật khẩu.
+* **Lời bình thuyết minh:**
+  > *"Hệ thống hỗ trợ 2 phương thức định danh hiện đại: Xác thực OTP 2 lớp qua Email gửi bằng giao thức Brevo REST API cổng 443 HTTPS – hoàn toàn miễn nhiễm trước việc Cloud chặn cổng SMTP; và phương thức Google Sign-In 1-Click an toàn, bảo mật tuyệt đối."*
+* **Điểm nhấn kỹ thuật:** `java.net.http.HttpClient` Port 443 HTTPS, Brevo REST API v3, Spring Security 6 Stateless JWT, mã hóa BCrypt.
+
+#### Cảnh 4: Giỏ Hàng Thông Minh, Tách Đơn & Đặt Hàng (Click & Collect / COD)
+* **URL:** `/cart`
+* **Thao tác quay:**
+  1. Bấm *"Thêm Vào Giỏ Hàng"* 2 cuốn sách từ 2 chi nhánh khác nhau.
+  2. Mở trang Giỏ hàng: Chỉ ra hệ thống tự động gom nhóm sản phẩm theo từng chi nhánh.
+  3. Nhập mã giảm giá: `FREESHIP` hoặc `BOOK20K` $\rightarrow$ Thấy tổng tiền giảm trừ ngay tức thì.
+  4. Bấm *"Tiến Hành Đặt Hàng"*:
+     * Thử nghiệm chọn **"Giữ sách nhận tại quầy (Click & Collect)"**: Phí vận chuyển về 0đ.
+     * Hoặc chọn **"Giao tận nơi (COD)"**: Chọn Tỉnh/Thành phố, hệ thống tự tính phí ship chuẩn xác.
+  5. Bấm *"Xác Nhận Đặt Hàng"* $\rightarrow$ Nhận mã đơn hàng thành công (`MO-...`).
+* **Lời bình thuyết minh:**
+  > *"Khi khách đặt mua nhiều cuốn sách thuộc các chi nhánh khác nhau, Động cơ Tách đơn tự động (Order Splitting Engine) sẽ tự động phân tách thành 1 Đơn hàng mẹ và các Đơn hàng con cho từng chi nhánh. Khách hàng cũng có thể chọn nhận sách miễn phí tại quầy với tính năng Click & Collect."*
+
+#### Cảnh 5: Động Cơ Thu Cũ Đổi Mới C2B (Trade-in / Buy-back)
+* **URL:** `/recycle` hoặc `/thu-mua-sach`
+* **Thao tác quay:**
+  1. Điền form thông tin sách thanh lý: Tựa sách, tác giả, năm xuất bản, giá bìa gốc.
+  2. Tải lên 6 ảnh chụp các góc độ: Bìa trước, bìa sau, gáy sách, mép giấy, vết tỳ vết.
+  3. Chọn chi nhánh dự kiến mang sách đến giao dịch.
+  4. Bấm *"Gửi Hồ Sơ & Định Giá Sơ Bộ"* $\rightarrow$ Hệ thống áp dụng **Thuật toán Auto-Appraisal** tính toán ngay số tiền đề xuất (ví dụ: 45.000đ) và sinh mã biên lai.
+* **Lời bình thuyết minh:**
+  > *"Đây là một trong những phân hệ đột phá nhất của Book4Life: Mô hình thu cũ đổi mới C2B. Độc giả chụp ảnh thực tế tình trạng sách, thuật toán tự động tính toán giá trị thu mua ban đầu dựa trên mức độ hư hại trước khi chuyên viên thẩm định của cửa hàng kiểm duyệt."*
+
+#### Cảnh 6: Săn Sách Wishlist & Cảnh Báo Restock Alert
+* **URL:** `/books/{id}` (chọn cuốn sách đang hết hàng) hoặc bấm icon Trái tim
+* **Thao tác quay:**
+  1. Bấm nút *"Yêu Thích / Săn Sách"*.
+  2. Vào trang cá nhân `/profile` mục *"Danh sách săn sách"* để thấy đầu sách đã được đưa vào danh sách theo dõi.
+  3. Thuyết minh: Ngay khi chi nhánh nhập kho cuốn sách này, hệ thống sẽ tự động gửi email thông báo kèm link mua ngay.
+* **Lời bình thuyết minh:**
+  > *"Với những đầu sách hiếm đã hết hàng, độc giả chỉ cần bấm 'Săn sách'. Hệ thống định kỳ quét kho và phát email cảnh báo Restock Alert tự động ngay khi có chi nhánh thu mua được cuốn sách đó."*
+
+#### Cảnh 7: Trợ Lý Ảo Google Gemini AI & Chuyển Tiếp Hotline
+* **URL:** Bất kỳ trang nào (click vào bong bóng Chatbot góc dưới phải)
+* **Thao tác quay:**
+  1. Mở cửa sổ chat AI.
+  2. Hỏi câu hỏi tư vấn: *"Tôi thích sách triết học và kỹ năng sống thì nên đọc cuốn nào?"* $\rightarrow$ Gemini AI trả lời thông minh, dẫn chứng tác phẩm có sẵn trong cửa hàng.
+  3. Hỏi câu hỏi kiểm tra tồn kho: *"Cuốn Nhà Giả Kim hiện có ở chi nhánh nào?"* $\rightarrow$ AI đọc dữ liệu kho và trả lời chính xác.
+  4. Hỏi yêu cầu hỗ trợ đặc biệt: *"Tôi muốn mua 100 cuốn sách cũ làm từ thiện thì liên hệ ai?"* $\rightarrow$ AI kích hoạt tính năng **Human Handoff**, tự động chuyển tiếp nội dung câu hỏi về email Hotline của Ban quản trị.
+* **Lời bình thuyết minh:**
+  > *"Book4Life tích hợp trợ lý thủ thư ảo Google Gemini 1.5 Flash. AI không chỉ tư vấn sách theo gu đọc mà còn tra cứu tồn kho thực tế và hỗ trợ chuyển tiếp các yêu cầu phức tạp tới nhân viên CSKH qua email."*
+
+---
+
+### 9.3. PHẦN II: KỊCH BẢN QUAY HỆ THỐNG QUẢN TRỊ & VẬN HÀNH CHUỖI (ADMIN & BRANCH MANAGEMENT)
+*Thời lượng đề xuất: 4 - 5 phút*
+
+#### Cảnh 1: Dashboard Analytics & Thống Kê Toàn Chuỗi
+* **Đăng nhập:** `admin.book4life@gmail.com` / `1234@abc`
+* **URL:** `/admin/analytics`
+* **Thao tác quay:**
+  1. Chỉ ra các thẻ KPI tổng quan: Doanh thu thực tế, Số đơn hàng hoàn tất, **Tồn kho sẵn sàng bán toàn chuỗi**, Tổng chi phí thu mua sách cũ.
+  2. Lướt qua biểu đồ cơ cấu sách theo độ cũ: Tỷ trọng sách *Like New (99%), Very Good (90%), Good (80%)*.
+  3. Chỉ ra biểu đồ thanh so sánh doanh thu giữa các chi nhánh: Chi nhánh Hà Nội, Quận 1, Thủ Đức.
+  4. Chuyển đổi bộ lọc chi nhánh từ *"Toàn chuỗi"* sang *"Chi nhánh Quận 1"* để thấy số liệu biến đổi thời gian thực.
+* **Lời bình thuyết minh:**
+  > *"Bước vào phân hệ quản trị, Super Admin được cung cấp một bức tranh toàn cảnh về sức khỏe tài chính và vận hành chuỗi. Dashboard trực quan hóa doanh thu theo ngày, tỷ trọng bán hàng và phân bổ hàng tồn theo từng thang đo chất lượng."*
+
+#### Cảnh 2: Quản Trị Dữ Liệu Gốc (Master Data MDM) & Tồn Kho Thống Nhất
+* **URL:** `/admin/books`
+* **Thao tác quay:**
+  1. Xem danh sách đầu sách: Cột **"Tồn Kho Toàn Chuỗi"** hiển thị rõ ràng số lượng `X cuốn` (hoặc `Hết hàng toàn chuỗi`), **khớp 100% với tổng số lượng sẵn sàng bán tại tất cả các chi nhánh**.
+  2. Bấm xem chi tiết 1 cuốn sách `/admin/books/detail/{id}`:
+     * Badge *"Tổng tồn kho toàn chuỗi: X cuốn"*.
+     * Bảng phân bổ bên dưới liệt kê chi tiết từng bản ghi SKU tại các chi nhánh, độ mới, giá bán, vị trí kệ và trạng thái `AVAILABLE`.
+  3. Thử tính năng tạo đầu sách mới: Nhập tựa đề, bấm nút **"Sinh mã ISBN"** tự động, kiểm tra trùng lặp ISBN.
+* **Lời bình thuyết minh:**
+  > *"Tại phân hệ Master Data, dữ liệu gốc được quản lý tập trung và chuẩn hóa. Điểm mấu chốt là số liệu Tồn kho toàn chuỗi đã được thống nhất tuyệt đối với số lượng thực tế tại các chi nhánh theo mô hình kiến trúc sách 2 tầng (Book Master & Book Items)."*
+
+#### Cảnh 3: Bán Lẻ Tại Quầy POS Siêu Tốc (Point of Sale)
+* **Đăng nhập:** `cashier.book4life@gmail.com` / `1234@abc`
+* **URL:** `/pos`
+* **Thao tác quay:**
+  1. Giao diện thu ngân tối ưu cho màn hình cảm ứng / máy quét mã vạch.
+  2. Quét hoặc gõ mã SKU (ví dụ: `SKU-B1-1000` hoặc tựa sách *"Chí Phèo"*).
+  3. Sách được thêm vào giỏ tức thì kèm giá bán theo độ cũ.
+  4. Áp dụng voucher giảm giá (nếu có), nhập số tiền khách đưa $\rightarrow$ Hệ thống tự tính tiền thối.
+  5. Bấm *"Thanh Toán & In Hóa Đơn"* $\rightarrow$ Đơn hàng hoàn tất, sách tự động chuyển trạng thái `SOLD` và trừ tồn kho vật lý ngay trong tích tắc.
+* **Lời bình thuyết minh:**
+  > *"Đối với khách hàng mua trực tiếp tại cửa hàng, giao diện POS cho phép nhân viên quét mã Barcode, thanh toán và in hóa đơn trong vài giây. Giao dịch POS lập tức trừ kho an toàn bằng cơ chế Database Lock, đảm bảo không bao giờ xảy ra tình trạng bán trùng một cuốn sách vật lý duy nhất."*
+
+#### Cảnh 4: Quy Trình Hoàn Tất Đơn Hàng 4 Bước (Order Fulfillment Pipeline)
+* **Đăng nhập:** `manage.book4life@gmail.com` hoặc `warehouse.book4life@gmail.com`
+* **URL:** `/admin/fulfillment`
+* **Thao tác quay:**
+  1. Chỉ ra đơn hàng vừa đặt ở Phần 1 đang ở trạng thái `PENDING`.
+  2. **Bước 1:** Bấm `1. Phê Duyệt & Tiếp Nhận Đơn Hàng` $\rightarrow$ Trạng thái chuyển sang `CONFIRMED`.
+  3. **Bước 2:** Bấm `2. Bắt Đầu Xuất Kho & Đóng Gói` $\rightarrow$ Trạng thái chuyển sang `PACKING`. Nhân viên nhìn vào cột **Vị trí kệ** (`Kệ A1-01`) để nhặt sách nhanh chóng.
+  4. **Bước 3:** Bấm `3. Giao Cho Đơn Vị Vận Chuyển / Tài Xế` $\rightarrow$ Chọn tài xế chi nhánh (ví dụ: *Nguyễn Văn Tuấn*) hoặc đối tác GHTK/GHN.
+  5. **Bước 4:** Bấm `4. Xác Nhận Giao Hàng Thành Công` $\rightarrow$ Đơn hàng hoàn tất (`COMPLETED`).
+  6. Demo tính năng an toàn: Mở 1 đơn hàng khác và bấm *"Hủy đơn"* $\rightarrow$ Thấy hệ thống tự động hoàn trả số lượng sách về lại kho ban đầu.
+* **Lời bình thuyết minh:**
+  > *"Quy trình Fulfillment 4 bước tại chi nhánh đảm bảo tính kỷ luật và chính xác: Từ khâu duyệt đơn, định vị vị trí kệ để đóng gói, phân công tài xế đến khi khách nhận hàng. Nếu có sự cố hủy đơn, hệ thống tự động hoàn kho bằng Transaction an toàn tuyệt đối."*
+
+#### Cảnh 5: Bàn Làm Việc Thẩm Định Sách Cũ Thu Mua (Trade-in Appraisal)
+* **Đăng nhập:** `warehouse.book4life@gmail.com`
+* **URL:** `/admin/trade-in`
+* **Thao tác quay:**
+  1. Mở danh sách yêu cầu thanh lý từ khách hàng.
+  2. Click vào hồ sơ vừa gửi ở Phần 1:
+     * Xem 6 ảnh chụp độ phân giải cao lưu trên Cloudinary (soi mép giấy, bìa, gáy sách).
+     * Xem giá định giá sơ bộ ban đầu của thuật toán.
+     * Nhân viên thẩm định chọn mức Grade chính thức (*VERY_GOOD*) và nhập giá mua chốt lại (ví dụ: *50.000đ*).
+  3. Bấm **"Phê duyệt & Chốt giá mua"**.
+  4. Khi khách mang sách đến cửa hàng: Bấm **"Xác nhận nhận sách & Nhập kho"** $\rightarrow$ Hệ thống tự động tạo mã SKU mới, gán vị trí kệ và tự động lập Phiếu chi tiền mặt cho khách.
+* **Lời bình thuyết minh:**
+  > *"Bàn làm việc của Chuyên viên thẩm định hỗ trợ soi ảnh đa chiều từ Cloudinary để đối soát tình trạng sách. Sau khi chốt giá và khách bàn giao sách tại quầy, hệ thống tự động sinh SKU mới nhập kho và tạo phiếu chi minh bạch."*
+
+#### Cảnh 6: Luân Chuyển Kho Liên Chi Nhánh (Internal Stock Transfer)
+* **URL:** `/admin/transfers`
+* **Thao tác quay:**
+  1. Xem danh sách các phiếu điều chuyển sách giữa các cơ sở.
+  2. Bấm *"Tạo Đề Xuất Luân Chuyển"*: Chọn chi nhánh nguồn (Quận 1), chi nhánh đích (Hoàn Kiếm), chọn sách và số lượng.
+  3. Thuyết minh về **Ràng buộc an toàn**: Hệ thống tự động kiểm tra nếu cuốn sách mới nhập dưới 6 tháng mà tại kho nguồn chỉ còn duy nhất 1 bản sao thì sẽ tự động từ chối điều chuyển để bảo vệ sự đa dạng nguồn sách của từng chi nhánh.
+* **Lời bình thuyết minh:**
+  > *"Tính năng luân chuyển kho liên chi nhánh giúp cân bằng lượng cung - cầu giữa các cơ sở. Điểm đặc biệt là thuật toán tự động ngăn chặn điều chuyển các cuốn sách độc bản mới nhập dưới 6 tháng nhằm giữ chân khách hàng địa phương."*
+
+#### Cảnh 7: Quản Trị Voucher Khuyến Mãi Đa Điều Kiện
+* **URL:** `/admin/coupons`
+* **Thao tác quay:**
+  1. Danh sách mã giảm giá: Giảm theo %, giảm tiền cố định, Freeship.
+  2. Mở form tạo mã: Chỉ ra các điều kiện lọc thông minh:
+     * Lọc theo giá trị đơn hàng tối thiểu.
+     * **Lọc theo Độ cũ của sách (Grade):** Chỉ áp dụng giảm giá cho sách tình trạng `GOOD` và `ACCEPTABLE` để đẩy nhanh việc xả hàng tồn kho.
+     * Lọc theo Chi nhánh áp dụng hoặc Áp dụng toàn chuỗi.
+* **Lời bình thuyết minh:**
+  > *"Hệ thống khuyến mãi hỗ trợ thiết lập các chính sách giá linh hoạt, đặc biệt là khả năng gắn điều kiện giảm giá theo thang đo độ cũ của sách để kích cầu tiêu thụ các nhóm hàng tồn lâu ngày."*
+
+#### Cảnh 8: Quản Trị Tài Khoản & Cơ Chế Xóa Cascade An Toàn
+* **URL:** `/admin/users`
+* **Thao tác quay:**
+  1. Danh sách người dùng với 6 vai trò rõ ràng, phân bổ theo chi nhánh.
+  2. Thử nghiệm chức năng Xóa tài khoản: Hệ thống triển khai quy trình **Cascade Deletion** dọn sạch 11 bảng quan hệ liên quan (đơn hàng, đánh giá, wishlist, tin nhắn AI...) mà không bao giờ bị lỗi vi phạm khóa ngoại (Foreign Key Constraint).
+* **Lời bình thuyết minh:**
+  > *"Module quản trị tài khoản được xây dựng với cơ chế Cascade Deletion chuẩn mực, cho phép quản trị viên dọn dẹp tài khoản rác an toàn trong Transaction CSDL mà không gây lỗi phân rã dữ liệu."*
+
+#### Cảnh 9: Công Cụ Chẩn Đoán Email Trực Tiếp Trên Cloud (`/api/test-email`)
+* **URL:** `/api/test-email?to=your_email@gmail.com`
+* **Thao tác quay:**
+  1. Mở một tab mới trên trình duyệt và gõ endpoint `/api/test-email?to=...`
+  2. Màn hình trả về JSON trạng thái: `finalStatus: SUCCESS_VIA_HTTP_API`, `apiStatusCode: 201`, `hasBrevoApiKey: true`.
+  3. Mở tab Brevo authorized_ips để thấy tính năng Deactivated bảo mật IP đã được kích hoạt.
+* **Lời bình thuyết minh:**
+  > *"Để phục vụ việc giám sát hạ tầng trên Cloud, hệ thống cung cấp endpoint chẩn đoán thời gian thực, xác nhận việc gửi email qua Brevo API Port 443 HTTPS hoàn toàn thông suốt."*
+
+---
+
+### 9.4. Gợi Ý Timeline Khi Quay Video (Dành Cho Các Độ Dài Clip Khác Nhau)
+
+| Mốc thời gian | Clip Ngắn (3 Phút) | Clip Tiêu Chuẩn (5 Phút) | Clip Báo Cáo Đầy Đủ (8 - 10 Phút) |
+| :--- | :--- | :--- | :--- |
+| **0:00 - 0:45** | Giới thiệu bài toán sách cũ & Trang chủ | Giới thiệu kiến trúc chuỗi & Trang chủ | Giới thiệu tổng quan đề tài & Kiến trúc 3 phân hệ |
+| **0:45 - 2:00** | Mua sách, Tách đơn & Đăng ký OTP | Chi tiết sách, Chọn chi nhánh, OTP & Giỏ hàng | Đăng ký OTP, Google Sign-in, Chi tiết sách, Giỏ hàng, Tách đơn |
+| **2:00 - 3:00** | POS tại quầy & Dashboard Admin | Trade-in 6 ảnh, Chat AI Gemini, Fulfillment | Trade-in C2B, Săn sách Wishlist, Chatbot Gemini AI |
+| **3:00 - 4:00** | *(Kết thúc & Cảm ơn)* | POS quẹt mã, Thẩm định sách & Fulfillment | Dashboard Analytics, Master Data MDM, Kho SKU |
+| **4:00 - 5:00** | - | Dashboard Analytics & Quản trị dữ liệu gốc | POS Barcode, Fulfillment 4 bước, Thẩm định Trade-in |
+| **5:00 - 8:00** | - | *(Kết thúc & Cảm ơn)* | Luân chuyển kho, Voucher theo Grade, Xóa Cascade, Test Email |
+| **8:00 - 10:00** | - | - | Tóm tắt ngăn xếp công nghệ, Bộ 84 Tests & Kết luận |
+

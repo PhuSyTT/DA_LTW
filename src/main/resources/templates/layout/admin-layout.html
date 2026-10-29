@@ -70,6 +70,9 @@
 <div th:replace="~{fragments/page-transition :: transitionOverlay}"></div>
 
 <div class="app-wrapper">
+    <!-- Responsive Backdrop for Mobile Sidebar -->
+    <div id="sidebarBackdrop" class="sidebar-backdrop" onclick="toggleAdminSidebar()"></div>
+
     <!-- Sidebar -->
     <div th:replace="~{fragments/sidebar :: sidebar}"></div>
 
@@ -226,6 +229,15 @@
             });
         } catch (e) {
             console.warn("WebSocket init error:", e);
+        }
+    }
+
+    function toggleAdminSidebar() {
+        const sidebar = document.querySelector('.app-sidebar');
+        const backdrop = document.getElementById('sidebarBackdrop');
+        if (sidebar) {
+            sidebar.classList.toggle('show');
+            if (backdrop) backdrop.classList.toggle('show');
         }
     }
 

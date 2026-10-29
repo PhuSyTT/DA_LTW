@@ -15,7 +15,7 @@
         
         <!-- Timeline Banner Card -->
         <div class="content-card mb-4" th:if="${tracking != null}">
-            <div class="content-card-header d-flex justify-content-between align-items-center">
+            <div class="content-card-header d-flex flex-wrap justify-content-between align-items-center gap-2">
                 <h6 class="fw-bold mb-0 text-dark">
                     <i class="fas fa-route text-primary me-2"></i>Tiến Độ Đơn Hàng (Visual Progress Timeline)
                 </h6>
@@ -23,8 +23,8 @@
                     <i class="fas fa-arrow-up-right-from-square me-1"></i>Xem Giao Diện Khách Hàng
                 </a>
             </div>
-            <div class="p-4">
-                <div class="row g-2 text-center position-relative">
+            <div class="p-4 overflow-auto">
+                <div class="row g-2 text-center position-relative flex-nowrap flex-md-wrap" style="min-width: 500px;">
                     <div class="col" th:each="step, iter : ${tracking.timelineSteps}">
                         <div class="d-flex flex-column align-items-center">
                             <div th:class="${step.cancelled} ? 'rounded-circle bg-danger text-white d-flex align-items-center justify-content-center shadow-sm' :
@@ -50,10 +50,10 @@
 
         <div class="row g-4">
             <!-- Left: Order Info & Actions -->
-            <div class="col-lg-5">
+            <div class="col-12 col-xl-5">
                 <!-- Order Header Card -->
                 <div class="content-card mb-4">
-                    <div class="content-card-header d-flex justify-content-between align-items-center">
+                    <div class="content-card-header d-flex flex-wrap justify-content-between align-items-center gap-2">
                         <h6 class="fw-bold mb-0">
                             <i class="fas fa-receipt text-primary me-2"></i>
                             Thông Tin Đơn Hàng
@@ -334,9 +334,9 @@
             </div>
 
             <!-- Right: Items list with shelf location -->
-            <div class="col-lg-7">
+            <div class="col-12 col-xl-7">
                 <div class="content-card">
-                    <div class="content-card-header d-flex justify-content-between align-items-center">
+                    <div class="content-card-header d-flex flex-wrap justify-content-between align-items-center gap-2">
                         <h6 class="fw-bold mb-0">
                             <i class="fas fa-list-check text-success me-2"></i>
                             Danh Sách Sách Cần Lấy Tại Kệ Chi Nhánh

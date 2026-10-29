@@ -3,9 +3,15 @@
       xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
 <body>
 <header class="app-header" th:fragment="navbar">
-    <div class="page-title">
-        <h4 th:text="${pageTitle} ?: 'Quản Trị Hệ Thống'">Quản Trị Hệ Thống</h4>
-        <p th:text="${pageSubtitle} ?: 'Hệ thống Quản lý Chuỗi Cửa hàng Sách cũ Đa Chi nhánh'">Hệ thống Quản lý Chuỗi Sách Cũ</p>
+    <div class="d-flex align-items-center gap-2">
+        <!-- Mobile Sidebar Toggle Button -->
+        <button type="button" class="btn btn-sm btn-outline-secondary d-lg-none" onclick="toggleAdminSidebar()" aria-label="Mở Menu Quản Trị">
+            <i class="fas fa-bars"></i>
+        </button>
+        <div class="page-title">
+            <h4 th:text="${pageTitle} ?: 'Quản Trị Hệ Thống'">Quản Trị Hệ Thống</h4>
+            <p th:text="${pageSubtitle} ?: 'Hệ thống Quản lý Chuỗi Cửa hàng Sách cũ Đa Chi nhánh'">Hệ thống Quản lý Chuỗi Sách Cũ</p>
+        </div>
     </div>
 
     <div class="d-flex align-items-center gap-3">

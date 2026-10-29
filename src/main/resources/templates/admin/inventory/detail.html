@@ -8,8 +8,8 @@
 <body>
 <section>
     <!-- Top Action Bar -->
-    <div class="d-flex align-items-center justify-content-between mb-4">
-        <div class="d-flex gap-2">
+    <div class="d-flex flex-wrap align-items-center justify-content-between gap-2 mb-4">
+        <div class="d-flex flex-wrap gap-2">
             <a th:href="@{/admin/inventory}" class="btn btn-secondary-custom btn-sm">
                 <i class="fas fa-arrow-left me-1"></i> Quay lại Danh sách Kho
             </a>
@@ -18,7 +18,7 @@
             </a>
         </div>
 
-        <div class="d-flex gap-2">
+        <div class="d-flex flex-wrap gap-2">
             <a th:href="@{/admin/inventory/edit/{id}(id=${item.id})}" class="btn btn-warning btn-sm text-dark fw-bold">
                 <i class="fas fa-pen-to-square me-1"></i> Chỉnh Sửa Thông Tin
             </a>
@@ -30,7 +30,7 @@
 
     <div class="row g-4 mb-4">
         <!-- Left Column: Master Book & Physical Item Spec -->
-        <div class="col-lg-5">
+        <div class="col-12 col-xl-5">
             <!-- Physical SKU Card -->
             <div class="content-card mb-4">
                 <div class="content-card-body text-center">
@@ -66,18 +66,18 @@
 
                     <!-- Price Comparison -->
                     <div class="border-top pt-3 text-start">
-                        <div class="d-flex justify-content-between py-2 border-bottom">
+                        <div class="d-flex flex-wrap justify-content-between align-items-center py-2 border-bottom gap-2">
                             <span class="text-muted">Chi nhánh lưu trữ:</span>
-                            <span class="fw-bold text-dark" th:text="${item.branchName} + ' (' + ${item.branchCity} + ')'">Chi nhánh Quận 1</span>
+                            <span class="fw-bold text-dark text-end" th:text="${item.branchName} + ' (' + ${item.branchCity} + ')'">Chi nhánh Quận 1</span>
                         </div>
-                        <div class="d-flex justify-content-between py-2 border-bottom">
+                        <div class="d-flex flex-wrap justify-content-between align-items-center py-2 border-bottom gap-2">
                             <span class="text-muted">Giá bán sách cũ:</span>
                             <span class="fw-bold text-danger fs-5"
                                   th:text="${#numbers.formatDecimal(item.sellingPrice, 0, 'COMMA', 0, 'POINT')} + ' ₫'">
                                 55.000 ₫
                             </span>
                         </div>
-                        <div class="d-flex justify-content-between py-2 border-bottom">
+                        <div class="d-flex flex-wrap justify-content-between align-items-center py-2 border-bottom gap-2">
                             <span class="text-muted">Giá bìa niêm yết (Master):</span>
                             <span class="text-muted text-decoration-line-through"
                                   th:if="${item.bookOriginalPrice != null}"
@@ -85,18 +85,18 @@
                                 125.000 ₫
                             </span>
                         </div>
-                        <div class="d-flex justify-content-between py-2 border-bottom">
+                        <div class="d-flex flex-wrap justify-content-between align-items-center py-2 border-bottom gap-2">
                             <span class="text-muted">Mức tiết kiệm cho độc giả:</span>
                             <span class="badge bg-success-subtle text-success border border-success-subtle px-2 py-1 fw-bold"
                                   th:text="'Tiết kiệm ' + ${item.discountPercent} + '%'">
                                 Tiết kiệm 56%
                             </span>
                         </div>
-                        <div class="d-flex justify-content-between py-2 border-bottom">
+                        <div class="d-flex flex-wrap justify-content-between align-items-center py-2 border-bottom gap-2">
                             <span class="text-muted">Số lượng tồn kho:</span>
                             <span class="fw-bold text-dark" th:text="${item.stockQuantity} + ' cuốn'">1 cuốn</span>
                         </div>
-                        <div class="d-flex justify-content-between py-2 border-bottom">
+                        <div class="d-flex flex-wrap justify-content-between align-items-center py-2 border-bottom gap-2">
                             <span class="text-muted">Ngày nhập kho:</span>
                             <span class="fw-semibold text-dark"
                                   th:text="${#temporals.format(item.importDate, 'dd/MM/yyyy HH:mm')}">20/09/2026 10:30</span>
@@ -133,10 +133,10 @@
         </div>
 
         <!-- Right Column: Physical Photos (Cloudinary Gallery) & Notes -->
-        <div class="col-lg-7">
+        <div class="col-12 col-xl-7">
             <!-- Physical Photo Gallery (FR-INV-03 & TC-02) -->
             <div class="content-card mb-4">
-                <div class="content-card-header d-flex justify-content-between align-items-center">
+                <div class="content-card-header d-flex flex-wrap justify-content-between align-items-center gap-2">
                     <h6 class="fw-bold mb-0 text-dark">
                         <i class="fas fa-camera text-info me-2"></i> Bộ Ảnh Chụp Thực Tế Góc Cạnh & Vết Ố (Cloudinary)
                     </h6>

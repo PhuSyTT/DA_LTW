@@ -150,16 +150,24 @@ public class MasterDataServiceImpl implements MasterDataService {
         Category category = categoryRepository.findById(bookDto.getCategoryId())
                 .orElseThrow(() -> new IllegalArgumentException("Thể loại không hợp lệ!"));
 
+        String cleanTitle = bookDto.getTitle() != null ? bookDto.getTitle().trim() : "";
+        String cleanPublisher = (bookDto.getPublisher() != null && !bookDto.getPublisher().trim().isEmpty())
+                ? bookDto.getPublisher().trim() : null;
+        String cleanCover = (bookDto.getCoverImageUrl() != null && !bookDto.getCoverImageUrl().trim().isEmpty())
+                ? bookDto.getCoverImageUrl().trim() : null;
+        String cleanDesc = (bookDto.getDescription() != null && !bookDto.getDescription().trim().isEmpty())
+                ? bookDto.getDescription().trim() : null;
+
         Book book = Book.builder()
-                .title(bookDto.getTitle().trim())
+                .title(cleanTitle)
                 .isbn(bookDto.getIsbn().trim())
                 .author(author)
                 .category(category)
-                .publisher(bookDto.getPublisher())
+                .publisher(cleanPublisher)
                 .publishYear(bookDto.getPublishYear())
                 .originalPrice(bookDto.getOriginalPrice())
-                .coverImageUrl(bookDto.getCoverImageUrl())
-                .description(bookDto.getDescription())
+                .coverImageUrl(cleanCover)
+                .description(cleanDesc)
                 .build();
 
         Book saved = bookRepository.save(book);
@@ -181,15 +189,23 @@ public class MasterDataServiceImpl implements MasterDataService {
         Category category = categoryRepository.findById(bookDto.getCategoryId())
                 .orElseThrow(() -> new IllegalArgumentException("Thể loại không hợp lệ!"));
 
-        book.setTitle(bookDto.getTitle().trim());
+        String cleanTitle = bookDto.getTitle() != null ? bookDto.getTitle().trim() : "";
+        String cleanPublisher = (bookDto.getPublisher() != null && !bookDto.getPublisher().trim().isEmpty())
+                ? bookDto.getPublisher().trim() : null;
+        String cleanCover = (bookDto.getCoverImageUrl() != null && !bookDto.getCoverImageUrl().trim().isEmpty())
+                ? bookDto.getCoverImageUrl().trim() : null;
+        String cleanDesc = (bookDto.getDescription() != null && !bookDto.getDescription().trim().isEmpty())
+                ? bookDto.getDescription().trim() : null;
+
+        book.setTitle(cleanTitle);
         book.setIsbn(bookDto.getIsbn().trim());
         book.setAuthor(author);
         book.setCategory(category);
-        book.setPublisher(bookDto.getPublisher());
+        book.setPublisher(cleanPublisher);
         book.setPublishYear(bookDto.getPublishYear());
         book.setOriginalPrice(bookDto.getOriginalPrice());
-        book.setCoverImageUrl(bookDto.getCoverImageUrl());
-        book.setDescription(bookDto.getDescription());
+        book.setCoverImageUrl(cleanCover);
+        book.setDescription(cleanDesc);
 
         Book saved = bookRepository.save(book);
         return mapToDto(saved);

@@ -25,6 +25,7 @@ Thumbs.db
 .DS_Store
 
 # Temporary / Scratch files
+~$*
 *.tmp
 *.bak
 468/

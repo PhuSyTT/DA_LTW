@@ -121,7 +121,7 @@
                                 <i class="fas fa-barcode me-1 text-primary"></i>
                                 <span th:text="${book.isbn}">9786041180010</span>
                             </span>
-                            <span th:if="${book.publisher}" th:text="'NXB ' + ${book.publisher}">NXB Trẻ</span>
+                            <span th:if="${book.publisher}" th:text="${#strings.startsWith(#strings.toUpperCase(book.publisher), 'NXB')} ? ${book.publisher} : 'NXB ' + ${book.publisher}">NXB Trẻ</span>
                             <span th:if="${book.publishYear}" th:text="'(' + ${book.publishYear} + ')'">(2020)</span>
                         </div>
                     </td>
